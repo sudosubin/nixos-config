@@ -31,6 +31,7 @@ install_la_capitaine_icon_theme() {
 
   # copy to icon directory
   msg_normal "copy to icon directory"
+  mkdir -p ~/.local/share/icons
   cp -r temp-git ~/.local/share/icons/la-capitaine-icon-theme
 
   # clean up

@@ -31,6 +31,7 @@ install_capitaine_cursors() {
 
   # copy to cursors directory
   msg_normal "copy to cursors directory"
+  mkdir -p ~/.icons
   cp -r temp-git/dist/dark ~/.icons/capitaine-cursors
 
   # clean up
