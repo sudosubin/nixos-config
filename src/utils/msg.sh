@@ -30,8 +30,8 @@ msg_title() {
   msg bold blue "\n$*"
 }
 
-# pretty print subtitle
-msg_subtitle() {
+# pretty print heading
+msg_heading() {
   msg bold green "> $*"
 }
 
@@ -41,7 +41,7 @@ msg_step() {
 }
 
 # print line without style
-msg_line() {
+msg_normal() {
   echo "    • $*"
 }
 
@@ -55,4 +55,10 @@ new_line() {
   echo ""
 }
 
-
+# output box (highlight the area)
+output_box() {
+  hr
+  "$@"
+  hr
+  new_line
+}

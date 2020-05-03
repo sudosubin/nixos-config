@@ -14,15 +14,25 @@ Add this line to top of the file.
 
 ```sh
 # in ./<file>.sh
-APP_DIR="$(dirname "$(readlink -fm "$0")")"
+local app_dir
 
-# in ./src/scripts/<file>.sh
-CURRENT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-APP_DIR="$(dirname "$(dirname "$(dirname "$CURRENT_DIR")")")"
+app_dir="$(dirname "$(readlink -fm "$0")")"
 
-# in ./src/scripts/<1-dep>/<file>.sh
-CURRENT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-APP_DIR="$(dirname "$(dirname "$(dirname "$(dirname "$CURRENT_DIR")")")")"
+# in ./src/scripts/00-directory/<file>.sh
+local current_dir
+local app_dir
+
+current_dir="$(dirname "${BASH_SOURCE[0]}")"
+app_dir="$(dirname "$(dirname "$(dirname "$CURRENT_DIR")")")"
+
+# in ./src/scripts/00-directory/<1-dep>/<file>.sh
+local current_dir
+local script_dir
+local app_dir
+
+current_dir="$(dirname "${BASH_SOURCE[0]}")"
+script_dir="$(dirname "$current_dir")"
+app_dir="$(dirname "$(dirname "$(dirname "$script_dir")")")"
 ```
 
 ## Import function
