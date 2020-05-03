@@ -9,3 +9,6 @@ source "$app_dir/src/scripts/01-software/install.sh"
 
 # shellcheck source=02-basic-installation/install.sh
 source "$app_dir/src/scripts/02-basic-installation/install.sh"
+
+# shellcheck source=03-appearance/install.sh
+source "$app_dir/src/scripts/03-appearance/install.sh"

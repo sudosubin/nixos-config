@@ -18,4 +18,7 @@ scripts_01
 # 02. Basic Installation
 scripts_02
 
+# 03. Appearance
+scripts_03
+
 # TODO: Additional Installation (for development)

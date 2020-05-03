@@ -36,6 +36,5 @@ scripts_02() {
   install_capitaine_cursors
   # TODO (sudosubin): install actually to system
   install_la_capitaine_icon_theme
-  # TODO (sudosubin): install actually to system
   install_hello
 }
