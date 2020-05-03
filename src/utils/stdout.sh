@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# Mute
-## Mute > Silent (stdout)
+# Silent (stdout)
 function silent {
-  $@ >/dev/null
+  "$@" > /dev/null
 }
 
-## Mute > Mute (stdout, stderr)
+# Mute (stdout, stderr)
 function mute {
-  $@ &>/dev/null
+  "$@" &> /dev/null
 }
