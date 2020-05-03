@@ -16,7 +16,6 @@ get_sudo
 scripts_01
 
 # 02. Basic Installation
-# shellcheck source=src/scripts/02-basic-installation/install.sh
-source "$APP_DIR/src/scripts/02-basic-installation/install.sh"
+scripts_02
 
 # TODO: Additional Installation (for development)
