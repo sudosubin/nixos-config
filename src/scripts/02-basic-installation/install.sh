@@ -2,8 +2,8 @@
 
 
 # Directory
-CURRENT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-APP_DIR="$(dirname "$(dirname "$(dirname "$CURRENT_DIR")")")"
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+APP_DIR="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 
 
 # Function
@@ -79,8 +79,8 @@ mute git clone https://github.com/zdharma/zinit.git ~/.zinit/bin
 
 ### Install softwares: settigns
 msg_line "copy .zshrc, .zshenv"
-cp "$CURRENT_DIR/settings/.zshrc" ~/.zshrc
-cp "$CURRENT_DIR/settings/.zshenv" ~/.zshenv
+cp "$SCRIPT_DIR/settings/.zshrc" ~/.zshrc
+cp "$SCRIPT_DIR/settings/.zshenv" ~/.zshenv
 
 
 # Configure softwares
@@ -131,7 +131,7 @@ silent codium --install-extension eamodio.gitlens
 
 ### Configure softwares: vscodium settings
 msg_line "configure vscodium settings"
-cp "$CURRENT_DIR/settings/vscodium.json" ~/.config/VSCodium/User/settings.json
+cp "$SCRIPT_DIR/settings/vscodium.json" ~/.config/VSCodium/User/settings.json
 
 
 # Build softwares

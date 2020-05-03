@@ -2,8 +2,8 @@
 
 
 # Directory
-CURRENT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-APP_DIR="$(dirname "$(dirname "$(dirname "$CURRENT_DIR")")")"
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+APP_DIR="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 
 
 # Function
@@ -26,27 +26,31 @@ sudo sed -i -Ee "s|[a-z]{2}.archive.ubuntu.com|archive.ubuntu.com|g" \
   -e "/^#/!s/archive.ubuntu.com/mirror.kakao.com/" /etc/apt/sources.list
 
 
+# Update & Upgrade (no silent mode)
+msg_subtitle "Update & upgrade packages"
+
+## Update & Upgrade: Update packages
+msg_step "Update packages"
+hr
+sudo apt-get update
+hr
+new_line
+
+## Update & Upgrade: Upgrade packages
+msg_step "Upgrade packages"
+hr
+sudo apt-get -y upgrade
+hr
+new_line
+
+
 # Add ppa (launchpad ppa)
-msg_subtitle "Add launchpad ppa"
+msg_subtitle "Add ubuntu ppa"
 
-## Add ppa: chromium-dev (non-snap)
+## Add ppa: chromium-dev
 msg_step "Add ppa: saiarcot895/chromium-dev"
-
-### Add ppa: chromium-dev add apt repository
-msg_line "add apt repository"
-sudo add-apt-repository -ny ppa:saiarcot895/chromium-dev
-
-### Add ppa: chromium-dev add Google api key
-msg_line "add Google api key"
-cat "$CURRENT_DIR/keys/google-api-key" > ~/.zprofile
-
-### Add ppa: chromium-dev add apt hooks
-msg_line "add apt hooks (dark mode)"
-sudo cp "$CURRENT_DIR/hooks/chromium-upgrade-helper" \
-  /usr/local/bin/chromium-upgrade-helper
-sudo chmod 777 /usr/local/bin/chromium-upgrade-helper
-echo 'DPkg::Post-Invoke {"/usr/local/bin/chromium-upgrade-helper";};' \
-  | silent sudo tee -a /etc/apt/apt.conf.d/80upgradehook
+# shellcheck source=libs/chromium.sh
+source "$SCRIPT_DIR/libs/chromium.sh"
 
 ## Add ppa: nimf (compatible 20.04)
 msg_step "Add ppa: nemonein/nimf"
@@ -62,21 +66,8 @@ msg_subtitle "Add non-launchpad ppa"
 
 ## Add ppa: vscodium
 msg_step "Add ppa: paulcarroty/vscodium"
-
-### Add ppa: vscodium add apt repository
-msg_line "add apt repository"
-vscodium_repo="https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo"
-add_ppa vscodium \
-  "$vscodium_repo/raw/master/pub.gpg" \
-  "deb $vscodium_repo/raw/repos/debs/ vscodium main"
-
-### Add ppa: vscodium add apt hooks
-msg_line "add apt hooks (proposed api)"
-sudo cp "$CURRENT_DIR/hooks/vscodium-upgrade-helper" \
-  /usr/local/bin/vscodium-upgrade-helper
-sudo chmod 777 /usr/local/bin/vscodium-upgrade-helper
-echo 'DPkg::Post-Invoke {"/usr/local/bin/vscodium-upgrade-helper";};' \
-  | silent sudo tee -a /etc/apt/apt.conf.d/80upgradehook
+# shellcheck source=libs/vscodium.sh
+source "$SCRIPT_DIR/libs/vscodium.sh"
 
 ## Add ppa: yarn
 msg_step "Add ppa: yarn"
@@ -97,20 +88,3 @@ silent sudo apt-get -y remove --purge firefox
 msg_step "Remove package: clean up packages"
 silent sudo apt-get -y --purge autoremove
 silent sudo apt-get -y clean
-
-
-# Update & Upgrade (no silent mode)
-msg_subtitle "Update & upgrade packages"
-
-## Update & Upgrade: Update packages
-msg_step "Update packages"
-hr
-sudo apt-get update
-hr
-new_line
-
-## Update & Upgrade: Upgrade packages
-msg_step "Upgrade packages"
-hr
-sudo apt-get -y upgrade
-hr
