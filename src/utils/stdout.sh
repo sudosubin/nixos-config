@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Silent (stdout)
-function silent {
+silent() {
   "$@" > /dev/null
 }
 
 # Mute (stdout, stderr)
-function mute {
+mute() {
   "$@" &> /dev/null
 }

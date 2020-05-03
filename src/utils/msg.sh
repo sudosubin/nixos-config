@@ -27,7 +27,7 @@ msg() {
 
 # pretty print title
 msg_title() {
-  msg bold blue "$*"
+  msg bold blue "\n$*"
 }
 
 # pretty print subtitle
@@ -45,7 +45,14 @@ msg_line() {
   echo "    • $*"
 }
 
+# print horizontal line (*60)
+hr() {
+  echo "============================================================"
+}
+
 # new empty line
 new_line() {
   echo ""
 }
+
+

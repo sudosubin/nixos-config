@@ -1,0 +1,29 @@
+{
+    "workbench.colorTheme": "One Dark Pro",
+    "editor.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
+    "editor.fontSize": 13,
+    "debug.console.fontSize": 1,
+    "debug.console.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
+    "markdown.preview.fontSize": 14,
+    "terminal.integrated.fontSize": 13,
+    "terminal.integrated.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
+    "markdown.preview.fontFamily": "'SF Pro Text', 'FiraMono Nerd Font Mono'",
+    "editor.rulers": [
+        80, 120
+    ],
+    "githubPullRequests.telemetry.enabled": false,
+    "workbench.tree.indent": 16,
+    "workbench.iconTheme": "material-icon-theme",
+    "material-icon-theme.activeIconPack": "react_redux",
+    "material-icon-theme.hidesExplorerArrows": true,
+    "material-icon-theme.showWelcomeMessage": false,
+    "oneDarkPro.editorTheme": "Onedark Pro",
+    "gitlens.currentLine.format": "${author} • ${date}, ${message}",
+    "gitlens.currentLine.dateFormat": "YYYY-MM-DD",
+    "gitlens.codeLens.enabled": false,
+    "gitlens.statusBar.enabled": false,
+    "window.zoomLevel": 0,
+    "shellcheck.customArgs": [
+        "-x"
+    ]
+}

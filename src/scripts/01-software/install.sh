@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # Directory
 CURRENT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 APP_DIR="$(dirname "$(dirname "$(dirname "$CURRENT_DIR")")")"
@@ -13,7 +14,7 @@ source "$APP_DIR/src/utils/stdout.sh" ":"
 
 # Function: easy add ppa
 add_ppa() {
-  wget -qO - "$2" | sudo apt-key add -
+  wget -qO - "$2" | mute sudo apt-key add -
   echo "$3" | silent sudo tee "/etc/apt/sources.list.d/$1.list"
 }
 
@@ -82,7 +83,6 @@ echo 'DPkg::Post-Invoke {"/usr/local/bin/vscodium-upgrade-helper";};' \
   | silent sudo tee -a /etc/apt/apt.conf.d/80upgradehook
 
 ## Add ppa: yarn
-# TODO (sudosubin): --no-install-recommends yarn
 msg_step "Add ppa: yarn"
 yarn_repo="https://dl.yarnpkg.com"
 add_ppa yarn \
@@ -104,15 +104,17 @@ silent sudo apt-get -y clean
 
 
 # Update & Upgrade (no silent mode)
-msg_step "Update & upgrade packages"
+msg_subtitle "Update & upgrade packages"
 
-## Update & Upgrade > update packages
-msg_line "update packages"
-sudo apt update
-
-## Update & Upgrade > upgrade packages
-msg_line "upgrade packages"
-sudo apt -y upgrade
-
-# Finish
+## Update & Upgrade: Update packages
+msg_step "Update packages"
+hr
+sudo apt-get update
+hr
 new_line
+
+## Update & Upgrade: Upgrade packages
+msg_step "Upgrade packages"
+hr
+sudo apt-get -y upgrade
+hr
