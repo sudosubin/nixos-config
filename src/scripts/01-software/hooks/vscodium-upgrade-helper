@@ -1,0 +1,23 @@
+#!/bin/bash
+
+update_vscodium_setting() {
+  # Installed vscodium, jq exists
+  if [ -f /usr/share/codium/resources/app/product.json ] && \
+     [ "$(command -v jq)" ]
+  then
+    # create bak file
+    sudo cp /usr/share/codium/resources/app/product.json \
+      /usr/share/codium/resources/app/product.json.bak
+
+    # edit json and write
+    jq < /usr/share/codium/resources/app/product.json.bak \
+      ".extensionAllowedProposedApi |= . + 
+        [\"GitHub.vscode-pull-request-github\"]" \
+      | jq ".extensionAllowedProposedApi |= unique" \
+      | sudo tee >/dev/null /usr/share/codium/resources/app/product.json
+
+    echo "vscodim setting was updated."
+  fi
+}
+
+update_vscodium_setting

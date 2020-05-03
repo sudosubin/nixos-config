@@ -1,0 +1,18 @@
+#!/bin/bash
+
+update_chromium_exec() {
+  # edit Exec options (overlay scroll bar, dark mode, etc)
+  local skip_pattern=".*dark-mode.*"
+  local search_pattern="^Exec.*$"
+
+  local flags="--enable-features=WebUIDarkMode,OverlayScrollbar"
+  local dark_mode="--force-dark-mode"
+  local replace_pattern="& $flags $dark_mode"
+
+  sudo sed -iE "/$skip_pattern/b; s/$search_pattern/$replace_pattern/g" \
+    /usr/share/applications/chromium-browser.desktop
+
+  echo "chromium exec was updated."
+}
+
+update_chromium_exec
