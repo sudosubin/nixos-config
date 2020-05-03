@@ -11,12 +11,8 @@ APP_DIR="$(dirname "$(dirname "$(dirname "$CURRENT_DIR")")")"
 source "$APP_DIR/src/utils/msg.sh" ":"
 # shellcheck source=../../../src/utils/stdout.sh
 source "$APP_DIR/src/utils/stdout.sh" ":"
-
-# Function: easy add ppa
-add_ppa() {
-  wget -qO - "$2" | mute sudo apt-key add -
-  echo "$3" | silent sudo tee "/etc/apt/sources.list.d/$1.list"
-}
+# shellcheck source=../../../src/utils/ppa.sh
+source "$APP_DIR/src/utils/ppa.sh" ":"
 
 
 # Title
