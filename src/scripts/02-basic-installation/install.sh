@@ -23,6 +23,7 @@ scripts_02() {
   msg_heading "Install softwares"
   install_requirements
   install_asdf
+  install_latte
   install_zsh
 
   # Configure softwares
@@ -32,9 +33,7 @@ scripts_02() {
 
   # Build softwares
   msg_heading "Build softwares"
-  # TODO (sudosubin): install actually to system
   install_capitaine_cursors
-  # TODO (sudosubin): install actually to system
   install_la_capitaine_icon_theme
   install_hello
 }

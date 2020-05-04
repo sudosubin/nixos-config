@@ -20,6 +20,9 @@ source "$script_dir/libs/icons.sh"
 # shellcheck source=global-theme.sh
 source "$script_dir/libs/global-theme.sh"
 
+# shellcheck source=latte.sh
+source "$script_dir/libs/latte.sh"
+
 # shellcheck source=wallpaper.sh
 source "$script_dir/libs/wallpaper.sh"
 

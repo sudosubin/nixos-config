@@ -27,6 +27,10 @@ scripts_04() {
   msg_heading "Window management"
   set_window_management
 
+  # Keyboard & Mouse
+  msg_heading "Keyboard & Mouse"
+  set_keyboard_and_mouse
+
   # Plasma etc
   msg_heading "Plasma etc"
   set_plasma_etc

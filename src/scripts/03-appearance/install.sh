@@ -46,4 +46,8 @@ scripts_03() {
   # Wallpaper
   msg_heading "Wallpaper"
   set_wallpaper
+
+  # Latte dock, panel
+  msg_heading "Latte dock, panel"
+  set_latte
 }

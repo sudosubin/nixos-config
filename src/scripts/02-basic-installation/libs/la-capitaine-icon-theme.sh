@@ -15,7 +15,7 @@ install_la_capitaine_icon_theme() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
-  ## Build la-capitaine-icon-theme
+  # Build la-capitaine-icon-theme
   msg_step "Build la-capitaine-icon-theme"
 
   # clone from git
