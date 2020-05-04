@@ -73,6 +73,10 @@ zinit light-mode wait lucid for \
 zinit ice pick'asdf.plugin.zsh' atinit'autoload bashcompinit; bashcompinit' blockf
 zinit light kiurchv/asdf.plugin.zsh
 
+# Plugins > auto-update
+zinit ice wait lucid pick'update.sh'
+zinit light sudosubin/auto-update
+
 # Plugins > fzf
 zplugin ice wait lucid pick'shell/key-bindings.zsh' src'shell/completion.zsh'
 zplugin light junegunn/fzf
@@ -85,17 +89,3 @@ zinit light supercrabtree/k
 
 # Softwares > vscodium
 alias code=codium
-
-# Function
-update() {
-    # general
-    sudo apt-get update
-    sudo apt-get -y upgrade
-
-    # asdf
-    asdf update --head
-
-    # zinit
-    zinit self-update
-    zinit update
-}

@@ -45,20 +45,10 @@ msg_normal() {
   echo "    • $*"
 }
 
-# print horizontal line (*60)
-hr() {
-  echo "============================================================"
-}
-
-# new empty line
-new_line() {
-  echo ""
-}
-
 # output box (highlight the area)
 output_box() {
-  hr
+  echo "============================================================"
   "$@"
-  hr
-  new_line
+  echo "============================================================"
+  echo ""
 }
