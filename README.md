@@ -6,6 +6,10 @@ This is a personal KDE setup script. I made this script to set up my laptop and 
 
 - First boot, with Kubuntu 20.04 LTS
 
+## Sources
+
+- Wallpaper: Never Settle Wallpapers
+
 ## Installation
 
 ```sh

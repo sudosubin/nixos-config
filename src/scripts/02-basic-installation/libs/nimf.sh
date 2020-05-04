@@ -25,17 +25,11 @@ install_nimf() {
   # configure nimf keys
   msg_normal "configure nimf keys"
 
-  local hangul_keys
-  local hanja_keys
-  local xkb_option_ctrl
-  local xkb_option_korean
-  local xkb_options
-
-  hangul_keys="['Hangul', 'Alt_R']"
-  hanja_keys="['Hangul_Hanja', 'Control_R']"
-  xkb_option_ctrl="'ctrl:menu_rctrl', 'ctrl:swapcaps'"
-  xkb_option_korean="'korean:ralt_hangul', 'korean:rctrl_hanja'"
-  xkb_options="[$xkb_option_ctrl, $xkb_option_korean]"
+  local hangul_keys="['Hangul', 'Alt_R']"
+  local hanja_keys="['Hangul_Hanja', 'Control_R']"
+  local xkb_option_ctrl="'ctrl:menu_rctrl', 'ctrl:swapcaps'"
+  local xkb_option_korean="'korean:ralt_hangul', 'korean:rctrl_hanja'"
+  local xkb_options="[$xkb_option_ctrl, $xkb_option_korean]"
 
   gsettings set org.nimf setup-environment-variables true
   gsettings set org.nimf hotkeys "$hangul_keys"

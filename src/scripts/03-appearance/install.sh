@@ -32,8 +32,18 @@ scripts_03() {
   set_colors
 
   # Fonts
+  msg_heading "Fonts"
+  set_fonts
 
   # Icons
+  msg_heading "Icons"
+  set_icons
 
   # Cursors
+  msg_heading "Cursors"
+  set_cursors
+
+  # Wallpaper
+  msg_heading "Wallpaper"
+  set_wallpaper
 }

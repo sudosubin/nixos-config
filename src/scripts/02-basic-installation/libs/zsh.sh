@@ -21,11 +21,8 @@ install_zsh() {
   # zsh as default shell
   msg_normal "make zsh as default shell"
 
-  local pam_required
-  local pam_sufficient
-
-  pam_required="required   pam_shells.so"
-  pam_sufficient="sufficient   pam_shells.so"
+  local pam_required="required   pam_shells.so"
+  local pam_sufficient="sufficient   pam_shells.so"
 
   sudo sed -iE "s/$pam_required/$pam_sufficient/g" /etc/pam.d/chsh
   chsh -s "$(command -v zsh)"

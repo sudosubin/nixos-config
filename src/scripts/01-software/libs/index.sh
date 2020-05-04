@@ -37,8 +37,7 @@ add_ppa_yarn() {
   # Add ppa: yarn
   msg_step "Add ppa: yarn"
 
-  local yarn_repo
-  yarn_repo="https://dl.yarnpkg.com"
+  local yarn_repo="https://dl.yarnpkg.com"
   
   add_ppa yarn \
     "$yarn_repo/debian/pubkey.gpg" \

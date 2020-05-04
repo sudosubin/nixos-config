@@ -19,13 +19,9 @@ set_colors() {
   msg_step "Set colors: One Dark"
 
   # copy to colors directory
-  local kde_dir
-  local local_dir
-  local origin_dir
-
-  kde_dir="$HOME/.kde/share/apps/color-schemes"
-  local_dir="$HOME/.local/share/color-schemes"
-  origin_dir="$script_dir/assets/OneDark.colors"
+  local kde_dir="$HOME/.kde/share/apps/color-schemes"
+  local local_dir="$HOME/.local/share/color-schemes"
+  local origin_dir="$script_dir/assets/OneDark.colors"
 
   mkdir -p "$kde_dir"
   cp "$origin_dir" "$kde_dir"
