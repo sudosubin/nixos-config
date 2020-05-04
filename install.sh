@@ -21,4 +21,7 @@ scripts_02
 # 03. Appearance
 scripts_03
 
+# 04. Tweaks
+scripts_04
+
 # TODO: Additional Installation (for development)

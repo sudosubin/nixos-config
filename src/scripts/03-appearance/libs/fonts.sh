@@ -67,7 +67,7 @@ set_fonts() {
   local firamono_dir="$HOME/.local/share/fonts/FiraMono"
 
   # download from github repository
-  msg_normal "download from github repository"
+  msg_normal "download fonts from github repository"
   # TODO (sudosubin): remove after test complete
   rm -rf "$firamono_dir"
   mkdir -p "$firamono_dir"
@@ -77,8 +77,10 @@ set_fonts() {
 
   for weight in "${weights[@]}"; do
     msg_normal "download FiraMono $weight"
-    curl -sL "https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraMono/$weight/complete/Fira%20Mono%20$weight%20Nerd%20Font%20Complete%20Mono.otf" \
-      -o "$firamono_dir/$weight.otf"
+    curl -sL "https://github.com/ryanoasis/nerd-fonts/raw/\
+master/patched-fonts/FiraMono/$weight/complete/\
+Fira%20Mono%20$weight%20Nerd%20Font%20Complete%20Mono.otf" \
+      -o "$firamono_dir/FiraMono $weight.otf"
   done
 
   # set plasma, gsettings

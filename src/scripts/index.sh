@@ -12,3 +12,6 @@ source "$app_dir/src/scripts/02-basic-installation/install.sh"
 
 # shellcheck source=03-appearance/install.sh
 source "$app_dir/src/scripts/03-appearance/install.sh"
+
+# shellcheck source=04-tweaks/install.sh
+source "$app_dir/src/scripts/04-tweaks/install.sh"
