@@ -15,3 +15,6 @@ source "$app_dir/src/scripts/03-appearance/install.sh"
 
 # shellcheck source=04-tweaks/install.sh
 source "$app_dir/src/scripts/04-tweaks/install.sh"
+
+# shellcheck source=05-additional-installation/install.sh
+source "$app_dir/src/scripts/05-additional-installation/install.sh"
