@@ -22,7 +22,7 @@ install_alacritty() {
 
   msg_normal "copy settings to local"
   mkdir -p ~/.config/alacritty
-  cp "$script_dir/libs/alacritty.yml" ~/.config/alacritty/alacritty.yml
+  cp "$script_dir/settings/alacritty.yml" ~/.config/alacritty/alacritty.yml
 
   msg_step "make alacritty as a default shell"
   kwriteconfig5 --file kdeglobals --group General \
