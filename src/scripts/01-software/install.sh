@@ -38,6 +38,7 @@ scripts_01() {
   # Add packages ppa
   msg_heading "Add packages ppa"
 
+  add_ppa_alacritty
   add_ppa_applet_window_buttons
   add_ppa_chromium
   add_ppa_nimf
@@ -47,8 +48,8 @@ scripts_01() {
   # Remove packages
   msg_heading "Remove packages"
 
-  msg_step "Remove package: firefox"
-  silent sudo apt-get -y remove --purge firefox
+  msg_step "Remove packages"
+  silent sudo apt-get -y remove --purge firefox konsole
 
   ## Remove package: finish
   msg_step "Remove package: clean up packages"

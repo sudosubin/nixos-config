@@ -19,7 +19,8 @@ install_requirements() {
   # - git curl: Basic for script installation
   # - nimf nimf-libhangul: Basic for Korean input
   # - latte-dock applet-window-buttons: For better appearance
-  # - chromium-browser codium net-tools fzf yarn zsh: My personal preference
+  # - chromium-browser codium net-tools fzf
+  #   yarn alacritty tmux zsh: My personal preference
   # - cmake g++ extra-cmake-modules libkdecorations2-dev
   #   libkf5guiaddons-dev libkf5configwidgets-dev
   #   libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev
@@ -33,7 +34,8 @@ install_requirements() {
     git curl \
     nimf nimf-libhangul \
     latte-dock applet-window-buttons \
-    chromium-browser codium net-tools fzf yarn zsh \
+    chromium-browser codium net-tools fzf \
+    yarn alacritty tmux zsh \
     cmake g++ extra-cmake-modules libkdecorations2-dev \
     libkf5guiaddons-dev libkf5configwidgets-dev \
     libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev \

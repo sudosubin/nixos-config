@@ -11,6 +11,13 @@ source "$script_dir/libs/chromium.sh"
 # shellcheck source=vscodium.sh
 source "$script_dir/libs/vscodium.sh"
 
+# alacritty
+add_ppa_alacritty() {
+  # Add ppa: mmstick76/alacritty
+  msg_step "Add ppa: mmstick76/alacritty"
+  sudo add-apt-repository -ny ppa:mmstick76/alacritty
+}
+
 # applet-window-buttons
 add_ppa_applet_window_buttons() {
   # Add ppa: krisives/applet-window-buttons

@@ -27,6 +27,16 @@ set_plasma_etc() {
   msg_normal "change krunner to float on center"
   kwriteconfig5 --file krunnerrc --group General --key FreeFloating true
 
+  # Configure konsole
+  mkdir -p ~/.local/share/konsole
+  curl -sL https://raw.githubusercontent.com/sudosubin/setup-script/master/OneDark.colorscheme > ~/.local/share/konsole/OneDark.colorscheme
+  kwriteconfig5 --file konsolerc --group "Desktop Entry" --key DefaultProfile "Profile 1.profile"
+  kwriteconfig5 --file ~/.local/share/konsole/Profile\ 1.profile --group General --key Name "Profile 1"
+  kwriteconfig5 --file ~/.local/share/konsole/Profile\ 1.profile --group Appearance --key ColorScheme "OneDark"
+  kwriteconfig5 --file ~/.local/share/konsole/Profile\ 1.profile --group "Cursor Options" --key CursorShape 1
+  kwriteconfig5 --file ~/.local/share/konsole/Profile\ 1.profile --group General --key TerminalCenter true
+  kwriteconfig5 --file ~/.local/share/konsole/Profile\ 1.profile --group General --key TerminalMargin 1
+
   # Configure Power
   msg_step "Configure Power"
   msg_normal "change power settings, idle time"

@@ -28,6 +28,7 @@ scripts_02() {
 
   # Configure softwares
   msg_heading "Configure softwares"
+  install_alacritty
   install_nimf
   install_vscodium
 
