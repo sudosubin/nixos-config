@@ -32,6 +32,8 @@ install_requirements() {
   # - qttools5-dev libkf5crash-dev libkf5globalaccel-dev
   #   libkf5kio-dev libkf5notifications-dev libqt5opengl5-dev
   #   kinit-dev kwin-dev: Build-deps for kde-hello kwin effects
+  # - qtdeclarative5-dev libkf5plasma-dev libsm-dev libxcb-randr0-dev
+  #   : Build-deps for applet-window-appmenu
   # - inkscape x11-apps: Build-deps for capitaine-cursors
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
@@ -47,5 +49,6 @@ install_requirements() {
     qttools5-dev libkf5crash-dev libkf5globalaccel-dev \
     libkf5kio-dev libkf5notifications-dev libqt5opengl5-dev \
     kinit-dev kwin-dev \
+    qtdeclarative5-dev libkf5plasma-dev libsm-dev libxcb-randr0-dev \
     inkscape x11-apps
 }

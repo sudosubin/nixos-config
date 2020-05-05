@@ -35,6 +35,7 @@ scripts_02() {
 
   # Build softwares
   msg_heading "Build softwares"
+  install_applet_window_appmenu
   install_capitaine_cursors
   install_la_capitaine_icon_theme
   install_hello
