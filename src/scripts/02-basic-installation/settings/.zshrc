@@ -97,11 +97,11 @@ prompt_pure_precmd() {
 	prompt_pure_reset_prompt_symbol
 
 	# Print the preprompt. (customized part)
-    if [[ -n $NEW_TERM ]]; then
+    if [[ -n $PURE_PROMPT_NEW_LNIE ]]; then
     	prompt_pure_preprompt_render "precmd"
     else
         prompt_pure_preprompt_render
-        NEW_TERM=true
+        PURE_PROMPT_NEW_LNIE=1
     fi
 
 	if [[ -n $ZSH_THEME ]]; then
