@@ -24,11 +24,11 @@ install_alacritty() {
   mkdir -p ~/.config/alacritty
   cp "$script_dir/settings/alacritty.yml" ~/.config/alacritty/alacritty.yml
 
-  msg_step "make alacritty as a default shell"
+  msg_normal "make alacritty as a default shell"
   kwriteconfig5 --file kdeglobals --group General \
     --key TerminalApplication "alac"
 
-  msg_step "change global shortcuts"
+  msg_normal "change global shortcuts"
   sed -i -e "s|Ctrl+Alt+T||g" ~/.config/kglobalshortcutsrc
   kwriteconfig5 --file kglobalshortcutsrc \
     --group com.alacritty.Alacritty.desktop \

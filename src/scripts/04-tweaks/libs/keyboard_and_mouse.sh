@@ -26,9 +26,11 @@ set_keyboard_and_mouse() {
   kwriteconfig5 --file kglobalshortcutsrc --group kwin \
     --key "Window Close" "Alt+F4\tAlt+Esc,Alt+F4,Close Window"
   kwriteconfig5 --file kglobalshortcutsrc --group kwin \
-    --key "ShowDesktopGrid" "Meta+Tab,Ctrl+F8,Show Desktop Grid"
-  kwriteconfig5 --file kglobalshortcutsrc --group kwin \
     --key "next activity" ",none,Walk through activities"
+  kwriteconfig5 --file kglobalshortcutsrc --group plasmashell \
+    --key "next activity" ",none,Walk through activities"
+  kwriteconfig5 --file kglobalshortcutsrc --group kwin \
+    --key "ShowDesktopGrid" "Meta+Tab,Ctrl+F8,Show Desktop Grid"
   kwriteconfig5 --file kglobalshortcutsrc --group kwin \
     --key "Expose" \
     "Meta+\`,Ctrl+F9,Toggle Present Windows (Current desktop)"

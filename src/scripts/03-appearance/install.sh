@@ -43,11 +43,11 @@ scripts_03() {
   msg_heading "Cursors"
   set_cursors
 
-  # Wallpaper
-  msg_heading "Wallpaper"
-  set_wallpaper
-
   # Latte dock, panel
   msg_heading "Latte dock, panel"
   set_latte
+
+  # Wallpaper
+  msg_heading "Wallpaper"
+  set_wallpaper
 }

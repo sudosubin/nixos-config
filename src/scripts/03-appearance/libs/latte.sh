@@ -20,6 +20,12 @@ set_latte() {
   kwriteconfig5 --file kwinrc --group Plugins \
     --key lattewindowcolorsEnabled true
 
+  # Remove default panel
+  msg_stpe "Remove default panels"
+  sed -i \
+    -e '/./{H;$!d;}' -e 'x;/ActionPlugins/b' \
+    -e '/[9]/b' -e '/ScreenMapping/b' -e d ~/.config/plasma-org.kde.plasma.desktop-appletsrc
+
   # Configure latte layout
   msg_step "Configure latte layout"
   mkdir -p ~/.config/latte
