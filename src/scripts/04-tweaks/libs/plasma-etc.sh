@@ -21,11 +21,6 @@ set_plasma_etc() {
   kwriteconfig5 --file plasma-localerc --group Formats --key useDetailed true
   kwriteconfig5 --file plasma-localerc --group Formats \
     --key LC_TIME "en_US.UTF-8"
-  
-  # Configure krunner
-  msg_step "Configure krunner"
-  msg_normal "change krunner to float on center"
-  kwriteconfig5 --file krunnerrc --group General --key FreeFloating true
 
   # Configure konsole
   mkdir -p ~/.local/share/konsole

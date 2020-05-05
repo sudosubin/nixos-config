@@ -29,6 +29,9 @@ source "$script_dir/libs/latte.sh"
 # shellcheck source=nimf.sh
 source "$script_dir/libs/nimf.sh"
 
+# shellcheck source=ulauncher.sh
+source "$script_dir/libs/ulauncher.sh"
+
 # shellcheck source=vscodium.sh
 source "$script_dir/libs/vscodium.sh"
 

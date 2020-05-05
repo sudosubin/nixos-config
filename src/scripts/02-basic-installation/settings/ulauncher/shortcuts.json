@@ -1,0 +1,12 @@
+{
+    "dce829ac-65a4-4d77-939d-dc5395042440": {
+        "id": "dce829ac-65a4-4d77-939d-dc5395042440",
+        "name": "Google",
+        "keyword": "g",
+        "cmd": "https://www.google.co.kr/search?q=%s&pws=0&gl=us&gws_rd=cr",
+        "icon": "~/.local/share/icons/ulauncher/google.png",
+        "is_default_search": true,
+        "run_without_argument": false,
+        "added": 1588656362.4486368
+    }
+}

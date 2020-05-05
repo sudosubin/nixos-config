@@ -27,7 +27,8 @@ scripts_05() {
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
     libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl \
     libmysqlclient-dev libpq-dev \
-    dirmngr gpg
+    dirmngr gpg \
+    shellcheck
 
   msg_normal "fix Mysql-python my_config.h error"
   sudo curl -s "https://raw.githubusercontent.com/paulfitz/\

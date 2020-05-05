@@ -18,6 +18,13 @@ add_ppa_alacritty() {
   sudo add-apt-repository -ny ppa:mmstick76/alacritty
 }
 
+# ulauncher
+add_ppa_ulauncher() {
+  # Add ppa: agornostal/ulauncher
+  msg_step "Add ppa: agornostal/ulauncher"
+  sudo add-apt-repository -ny ppa:agornostal/ulauncher
+}
+
 # applet-window-buttons
 add_ppa_applet_window_buttons() {
   # Add ppa: krisives/applet-window-buttons
