@@ -55,8 +55,62 @@ zinit ice pick'async.zsh'
 zinit light mafredri/zsh-async
 
 # Theme
-SPACESHIP_CHAR_SYMBOL=' '
-zinit light denysdovhan/spaceship-prompt
+# SPACESHIP_CHAR_SYMBOL=' '
+# zinit light denysdovhan/spaceship-prompt
+PURE_GIT_PULL=1
+PURE_PROMPT_SYMBOL=""
+PURE_PROMPT_VICMD_SYMBOL=""
+zstyle ':prompt:pure:prompt:success' color green
+zinit light sindresorhus/pure
+
+prompt_pure_precmd() {
+	setopt localoptions noshwordsplit
+
+	# Check execution time and store it in a variable.
+	prompt_pure_check_cmd_exec_time
+	unset prompt_pure_cmd_timestamp
+
+	# Shows the full path in the title.
+	prompt_pure_set_title 'expand-prompt' '%~'
+
+	# Modify the colors if some have changed..
+	prompt_pure_set_colors
+
+	# Perform async Git dirty check and fetch.
+	prompt_pure_async_tasks
+
+	# Check if we should display the virtual env. We use a sufficiently high
+	# index of psvar (12) here to avoid collisions with user defined entries.
+	psvar[12]=
+	# Check if a Conda environment is active and display its name.
+	if [[ -n $CONDA_DEFAULT_ENV ]]; then
+		psvar[12]="${CONDA_DEFAULT_ENV//[$'\t\r\n']}"
+	fi
+	# When VIRTUAL_ENV_DISABLE_PROMPT is empty, it was unset by the user and
+	# Pure should take back control.
+	if [[ -n $VIRTUAL_ENV ]] && [[ -z $VIRTUAL_ENV_DISABLE_PROMPT || $VIRTUAL_ENV_DISABLE_PROMPT = 12 ]]; then
+		psvar[12]="${VIRTUAL_ENV:t}"
+		export VIRTUAL_ENV_DISABLE_PROMPT=12
+	fi
+
+	# Make sure VIM prompt is reset.
+	prompt_pure_reset_prompt_symbol
+
+	# Print the preprompt. (customized part)
+    if [[ -n $NEW_TERM ]]; then
+    	prompt_pure_preprompt_render "precmd"
+    else
+        prompt_pure_preprompt_render
+        NEW_TERM=true
+    fi
+
+	if [[ -n $ZSH_THEME ]]; then
+		print "WARNING: Oh My Zsh themes are enabled (ZSH_THEME='${ZSH_THEME}'). Pure might not be working correctly."
+		print "For more information, see: https://github.com/sindresorhus/pure#oh-my-zsh"
+		unset ZSH_THEME  # Only show this warning once.
+	fi
+}
+
 
 # Plugins > Core
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#808080'
