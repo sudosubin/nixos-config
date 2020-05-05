@@ -25,12 +25,12 @@ install_requirements() {
   # - latte-dock applet-window-buttons: For better appearance
   # - chromium-browser codium net-tools fzf
   #   yarn alacritty tmux zsh: My personal preference
-  # - cmake g++ extra-cmake-modules libkdecorations2-dev
+  # - cmake make g++ extra-cmake-modules libkdecorations2-dev
   #   libkf5guiaddons-dev libkf5configwidgets-dev
   #   libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev
   #   gettext pkg-config: Build-deps for kde-hello window decoration
   # - qttools5-dev libkf5crash-dev libkf5globalaccel-dev
-  #   libkf5kio-dev libkf5notifications-dev
+  #   libkf5kio-dev libkf5notifications-dev libqt5opengl5-dev
   #   kinit-dev kwin-dev: Build-deps for kde-hello kwin effects
   # - inkscape x11-apps: Build-deps for capitaine-cursors
   msg_step "Install packages via apt-get"
@@ -40,12 +40,12 @@ install_requirements() {
     latte-dock applet-window-buttons \
     chromium-browser codium net-tools fzf \
     yarn alacritty tmux zsh \
-    cmake g++ extra-cmake-modules libkdecorations2-dev \
+    cmake make g++ extra-cmake-modules libkdecorations2-dev \
     libkf5guiaddons-dev libkf5configwidgets-dev \
     libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev \
     gettext pkg-config \
     qttools5-dev libkf5crash-dev libkf5globalaccel-dev \
-    libkf5kio-dev libkf5notifications-dev \
+    libkf5kio-dev libkf5notifications-dev libqt5opengl5-dev \
     kinit-dev kwin-dev \
     inkscape x11-apps
 }

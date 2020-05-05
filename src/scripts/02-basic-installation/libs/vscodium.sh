@@ -26,7 +26,7 @@ install_vscodium() {
   # - mrorz.language-gettext: gettext(.po) Syntax support
   # - GitHub.vscode-pull-request-github: GitHub PR from codium
   # - eamodio.gitlens: Git blame in codium
-  msg_normal "install vscodium extensions"
+  msg_normal "install vscodium extensions (takes long time)"
   silent codium --install-extension zhuangtongfa.Material-theme
   silent codium --install-extension PKief.material-icon-theme
   silent codium --install-extension ms-python.python

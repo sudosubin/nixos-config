@@ -28,4 +28,5 @@ install_awscli() {
   msg_normal "install"
   silent sudo ./aws/install
   rm -rf aws
+  rm -f awscliv2.zip
 }
