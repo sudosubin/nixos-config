@@ -11,6 +11,9 @@ source "$script_dir/libs/requirements.sh"
 # shellcheck source=alacritty.sh
 source "$script_dir/libs/alacritty.sh"
 
+# shellcheck source=applet-window-appmenu.sh
+source "$script_dir/libs/applet-window-appmenu.sh"
+
 # shellcheck source=asdf.sh
 source "$script_dir/libs/asdf.sh"
 
