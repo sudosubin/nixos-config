@@ -1,6 +1,6 @@
 # Snippets
 
-Copy and paste this codes easily.
+Copy and paste below easily.
 
 ## Specify bash script
 

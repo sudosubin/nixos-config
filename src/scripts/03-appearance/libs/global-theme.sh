@@ -15,7 +15,20 @@ set_global_theme() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
-  # Set global theme: Breeze Dark
-  msg_step "Set global theme: Breeze Dark"
-  lookandfeeltool -a org.kde.breezedark.desktop
+  # Install theme
+  msg_step "Install theme"
+  msg_normal "download theme from git"
+  mute git clone https://github.com/vinceliuice/Qogir-kde.git ./temp-git
+
+  msg_normal "install"
+  cd temp-git || exit
+  output_box ./install.sh
+  cd ..
+
+  msg_normal "clean up"
+  rm -rf temp-git
+
+  # Set global theme: Qogir Dark
+  msg_step "Set global theme: Qogir Dark"
+  lookandfeeltool -a com.github.vinceliuice.Qogir-dark
 }
