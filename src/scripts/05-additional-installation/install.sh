@@ -28,7 +28,7 @@ scripts_05() {
     libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl \
     libmysqlclient-dev libpq-dev \
     dirmngr gpg \
-    shellcheck
+    shellcheck jq
 
   msg_normal "fix Mysql-python my_config.h error"
   sudo curl -s "https://raw.githubusercontent.com/paulfitz/\

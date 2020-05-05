@@ -37,8 +37,8 @@ install_alacritty() {
     --key New "none,none,New Terminal"
   kwriteconfig5 --file kglobalshortcutsrc \
     --group com.alacritty.Alacritty.desktop \
-    --key _k_friendly_name "Alacritty"
+    --key _k_friendly_name "Launch Alacritty"
   kwriteconfig5 --file kglobalshortcutsrc \
     --group com.alacritty.Alacritty.desktop \
-    --key _launch "Ctrl+Alt+T,none,Alacritty"
+    --key _launch "Ctrl+Alt+T,none,Launch Alacritty"
 }
