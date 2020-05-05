@@ -30,6 +30,8 @@ install_alacritty() {
 
   msg_normal "change global shortcuts"
   sed -i -e "s|Ctrl+Alt+T||g" ~/.config/kglobalshortcutsrc
+  kwriteconfig5 --file khotkeysrc --group Data_1_2 --key Enabled false
+
   kwriteconfig5 --file kglobalshortcutsrc \
     --group com.alacritty.Alacritty.desktop \
     --key New "none,none,New Terminal"
