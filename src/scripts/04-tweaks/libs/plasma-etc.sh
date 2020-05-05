@@ -32,8 +32,8 @@ set_plasma_etc() {
   kwriteconfig5 --file ~/.local/share/konsole/Profile\ 1.profile --group General --key TerminalCenter true
   kwriteconfig5 --file ~/.local/share/konsole/Profile\ 1.profile --group General --key TerminalMargin 1
 
-  # Configure Power
-  msg_step "Configure Power"
+  # Configure power
+  msg_step "Configure power"
   msg_normal "change power settings, idle time"
   kwriteconfig5 --file powermanagementprofilesrc \
     --group AC --group DimDisplay \
@@ -41,4 +41,28 @@ set_plasma_etc() {
   kwriteconfig5 --file powermanagementprofilesrc \
     --group AC --group DPMSControl \
     --key idleTime 1800
+
+  # Configure dolphin
+  msg_step "Configure dolphin"
+
+  kwriteconfig5 --file dolphinrc --group General \
+    --key ShowFullPath true
+  kwriteconfig5 --file dolphinrc --group General \
+    --key ShowFullPathInTitlebar true
+  kwriteconfig5 --file dolphinrc --group General \
+    --key ShowSpaceInfo false
+  kwriteconfig5 --file dolphinrc --group General \
+    --key ShowToolTips true
+  kwriteconfig5 --file dolphinrc --group General \
+    --key ShowZoomSlider false
+
+  kwriteconfig5 --file dolphinrc --group DetailsMode \
+    --key PreviewSize 16
+
+  kwriteconfig5 --file dolphinrc --group "Toolbar mainToolBar" \
+    --key ToolButtonStyle "IconOnly"
+
+  kwriteconfig5 --file dolphinrc \
+    --group MainWindow --group "Toolbar mainToolBar" \
+    --key ToolButtonStyle "IconOnly"
 }
