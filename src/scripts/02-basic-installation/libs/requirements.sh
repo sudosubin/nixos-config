@@ -15,6 +15,10 @@ install_requirements() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
+  # Update new ppa sources
+  msg_step "Update new ppa sources"
+  output_box sudo apt-get update
+
   # Install via apt-get
   # - git curl: Basic for script installation
   # - nimf nimf-libhangul: Basic for Korean input
