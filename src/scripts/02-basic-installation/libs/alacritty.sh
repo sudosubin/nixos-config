@@ -29,6 +29,10 @@ install_alacritty() {
     --key TerminalApplication "alac"
 
   msg_normal "change global shortcuts"
+
+  sudo ln -s /usr/share/applications/com.alacritty.Alacritty.desktop \
+    /usr/share/kglobalaccel/com.alacritty.Alacritty.desktop
+
   sed -i -e "s|Ctrl+Alt+T||g" ~/.config/kglobalshortcutsrc
   kwriteconfig5 --file khotkeysrc --group Data_1_2 --key Enabled false
 
