@@ -205,7 +205,7 @@ colors:
   # Normal colors
   normal:
    black:   '#5C6370'
-   red:     '#BE5046'
+   red:     '#E06C75'
    green:   '#98C379'
    yellow:  '#E5C07B'
    blue:    '#61AFEF'
@@ -500,7 +500,11 @@ live_config_reload: false
 #
 # If the same trigger is assigned to multiple actions, all of them are executed
 # at once.
-#key_bindings:
+key_bindings:
+  - { key: Left,     mods: Control|Alt,         chars: ""          }
+  - { key: Right,    mods: Control|Alt,         chars: ""          }
+  - { key: Left,     mods: Control|Alt|Shift,   chars: ""          }
+  - { key: Right,    mods: Control|Alt|Shift,   chars: ""          }
   # (Windows, Linux, and BSD only)
   #- { key: V,        mods: Control|Shift, action: Paste            }
   #- { key: C,        mods: Control|Shift, action: Copy             }
