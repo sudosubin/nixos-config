@@ -36,4 +36,5 @@ install_zsh() {
   msg_normal "copy .zshrc, .zshenv"
   cp "$script_dir/settings/.zshrc" ~/.zshrc
   cp "$script_dir/settings/.zshenv" ~/.zshenv
+  cp "$script_dir/settings/.p10k.zsh" ~/.p10k.zsh
 }
