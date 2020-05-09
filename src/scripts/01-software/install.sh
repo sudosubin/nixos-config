@@ -39,10 +39,10 @@ scripts_01() {
   msg_heading "Add packages ppa"
 
   add_ppa_alacritty
-  add_ppa_ulauncher
   add_ppa_applet_window_buttons
   add_ppa_chromium
   add_ppa_nimf
+  add_ppa_ulauncher
   add_ppa_vscodium
   add_ppa_yarn
 

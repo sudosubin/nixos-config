@@ -57,5 +57,5 @@ set_workspace_behaviors() {
     --key TextOnly true
   kwriteconfig5 --file kwinrc --group Script-desktopchangeosd \
     --key PopupHideDelay 500
-  kwriteconfig5 --file kwinrc --group Effect-Slide --key SlideDocks true
+  # kwriteconfig5 --file kwinrc --group Effect-Slide --key SlideDocks true
 }

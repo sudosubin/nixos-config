@@ -27,8 +27,9 @@ scripts_05() {
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
     libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl \
     libmysqlclient-dev libpq-dev \
+    libcurl4-openssl-dev libssl-dev libaec-dev \
     dirmngr gpg \
-    shellcheck jq
+    docker.io docker-compose shellcheck jq
 
   msg_normal "fix Mysql-python my_config.h error"
   sudo curl -s "https://raw.githubusercontent.com/paulfitz/\
