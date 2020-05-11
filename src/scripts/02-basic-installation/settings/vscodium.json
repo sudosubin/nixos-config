@@ -25,5 +25,7 @@
     "window.zoomLevel": 0,
     "shellcheck.customArgs": [
         "-x"
-    ]
+    ],
+    "trailing-spaces.backgroundColor": "rgba(255,0,0,0.2)",
+    "trailing-spaces.borderColor": "rgba(255,100,100,0.1)"
 }

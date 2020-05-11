@@ -84,14 +84,19 @@ zinit ice wait lucid pick'update.sh'
 zinit light sudosubin/auto-update
 
 # Plugins > fzf
-zplugin ice wait lucid pick'shell/key-bindings.zsh' src'shell/completion.zsh'
-zplugin light junegunn/fzf
+zinit ice wait lucid pick'shell/key-bindings.zsh' src'shell/completion.zsh'
+zinit light junegunn/fzf
 
 # Plugins > k
 alias l=k
 alias ls='k -a'
 zinit ice wait lucid pick'k.sh'
 zinit light supercrabtree/k
+
+# Plugins > keepassxc-helper
+typeset -g KEEPASSXC_DB_DIR="$HOME/.config/keepassxc/keepass.kdbx"
+zinit ice wait lucid
+zinit light sudosubin/keepassxc-helper
 
 # Softwares > vscodium
 alias code=codium

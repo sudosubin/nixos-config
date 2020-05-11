@@ -34,6 +34,7 @@ install_vscodium() {
   silent codium --install-extension mrorz.language-gettext
   silent codium --install-extension GitHub.vscode-pull-request-github
   silent codium --install-extension eamodio.gitlens
+  silent codium --install-extension shardulm94.trailing-spaces
 
   # configure vscodium settings
   msg_normal "configure vscodium settings"

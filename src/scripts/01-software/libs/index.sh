@@ -32,6 +32,13 @@ add_ppa_applet_window_buttons() {
   sudo add-apt-repository -ny ppa:krisives/applet-window-buttons
 }
 
+# keepassxc
+add_ppa_keepassxc() {
+  # Add ppa: keepassxc
+  msg_step "Add ppa: keepassxc"
+  sudo add-apt-repository -ny ppa:phoerious/keepassxc
+}
+
 # nimf
 add_ppa_nimf() {
   # Add ppa: nemonein/nimf
