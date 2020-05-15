@@ -26,6 +26,7 @@ install_ulauncher() {
 
   msg_normal "copy icons, configurations"
   mkdir -p "$HOME/.config/autostart"
+  mkdir -p "$HOME/.local/share/icons/ulauncher"
   cp "$script_dir/settings/ulauncher/google.png" \
     ~/.local/share/icons/ulauncher/google.png
   cp "$script_dir/settings/ulauncher/autostart.desktop" \
