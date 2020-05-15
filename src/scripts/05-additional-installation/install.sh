@@ -42,4 +42,9 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   # Install asdf-vm plugins
   msg_heading "Install asdf-vm plugins"
   install_asdf
+
+  # Change pip sources
+  msg_heading "Change pip sources"
+  mkdir -p "$HOME/.config/pip"
+  cp "$current_dir/settings/pip.conf" "$HOME/.config/pip/pip.conf"
 }

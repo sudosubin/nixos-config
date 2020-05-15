@@ -34,4 +34,8 @@ scripts_04() {
   # Plasma etc
   msg_heading "Plasma etc"
   set_plasma_etc
+
+  # Network
+  msg_heading "Network"
+  set_network
 }

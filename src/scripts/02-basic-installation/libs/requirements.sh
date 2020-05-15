@@ -36,6 +36,7 @@ install_requirements() {
   #   : Build-deps for applet-window-appmenu
   # - inkscape x11-apps: Build-deps for capitaine-cursors
   # - keepassxc xclip rclone: Password managing
+  # - resolvconf: network settings
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     git curl \
@@ -52,5 +53,6 @@ install_requirements() {
     kinit-dev kwin-dev \
     qtdeclarative5-dev libkf5plasma-dev libsm-dev libxcb-randr0-dev \
     inkscape x11-apps \
-    keepassxc xclip rclone
+    keepassxc xclip rclone \
+    resolvconf
 }
