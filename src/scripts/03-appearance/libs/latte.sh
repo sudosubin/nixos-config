@@ -21,7 +21,7 @@ set_latte() {
     --key lattewindowcolorsEnabled true
 
   # Remove default panel
-  msg_stpe "Remove default panels"
+  msg_step "Remove default panels"
   sed -i \
     -e '/./{H;$!d;}' -e 'x;/ActionPlugins/b' \
     -e '/[9]/b' -e '/ScreenMapping/b' -e d ~/.config/plasma-org.kde.plasma.desktop-appletsrc

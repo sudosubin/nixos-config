@@ -32,5 +32,5 @@ add_ppa_chromium() {
     /usr/local/bin/chromium-upgrade-helper
   sudo chmod 777 /usr/local/bin/chromium-upgrade-helper
   echo 'DPkg::Post-Invoke {"/usr/local/bin/chromium-upgrade-helper";};' \
-    | silent sudo tee -a /etc/apt/apt.conf.d/80upgradehook
+    | silent sudo tee /etc/apt/apt.conf.d/80upgradehook
 }
