@@ -46,5 +46,6 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   # Change pip sources
   msg_heading "Change pip sources"
   mkdir -p "$HOME/.config/pip"
-  cp "$current_dir/settings/pip.conf" "$HOME/.config/pip/pip.conf"
+  cp "$app_dir/src/scripts/05-additional-installation/settings/pip.conf" \
+    "$HOME/.config/pip/pip.conf"
 }
