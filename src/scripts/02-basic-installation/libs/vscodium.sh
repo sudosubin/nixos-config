@@ -27,14 +27,16 @@ install_vscodium() {
   # - GitHub.vscode-pull-request-github: GitHub PR from codium
   # - eamodio.gitlens: Git blame in codium
   msg_normal "install vscodium extensions (takes long time)"
-  silent codium --install-extension zhuangtongfa.Material-theme
-  silent codium --install-extension PKief.material-icon-theme
-  silent codium --install-extension ms-python.python
-  silent codium --install-extension timonwong.shellcheck
-  silent codium --install-extension mrorz.language-gettext
-  silent codium --install-extension GitHub.vscode-pull-request-github
-  silent codium --install-extension eamodio.gitlens
-  silent codium --install-extension shardulm94.trailing-spaces
+  {
+    codium --install-extension zhuangtongfa.Material-theme
+    codium --install-extension PKief.material-icon-theme
+    codium --install-extension ms-python.python
+    codium --install-extension timonwong.shellcheck
+    codium --install-extension mrorz.language-gettext
+    codium --install-extension GitHub.vscode-pull-request-github
+    codium --install-extension eamodio.gitlens
+    codium --install-extension shardulm94.trailing-spaces
+  } | output_box cat
 
   # configure vscodium settings
   msg_normal "configure vscodium settings"
