@@ -32,6 +32,12 @@ source "$script_dir/libs/latte.sh"
 # shellcheck source=nimf.sh
 source "$script_dir/libs/nimf.sh"
 
+# shellcheck source=plank.sh
+source "$script_dir/libs/plank.sh"
+
+# shellcheck source=rclone.sh
+source "$script_dir/libs/rclone.sh"
+
 # shellcheck source=ulauncher.sh
 source "$script_dir/libs/ulauncher.sh"
 

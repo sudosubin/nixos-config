@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Plank
+Comment=Stupidly simple.
+Categories=Utility;
+Exec=plank
+Icon=plank
+Terminal=false
+Type=Application
+X-GNOME-Autostart-enabled=true

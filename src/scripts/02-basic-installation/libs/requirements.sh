@@ -22,7 +22,7 @@ install_requirements() {
   # Install via apt-get
   # - git curl: Basic for script installation
   # - nimf nimf-libhangul: Basic for Korean input
-  # - latte-dock applet-window-buttons: For better appearance
+  # - latte-dock plank applet-window-buttons: For better appearance
   # - chromium-browser codium net-tools fzf ulauncher
   #   yarn alacritty tmux zsh: My personal preference
   # - cmake make g++ extra-cmake-modules libkdecorations2-dev
@@ -35,12 +35,12 @@ install_requirements() {
   # - qtdeclarative5-dev libkf5plasma-dev libsm-dev libxcb-randr0-dev
   #   : Build-deps for applet-window-appmenu
   # - inkscape x11-apps: Build-deps for capitaine-cursors
-  # - keepassxc xclip: Password managing
+  # - keepassxc xclip rclone: Password managing
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     git curl \
     nimf nimf-libhangul \
-    latte-dock applet-window-buttons \
+    latte-dock plank applet-window-buttons \
     chromium-browser codium net-tools fzf ulauncher \
     yarn alacritty tmux zsh \
     cmake make g++ extra-cmake-modules libkdecorations2-dev \
@@ -52,5 +52,5 @@ install_requirements() {
     kinit-dev kwin-dev \
     qtdeclarative5-dev libkf5plasma-dev libsm-dev libxcb-randr0-dev \
     inkscape x11-apps \
-    keepassxc xclip
+    keepassxc xclip rclone
 }

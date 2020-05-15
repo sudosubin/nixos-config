@@ -30,6 +30,8 @@ scripts_02() {
   msg_heading "Configure softwares"
   install_alacritty
   install_nimf
+  install_plank
+  install_rclone
   install_ulauncher
   install_vscodium
 
