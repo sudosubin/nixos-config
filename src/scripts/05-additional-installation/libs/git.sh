@@ -1,6 +1,6 @@
 #!/bin/bash
 
-install_awscli() {
+install_git() {
   # Directory
   local current_dir
   local script_dir
@@ -15,18 +15,13 @@ install_awscli() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
-  # Download AWS CLI
-  msg_step "Downlaod AWS CLI"
+  # Default git hooks
+  msg_step "Default git hooks"
 
-  msg_normal "download files from online"
-  curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-    -o "awscliv2.zip"
+  msg_normal "jira commit msg hooks"
+  mkdir -p ~/.git-config/hooks
+  cp "$script_dir/settings/commit-msg" "$HOME/.git-config/hooks/commit-msg"
+  chmod +x "$HOME/.git-config/hooks/commit-msg"
 
-  msg_normal "unzip fiels"
-  silent unzip awscliv2.zip
-
-  msg_normal "install"
-  silent sudo ./aws/install
-  rm -rf aws
-  rm -f awscliv2.zip
+  git config --global core.hookspath "$HOME/.git-config/hooks"
 }

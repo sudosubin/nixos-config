@@ -29,7 +29,7 @@ scripts_05() {
     libmysqlclient-dev libpq-dev \
     libcurl4-openssl-dev libssl-dev libaec-dev \
     dirmngr gpg \
-    docker.io docker-compose shellcheck jq
+    docker.io docker-compose shellcheck jq git-flow
 
   msg_normal "fix Mysql-python my_config.h error"
   sudo curl -s "https://raw.githubusercontent.com/paulfitz/\
@@ -42,6 +42,10 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   # Install asdf-vm plugins
   msg_heading "Install asdf-vm plugins"
   install_asdf
+
+  # Install git
+  msg_heading "Install git"
+  install_git
 
   # Change pip sources
   msg_heading "Change pip sources"

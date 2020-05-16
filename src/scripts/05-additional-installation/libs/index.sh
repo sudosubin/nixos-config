@@ -10,3 +10,6 @@ source "$script_dir/libs/asdf.sh"
 
 # shellcheck source=awscli.sh
 source "$script_dir/libs/awscli.sh"
+
+# shellcheck source=git.sh
+source "$script_dir/libs/git.sh"
