@@ -8,6 +8,9 @@ app_dir="$(dirname "$(dirname "$(dirname "$script_dir")")")"
 # shellcheck source=chromium.sh
 source "$script_dir/libs/chromium.sh"
 
+# shellcheck source=jetbrains.sh
+source "$script_dir/libs/jetbrains.sh"
+
 # shellcheck source=vscodium.sh
 source "$script_dir/libs/vscodium.sh"
 
@@ -59,7 +62,7 @@ add_ppa_yarn() {
   msg_step "Add ppa: yarn"
 
   local yarn_repo="https://dl.yarnpkg.com"
-  
+
   add_ppa yarn \
     "$yarn_repo/debian/pubkey.gpg" \
     "deb $yarn_repo/debian/ stable main"
