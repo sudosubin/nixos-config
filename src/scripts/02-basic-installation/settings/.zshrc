@@ -100,3 +100,19 @@ zinit light sudosubin/keepassxc-helper
 
 # Softwares > vscodium
 alias code=codium
+
+# Functions > activate-virtualenv
+activate() {
+    local venv_path
+    venv_path=$(pwd)
+
+    while [[ $venv_path != "$HOME" ]]; do
+        if [[ -f "$venv_path/venv/bin/activate" ]]; then
+            # shellcheck disable=SC1090
+            source "$venv_path/venv/bin/activate"
+            export OPENSSL_CONF="$HOME/.ssl/openssl.cnf"
+            break
+        fi
+        venv_path="$(readlink -f "$venv_path"/..)"
+    done
+}

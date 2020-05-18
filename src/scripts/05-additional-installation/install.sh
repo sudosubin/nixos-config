@@ -52,4 +52,10 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   mkdir -p "$HOME/.config/pip"
   cp "$app_dir/src/scripts/05-additional-installation/settings/pip.conf" \
     "$HOME/.config/pip/pip.conf"
+
+  # Change openssl config
+  msg_heading "Change openssl config (TLS)"
+  mkdir -p "$HOME/.ssl"
+  cp"$app_dir/src/scripts/05-additional-installation/settings/openssl.cnf" \
+    "$HOME/.ssl/openssl.cnf"
 }
