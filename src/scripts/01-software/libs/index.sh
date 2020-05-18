@@ -8,6 +8,9 @@ app_dir="$(dirname "$(dirname "$(dirname "$script_dir")")")"
 # shellcheck source=chromium.sh
 source "$script_dir/libs/chromium.sh"
 
+# shellcheck source=insomnia.sh
+source "$script_dir/libs/insomnia.sh"
+
 # shellcheck source=jetbrains.sh
 source "$script_dir/libs/jetbrains.sh"
 

@@ -14,7 +14,7 @@
 
 window:
   # Window dimensions (changes require restart)
-  
+
   # Specified in number of columns/lines, not pixels.
   # If both are `0`, this setting is ignored.
   dimensions:
@@ -189,9 +189,9 @@ colors:
   #
   # Colors which should be used to draw the terminal cursor. If these are unset,
   # the cursor color will be the inverse of the cell color.
-  cursor:
-   text: '#1E2127'
-   cursor: '#ABB2BF'
+  # cursor:
+  #  text: '#1E2127'
+  #  cursor: '#ABB2BF'
 
   # Selection colors
   #
