@@ -39,4 +39,6 @@ set_window_decorations() {
     --key BorderlessMaximizedWindows true
   kwriteconfig5 --file hellorc --group Windeco \
     --key TitleBarHeightSpin 2
+  kwriteconfig5 --file hellorc --group Windeco \
+    --key DrawBackgroundGradient false
 }

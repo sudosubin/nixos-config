@@ -1,4 +1,4 @@
-FADD#!/bin/bash
+#!/bin/bash
 
 scripts_01() {
   # Directory

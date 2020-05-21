@@ -37,4 +37,8 @@ install_zsh() {
   cp "$script_dir/settings/.zshrc" ~/.zshrc
   cp "$script_dir/settings/.zshenv" ~/.zshenv
   cp "$script_dir/settings/.p10k.zsh" ~/.p10k.zsh
+
+  # source etc profile
+  msg_normal "source etc system profile (for snap)"
+  echo "emulate sh -c 'source /etc/profile'" | silent sudo tee -a /etc/zsh/zprofile
 }
