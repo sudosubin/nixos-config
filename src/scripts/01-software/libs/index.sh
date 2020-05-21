@@ -52,6 +52,22 @@ add_ppa_nimf() {
   sudo add-apt-repository -ny ppa:nemonein/nimf
 }
 
+# slack
+add_ppa_slack() {
+  current_dir="$(dirname "${BASH_SOURCE[0]}")"
+  script_dir="$(dirname "$current_dir")"
+  app_dir="$(dirname "$(dirname "$(dirname "$script_dir")")")"
+
+  # shellcheck source=../../../../src/utils/ppa.sh
+  source "$app_dir/src/utils/ppa.sh"
+
+  msg_step "Add ppa: slack"
+
+  add_ppa slack \
+    "https://packagecloud.io/slacktechnologies/slack/gpgkey" \
+    "deb https://packagecloud.io/slacktechnologies/slack/debian/ jessie main"
+}
+
 # yarn
 add_ppa_yarn() {
   current_dir="$(dirname "${BASH_SOURCE[0]}")"
