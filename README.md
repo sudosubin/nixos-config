@@ -23,6 +23,22 @@ git clone https://github.com/sudosubin/setup-script.git
 sh setup-script/install.sh
 ```
 
+### for Surface device
+
+Do below together.
+
+```sh
+sudo apt -y install linux-headers-surface linux-image-surface linux-libc-dev-surface surface-ipts-firmware libwacom-surface linux-surface-secureboot-mok
+```
+
+### Secure notes
+
+- `rclone conf`
+- `keepassxc db`
+- `pip.conf`
+- `ufw rules`
+
+
 ## Contribute
 
 It is a personal script, so some requests might not be admitted. (eg. Changing shortcuts, themes, etc.)
