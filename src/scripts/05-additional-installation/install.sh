@@ -56,6 +56,6 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   # Change openssl config
   msg_heading "Change openssl config (TLS)"
   mkdir -p "$HOME/.ssl"
-  cp"$app_dir/src/scripts/05-additional-installation/settings/openssl.cnf" \
+  cp "$app_dir/src/scripts/05-additional-installation/settings/openssl.cnf" \
     "$HOME/.ssl/openssl.cnf"
 }
