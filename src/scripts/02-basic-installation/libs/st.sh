@@ -47,9 +47,6 @@ install_st() {
 
   kwriteconfig5 --file kglobalshortcutsrc \
     --group st.desktop \
-    --key New "none,none,New Terminal"
-  kwriteconfig5 --file kglobalshortcutsrc \
-    --group st.desktop \
     --key _k_friendly_name "Launch Terminal"
   kwriteconfig5 --file kglobalshortcutsrc \
     --group st.desktop \
