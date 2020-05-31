@@ -19,8 +19,10 @@ set_keyboard_and_mouse() {
   msg_step "Configure keyboard"
 
   msg_normal "set xkbmap"
-  setxkbmap -option \
-    "ctrl:menu_rctrl,ctrl:swapcaps,korean:ralt_hangul,korean:rctrl_hanja"
+  sudo cp "$script_dir/settings/00-keyboard.conf" \
+    "/usr/share/X11/xorg.conf.d/00-keyboard.conf"
+  # setxkbmap -option \
+  #   "ctrl:menu_rctrl,ctrl:swapcaps,korean:ralt_hangul,korean:rctrl_hanja"
 
   msg_normal "set global shortcuts"
   kwriteconfig5 --file kglobalshortcutsrc --group kwin \
