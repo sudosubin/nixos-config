@@ -24,7 +24,7 @@ install_requirements() {
   # - nimf nimf-libhangul: Basic for Korean input
   # - latte-dock plank applet-window-buttons: For better appearance
   # - chromium-browser codium net-tools fzf ulauncher slack-desktop
-  #   yarn alacritty tmux zsh: My personal preference
+  #   yarn tmux zsh: My personal preference
   # - cmake make g++ extra-cmake-modules libkdecorations2-dev
   #   libkf5guiaddons-dev libkf5configwidgets-dev
   #   libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev
@@ -43,7 +43,7 @@ install_requirements() {
     nimf nimf-libhangul \
     latte-dock plank applet-window-buttons \
     chromium-browser codium net-tools fzf ulauncher slack-desktop \
-    yarn alacritty tmux zsh \
+    yarn tmux zsh \
     cmake make g++ extra-cmake-modules libkdecorations2-dev \
     libkf5guiaddons-dev libkf5configwidgets-dev \
     libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev \

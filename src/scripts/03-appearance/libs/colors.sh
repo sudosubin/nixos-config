@@ -52,12 +52,13 @@ set_colors() {
     fi
   done < "$origin_dir"
 
-  # set ColorScheme
+  # Set ColorScheme
   kwriteconfig5 --file kdeglobals --group General --key ColorScheme "OneDark"
 
-  # Set ColorScheme per Application
-  kwriteconfig5 --file kwinrulesrc --group General --key count 1
+  # window rules
+  kwriteconfig5 --file kwinrulesrc --group General --key count 2
 
+  # Set ColorScheme per Application
   kwriteconfig5 --file kwinrulesrc --group 1 --key Description \
     "Application settings for chromium-browser"
   kwriteconfig5 --file kwinrulesrc --group 1 --key clientmachine \
@@ -65,9 +66,22 @@ set_colors() {
   kwriteconfig5 --file kwinrulesrc --group 1 --key clientmachinematch 0
   kwriteconfig5 --file kwinrulesrc --group 1 --key wmclass \
     "chromium-browser"
+  kwriteconfig5 --file kwinrulesrc --group 1 --key wmclasscomplete false
+  kwriteconfig5 --file kwinrulesrc --group 1 --key wmclassmatch 1
   kwriteconfig5 --file kwinrulesrc --group 1 --key decocolorrule 2
   kwriteconfig5 --file kwinrulesrc --group 1 --key decocolor \
     "OneDarkChromium"
+
+  # Set st-term window size
+  kwriteconfig5 --file kwinrulesrc --group 1 --key Description \
+    "Application settings for st"
+  kwriteconfig5 --file kwinrulesrc --group 1 --key clientmachine \
+    "localhost"
+  kwriteconfig5 --file kwinrulesrc --group 1 --key clientmachinematch 0
+  kwriteconfig5 --file kwinrulesrc --group 1 --key wmclass \
+    "chromium-browser"
   kwriteconfig5 --file kwinrulesrc --group 1 --key wmclasscomplete false
   kwriteconfig5 --file kwinrulesrc --group 1 --key wmclassmatch 1
+  kwriteconfig5 --file kwinrulesrc --group 1 --key size "800,500"
+  kwriteconfig5 --file kwinrulesrc --group 1 --key sizerule 3
 }

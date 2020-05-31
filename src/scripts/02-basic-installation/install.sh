@@ -24,11 +24,11 @@ scripts_02() {
   install_requirements
   install_asdf
   install_latte
+  install_st
   install_zsh
 
   # Configure softwares
   msg_heading "Configure softwares"
-  install_alacritty
   install_nimf
   install_plank
   install_rclone

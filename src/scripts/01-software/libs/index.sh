@@ -17,13 +17,6 @@ source "$script_dir/libs/jetbrains.sh"
 # shellcheck source=vscodium.sh
 source "$script_dir/libs/vscodium.sh"
 
-# alacritty
-add_ppa_alacritty() {
-  # Add ppa: mmstick76/alacritty
-  msg_step "Add ppa: mmstick76/alacritty"
-  sudo add-apt-repository -ny ppa:mmstick76/alacritty
-}
-
 # ulauncher
 add_ppa_ulauncher() {
   # Add ppa: agornostal/ulauncher
