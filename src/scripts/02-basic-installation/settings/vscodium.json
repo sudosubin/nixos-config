@@ -9,9 +9,8 @@
     "terminal.integrated.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
     "markdown.preview.fontFamily": "'SF Pro Text', 'FiraMono Nerd Font Mono'",
     "editor.rulers": [
-        80, 120
+        120
     ],
-    "githubPullRequests.telemetry.enabled": false,
     "workbench.tree.indent": 16,
     "workbench.iconTheme": "material-icon-theme",
     "material-icon-theme.activeIconPack": "react_redux",
@@ -27,5 +26,15 @@
         "-x"
     ],
     "trailing-spaces.backgroundColor": "rgba(255,0,0,0.2)",
-    "trailing-spaces.borderColor": "rgba(255,100,100,0.1)"
+    "trailing-spaces.borderColor": "rgba(255,100,100,0.1)",
+    "python.linting.pylintArgs": [
+        "--max-line-length=120",
+        "--load-plugins=pylint_django"
+    ],
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/venv/*/**": true
+    }
 }
