@@ -73,15 +73,15 @@ set_colors() {
     "OneDarkChromium"
 
   # Set st-term window size
-  kwriteconfig5 --file kwinrulesrc --group 1 --key Description \
+  kwriteconfig5 --file kwinrulesrc --group 2 --key Description \
     "Application settings for st"
-  kwriteconfig5 --file kwinrulesrc --group 1 --key clientmachine \
+  kwriteconfig5 --file kwinrulesrc --group 2 --key clientmachine \
     "localhost"
-  kwriteconfig5 --file kwinrulesrc --group 1 --key clientmachinematch 0
-  kwriteconfig5 --file kwinrulesrc --group 1 --key wmclass \
-    "chromium-browser"
-  kwriteconfig5 --file kwinrulesrc --group 1 --key wmclasscomplete false
-  kwriteconfig5 --file kwinrulesrc --group 1 --key wmclassmatch 1
-  kwriteconfig5 --file kwinrulesrc --group 1 --key size "800,500"
-  kwriteconfig5 --file kwinrulesrc --group 1 --key sizerule 3
+  kwriteconfig5 --file kwinrulesrc --group 2 --key clientmachinematch 0
+  kwriteconfig5 --file kwinrulesrc --group 2 --key wmclass \
+    "st"
+  kwriteconfig5 --file kwinrulesrc --group 2 --key wmclasscomplete false
+  kwriteconfig5 --file kwinrulesrc --group 2 --key wmclassmatch 1
+  kwriteconfig5 --file kwinrulesrc --group 2 --key size "800,500"
+  kwriteconfig5 --file kwinrulesrc --group 2 --key sizerule 3
 }
