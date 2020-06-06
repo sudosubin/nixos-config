@@ -23,12 +23,14 @@ scripts_02() {
   msg_heading "Install softwares"
   install_requirements
   install_asdf
+  install_delta
   install_latte
   install_st
   install_zsh
 
   # Configure softwares
   msg_heading "Configure softwares"
+  install_bat
   install_nimf
   install_plank
   install_rclone

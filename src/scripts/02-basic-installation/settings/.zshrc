@@ -101,6 +101,9 @@ zinit light sudosubin/keepassxc-helper
 # Softwares > vscodium
 alias code=codium
 
+# Softwares > bat
+alias bat=batcat
+
 # Functions > activate-virtualenv
 activate() {
     local venv_path

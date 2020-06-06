@@ -31,7 +31,7 @@ install_latte() {
     ./temp-git
   mute plasmapkg2 -i temp-git
   rm -rf temp-git
-  
+
   # varlesh/org.kde.plasma.digitalclock.wl
   msg_normal "download psifidotos/org.kde.plasma.digitalclock.wl"
   mute git clone https://github.com/varlesh/org.kde.plasma.digitalclock.wl.git \
