@@ -58,4 +58,10 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   mkdir -p "$HOME/.ssl"
   cp "$app_dir/src/scripts/05-additional-installation/settings/openssl.cnf" \
     "$HOME/.ssl/openssl.cnf"
+
+  # Change bpython config
+  msg_heading "Change bpython config"
+  mkdir -p "$HOME/.config/bpython"
+  cp "$current_dir/settings/bpython/config" "$HOME/.config/bpython/config"
+  cp "$current_dir/settings/bpython/base16.theme" "$HOME/.config/bpython/base16.theme"
 }
