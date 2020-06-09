@@ -14,8 +14,14 @@ source "$script_dir/libs/applet-window-appmenu.sh"
 # shellcheck source=asdf.sh
 source "$script_dir/libs/asdf.sh"
 
+# shellcheck source=bat.sh
+source "$script_dir/libs/bat.sh"
+
 # shellcheck source=capitaine-cursors.sh
 source "$script_dir/libs/capitaine-cursors.sh"
+
+# shellcheck source=delta.sh
+source "$script_dir/libs/delta.sh"
 
 # shellcheck source=hello.sh
 source "$script_dir/libs/hello.sh"
