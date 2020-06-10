@@ -21,8 +21,8 @@ install_delta() {
   # settings
   msg_normal "download deb"
   local download="https://github.com/barnumbirr/delta-debian/releases/download"
-  local version="v0.1.1-1"
-  curl -sL "$download/$version/delta_0.1.1-1_amd64_debian_buster.deb" \
+  local version="0.1.1-2"
+  curl -sL "$download/v$version/delta-diff_${version}_amd64_debian_buster.deb" \
     -o "delta.deb"
 
   msg_normal "install deb"
