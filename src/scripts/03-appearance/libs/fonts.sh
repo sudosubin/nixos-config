@@ -57,7 +57,7 @@ set_fonts() {
   # set global fonts (etc)
   kwriteconfig5 --file ~/.config/gtk-3.0/settings.ini --group Settings \
     --key gtk-font-name "SF Pro Text,  10"
-  
+
   sed -i -E "s|^Gtk\/FontName.*|Gtk/FontName \"SF Pro Text,  10\"|g" \
     ~/.config/xsettingsd/xsettingsd.conf
 
@@ -88,4 +88,11 @@ Fira%20Mono%20$weight%20Nerd%20Font%20Complete%20Mono.otf" \
     --key fixed "FiraMono Nerd Font Mono,10,-1,5,50,0,0,0,0,0"
   gsettings set org.gnome.desktop.interface \
     monospace-font-name "FiraMono Nerd Font Mono 10"
+
+  # set custom fontconfig
+  msg_normal "set custom fontconfig"
+  mkdir -p ~/.config/fontconfig
+  cp "$script_dir/fonts/fonts.conf" \
+    "$HOME/.config/fontconfig/fonts.conf"
+
 }

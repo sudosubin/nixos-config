@@ -1,44 +1,44 @@
 ! special
-*.foreground:   #abb2bf
-*.background:   #1e2127
-*.cursorColor:  #abb2bf
+st.foreground:   #abb2bf
+st.background:   #1e2127
+st.cursorColor:  #abb2bf
 
 ! black
-*.color0:       #5c6370
-*.color8:       #5c6370
+st.color0:       #5c6370
+st.color8:       #5c6370
 
 ! red
-*.color1:       #e06c75
-*.color9:       #e06c75
+st.color1:       #e06c75
+st.color9:       #e06c75
 
 ! green
-*.color2:       #98c379
-*.color10:      #98c379
+st.color2:       #98c379
+st.color10:      #98c379
 
 ! yellow
-*.color3:       #d19a66
-*.color11:      #d19a66
+st.color3:       #e5c07b
+st.color11:      #d19a66
 
 ! blue
-*.color4:       #61afef
-*.color12:      #61afef
+st.color4:       #61afef
+st.color12:      #61afef
 
 ! magenta
-*.color5:       #c678dd
-*.color13:      #c678dd
+st.color5:       #c678dd
+st.color13:      #c678dd
 
 ! cyan
-*.color6:       #56b6c2
-*.color14:      #56b6c2
+st.color6:       #56b6c2
+st.color14:      #56b6c2
 
 ! white
-*.color7:       #abb2bf
-*.color15:      #abb2bf
+st.color7:       #abb2bf
+st.color15:      #abb2bf
 
 ! font
-*.font: FiraMono Nerd Font Mono:pixelsize=13:antialias=true:autohint=true;
-*.fontalt0: SF Pro Text:pixelsize=13:antialias=true:autohint=true;
+st.font: FiraMono Nerd Font Mono:pixelsize=13:antialias=true:autohint=true;
+st.fontalt0: SF Pro Text:pixelsize=13:antialias=true:autohint=true;
 
 ! window
-*.alpha: 1
-*.borderpx: 8
+st.alpha: 1
+st.borderpx: 8

@@ -52,7 +52,7 @@ scripts_01() {
   msg_heading "Remove packages"
 
   msg_step "Remove packages"
-  silent sudo apt-get -y remove --purge firefox thunderbird konsole
+  silent sudo apt-get -y remove --purge firefox thunderbird konsole fonts-noto-color-emoji
 
   ## Remove package: finish
   msg_step "Remove package: clean up packages"

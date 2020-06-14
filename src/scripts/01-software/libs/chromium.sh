@@ -15,12 +15,12 @@ add_ppa_chromium() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
-  # Add ppa: saiarcot895/chromium-dev
-  msg_step "Add ppa: saiarcot895/chromium-dev"
+  # Add ppa: saiarcot895/chromium-beta
+  msg_step "Add ppa: saiarcot895/chromium-beta"
 
   # add apt repository
   msg_normal "add apt repository"
-  sudo add-apt-repository -ny ppa:saiarcot895/chromium-dev
+  sudo add-apt-repository -ny ppa:saiarcot895/chromium-beta
 
   # add Google api key
   msg_normal "add Google api key"
