@@ -11,7 +11,7 @@ update_vscodium_setting() {
 
     # edit json and write
     jq < /usr/share/codium/resources/app/product.json.bak \
-      ".extensionAllowedProposedApi |= . + 
+      ".extensionAllowedProposedApi |= . +
         [\"GitHub.vscode-pull-request-github\"]" \
       | jq ".extensionAllowedProposedApi |= unique" \
       | sudo tee >/dev/null /usr/share/codium/resources/app/product.json
