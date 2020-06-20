@@ -10,7 +10,7 @@ update_chromium_exec() {
     local dark_mode="--force-dark-mode"
     local replace_pattern="& $flags $dark_mode"
 
-    sudo sed -E "/$skip_pattern/b; s/$search_pattern/$replace_pattern/g" \
+    sudo sed -nE "/$skip_pattern/b; s/$search_pattern/$replace_pattern/g" \
       /usr/share/applications/chromium-browser.desktop
 
     echo "chromium exec was updated."
