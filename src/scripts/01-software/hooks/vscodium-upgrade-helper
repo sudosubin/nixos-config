@@ -9,11 +9,15 @@ update_vscodium_setting() {
     sudo cp /usr/share/codium/resources/app/product.json \
       /usr/share/codium/resources/app/product.json.bak
 
-    # edit json and write
-    jq < /usr/share/codium/resources/app/product.json.bak \
-      ".extensionAllowedProposedApi |= . +
-        [\"GitHub.vscode-pull-request-github\"]" \
-      | jq ".extensionAllowedProposedApi |= unique" \
+    # edit json and write (replace marketplace)
+    # shellcheck disable=SC2002
+    cat /usr/share/codium/resources/app/product.json.bak \
+      | jq ".extensionsGallery.serviceUrl = \
+        \"https://marketplace.visualstudio.com/_apis/public/gallery\"" \
+      | jq ".extensionsGallery.cacheUrl = \
+        \"https://vscode.blob.core.windows.net/gallery/index\"" \
+      | jq ".extensionsGallery.itemUrl = \
+        \"https://marketplace.visualstudio.com/items\"" \
       | sudo tee >/dev/null /usr/share/codium/resources/app/product.json
 
     echo "vscodim setting was updated."
