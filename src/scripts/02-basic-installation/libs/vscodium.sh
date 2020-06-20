@@ -30,12 +30,13 @@ install_vscodium() {
   {
     codium --install-extension zhuangtongfa.Material-theme
     codium --install-extension PKief.material-icon-theme
-    # codium --install-extension ms-python.python
+    codium --install-extension ms-python.python
     codium --install-extension timonwong.shellcheck
     codium --install-extension mrorz.language-gettext
     codium --install-extension GitHub.vscode-pull-request-github
     codium --install-extension eamodio.gitlens
     codium --install-extension shardulm94.trailing-spaces
+    codium --install-extension iocave.customize-ui
   } | output_box cat
 
   # configure vscodium settings
