@@ -12,8 +12,10 @@
     "editor.rulers": [
         120
     ],
+    "editor.minimap.renderCharacters": false,
     "workbench.tree.indent": 16,
     "workbench.iconTheme": "material-icon-theme",
+    "workbench.startupEditor": "newUntitledFile",
     "material-icon-theme.activeIconPack": "react_redux",
     "material-icon-theme.hidesExplorerArrows": true,
     "material-icon-theme.showWelcomeMessage": false,
@@ -32,6 +34,12 @@
     "python.linting.flake8Args": [
         "--max-line-length=120"
     ],
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/venv/*/**": true
+    },
     "customizeUI.font.regular": "SF Pro Text",
     "customizeUI.font.monospace": "FiraMono Nerd Font Mono",
     "customizeUI.stylesheet": {

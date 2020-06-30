@@ -44,6 +44,9 @@ source "$script_dir/libs/rclone.sh"
 # shellcheck source=st.sh
 source "$script_dir/libs/st.sh"
 
+# shellcheck source=tmux.sh
+source "$script_dir/libs/tmux.sh"
+
 # shellcheck source=ulauncher.sh
 source "$script_dir/libs/ulauncher.sh"
 

@@ -14,8 +14,6 @@ install_st() {
   source "$app_dir/src/utils/msg.sh"
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
-  # shellcheck disable=SC1090
-  source "$HOME/.asdf/asdf.sh"
 
   # Configure st
   msg_step "Install st"
