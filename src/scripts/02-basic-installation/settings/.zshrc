@@ -73,7 +73,9 @@ zinit light-mode wait lucid for \
     blockf \
         zsh-users/zsh-completions \
     blockf \
-        greymd/docker-zsh-completion
+        greymd/docker-zsh-completion \
+    blockf \
+        sudosubin/zsh-poetry
 
 # Plugins > asdf
 zinit ice pick'asdf.plugin.zsh' atinit'autoload bashcompinit; bashcompinit' blockf
