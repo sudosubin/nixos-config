@@ -15,12 +15,18 @@ add_ppa_chromium() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
-  # Add ppa: saiarcot895/chromium-beta
-  msg_step "Add ppa: saiarcot895/chromium-beta"
+  # Add debian repository
+  msg_step "Add debian repository"
 
   # add apt repository
   msg_normal "add apt repository"
-  sudo add-apt-repository -ny ppa:saiarcot895/chromium-beta
+  sudo cp "$script_dir/settings/debian.list" \
+    "/etc/apt/sources.list.d/debian.list"
+  silent sudo apt-key add /usr/share/keyrings/debian-archive-keyring.gpg
+
+  # copy pref
+  sudo cp "$script_dir/settings/chromium.pref" \
+    "/etc/apt/preferences.d/chromium.pref"
 
   # add Google api key
   msg_normal "add Google api key"
