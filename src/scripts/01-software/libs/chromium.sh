@@ -30,7 +30,7 @@ add_ppa_chromium() {
 
   # add Google api key
   msg_normal "add Google api key"
-  cp "$script_dir/keys/google-api-key" ~/.zprofile
+  cp "$script_dir/settings/.zprofile" ~/.zprofile
 
   # add apt hooks
   msg_normal "add apt hooks (dark mode)"
