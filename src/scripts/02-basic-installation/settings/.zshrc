@@ -81,7 +81,7 @@ zinit light kiurchv/asdf.plugin.zsh
 
 # Plugins > auto-update
 zinit ice wait lucid pick'update.sh'
-zinit light sudosubin/auto-update
+zinit light sudosubin/zsh-auto-update
 
 # Plugins > fzf
 zinit ice wait lucid pick'shell/key-bindings.zsh' src'shell/completion.zsh'
