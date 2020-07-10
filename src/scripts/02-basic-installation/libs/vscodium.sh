@@ -19,19 +19,13 @@ install_vscodium() {
   msg_step "Configure vscodium"
 
   # install vscodium extensions
-  # - zhuangtongfa.Material-theme: One Dark Pro Theme
-  # - PKief.material-icon-theme: Material Icon Theme
-  # - ms-python.python: Python Language support
-  # - timonwong.shellcheck: Bash style checker
-  # - mrorz.language-gettext: gettext(.po) Syntax support
-  # - GitHub.vscode-pull-request-github: GitHub PR from codium
-  # - eamodio.gitlens: Git blame in codium
   msg_normal "install vscodium extensions (takes long time)"
   {
     codium --install-extension zhuangtongfa.Material-theme
     codium --install-extension PKief.material-icon-theme
     codium --install-extension ms-python.python
     codium --install-extension ms-python.vscode-pylance
+    codium --install-extension ms-pyright.pyright
     codium --install-extension njpwerner.autodocstring
     codium --install-extension fabiospampinato.vscode-highlight
     codium --install-extension timonwong.shellcheck
