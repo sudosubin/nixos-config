@@ -25,7 +25,6 @@ install_vscodium() {
     codium --install-extension PKief.material-icon-theme
     codium --install-extension ms-python.python
     codium --install-extension ms-python.vscode-pylance
-    codium --install-extension ms-pyright.pyright
     codium --install-extension njpwerner.autodocstring
     codium --install-extension fabiospampinato.vscode-highlight
     codium --install-extension timonwong.shellcheck

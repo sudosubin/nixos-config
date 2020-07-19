@@ -9,7 +9,13 @@ update_vscodium_setting() {
     sudo cp /usr/share/codium/resources/app/product.json \
       /usr/share/codium/resources/app/product.json.bak
 
-    # edit json and write (replace marketplace)
+    # edit json and write
+    jq < /usr/share/codium/resources/app/product.json.bak \
+      ".extensionAllowedProposedApi |= . +
+      [\"ms-python.python\"]" \
+    | jq ".extensionAllowedProposedApi |= unique" \
+    | sudo tee >/dev/null /usr/share/codium/resources/app/product.json
+
     # shellcheck disable=SC2002
     cat /usr/share/codium/resources/app/product.json.bak \
       | jq ".extensionsGallery.serviceUrl = \

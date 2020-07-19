@@ -23,15 +23,13 @@ install_git() {
   cp "$script_dir/settings/commit-msg" "$HOME/.git-config/hooks/commit-msg"
   chmod +x "$HOME/.git-config/hooks/commit-msg"
 
+  # Copy .gitconfig
+  cp "$script_dir/settings/.gitconfig" "$HOME/.gitconfig"
+
+  # Git hooks
   git config --global core.hookspath "$HOME/.git-config/hooks"
 
   # Delta git-diff
+  git config --global core.pager "delta --24-bit-color=always"
   git config --global interactive.diffFilter "delta --color-only"
-  git config --global core.pager \
-    "delta \
---max-line-distance 1 --theme=base16 --24-bit-color=always \
---file-color=#08000000 \
---hunk-color=#08000000 \
---minus-color=#400000 --minus-emph-color=#600000 \
---plus-color=#003000 --plus-emph-color=#005000"
 }
