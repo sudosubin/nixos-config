@@ -37,6 +37,7 @@ install_requirements() {
   # - inkscape x11-apps: Build-deps for capitaine-cursors
   # - keepassxc xclip rclone: Password managing
   # - resolvconf: network settings
+  # - harfbuzz: Build-deps for st term
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     git curl \
@@ -54,5 +55,6 @@ install_requirements() {
     qtdeclarative5-dev libkf5plasma-dev libsm-dev libxcb-randr0-dev \
     inkscape x11-apps \
     keepassxc xclip rclone \
-    resolvconf
+    resolvconf \
+    harfbuzz
 }
