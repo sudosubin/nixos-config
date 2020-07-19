@@ -28,7 +28,7 @@ scripts_05() {
     libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl \
     libmysqlclient-dev libpq-dev \
     libcurl4-openssl-dev libssl-dev libaec-dev \
-    dirmngr gpg libharfbuzz-dev \
+    dirmngr gpg \
     docker.io docker-compose redis-server insomnia shellcheck jq git-flow
 
   msg_normal "fix Mysql-python my_config.h error"
