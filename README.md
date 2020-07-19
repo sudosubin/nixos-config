@@ -28,6 +28,14 @@ sh setup-script/install.sh
 Do below together.
 
 ```sh
+# Add package repository
+wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
+    | sudo apt-key add -
+
+echo "deb [arch=amd64] https://pkg.surfacelinux.com/debian release main" \
+    | sudo tee /etc/apt/sources.list.d/linux-surface.list
+
+# Install
 sudo apt -y install linux-headers-surface linux-image-surface linux-libc-dev-surface surface-ipts-firmware libwacom-surface linux-surface-secureboot-mok
 ```
 
