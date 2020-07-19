@@ -4,9 +4,11 @@ scripts_05() {
   # Directory
   local current_dir
   local app_dir
+  local settings_dir
 
   current_dir="$(dirname "${BASH_SOURCE[0]}")"
   app_dir="$(dirname "$(dirname "$(dirname "$current_dir")")")"
+  settings_dir="$app_dir/src/scripts/05-additional-installation/settings"
 
   # Function
   # shellcheck source=../../../src/utils/msg.sh
@@ -50,20 +52,20 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   # Change pip sources
   msg_heading "Change pip sources"
   mkdir -p "$HOME/.config/pip"
-  cp "$app_dir/src/scripts/05-additional-installation/settings/pip.conf" \
-    "$HOME/.config/pip/pip.conf"
+  cp "$settings_dir/pip.conf" "$HOME/.config/pip/pip.conf"
 
   # Change openssl config
   msg_heading "Change openssl config (TLS)"
   mkdir -p "$HOME/.ssl"
-  cp "$app_dir/src/scripts/05-additional-installation/settings/openssl.cnf" \
-    "$HOME/.ssl/openssl.cnf"
+  cp "$settings_dir/openssl.cnf" "$HOME/.ssl/openssl.cnf"
+
+  # Change zprofile
+  msg_heading "Change zprofile"
+  cp "$settings_dir/.zprofile" "$HOME/.zprofile"
 
   # Change bpython config
   msg_heading "Change bpython config"
   mkdir -p "$HOME/.config/bpython"
-  cp "$app_dir/src/scripts/05-additional-installation/settings/bpython/config" \
-    "$HOME/.config/bpython/config"
-  cp "$app_dir/src/scripts/05-additional-installation/settings/bpython/base16.theme" \
-    "$HOME/.config/bpython/base16.theme"
+  cp "$settings_dir/bpython/config" "$HOME/.config/bpython/config"
+  cp "$settings_dir/bpython/base16.theme" "$HOME/.config/bpython/base16.theme"
 }

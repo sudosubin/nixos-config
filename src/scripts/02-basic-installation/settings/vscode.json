@@ -31,6 +31,7 @@
     ],
     "trailing-spaces.backgroundColor": "rgba(255, 0, 0, 0.2)",
     "trailing-spaces.borderColor": "rgba(255, 100, 100, 0.1)",
+    "python.languageServer": "Pylance",
     "python.analysis.typeCheckingMode": "strict",
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
@@ -80,8 +81,6 @@
             }
         ]
     },
-    "telemetry.enableCrashReporter": false,
-    "gitlens.advanced.telemetry.enabled": false,
     "highlight.regexes": {
         "(Examples?|Attributes|Todos?|Args|Returns?|Raises|Yields|Note|\\.\\.\\ _.*)(:)": {
             "regexFlags": "gi",
@@ -91,5 +90,10 @@
                 {"color": "#7f848e"}
             ]
         }
-    }
+    },
+    "telemetry.enableCrashReporter": false,
+    "telemetry.enableTelemetry": false,
+    "gitlens.advanced.telemetry.enabled": false,
+    "update.mode": "none",
+    "extensions.ignoreRecommendations": true
 }
