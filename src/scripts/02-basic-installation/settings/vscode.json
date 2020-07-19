@@ -33,7 +33,7 @@
     "trailing-spaces.borderColor": "rgba(255, 100, 100, 0.1)",
     "python.showStartPage": false,
     "python.languageServer": "Pylance",
-    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.typeCheckingMode": "off",
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
     "python.linting.flake8Args": [

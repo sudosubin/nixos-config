@@ -33,6 +33,7 @@ install_vscode() {
     code --install-extension shardulm94.trailing-spaces
     code --install-extension iocave.customize-ui
     code --install-extension bungcip.better-toml
+    code --install-extension yzhang.markdown-all-in-one
   } | output_box cat
 
   # configure vscode settings
