@@ -22,7 +22,10 @@ add_ppa_chromium() {
   msg_normal "add apt repository"
   sudo cp "$script_dir/settings/debian.list" \
     "/etc/apt/sources.list.d/debian.list"
-  silent sudo apt-key add /usr/share/keyrings/debian-archive-keyring.gpg
+  silent sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys DCC9EFBF77E11517
+  silent sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
+  silent sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AA8E81B4331F7F50
+  silent sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 112695A0E562B32A
 
   # copy pref
   sudo cp "$script_dir/settings/chromium.pref" \
