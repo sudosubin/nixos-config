@@ -36,7 +36,7 @@ scripts_02() {
   install_rclone
   install_tmux
   install_ulauncher
-  install_vscodium
+  install_vscode
 
   # Build softwares
   msg_heading "Build softwares"

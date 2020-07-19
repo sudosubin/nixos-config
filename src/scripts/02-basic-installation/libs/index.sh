@@ -50,8 +50,8 @@ source "$script_dir/libs/tmux.sh"
 # shellcheck source=ulauncher.sh
 source "$script_dir/libs/ulauncher.sh"
 
-# shellcheck source=vscodium.sh
-source "$script_dir/libs/vscodium.sh"
+# shellcheck source=vscode.sh
+source "$script_dir/libs/vscode.sh"
 
 # shellcheck source=zsh.sh
 source "$script_dir/libs/zsh.sh"

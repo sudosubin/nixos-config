@@ -14,8 +14,8 @@ source "$script_dir/libs/insomnia.sh"
 # shellcheck source=jetbrains.sh
 source "$script_dir/libs/jetbrains.sh"
 
-# shellcheck source=vscodium.sh
-source "$script_dir/libs/vscodium.sh"
+# shellcheck source=vscode.sh
+source "$script_dir/libs/vscode.sh"
 
 # ulauncher
 add_ppa_ulauncher() {

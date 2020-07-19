@@ -100,9 +100,6 @@ typeset -g KEEPASSXC_DB_DIR="$HOME/.config/keepassxc/keepass.kdbx"
 zinit ice wait lucid
 zinit light sudosubin/keepassxc-helper
 
-# Softwares > vscodium
-alias code=codium
-
 # Softwares > bat
 alias bat=batcat
 
