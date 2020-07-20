@@ -22,7 +22,7 @@ add_ppa_vscode() {
 
   # add apt repository
   msg_normal "add gpg"
-  silent curl https://packages.microsoft.com/keys/microsoft.asc \
+  curl https://packages.microsoft.com/keys/microsoft.asc \
     | gpg --dearmor > packages.microsoft.gpg
   mute sudo apt-key add packages.microsoft.gpg
   rm -r packages.microsoft.gpg
