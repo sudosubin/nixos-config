@@ -25,7 +25,7 @@ scripts_05() {
   msg_heading "Install requirements"
   msg_normal "install"
   output_box sudo apt-get -y --no-install-recommends install \
-    build-essential libssl-dev zlib1g-dev libbz2-dev \
+    build-essential libssl-dev zlib1g-dev libbz2-dev libjpeg8-dev \
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
     libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl \
     libmysqlclient-dev libpq-dev \
