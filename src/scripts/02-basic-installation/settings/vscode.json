@@ -1,5 +1,5 @@
 {
-    "oneDarkPro.editorTheme": "Onedark Pro",
+    "oneDarkPro.editorTheme": "onedarkPro",
     "markdown.preview.fontFamily": "'SF Pro Text'",
     "editor.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
     "debug.console.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
@@ -46,6 +46,15 @@
         "**/node_modules/*/**": true,
         "**/venv/*/**": true,
         "**/.venv/*/**": true
+    },
+    "explorer.compactFolders": false,
+    "files.eol": "\n",
+    "files.trimTrailingWhitespace": true,
+    "editor.trimAutoWhitespace": true,
+    "editor.insertSpaces": true,
+    "[python]": {
+        "editor.tabSize": 4,
+        "files.insertFinalNewline": true
     },
     "[javascript]": {
         "editor.tabSize": 2
@@ -95,6 +104,6 @@
     "telemetry.enableCrashReporter": false,
     "telemetry.enableTelemetry": false,
     "gitlens.advanced.telemetry.enabled": false,
-    "update.mode": "none",
-    "extensions.ignoreRecommendations": true
+    "extensions.ignoreRecommendations": true,
+    "update.mode": "none"
 }

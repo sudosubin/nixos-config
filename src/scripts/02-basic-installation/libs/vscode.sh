@@ -34,6 +34,8 @@ install_vscode() {
     code --install-extension iocave.customize-ui
     code --install-extension bungcip.better-toml
     code --install-extension yzhang.markdown-all-in-one
+
+    code --install-extension jpoissonnier.vscode-styled-components
   } | output_box cat
 
   # configure vscode settings
