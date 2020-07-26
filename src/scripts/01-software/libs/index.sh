@@ -56,7 +56,7 @@ add_ppa_chrome() {
 
   local chrome_repo="https://dl.google.com/linux"
 
-  add_ppa chrome \
+  add_ppa google-chrome \
     "$chrome_repo/linux_signing_key.pub" \
     "deb [arch=amd64] $chrome_repo/chrome/deb/ stable main"
 
