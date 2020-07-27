@@ -13,3 +13,6 @@ source "$script_dir/libs/awscli.sh"
 
 # shellcheck source=git.sh
 source "$script_dir/libs/git.sh"
+
+# shellcheck source=lokalise.sh
+source "$script_dir/libs/lokalise.sh"
