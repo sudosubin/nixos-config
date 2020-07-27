@@ -15,10 +15,9 @@ install_lokalise() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
-  # Default git hooks
   msg_step "Install lokalise cli v2"
 
-  msg_normal "install lokalise cli v2"
+  msg_normal "download from git"
   output_box curl -sfL https://raw.githubusercontent.com/lokalise/lokalise-cli-2-go/master/install.sh | sh
   sudo mv "./bin/lokalise2" "/usr/local/bin/lokalise2"
 }
