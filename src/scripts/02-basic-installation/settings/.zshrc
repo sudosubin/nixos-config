@@ -98,7 +98,7 @@ zinit light supercrabtree/k
 # Plugins > keepassxc-helper
 typeset -g KEEPASSXC_DB_DIR="$HOME/.config/keepassxc/keepass.kdbx"
 zinit ice wait lucid
-zinit light sudosubin/keepassxc-helper
+zinit light sudosubin/zsh-keepassxc-helper
 
 # Softwares > bat
 alias bat=batcat
