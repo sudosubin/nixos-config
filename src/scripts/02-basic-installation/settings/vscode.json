@@ -93,7 +93,7 @@
     },
     "highlight.regexes": {
         "(Examples?|Attributes|Todos?|Args|Returns?|Raises|Yields|Note|\\.\\.\\ _.*)(:)": {
-            "regexFlags": "gi",
+            "regexFlags": "g",
             "filterLanguageRegex": "python",
             "decorations": [
                 {"color": "#c678dd", "textDecoration": ";font-style: italic;"},

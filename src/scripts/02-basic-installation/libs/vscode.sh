@@ -36,6 +36,8 @@ install_vscode() {
     code --install-extension yzhang.markdown-all-in-one
 
     code --install-extension jpoissonnier.vscode-styled-components
+    code --install-extension esbenp.prettier-vscode
+    code --install-extension exiasr.hadolint
   } | output_box cat
 
   # configure vscode settings

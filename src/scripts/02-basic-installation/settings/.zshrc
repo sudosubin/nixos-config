@@ -86,6 +86,13 @@ zinit ice wait lucid pick'update.sh'
 zinit light sudosubin/zsh-auto-update
 
 # Plugins > fzf
+typeset -g FZF_DEFAULT_OPTS='
+    --color=dark
+    --color=fg:-1,bg:-1,hl:#98c379
+    --color=fg+:#ffffff,bg+:#282c34,hl+:#98c379
+    --color=info:#e5c07b,prompt:#98c379,pointer:#56b6c2
+    --color=marker:#56b6c2,spinner:#e5c07b,header:#56b6c2
+'
 zinit ice wait lucid pick'shell/key-bindings.zsh' src'shell/completion.zsh'
 zinit light junegunn/fzf
 
