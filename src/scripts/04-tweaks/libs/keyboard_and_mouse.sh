@@ -61,7 +61,7 @@ set_keyboard_and_mouse() {
 
   msg_normal "change scroll direction, cursor speed"
   kwriteconfig5 --file kcminputrc --group Mouse \
-    --key XLbInptNaturalScroll true
+    --key XLbInptNaturalScroll false
   kwriteconfig5 --file kcminputrc --group Mouse \
     --key XLbInptPointerAcceleration 0.6
 }

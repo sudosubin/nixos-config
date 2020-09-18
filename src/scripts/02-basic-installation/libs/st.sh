@@ -43,6 +43,7 @@ install_st() {
   sudo ln -s /usr/share/applications/st.desktop \
     /usr/share/kglobalaccel/st.desktop
 
+  sed -i -e 's/Ctrl+Alt+T//g' ~/.config/kglobalshortcutsrc
   kwriteconfig5 --file kglobalshortcutsrc \
     --group st.desktop \
     --key _k_friendly_name "Launch Terminal"
