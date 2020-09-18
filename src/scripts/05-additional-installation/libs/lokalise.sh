@@ -18,6 +18,7 @@ install_lokalise() {
   msg_step "Install lokalise cli v2"
 
   msg_normal "download from git"
-  output_box curl -sfL https://raw.githubusercontent.com/lokalise/lokalise-cli-2-go/master/install.sh | sh
+  curl -sfL https://raw.githubusercontent.com/lokalise/lokalise-cli-2-go/master/install.sh | sh
   sudo mv "./bin/lokalise2" "/usr/local/bin/lokalise2"
+  rm -rf bin/
 }

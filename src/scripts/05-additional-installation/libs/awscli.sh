@@ -22,7 +22,7 @@ install_awscli() {
   curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
     -o "awscliv2.zip"
 
-  msg_normal "unzip fiels"
+  msg_normal "unzip files"
   silent unzip awscliv2.zip
 
   msg_normal "install"
