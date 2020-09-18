@@ -23,8 +23,10 @@ set_latte() {
   # Remove default panel
   msg_step "Remove default panels"
   sed -i \
-    -e '/./{H;$!d;}' -e 'x;/ActionPlugins/b' \
-    -e '/[9]/b' -e '/ScreenMapping/b' -e d ~/.config/plasma-org.kde.plasma.desktop-appletsrc
+    -e '/./{H;$!d;}' \
+    -e 'x;/ActionPlugins/b' -e '/ScreenMapping/b' \
+    -e '/org.kde.plasma.private.systemtray/b' \
+    -e d ~/.config/plasma-org.kde.plasma.desktop-appletsrc
 
   # Configure latte layout
   msg_step "Configure latte layout"
