@@ -21,7 +21,7 @@ install_delta() {
   # settings
   msg_normal "download deb"
   local download="https://github.com/dandavison/delta/releases/download"
-  local version="0.3.0"
+  local version="0.4.3"
   curl -sL "$download/$version/git-delta_${version}_amd64.deb" \
     -o "delta.deb"
 
