@@ -36,7 +36,7 @@ echo "deb [arch=amd64] https://pkg.surfacelinux.com/debian release main" \
     | sudo tee /etc/apt/sources.list.d/linux-surface.list
 
 # Install
-sudo apt -y install linux-headers-surface linux-image-surface linux-libc-dev-surface surface-ipts-firmware libwacom-surface linux-surface-secureboot-mok
+sudo apt -y install linux-headers-surface linux-image-surface surface-ipts-firmware libwacom-surface iptsd linux-surface-secureboot-mok
 ```
 
 ### Secure notes
