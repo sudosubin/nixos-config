@@ -42,6 +42,15 @@ add_ppa_nimf() {
   sudo add-apt-repository -ny ppa:nemonein/nimf
 }
 
+# github cli
+add_ppa_github_cli() {
+  # Add ppa: github cli
+  msg_step "Add ppa: github cli"
+  sudo apt-key adv --keyserver keyserver.ubuntu.com \
+    --recv-key C99B11DEB97541F0
+  sudo apt-add-repository -ny https://cli.github.com/packages
+}
+
 # chrome
 add_ppa_chrome() {
   current_dir="$(dirname "${BASH_SOURCE[0]}")"
