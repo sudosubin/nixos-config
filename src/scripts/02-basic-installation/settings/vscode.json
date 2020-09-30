@@ -15,6 +15,7 @@
         120
     ],
     "editor.minimap.renderCharacters": false,
+    "editor.semanticHighlighting.enabled": false,
     "workbench.colorTheme": "One Dark Pro",
     "workbench.tree.indent": 16,
     "workbench.startupEditor": "newUntitledFile",
@@ -22,6 +23,9 @@
     "material-icon-theme.activeIconPack": "react_redux",
     "material-icon-theme.hidesExplorerArrows": true,
     "material-icon-theme.showWelcomeMessage": false,
+    "material-icon-theme.files.associations": {
+        "stories.tsx": "storybook"
+    },
     "gitlens.currentLine.format": "${author} • ${date}, ${message}",
     "gitlens.currentLine.dateFormat": "YYYY-MM-DD",
     "gitlens.codeLens.enabled": false,
