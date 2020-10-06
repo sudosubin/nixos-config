@@ -61,20 +61,26 @@
         "files.insertFinalNewline": true
     },
     "[javascript]": {
-        "editor.tabSize": 2
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true
     },
     "[typescript]": {
-        "editor.tabSize": 2
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true
     },
     "[javascriptreact]": {
-        "editor.tabSize": 2
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true
     },
     "[typescriptreact]": {
-        "editor.tabSize": 2
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[html]": {
         "editor.tabSize": 2
     },
+    "eslint.enable": true,
     "customizeUI.font.regular": "SF Pro Text",
     "customizeUI.font.monospace": "FiraMono Nerd Font Mono",
     "customizeUI.stylesheet": {
