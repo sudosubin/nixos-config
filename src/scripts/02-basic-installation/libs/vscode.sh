@@ -23,8 +23,10 @@ install_vscode() {
   {
     code --install-extension zhuangtongfa.Material-theme
     code --install-extension PKief.material-icon-theme
-    # code --install-extension ms-python.python
-    # code --install-extension ms-python.vscode-pylance
+    code --install-extension ms-python.python
+    code --install-extension ms-python.vscode-pylance
+    code --install-extension dbaeumer.vscode-eslint
+    code --install-extension esbenp.prettier-vscode
     code --install-extension njpwerner.autodocstring
     code --install-extension fabiospampinato.vscode-highlight
     code --install-extension timonwong.shellcheck
