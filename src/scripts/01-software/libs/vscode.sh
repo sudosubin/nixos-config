@@ -21,14 +21,8 @@ add_ppa_vscode() {
   msg_step "Add ppa: vscode"
 
   # add apt repository
-  msg_normal "add gpg"
-  curl https://packages.microsoft.com/keys/microsoft.asc \
-    | gpg --dearmor > packages.microsoft.gpg
-  mute sudo apt-key add packages.microsoft.gpg
-  rm -r packages.microsoft.gpg
-
   msg_normal "add apt repository"
-  echo \
-    "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" \
-    | silent sudo tee "/etc/apt/sources.list.d/vscode.list"
+  add_ppa vscode \
+    "https://packages.microsoft.com/keys/microsoft.asc" \
+    "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
 }

@@ -16,7 +16,7 @@ This is a personal KDE setup script. I made this script to set up my laptop and 
 # install git
 sudo apt update
 sudo apt -y upgrade
-sudo apt install git
+sudo apt install git curl wget --no-install-recommends
 
 # git clone
 git clone https://github.com/sudosubin/setup-script.git
@@ -41,8 +41,6 @@ sudo apt -y install linux-headers-surface linux-image-surface surface-ipts-firmw
 
 ### Secure notes
 
-- `rclone conf`
-- `keepassxc db`
 - `pip.conf`
 - `ufw rules`
 

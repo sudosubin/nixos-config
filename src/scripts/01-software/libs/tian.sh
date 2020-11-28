@@ -1,6 +1,6 @@
 #!/bin/bash
 
-install_delta() {
+add_ppa_tian() {
   # Directory
   local current_dir
   local script_dir
@@ -14,18 +14,15 @@ install_delta() {
   source "$app_dir/src/utils/msg.sh"
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
+  # shellcheck source=../../../../src/utils/ppa.sh
+  source "$app_dir/src/utils/ppa.sh"
 
-  # Install delta
-  msg_step "Install delta"
+  # Add ppa: tian
+  msg_step "Add ppa: tian"
 
-  # settings
-  msg_normal "download deb"
-  local download="https://github.com/dandavison/delta/releases/download"
-  local version="0.4.4"
-  curl -sL "$download/$version/git-delta_${version}_amd64.deb" \
-    -o "delta.deb"
-
-  msg_normal "install deb"
-  output_box sudo dpkg -i delta.deb
-  rm -r delta.deb
+  # add apt repository
+  msg_normal "add gpg"
+  add_ppa tian \
+    "https://www.nimfsoft.com/downloads/nimfsoft.asc" \
+    "deb https://www.nimfsoft.com/downloads/debian stable main"
 }

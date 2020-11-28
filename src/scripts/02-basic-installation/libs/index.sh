@@ -11,6 +11,9 @@ source "$script_dir/libs/requirements.sh"
 # shellcheck source=applet-window-appmenu.sh
 source "$script_dir/libs/applet-window-appmenu.sh"
 
+# shellcheck source=applet-window-buttons.sh
+source "$script_dir/libs/applet-window-buttons.sh"
+
 # shellcheck source=asdf.sh
 source "$script_dir/libs/asdf.sh"
 
@@ -32,14 +35,11 @@ source "$script_dir/libs/la-capitaine-icon-theme.sh"
 # shellcheck source=latte.sh
 source "$script_dir/libs/latte.sh"
 
-# shellcheck source=nimf.sh
-source "$script_dir/libs/nimf.sh"
+# shellcheck source=tian.sh
+source "$script_dir/libs/tian.sh"
 
 # shellcheck source=plank.sh
 source "$script_dir/libs/plank.sh"
-
-# shellcheck source=rclone.sh
-source "$script_dir/libs/rclone.sh"
 
 # shellcheck source=st.sh
 source "$script_dir/libs/st.sh"
@@ -49,9 +49,6 @@ source "$script_dir/libs/tmux.sh"
 
 # shellcheck source=ulauncher.sh
 source "$script_dir/libs/ulauncher.sh"
-
-# shellcheck source=vscode.sh
-source "$script_dir/libs/vscode.sh"
 
 # shellcheck source=zsh.sh
 source "$script_dir/libs/zsh.sh"

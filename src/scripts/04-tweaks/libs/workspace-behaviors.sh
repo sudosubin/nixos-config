@@ -24,12 +24,12 @@ set_workspace_behaviors() {
   local replace_pattern="Gtk/PrimaryButtonWarpsSlider 1"
   sed -i -E "s|$search_pattern|$replace_pattern|g" \
     ~/.config/xsettingsd/xsettingsd.conf
-  
+
   # Desktop Effects
   msg_step "Desktop Effects"
   msg_normal "enable wobbly windows"
   kwriteconfig5 --file kwinrc --group Plugins --key wobblywindowsEnabled true
-  msg_normal "enable din screen"
+  msg_normal "enable dim screen"
   kwriteconfig5 --file kwinrc --group Plugins --key kwin4_effect_dimscreenEnabled true
   msg_normal "enable glide"
   kwriteconfig5 --file kwinrc --group Plugins --key glideEnabled true

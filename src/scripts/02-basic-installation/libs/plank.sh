@@ -35,7 +35,7 @@ install_plank() {
     ~/.config/plank/dock1/launchers/org.kde.dolphin.dockitem
 
   msg_normal "copy theme"
-  mkdir -p ~/.local/share/plank/themes/OneWhite
+  mkdir -p ~/.local/share/plank/themes/OneDark
   cp "$script_dir/settings/plank/dock.theme" \
-    ~/.local/share/plank/themes/OneWhite/dock.theme
+    ~/.local/share/plank/themes/OneDark/dock.theme
 }

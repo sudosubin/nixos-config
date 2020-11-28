@@ -68,8 +68,6 @@ set_fonts() {
 
   # download from github repository
   msg_normal "download fonts from github repository"
-  # TODO (sudosubin): remove after test complete
-  rm -rf "$firamono_dir"
   mkdir -p "$firamono_dir"
 
   # shellcheck disable=SC2190
@@ -94,5 +92,4 @@ Fira%20Mono%20$weight%20Nerd%20Font%20Complete%20Mono.otf" \
   mkdir -p ~/.config/fontconfig
   cp "$script_dir/fonts/fonts.conf" \
     "$HOME/.config/fontconfig/fonts.conf"
-
 }

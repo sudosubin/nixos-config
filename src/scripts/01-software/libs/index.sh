@@ -11,6 +11,9 @@ source "$script_dir/libs/insomnia.sh"
 # shellcheck source=jetbrains.sh
 source "$script_dir/libs/jetbrains.sh"
 
+# shellcheck source=tian.sh
+source "$script_dir/libs/tian.sh"
+
 # shellcheck source=vscode.sh
 source "$script_dir/libs/vscode.sh"
 
@@ -19,27 +22,6 @@ add_ppa_ulauncher() {
   # Add ppa: agornostal/ulauncher
   msg_step "Add ppa: agornostal/ulauncher"
   sudo add-apt-repository -ny ppa:agornostal/ulauncher
-}
-
-# applet-window-buttons
-add_ppa_applet_window_buttons() {
-  # Add ppa: krisives/applet-window-buttons
-  msg_step "Add ppa: krisives/applet-window-buttons"
-  sudo add-apt-repository -ny ppa:krisives/applet-window-buttons
-}
-
-# keepassxc
-add_ppa_keepassxc() {
-  # Add ppa: keepassxc
-  msg_step "Add ppa: keepassxc"
-  sudo add-apt-repository -ny ppa:phoerious/keepassxc
-}
-
-# nimf
-add_ppa_nimf() {
-  # Add ppa: nemonein/nimf
-  msg_step "Add ppa: nemonein/nimf"
-  sudo add-apt-repository -ny ppa:nemonein/nimf
 }
 
 # github cli

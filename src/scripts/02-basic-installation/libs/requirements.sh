@@ -20,11 +20,11 @@ install_requirements() {
   output_box sudo apt-get update
 
   # Install via apt-get
-  # - git curl: Basic for script installation
-  # - nimf nimf-libhangul: Basic for Korean input
-  # - latte-dock plank applet-window-buttons: For better appearance
+  # - git curl wget: Basic for script installation
+  # - tian: Basic for Korean input
+  # - latte-dock plank: For better appearance
   # - google-chrome-stable code net-tools fzf ulauncher slack-desktop
-  #   yarn tmux bat zsh fonts-symbola: My personal preference
+  #   yarn tmux bat zsh: My personal preference
   # - cmake make g++ extra-cmake-modules libkdecorations2-dev
   #   libkf5guiaddons-dev libkf5configwidgets-dev
   #   libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev
@@ -34,17 +34,17 @@ install_requirements() {
   #   kinit-dev kwin-dev: Build-deps for kde-hello kwin effects
   # - qtdeclarative5-dev libkf5plasma-dev libsm-dev plasma-workspace-dev
   #   libxcb-randr0-dev libkf5wayland-dev: Build-deps for applet-window-appmenu
+  # - qtbase5-dev libkf5declarative-dev: Build-deps for applet-window-buttons
   # - inkscape x11-apps: Build-deps for capitaine-cursors
-  # - keepassxc xclip rclone: Password managing
   # - resolvconf: network settings
   # - libharfbuzz-dev libxft-dev: Build-deps for st term
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
-    git curl \
-    nimf nimf-libhangul \
-    latte-dock plank applet-window-buttons \
+    git curl wget \
+    tian \
+    latte-dock plank fonts-symbola \
     google-chrome-stable code net-tools fzf ulauncher slack-desktop \
-    yarn tmux bat zsh fonts-symbola \
+    yarn tmux bat zsh \
     cmake make g++ extra-cmake-modules libkdecorations2-dev \
     libkf5guiaddons-dev libkf5configwidgets-dev libtool \
     libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev \
@@ -54,9 +54,8 @@ install_requirements() {
     kinit-dev kwin-dev \
     qtdeclarative5-dev libkf5plasma-dev libsm-dev plasma-workspace-dev \
     libxcb-randr0-dev libkf5wayland-dev \
+    qtbase5-dev libkf5declarative-dev \
     inkscape x11-apps \
-    keepassxc xclip rclone \
     resolvconf \
     libharfbuzz-dev libxft-dev
 }
-

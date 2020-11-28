@@ -31,16 +31,15 @@ scripts_02() {
   # Configure softwares
   msg_heading "Configure softwares"
   install_bat
-  install_nimf
+  install_tian
   install_plank
-  install_rclone
   install_tmux
   install_ulauncher
-  install_vscode
 
   # Build softwares
   msg_heading "Build softwares"
   install_applet_window_appmenu
+  install_applet_window_buttons
   install_capitaine_cursors
   install_la_capitaine_icon_theme
   install_hello

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-install_rclone() {
+install_applet_window_buttons() {
   # Directory
   local current_dir
   local script_dir
@@ -15,9 +15,18 @@ install_rclone() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
-  # Configure rclone
-  msg_step "Configure rclone"
+  # Build applet-window-buttons
+  msg_step "Build psifidotos/applet-window-buttons"
 
-  # msg_normal "TODO"
-  # rclone config
+  msg_normal "download from git"
+  mute git clone https://github.com/psifidotos/applet-window-buttons.git \
+    ./temp-git
+
+  msg_normal "build and install"
+  cd temp-git || exit
+  output_box silent sh install.sh
+  cd ..
+
+  msg_normal "clean up"
+  rm -rf temp-git
 }

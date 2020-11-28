@@ -22,6 +22,11 @@ set_wallpaper() {
   cp -r "$script_dir/wallpapers/background.jpg" \
     ~/.local/share/wallpapers/background.jpg
 
+  # Set lock screen wallpaper
+  kwriteconfig5 --file kscreenlockerrc \
+    --group Greeter --group Wallpaper --group org.kde.image --group General \
+    --key Image "file://$HOME/.local/share/wallpapers/background.jpg"
+
   echo \
     "qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
       var allDesktops = desktops();
@@ -36,9 +41,4 @@ set_wallpaper() {
         );
       }
     '" | bash
-
-  # Set lock screen wallpaper
-  kwriteconfig5 --file kscreenlockerrc \
-    --group Greeter --group Wallpaper --group org.kde.image --group General \
-    --key Image "file://$HOME/.local/share/wallpapers/background.jpg"
 }

@@ -24,7 +24,7 @@ scripts_01() {
 
   msg_step "Change from ubuntu to kakao"
   sudo sed -i -Ee "s|[a-z]{2}.archive.ubuntu.com|archive.ubuntu.com|g" \
-    -e "/^#/!s/archive.ubuntu.com/mirror.kakao.com/" /etc/apt/sources.list
+    -e "s|archive.ubuntu.com|mirror.kakao.com|g" /etc/apt/sources.list
 
   # Update & Upgrade packages
   msg_heading "Update & upgrade packages"
@@ -38,13 +38,12 @@ scripts_01() {
   # Add packages ppa
   msg_heading "Add packages ppa"
 
-  add_ppa_applet_window_buttons
   add_ppa_chrome
   add_ppa_insomnia
   add_ppa_jetbrains
-  add_ppa_nimf
   add_ppa_github_cli
   add_ppa_slack
+  add_ppa_tian
   add_ppa_ulauncher
   add_ppa_vscode
   add_ppa_yarn
@@ -53,7 +52,7 @@ scripts_01() {
   msg_heading "Remove packages"
 
   msg_step "Remove packages"
-  silent sudo apt-get -y remove --purge firefox thunderbird konsole fonts-noto-color-emoji
+  silent sudo apt-get -y remove --purge firefox thunderbird konsole
 
   ## Remove package: finish
   msg_step "Remove package: clean up packages"
