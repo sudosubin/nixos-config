@@ -84,4 +84,7 @@ set_colors() {
   kwriteconfig5 --file kwinrulesrc --group 2 --key wmclassmatch 1
   kwriteconfig5 --file kwinrulesrc --group 2 --key size "800,500"
   kwriteconfig5 --file kwinrulesrc --group 2 --key sizerule 3
+
+  # window rules (override one more time)
+  kwriteconfig5 --file kwinrulesrc --group General --key count 2
 }
