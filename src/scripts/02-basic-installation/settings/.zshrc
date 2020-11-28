@@ -77,6 +77,10 @@ zinit light-mode wait lucid for \
     blockf \
         sudosubin/zsh-poetry
 
+# Plugins > completions (pass otp)
+zinit ice wait lucid blockf pick'pass-otp.bash.completion'
+zinit light tadfisher/pass-otp
+
 # Plugins > asdf
 zinit ice pick'asdf.plugin.zsh' atinit'autoload bashcompinit; bashcompinit' blockf
 zinit light kiurchv/asdf.plugin.zsh
