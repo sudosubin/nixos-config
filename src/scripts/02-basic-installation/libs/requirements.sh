@@ -22,7 +22,7 @@ install_requirements() {
   # Install via apt-get
   # - git curl wget: Basic for script installation
   # - tian: Basic for Korean input
-  # - pass pass-extension-otp: My password manage
+  # - pass pass-extension-otp oathtool xclip: My password manage
   # - latte-dock plank: For better appearance
   # - google-chrome-stable code net-tools fzf ulauncher slack-desktop
   #   yarn tmux bat zsh: My personal preference
@@ -43,7 +43,7 @@ install_requirements() {
   output_box sudo apt-get -y --no-install-recommends install \
     git curl wget \
     tian \
-    pass pass-extension-otp \
+    pass pass-extension-otp oathtool xclip \
     latte-dock plank fonts-symbola \
     google-chrome-stable code net-tools fzf ulauncher slack-desktop \
     yarn tmux bat zsh \
