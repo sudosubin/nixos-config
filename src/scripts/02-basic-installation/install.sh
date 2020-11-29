@@ -25,6 +25,8 @@ scripts_02() {
   install_asdf
   install_delta
   install_latte
+  # installing xft should before st build
+  install_xft
   install_st
   install_zsh
 

@@ -37,7 +37,7 @@ st.color15:      #abb2bf
 
 ! font
 st.font: FiraMono Nerd Font Mono:pixelsize=13:antialias=true:autohint=true;
-st.fontalt0: Symbola:pixelsize=13:antialias=true:autohint=true;
+st.fontalt0: SF Pro Text:pixelsize=13:antialias=true:autohint=true;
 
 ! window
 st.alpha: 1

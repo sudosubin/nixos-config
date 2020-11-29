@@ -39,6 +39,7 @@ install_requirements() {
   # - inkscape x11-apps: Build-deps for capitaine-cursors
   # - resolvconf: network settings
   # - libharfbuzz-dev libxft-dev: Build-deps for st term
+  # - xutils-dev: Build-deps for xft
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     git curl wget \
