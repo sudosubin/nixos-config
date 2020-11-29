@@ -41,6 +41,9 @@ source "$script_dir/libs/tian.sh"
 # shellcheck source=plank.sh
 source "$script_dir/libs/plank.sh"
 
+# shellcheck source=spotify.sh
+source "$script_dir/libs/spotify.sh"
+
 # shellcheck source=st.sh
 source "$script_dir/libs/st.sh"
 

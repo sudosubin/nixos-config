@@ -77,6 +77,23 @@ add_ppa_slack() {
     "deb $slack_repo/debian/ jessie main"
 }
 
+# spotify
+add_ppa_spotify() {
+  current_dir="$(dirname "${BASH_SOURCE[0]}")"
+  script_dir="$(dirname "$current_dir")"
+  app_dir="$(dirname "$(dirname "$(dirname "$script_dir")")")"
+
+  # shellcheck source=../../../../src/utils/ppa.sh
+  source "$app_dir/src/utils/ppa.sh"
+
+  # Add ppa: spotify
+  msg_step "Add ppa: spotify"
+
+  add_ppa spotify \
+    "https://download.spotify.com/debian/pubkey_0D811D58.gpg" \
+    "deb http://repository.spotify.com stable non-free"
+}
+
 # yarn
 add_ppa_yarn() {
   current_dir="$(dirname "${BASH_SOURCE[0]}")"

@@ -62,6 +62,10 @@ zinit light mafredri/zsh-async
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 zinit light romkatv/powerlevel10k
 
+# Paths > spicetify
+export SPICETIFY_INSTALL="$HOME/spicetify-cli"
+export PATH="$SPICETIFY_INSTALL:$PATH"
+
 # Plugins > completions
 typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#808080'
 
@@ -78,7 +82,7 @@ zinit light-mode wait lucid for \
         sudosubin/zsh-poetry
 
 # Plugins > completions (pass otp)
-zinit ice wait lucid blockf pick'pass-otp.bash.completion'
+zinit ice wait lucid pick'pass-otp.bash.completion' blockf
 zinit light tadfisher/pass-otp
 
 # Plugins > asdf

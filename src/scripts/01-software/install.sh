@@ -43,6 +43,7 @@ scripts_01() {
   add_ppa_jetbrains
   add_ppa_github_cli
   add_ppa_slack
+  add_ppa_spotify
   add_ppa_tian
   add_ppa_ulauncher
   add_ppa_vscode

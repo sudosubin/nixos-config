@@ -33,6 +33,7 @@ scripts_02() {
   install_bat
   install_tian
   install_plank
+  install_spotify
   install_tmux
   install_ulauncher
 
