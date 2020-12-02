@@ -29,4 +29,8 @@ install_awscli() {
   silent sudo ./aws/install
   rm -rf aws
   rm -f awscliv2.zip
+
+  msg_normal "set completions"
+  echo "complete -C aws_completer aws" \
+    | silent sudo tee /etc/bash_completion.d/aws_bash_completer
 }
