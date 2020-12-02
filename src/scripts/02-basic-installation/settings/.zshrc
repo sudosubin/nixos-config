@@ -40,7 +40,6 @@ zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
-
 ### Added by Zinit's installer
 source "$HOME/.zinit/bin/zinit.zsh"
 autoload -Uz _zinit
@@ -68,8 +67,9 @@ export PATH="$SPICETIFY_INSTALL:$PATH"
 
 # Plugins > completions
 typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#808080'
+# typeset -g ZSH_BASH_COMPLETIONS_FALLBACK_LAZYLOAD_DISABLE='true'
 
-zinit light-mode wait lucid for \
+zinit light-mode wait lucid nocd for \
     atinit'ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay' \
         zdharma/fast-syntax-highlighting \
     atload'!_zsh_autosuggest_start' \
@@ -77,17 +77,24 @@ zinit light-mode wait lucid for \
     blockf \
         zsh-users/zsh-completions \
     blockf \
+        3v1n0/zsh-bash-completions-fallback \
+    blockf \
         greymd/docker-zsh-completion \
+    blockf \
+        sudosubin/zsh-github-cli \
     blockf \
         sudosubin/zsh-poetry
 
 # Plugins > completions (pass otp)
-zinit ice wait lucid pick'pass-otp.bash.completion' blockf
 zinit light tadfisher/pass-otp
 
 # Plugins > asdf
 zinit ice pick'asdf.plugin.zsh' atinit'autoload bashcompinit; bashcompinit' blockf
 zinit light kiurchv/asdf.plugin.zsh
+
+# Plugins > auto-pair
+zinit ice wait lucid
+zinit light hlissner/zsh-autopair
 
 # Plugins > auto-update
 zinit ice wait lucid pick'update.sh'
