@@ -83,12 +83,15 @@ zinit light-mode wait lucid nocd for \
     blockf \
         sudosubin/zsh-github-cli \
     blockf \
-        sudosubin/zsh-poetry
+        sudosubin/zsh-poetry \
+    blockf \
+        sudosubin/zsh-pipenv
 
 # Plugins > completions (pass otp)
 zinit light tadfisher/pass-otp
 
 # Plugins > asdf
+# typeset -g JAVA_HOME="$HOME/.asdf/plugins/java/set-java-home.zsh"
 zinit ice pick'asdf.plugin.zsh' atinit'autoload bashcompinit; bashcompinit' blockf
 zinit light kiurchv/asdf.plugin.zsh
 
