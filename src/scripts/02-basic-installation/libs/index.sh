@@ -56,5 +56,8 @@ source "$script_dir/libs/ulauncher.sh"
 # shellcheck source=xft.sh
 source "$script_dir/libs/xft.sh"
 
+# shellcheck source=zpl.sh
+source "$script_dir/libs/zpl.sh"
+
 # shellcheck source=zsh.sh
 source "$script_dir/libs/zsh.sh"

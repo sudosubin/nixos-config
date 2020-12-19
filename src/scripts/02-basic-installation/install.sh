@@ -28,6 +28,7 @@ scripts_02() {
   # installing xft should before st build
   install_xft
   install_st
+  install_zpl
   install_zsh
 
   # Configure softwares
