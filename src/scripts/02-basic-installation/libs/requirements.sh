@@ -40,6 +40,7 @@ install_requirements() {
   # - resolvconf: network settings
   # - libharfbuzz-dev libxft-dev: Build-deps for st term
   # - xutils-dev: Build-deps for xft
+  # - gnome-keyring libsecret-1-0: Secret store for vscode store
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     git curl wget \
@@ -60,5 +61,6 @@ install_requirements() {
     qtbase5-dev libkf5declarative-dev \
     inkscape x11-apps \
     resolvconf \
-    libharfbuzz-dev libxft-dev
+    libharfbuzz-dev libxft-dev \
+    gnome-keyring libsecret-1-0
 }
