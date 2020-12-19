@@ -21,7 +21,7 @@ install_requirements() {
 
   # Install via apt-get
   # - git curl wget: Basic for script installation
-  # - tian: Basic for Korean input
+  # - nimf nimf-libhangul: Basic for Korean input
   # - pass pass-extension-otp oathtool xclip: My password manage
   # - latte-dock plank: For better appearance
   # - google-chrome-stable code net-tools fzf ulauncher slack-desktop
@@ -44,7 +44,7 @@ install_requirements() {
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     git curl wget \
-    tian \
+    nimf nimf-libhangul \
     pass pass-extension-otp oathtool xclip \
     latte-dock plank fonts-symbola \
     google-chrome-stable code net-tools fzf ulauncher slack-desktop \

@@ -35,8 +35,8 @@ source "$script_dir/libs/la-capitaine-icon-theme.sh"
 # shellcheck source=latte.sh
 source "$script_dir/libs/latte.sh"
 
-# shellcheck source=tian.sh
-source "$script_dir/libs/tian.sh"
+# shellcheck source=nimf.sh
+source "$script_dir/libs/nimf.sh"
 
 # shellcheck source=plank.sh
 source "$script_dir/libs/plank.sh"
