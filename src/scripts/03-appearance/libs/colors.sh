@@ -63,12 +63,12 @@ set_colors() {
 
   # Set ColorScheme per Application
   kwriteconfig5 --file kwinrulesrc --group 1 --key Description \
-    "Application settings for google-chrome"
+    "Application settings for chromium-browser"
   kwriteconfig5 --file kwinrulesrc --group 1 --key clientmachine \
     "localhost"
   kwriteconfig5 --file kwinrulesrc --group 1 --key clientmachinematch 0
   kwriteconfig5 --file kwinrulesrc --group 1 --key wmclass \
-    "google-chrome"
+    "chromium-browser"
   kwriteconfig5 --file kwinrulesrc --group 1 --key wmclasscomplete false
   kwriteconfig5 --file kwinrulesrc --group 1 --key wmclassmatch 1
   kwriteconfig5 --file kwinrulesrc --group 1 --key decocolorrule 2
