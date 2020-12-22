@@ -24,7 +24,7 @@ install_requirements() {
   # - nimf nimf-libhangul: Basic for Korean input
   # - pass pass-extension-otp oathtool xclip: My password manage
   # - latte-dock plank: For better appearance
-  # - chromium-browser code net-tools fzf ulauncher slack-desktop
+  # - chromium-browser codium net-tools fzf ulauncher slack-desktop
   #   spotify-client yarn tmux bat zsh: My personal preference
   # - cmake make g++ extra-cmake-modules libkdecorations2-dev
   #   libkf5guiaddons-dev libkf5configwidgets-dev
@@ -40,14 +40,13 @@ install_requirements() {
   # - resolvconf: network settings
   # - libharfbuzz-dev libxft-dev: Build-deps for st term
   # - xutils-dev: Build-deps for xft
-  # - gnome-keyring libsecret-1-0: Secret store for vscode store
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     git curl wget \
     nimf nimf-libhangul \
     pass pass-extension-otp oathtool xclip \
     latte-dock plank fonts-symbola \
-    chromium-browser code net-tools fzf ulauncher slack-desktop \
+    chromium-browser codium net-tools fzf ulauncher slack-desktop \
     spotify-client yarn tmux bat zsh \
     cmake make g++ extra-cmake-modules libkdecorations2-dev \
     libkf5guiaddons-dev libkf5configwidgets-dev libtool \
@@ -61,6 +60,5 @@ install_requirements() {
     qtbase5-dev libkf5declarative-dev \
     inkscape x11-apps \
     resolvconf \
-    libharfbuzz-dev libxft-dev \
-    gnome-keyring libsecret-1-0
+    libharfbuzz-dev libxft-dev
 }

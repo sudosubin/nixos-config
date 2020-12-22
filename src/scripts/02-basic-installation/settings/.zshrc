@@ -114,6 +114,9 @@ typeset -g FZF_DEFAULT_OPTS='
 zinit ice wait lucid pick'shell/key-bindings.zsh' src'shell/completion.zsh'
 zinit light junegunn/fzf
 
+# Plugins > code
+alias code=codium
+
 # Plugins > k
 alias l=k
 alias ls='k -a'

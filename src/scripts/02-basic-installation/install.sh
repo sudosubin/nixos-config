@@ -39,6 +39,7 @@ scripts_02() {
   install_spotify
   install_tmux
   install_ulauncher
+  install_vscodium
 
   # Build softwares
   msg_heading "Build softwares"

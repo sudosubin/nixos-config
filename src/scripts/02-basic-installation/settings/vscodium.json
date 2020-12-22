@@ -1,0 +1,114 @@
+{
+    // fonts
+    "markdown.preview.fontFamily": "'SF Pro Text'",
+    "editor.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
+    "debug.console.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
+    "terminal.integrated.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
+    "editor.fontSize": 13,
+    "debug.console.fontSize": 13,
+    "markdown.preview.fontSize": 13,
+    "terminal.integrated.fontSize": 13,
+
+    // theme
+    "oneDarkPro.editorTheme": "oneDarkPro",
+    "workbench.colorTheme": "One Dark Pro",
+    "workbench.iconTheme": "material-icon-theme",
+    "material-icon-theme.hidesExplorerArrows": true,
+    "material-icon-theme.showWelcomeMessage": false,
+    "material-icon-theme.files.associations": {
+        "stories.tsx": "storybook",
+    },
+    "files.associations": {
+        "*.bats": "shellscript",
+    },
+    "customizeUI.stylesheet": {
+        ".search-widget textarea, .find-widget textarea, .search-view .results .match": "font-size: 12px; font-family: monospace !important;",
+        ".editor-container": "-webkit-font-smoothing: antialiased;"
+    },
+
+    // workspace
+    "window.zoomLevel": 0,
+    "explorer.compactFolders": false,
+    "workbench.tree.indent": 16,
+    "workbench.startupEditor": "none",
+    "editor.minimap.enabled": false,
+    "editor.rulers": [
+        80, 120
+    ],
+    "editor.semanticHighlighting.enabled": false,
+    "editor.insertSpaces": true,
+    "editor.smoothScrolling": true,
+    "trailing-spaces.backgroundColor": "rgba(255, 0, 0, 0.2)",
+    "trailing-spaces.borderColor": "rgba(255, 100, 100, 0.1)",
+
+    // git
+    "gitlens.currentLine.format": "${author} • ${date}, ${message}",
+    "gitlens.currentLine.dateFormat": "YYYY-MM-DD",
+    "gitlens.codeLens.enabled": false,
+    "gitlens.statusBar.enabled": false,
+
+    // files
+    "files.watcherExclude": {
+        "**/.git/*/**": true,
+        "**/node_modules/*/**": true,
+        "**/venv/*/**": true,
+        "**/.venv/*/**": true
+    },
+    "files.eol": "\n",
+    "editor.trimAutoWhitespace": true,
+    "files.trimTrailingWhitespace": true,
+
+    // language (python)
+    "python.showStartPage": false,
+    "python.languageServer": "Pylance",
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--max-line-length=120"
+    ],
+    "autoDocstring.generateDocstringOnEnter": true,
+    "autoDocstring.guessTypes": true,
+
+    // language (bash)
+    "shellcheck.customArgs": [
+        "-x"
+    ],
+
+    // languages (etc)
+    "java.configuration.checkProjectSettingsExclusions": false,
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "[python]": {
+        "editor.tabSize": 4,
+        "files.insertFinalNewline": true
+    },
+    "[html]": {
+        "editor.tabSize": 2
+    },
+    "[javascript]": {
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascriptreact]": {
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    // telemetry, etc
+    "telemetry.enableCrashReporter": false,
+    "telemetry.enableTelemetry": false,
+    "gitlens.advanced.telemetry.enabled": false,
+    "extensions.ignoreRecommendations": true,
+    "update.mode": "none",
+}

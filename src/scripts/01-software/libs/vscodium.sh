@@ -1,6 +1,6 @@
 #!/bin/bash
 
-add_ppa_vscode() {
+add_ppa_vscodium() {
   # Directory
   local current_dir
   local script_dir
@@ -17,12 +17,14 @@ add_ppa_vscode() {
   # shellcheck source=../../../../src/utils/ppa.sh
   source "$app_dir/src/utils/ppa.sh"
 
-  # Add ppa: vscode
-  msg_step "Add ppa: vscode"
+  # Add ppa: paulcarroty/vscodium
+  msg_step "Add ppa: paulcarroty/vscodium"
 
   # add apt repository
   msg_normal "add apt repository"
-  add_ppa vscode \
-    "https://packages.microsoft.com/keys/microsoft.asc" \
-    "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
+  vscodium_repo="https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo"
+  vscodium_io="https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo"
+  add_ppa vscodium \
+    "$vscodium_repo/raw/master/pub.gpg" \
+    "deb $vscodium_io/debs/ vscodium main"
 }

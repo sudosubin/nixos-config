@@ -53,6 +53,9 @@ source "$script_dir/libs/tmux.sh"
 # shellcheck source=ulauncher.sh
 source "$script_dir/libs/ulauncher.sh"
 
+# shellcheck source=vscodium.sh
+source "$script_dir/libs/vscodium.sh"
+
 # shellcheck source=xft.sh
 source "$script_dir/libs/xft.sh"
 

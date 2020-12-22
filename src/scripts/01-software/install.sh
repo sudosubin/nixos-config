@@ -46,7 +46,7 @@ scripts_01() {
   add_ppa_slack
   add_ppa_spotify
   add_ppa_ulauncher
-  add_ppa_vscode
+  add_ppa_vscodium
   add_ppa_yarn
 
   # Remove packages
