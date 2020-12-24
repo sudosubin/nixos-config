@@ -141,3 +141,8 @@ activate() {
         venv_path="$(readlink -f "$venv_path"/..)"
     done
 }
+
+# Functions > aws-mfa
+aws-mfa() {
+    awsmfa --token-code $(pass otp aws);
+}

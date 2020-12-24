@@ -19,6 +19,7 @@
         "stories.tsx": "storybook",
     },
     "files.associations": {
+        ".dockerignore": "ignore",
         "*.bats": "shellscript",
     },
     "customizeUI.stylesheet": {
@@ -60,7 +61,6 @@
 
     // language (python)
     "python.showStartPage": false,
-    "python.languageServer": "Pylance",
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
     "python.linting.flake8Args": [

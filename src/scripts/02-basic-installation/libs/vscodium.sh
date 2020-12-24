@@ -28,8 +28,7 @@ install_vscodium() {
 
     # language (python)
     codium --install-extension ms-python.python
-    codium --install-extension ms-python.vscode-pylance
-    codium --install-extension njpwerner.autodocstring
+    codium --install-extension ms-pyright.pyright
 
     # language (javascript)
     codium --install-extension dbaeumer.vscode-eslint
