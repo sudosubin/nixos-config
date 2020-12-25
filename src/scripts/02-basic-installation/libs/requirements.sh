@@ -24,8 +24,8 @@ install_requirements() {
   # - nimf nimf-libhangul: Basic for Korean input
   # - pass pass-extension-otp oathtool xclip: My password manage
   # - latte-dock plank: For better appearance
-  # - chromium-browser codium net-tools fzf ulauncher slack-desktop
-  #   spotify-client yarn tmux bat zsh: My personal preference
+  # - aws-rotate-key chromium-browser codium net-tools fzf ulauncher
+  #   slack-desktop spotify-client yarn tmux bat zsh: My personal preference
   # - cmake make g++ extra-cmake-modules libkdecorations2-dev
   #   libkf5guiaddons-dev libkf5configwidgets-dev
   #   libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev
@@ -46,8 +46,8 @@ install_requirements() {
     nimf nimf-libhangul \
     pass pass-extension-otp oathtool xclip \
     latte-dock plank fonts-symbola \
-    chromium-browser codium net-tools fzf ulauncher slack-desktop \
-    spotify-client yarn tmux bat zsh \
+    aws-rotate-key chromium-browser codium net-tools fzf ulauncher \
+    slack-desktop spotify-client yarn tmux bat zsh \
     cmake make g++ extra-cmake-modules libkdecorations2-dev \
     libkf5guiaddons-dev libkf5configwidgets-dev libtool \
     libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev \

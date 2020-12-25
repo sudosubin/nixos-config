@@ -146,3 +146,8 @@ activate() {
 aws-mfa() {
     awsmfa --token-code $(pass otp aws);
 }
+
+# Functions > aws-rotate
+aws-rotate() {
+    echo "$(pass otp aws)\ny" | aws-rotate-key --profile identity -mfa
+}
