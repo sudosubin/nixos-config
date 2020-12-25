@@ -22,33 +22,33 @@ install_vscodium() {
   msg_normal "install vscodium extensions (takes long time)"
   {
     # theme
-    codium --install-extension zhuangtongfa.Material-theme
-    codium --install-extension PKief.material-icon-theme
-    codium --install-extension iocave.customize-ui
+    timeout 10 codium --install-extension zhuangtongfa.Material-theme
+    timeout 10 codium --install-extension PKief.material-icon-theme
+    timeout 10 codium --install-extension iocave.customize-ui
 
     # language (python)
-    codium --install-extension ms-python.python
-    codium --install-extension ms-pyright.pyright
+    timeout 10 codium --install-extension ms-python.python
+    timeout 10 codium --install-extension ms-pyright.pyright
 
     # language (javascript)
-    codium --install-extension dbaeumer.vscode-eslint
-    codium --install-extension esbenp.prettier-vscode
-    codium --install-extension jpoissonnier.vscode-styled-components
+    timeout 10 codium --install-extension dbaeumer.vscode-eslint
+    timeout 10 codium --install-extension esbenp.prettier-vscode
+    timeout 10 codium --install-extension jpoissonnier.vscode-styled-components
 
     # language (java)
-    codium --install-extension redhat.java
+    timeout 10 codium --install-extension redhat.java
 
     # language (bash)
-    codium --install-extension timonwong.shellcheck
-    codium --install-extension exiasr.hadolint
+    timeout 10 codium --install-extension timonwong.shellcheck
+    timeout 10 codium --install-extension exiasr.hadolint
 
     # language (etc)
-    codium --install-extension bungcip.better-toml
+    timeout 10 codium --install-extension bungcip.better-toml
 
     # etc
-    codium --install-extension eamodio.gitlens
-    codium --install-extension shardulm94.trailing-spaces
-    codium --install-extension yzhang.markdown-all-in-one
+    timeout 10 codium --install-extension eamodio.gitlens
+    timeout 10 codium --install-extension shardulm94.trailing-spaces
+    timeout 10 codium --install-extension yzhang.markdown-all-in-one
   } | output_box cat
 
   # configure vscodium settings
