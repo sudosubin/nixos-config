@@ -149,5 +149,5 @@ aws-mfa() {
 
 # Functions > aws-rotate
 aws-rotate() {
-    echo "$(pass otp aws)\ny" | aws-rotate-key --profile identity -mfa
+    pass otp aws | aws-rotate-key --profile identity -mfa -y
 }
