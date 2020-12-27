@@ -10,11 +10,13 @@ update_chromium_exec() {
     local dark_mode="--force-dark-mode"
     local replace_pattern="& $flags $dark_mode"
 
-    sudo sed -i.bak "/$skip_pattern/b; s/$search_pattern/$replace_pattern/g" \
+    sudo sed -i -Ee "/$skip_pattern/b; s/$search_pattern/$replace_pattern/g" \
       /usr/share/applications/chromium-browser.desktop
 
-    sudo rm -r /usr/share/applications/chromium-browser.desktop.bak
-    echo "chromium exec was updated."
+    sudo sed -i -Ee "/$skip_pattern/b; s/$search_pattern/$replace_pattern/g" \
+      /usr/share/applications/slack.desktop
+
+    echo "chromium, slack exec was updated."
   fi
 }
 
