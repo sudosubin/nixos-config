@@ -34,6 +34,10 @@ install_la_capitaine_icon_theme() {
   mkdir -p ~/.local/share/icons
   cp -r temp-git ~/.local/share/icons/la-capitaine-icon-theme
 
+  # fix inherits theme
+  sed -i -Ee "s|^Inherits=.*|Inherits=breeze|g" \
+    ~/.local/share/icons/la-capitaine-icon-theme/index.theme
+
   # clean up
   msg_normal "clean up"
   rm -rf temp-git
