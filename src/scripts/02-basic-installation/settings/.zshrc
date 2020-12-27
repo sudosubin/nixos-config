@@ -2,11 +2,10 @@
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
 if [[ -r "$HOME/.cache/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "$HOME/.cache/p10k-instant-prompt-${(%):-%n}.zsh"
+    source "$HOME/.cache/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
 # Set up the prompt
-
 autoload -Uz promptinit
 promptinit
 
@@ -59,6 +58,7 @@ zinit light mafredri/zsh-async
 
 # Theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+zinit ice depth=1
 zinit light romkatv/powerlevel10k
 
 # Paths > spicetify
@@ -87,7 +87,12 @@ zinit light-mode wait lucid nocd for \
     blockf \
         sudosubin/zsh-pipenv
 
+# Plugins > completions(aws-cli)
+zinit ice lucid
+zinit snippet https://github.com/aws/aws-cli/blob/v2/bin/aws_zsh_completer.sh
+
 # Plugins > completions (pass otp)
+zinit ice wait lucid
 zinit light tadfisher/pass-otp
 
 # Plugins > asdf
@@ -140,14 +145,4 @@ activate() {
         fi
         venv_path="$(readlink -f "$venv_path"/..)"
     done
-}
-
-# Functions > aws-mfa
-aws-mfa() {
-    awsmfa --token-code $(pass otp aws);
-}
-
-# Functions > aws-rotate
-aws-rotate() {
-    pass otp aws | aws-rotate-key --profile identity -mfa -y
 }

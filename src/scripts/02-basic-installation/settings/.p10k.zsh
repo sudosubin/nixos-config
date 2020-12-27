@@ -34,9 +34,10 @@
     # =========================[ Line #1 ]=========================
     dir                     # current directory
     vcs                     # git status
-    asdf                    # asdf version manager (https://github.com/asdf-vm/asdf)
-    virtualenv              # python virtual environment (https://docs.python.org/3/library/venv.html)
-    package                 # name@version from package.json (https://docs.npmjs.com/files/package.json)
+    asdf                    # asdf version manager
+    virtualenv              # python virtual environment
+    package                 # name@version from package.json
+    aws                     # aws profile
     proxy                   # system-wide http/https/ftp proxy
     command_execution_time  # duration of the last command
     # =========================[ Line #2 ]=========================
@@ -234,7 +235,7 @@
   typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=$red
   typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=$red
 
-  ###############[ asdf: asdf version manager (https://github.com/asdf-vm/asdf) ]###############
+  ###############[ asdf: asdf version manager ]###############
   # Default asdf color. Only used to display tools for which there is no color override (see below).
   typeset -g POWERLEVEL9K_ASDF_FOREGROUND=$yellow
   typeset -g POWERLEVEL9K_ASDF_SOURCES=(shell local global)
@@ -297,7 +298,7 @@
   # Haskell version from asdf.
   typeset -g POWERLEVEL9K_ASDF_HASKELL_FOREGROUND=172
 
-  ###[ virtualenv: python virtual environment (https://docs.python.org/3/library/venv.html) ]###
+  ###[ virtualenv: python virtual environment ]###
   # Python virtual environment color.
   typeset -g POWERLEVEL9K_VIRTUALENV_FOREGROUND=$blue
   # Don't show Python version next to the virtual environment name.
@@ -307,9 +308,13 @@
   # Custom icon.
   typeset -g POWERLEVEL9K_VIRTUALENV_VISUAL_IDENTIFIER_EXPANSION=
 
-  ###[ package: name@version from package.json (https://docs.npmjs.com/files/package.json) ]####
+  ###[ package: name@version from package.json ]####
   # Package color.
   typeset -g POWERLEVEL9K_PACKAGE_FOREGROUND=$yellow
+
+  ###[ aws: aws profile ]####
+  typeset -g POWERLEVEL9K_AWS_SHOW_ON_COMMAND="aws*|awless|terraform|pulumi|terragrunt"
+  typeset -g POWERLEVEL9K_AWS_FOREGROUND=$yellow
 
   #########################[ proxy: system-wide http/https/ftp proxy ]##########################
   # Proxy color.
