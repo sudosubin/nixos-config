@@ -17,13 +17,6 @@ source "$script_dir/libs/jetbrains.sh"
 # shellcheck source=vscodium.sh
 source "$script_dir/libs/vscodium.sh"
 
-# aws-rotate-key
-add_ppa_aws_rotate_key() {
-  # Add ppa: agornostal/ulauncher
-  msg_step "Add ppa: stefansundin/aws-rotate-key"
-  sudo add-apt-repository -ny ppa:stefansundin/aws-rotate-key
-}
-
 # ulauncher
 add_ppa_ulauncher() {
   # Add ppa: agornostal/ulauncher

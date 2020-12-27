@@ -61,10 +61,6 @@ zinit light mafredri/zsh-async
 zinit ice depth=1
 zinit light romkatv/powerlevel10k
 
-# Paths > spicetify
-export SPICETIFY_INSTALL="$HOME/spicetify-cli"
-export PATH="$SPICETIFY_INSTALL:$PATH"
-
 # Plugins > completions
 typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#808080'
 # typeset -g ZSH_BASH_COMPLETIONS_FALLBACK_LAZYLOAD_DISABLE='true'
@@ -87,17 +83,19 @@ zinit light-mode wait lucid nocd for \
     blockf \
         sudosubin/zsh-pipenv
 
-# Plugins > completions(aws-cli)
-zinit ice lucid
+# Plugins > completions (aws-cli)
+zinit ice wait lucid atload'zicdreplay'
 zinit snippet https://github.com/aws/aws-cli/blob/v2/bin/aws_zsh_completer.sh
 
 # Plugins > completions (pass otp)
 zinit ice wait lucid
 zinit light tadfisher/pass-otp
 
-# Plugins > asdf
+# Plugins > completions (asdf)
 # typeset -g JAVA_HOME="$HOME/.asdf/plugins/java/set-java-home.zsh"
-zinit ice pick'asdf.plugin.zsh' atinit'autoload bashcompinit; bashcompinit' blockf
+zinit ice wait lucid pick'asdf.plugin.zsh' \
+    atinit'autoload bashcompinit; bashcompinit' \
+    atload'zicdreplay' blockf
 zinit light kiurchv/asdf.plugin.zsh
 
 # Plugins > auto-pair
@@ -119,9 +117,6 @@ typeset -g FZF_DEFAULT_OPTS='
 zinit ice wait lucid pick'shell/key-bindings.zsh' src'shell/completion.zsh'
 zinit light junegunn/fzf
 
-# Plugins > code
-alias code=codium
-
 # Plugins > k
 alias l=k
 alias ls='k -a'
@@ -130,6 +125,13 @@ zinit light supercrabtree/k
 
 # Softwares > bat
 alias bat=batcat
+
+# Softwares > code
+alias code=codium
+
+# Paths > spicetify
+export SPICETIFY_INSTALL="$HOME/spicetify-cli"
+export PATH="$SPICETIFY_INSTALL:$PATH"
 
 # Functions > activate-virtualenv
 activate() {
