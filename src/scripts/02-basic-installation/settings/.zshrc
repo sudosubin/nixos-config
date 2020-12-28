@@ -1,6 +1,4 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
+# Powerlevel10k instant prompt.
 if [[ -r "$HOME/.cache/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
     source "$HOME/.cache/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
@@ -135,16 +133,16 @@ export PATH="$SPICETIFY_INSTALL:$PATH"
 
 # Functions > activate-virtualenv
 activate() {
-    local venv_path
-    venv_path=$(pwd)
+    local venv_path;
+    venv_path=$(pwd);
 
     while [[ $venv_path != "$HOME" ]]; do
-        if [[ -f "$venv_path/venv/bin/activate" ]]; then
+        if [[ -f "$venv_path/.venv/bin/activate" ]]; then
             # shellcheck disable=SC1090
-            source "$venv_path/venv/bin/activate"
-            export OPENSSL_CONF="$HOME/.ssl/openssl.cnf"
-            break
+            source "$venv_path/.venv/bin/activate";
+            export OPENSSL_CONF="$HOME/.ssl/openssl.cnf";
+            break;
         fi
-        venv_path="$(readlink -f "$venv_path"/..)"
+        venv_path="$(readlink -f "$venv_path"/..)";
     done
 }

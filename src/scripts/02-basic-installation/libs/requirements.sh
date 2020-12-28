@@ -60,5 +60,6 @@ install_requirements() {
     qtbase5-dev libkf5declarative-dev \
     inkscape x11-apps \
     resolvconf \
-    libharfbuzz-dev libxft-dev
+    libharfbuzz-dev libxft-dev \
+    xutils-dev
 }
