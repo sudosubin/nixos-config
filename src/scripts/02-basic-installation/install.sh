@@ -23,7 +23,6 @@ scripts_02() {
   msg_heading "Install softwares"
   install_requirements
   install_asdf
-  install_delta
   install_latte
   # installing xft should before st build
   install_xft
