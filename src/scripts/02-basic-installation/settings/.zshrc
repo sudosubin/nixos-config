@@ -73,8 +73,6 @@ zinit light-mode wait lucid nocd for \
     blockf \
         3v1n0/zsh-bash-completions-fallback \
     blockf \
-        greymd/docker-zsh-completion \
-    blockf \
         sudosubin/zsh-github-cli \
     blockf \
         sudosubin/zsh-poetry \
@@ -90,7 +88,8 @@ zinit ice wait lucid
 zinit light tadfisher/pass-otp
 
 # Plugins > completions (asdf)
-# typeset -g JAVA_HOME="$HOME/.asdf/plugins/java/set-java-home.zsh"
+typeset -g JAVA_HOME="/home/sudosubin/.asdf/installs/java/openjdk-15.0.1"
+# source "$HOME/.asdf/plugins/java/set-java-home.zsh"
 zinit ice wait lucid pick'asdf.plugin.zsh' \
     atinit'autoload bashcompinit; bashcompinit' \
     atload'zicdreplay' blockf
@@ -121,11 +120,27 @@ alias ls='k -a'
 zinit ice wait lucid pick'k.sh'
 zinit light supercrabtree/k
 
+# Softwares > aws-vault
+zinit ice as'program' from'gh-r' mv'aws-vault* -> aws-vault'
+zinit light 99designs/aws-vault
+
 # Softwares > bat
 alias bat=batcat
 
 # Softwares > code
 alias code=codium
+
+# Softwares > delta
+zinit ice as'program' from'gh-r' mv'delta* -> delta' pick'delta/delta'
+zinit light dandavison/delta
+
+# Softwares > hadolint
+zinit ice as'program' from'gh-r' mv'hadolint* -> hadolint'
+zinit light hadolint/hadolint
+
+# Softwares > lokalise2
+zinit ice as'program' from'gh-r'
+zinit light lokalise/lokalise-cli-2-go
 
 # Paths > spicetify
 export SPICETIFY_INSTALL="$HOME/spicetify-cli"
