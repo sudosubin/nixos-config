@@ -50,10 +50,6 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   msg_heading "Install git"
   install_git
 
-  # Install lokalise
-  msg_heading "Install lokalise"
-  install_lokalise
-
   # Install poetry
   msg_heading "Install poetry"
   install_poetry
