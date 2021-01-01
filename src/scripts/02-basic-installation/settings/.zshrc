@@ -83,6 +83,14 @@ zinit light-mode wait lucid nocd for \
 zinit ice wait lucid atload'zicdreplay'
 zinit snippet https://github.com/aws/aws-cli/blob/v2/bin/aws_zsh_completer.sh
 
+# Plugins > completions (aws-vault)
+typeset -x AWS_VAULT_BACKEND="pass"
+typeset -x AWS_VAULT_PROMPT="pass"
+typeset -x AWS_VAULT_PASS_PREFIX="aws-vault"
+typeset -x PASS_OATH_CREDENTIAL_NAME="aws/mathpresso"
+zinit ice wait lucid
+zinit snippet https://github.com/99designs/aws-vault/blob/master/contrib/completions/zsh/aws-vault.zsh
+
 # Plugins > completions (pass otp)
 zinit ice wait lucid
 zinit light tadfisher/pass-otp

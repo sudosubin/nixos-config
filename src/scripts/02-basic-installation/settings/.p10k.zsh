@@ -313,7 +313,6 @@
   typeset -g POWERLEVEL9K_PACKAGE_FOREGROUND=$yellow
 
   ###[ aws: aws profile ]####
-  typeset -g POWERLEVEL9K_AWS_SHOW_ON_COMMAND="aws*|awless|terraform|pulumi|terragrunt"
   typeset -g POWERLEVEL9K_AWS_FOREGROUND=$yellow
 
   #########################[ proxy: system-wide http/https/ftp proxy ]##########################
