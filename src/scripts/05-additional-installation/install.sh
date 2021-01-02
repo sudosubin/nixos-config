@@ -28,7 +28,7 @@ scripts_05() {
     build-essential libssl-dev zlib1g-dev libbz2-dev libjpeg8-dev \
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
     libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl \
-    libmysqlclient-dev libpq-dev \
+    libmysqlclient-dev libpq-dev python3-venv \
     libcurl4-openssl-dev libssl-dev libaec-dev \
     dirmngr gpg \
     docker.io docker-compose redis-server insomnia shellcheck jq git-flow \
