@@ -50,6 +50,10 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   msg_heading "Install poetry"
   install_poetry
 
+  # Install dotfiles
+  git clone --bare https://github.com/sudosubin/dotfiles.git ~/.cfg
+  git --git-dir="$HOME/.cfg/" --work-tree="$HOME" checkout -f
+
   # Change max fs watch
   msg_heading "Change max fs watch limit"
   echo "fs.inotify.max_user_watches=524288" \
