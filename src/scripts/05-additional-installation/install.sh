@@ -72,10 +72,4 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   # Change zprofile
   msg_heading "Change zprofile"
   cp "$settings_dir/.zprofile" "$HOME/.zprofile"
-
-  # Change bpython config
-  msg_heading "Change bpython config"
-  mkdir -p "$HOME/.config/bpython"
-  cp "$settings_dir/bpython/config" "$HOME/.config/bpython/config"
-  cp "$settings_dir/bpython/base16.theme" "$HOME/.config/bpython/base16.theme"
 }
