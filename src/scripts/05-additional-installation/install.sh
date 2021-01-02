@@ -63,9 +63,4 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   msg_heading "Change pip sources"
   mkdir -p "$HOME/.config/pip"
   cp "$settings_dir/pip.conf" "$HOME/.config/pip/pip.conf"
-
-  # Change openssl config
-  msg_heading "Change openssl config (TLS)"
-  mkdir -p "$HOME/.ssl"
-  cp "$settings_dir/openssl.cnf" "$HOME/.ssl/openssl.cnf"
 }
