@@ -46,10 +46,6 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   msg_heading "Install asdf-vm plugins"
   install_asdf
 
-  # Install git
-  msg_heading "Install git"
-  install_git
-
   # Install poetry
   msg_heading "Install poetry"
   install_poetry
