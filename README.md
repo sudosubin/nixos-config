@@ -35,6 +35,10 @@ echo "deb [arch=amd64] https://pkg.surfacelinux.com/debian release main" \
 sudo apt -y install linux-headers-surface linux-image-surface surface-ipts-firmware libwacom-surface iptsd linux-surface-secureboot-mok
 ```
 
+## Sources
+
+- Wallpaper: Never Settle Wallpapers
+
 ## Contribute
 
 It is a personal script, so some requests might not be admitted. (eg. Changing shortcuts, themes, etc.)
@@ -42,6 +46,6 @@ It is a personal script, so some requests might not be admitted. (eg. Changing s
 But better syntax, comments, or enhancement of performance are all welcomed. Feel free to make a pull request, or fork
 this project.
 
-## Sources
+## License
 
-- Wallpaper: Never Settle Wallpapers
+Setup Script is [MIT Licensed](./LICENSE).
