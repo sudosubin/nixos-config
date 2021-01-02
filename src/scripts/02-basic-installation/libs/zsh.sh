@@ -28,10 +28,6 @@ install_zsh() {
   chsh -s "$(command -v zsh)"
   sudo sed -iE "s/$pam_sufficient/$pam_required/g" /etc/pam.d/chsh
 
-  # install zinit
-  msg_normal "install zinit from git"
-  mute git clone https://github.com/zdharma/zinit.git ~/.zinit/bin
-
   # source etc profile
   msg_normal "source etc system profile (for snap)"
   echo "emulate sh -c 'source /etc/profile'" | silent sudo tee -a /etc/zsh/zprofile
