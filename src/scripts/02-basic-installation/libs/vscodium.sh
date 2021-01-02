@@ -51,8 +51,4 @@ install_vscodium() {
     timeout 10 codium --install-extension shardulm94.trailing-spaces
     timeout 10 codium --install-extension yzhang.markdown-all-in-one
   } | output_box cat
-
-  # configure vscodium settings
-  msg_normal "configure vscodium settings"
-  cp "$script_dir/settings/vscodium.json" ~/.config/VSCodium/User/settings.json
 }

@@ -32,7 +32,6 @@ scripts_02() {
 
   # Configure softwares
   msg_heading "Configure softwares"
-  install_bat
   install_nimf
   install_plank
   install_spotify

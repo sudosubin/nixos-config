@@ -20,6 +20,6 @@ install_poetry() {
   msg_normal "installaing"
   {
     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py \
-      | python3
+      | /usr/bin/python3
   } | output_box cat
 }

@@ -27,9 +27,6 @@ install_st() {
   cd ..
   rm -rf temp-git
 
-  msg_normal "copy settings to local"
-  cp "$script_dir/settings/.Xresources" ~/.Xresources
-
   msg_normal "copy application desktop"
   sudo cp "$script_dir/settings/st.desktop" \
     "/usr/share/applications/st.desktop"

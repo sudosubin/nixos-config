@@ -28,7 +28,7 @@ scripts_05() {
     build-essential libssl-dev zlib1g-dev libbz2-dev libjpeg8-dev \
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
     libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl \
-    libmysqlclient-dev libpq-dev \
+    libmysqlclient-dev libpq-dev python3-venv \
     libcurl4-openssl-dev libssl-dev libaec-dev \
     dirmngr gpg \
     docker.io docker-compose redis-server insomnia shellcheck jq git-flow \
@@ -46,36 +46,16 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   msg_heading "Install asdf-vm plugins"
   install_asdf
 
-  # Install git
-  msg_heading "Install git"
-  install_git
-
   # Install poetry
   msg_heading "Install poetry"
   install_poetry
+
+  # Install dotfiles
+  git clone --bare https://github.com/sudosubin/dotfiles.git ~/.cfg
+  git --git-dir="$HOME/.cfg/" --work-tree="$HOME" checkout -f
 
   # Change max fs watch
   msg_heading "Change max fs watch limit"
   echo "fs.inotify.max_user_watches=524288" \
     | silent sudo tee -a /etc/sysctl.conf
-
-  # Change pip sources
-  msg_heading "Change pip sources"
-  mkdir -p "$HOME/.config/pip"
-  cp "$settings_dir/pip.conf" "$HOME/.config/pip/pip.conf"
-
-  # Change openssl config
-  msg_heading "Change openssl config (TLS)"
-  mkdir -p "$HOME/.ssl"
-  cp "$settings_dir/openssl.cnf" "$HOME/.ssl/openssl.cnf"
-
-  # Change zprofile
-  msg_heading "Change zprofile"
-  cp "$settings_dir/.zprofile" "$HOME/.zprofile"
-
-  # Change bpython config
-  msg_heading "Change bpython config"
-  mkdir -p "$HOME/.config/bpython"
-  cp "$settings_dir/bpython/config" "$HOME/.config/bpython/config"
-  cp "$settings_dir/bpython/base16.theme" "$HOME/.config/bpython/base16.theme"
 }

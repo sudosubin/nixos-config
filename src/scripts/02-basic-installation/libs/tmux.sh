@@ -21,7 +21,4 @@ install_tmux() {
   msg_normal "install tpm"
   mute git clone https://github.com/tmux-plugins/tpm \
     ~/.tmux/plugins/tpm
-
-  msg_normal "copy settings"
-  cp "$script_dir/settings/.tmux.conf" "$HOME/.tmux.conf"
 }

@@ -4,11 +4,7 @@ This is a personal KDE setup script. I made this script to set up my laptop and 
 
 ## Requires
 
-- First boot, with Kubuntu 20.04 LTS
-
-## Sources
-
-- Wallpaper: Never Settle Wallpapers
+- First boot, with Kubuntu 20.04.1 LTS
 
 ## Installation
 
@@ -39,11 +35,9 @@ echo "deb [arch=amd64] https://pkg.surfacelinux.com/debian release main" \
 sudo apt -y install linux-headers-surface linux-image-surface surface-ipts-firmware libwacom-surface iptsd linux-surface-secureboot-mok
 ```
 
-### Secure notes
+## Sources
 
-- `pip.conf`
-- `ufw rules`
-
+- Wallpaper: Never Settle Wallpapers
 
 ## Contribute
 
@@ -51,3 +45,7 @@ It is a personal script, so some requests might not be admitted. (eg. Changing s
 
 But better syntax, comments, or enhancement of performance are all welcomed. Feel free to make a pull request, or fork
 this project.
+
+## License
+
+Setup Script is [MIT Licensed](./LICENSE).
