@@ -58,9 +58,4 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   msg_heading "Change max fs watch limit"
   echo "fs.inotify.max_user_watches=524288" \
     | silent sudo tee -a /etc/sysctl.conf
-
-  # Change pip sources
-  msg_heading "Change pip sources"
-  mkdir -p "$HOME/.config/pip"
-  cp "$settings_dir/pip.conf" "$HOME/.config/pip/pip.conf"
 }
