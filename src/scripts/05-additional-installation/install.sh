@@ -68,8 +68,4 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   msg_heading "Change openssl config (TLS)"
   mkdir -p "$HOME/.ssl"
   cp "$settings_dir/openssl.cnf" "$HOME/.ssl/openssl.cnf"
-
-  # Change zprofile
-  msg_heading "Change zprofile"
-  cp "$settings_dir/.zprofile" "$HOME/.zprofile"
 }
