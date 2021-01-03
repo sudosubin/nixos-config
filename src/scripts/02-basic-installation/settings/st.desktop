@@ -1,11 +1,11 @@
 [Desktop Entry]
 Name=Terminal
 Comment=Suckless terminal emulator for X
-Icon=terminal
-Exec=st
-Terminal=false
-Type=Application
-Encoding=UTF-8
-Icon=utilities-terminal
-Categories=System;TerminalEmulator;
 Keywords=shell;prompt;command;commandline;cmd;
+Exec=st
+Icon=utilities-terminal
+Type=Application
+Categories=System;TerminalEmulator;
+StartupNotify=true
+Terminal=false
+Encoding=UTF-8
