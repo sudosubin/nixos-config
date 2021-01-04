@@ -51,4 +51,7 @@ install_vscodium() {
     timeout 10 codium --install-extension shardulm94.trailing-spaces
     timeout 10 codium --install-extension yzhang.markdown-all-in-one
   } | output_box cat
+
+  # remove cached directory
+  rm -rf ~/.config/VSCodium/CachedExtensionVSIXs
 }
