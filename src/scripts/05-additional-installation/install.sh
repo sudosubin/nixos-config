@@ -41,8 +41,9 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   # Install dotfiles
   git clone --bare https://github.com/sudosubin/dotfiles.git ~/.cfg
   git --git-dir="$HOME/.cfg/" --work-tree="$HOME" checkout -f
-  git --git-dir="$HOME/.cfg/" --work-tree="$HOME" \
-    submodule update --init --recursive
+  git --git-dir="$HOME/.cfg/" --work-tree="$HOME" submodule update --init
+  git --git-dir="$HOME/.cfg/" --work-tree="$HOME" submodule foreach -q \
+    --recursive 'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)'
 
   # Install AWS CLI
   msg_heading "Install AWS CLI"

@@ -11,14 +11,5 @@ source "$script_dir/libs/asdf.sh"
 # shellcheck source=awscli.sh
 source "$script_dir/libs/awscli.sh"
 
-# shellcheck source=git.sh
-source "$script_dir/libs/git.sh"
-
-# shellcheck source=hadolint.sh
-source "$script_dir/libs/hadolint.sh"
-
-# shellcheck source=lokalise.sh
-source "$script_dir/libs/lokalise.sh"
-
 # shellcheck source=poetry.sh
 source "$script_dir/libs/poetry.sh"

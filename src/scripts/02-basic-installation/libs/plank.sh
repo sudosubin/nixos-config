@@ -27,8 +27,8 @@ install_plank() {
 
   msg_normal "copy pinned items"
   mkdir -p ~/.config/plank/dock1/launchers
-  cp "$script_dir/settings/plank/google-chrome.dockitem" \
-    ~/.config/plank/dock1/launchers/google-chrome.dockitem
+  cp "$script_dir/settings/plank/chromium-browser.dockitem" \
+    ~/.config/plank/dock1/launchers/chromium-browser.dockitem
   cp "$script_dir/settings/plank/st.dockitem" \
     ~/.config/plank/dock1/launchers/st.dockitem
   cp "$script_dir/settings/plank/org.kde.dolphin.dockitem" \

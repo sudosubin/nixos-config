@@ -45,7 +45,6 @@ install_vscodium() {
 
     # language (etc)
     timeout 10 codium --install-extension bungcip.better-toml
-    timeout 10 codium --install-extension aaron-bond.better-comments
 
     # etc
     timeout 10 codium --install-extension eamodio.gitlens
