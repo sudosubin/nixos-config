@@ -8,9 +8,6 @@ app_dir="$(dirname "$(dirname "$(dirname "$script_dir")")")"
 # shellcheck source=keyboard_and_mouse.sh
 source "$script_dir/libs/keyboard_and_mouse.sh"
 
-# shellcheck source=network.sh
-source "$script_dir/libs/network.sh"
-
 # shellcheck source=plasma-etc.sh
 source "$script_dir/libs/plasma-etc.sh"
 
