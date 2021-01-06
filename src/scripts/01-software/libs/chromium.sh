@@ -26,7 +26,6 @@ add_ppa_chromium() {
   msg_normal "add apt hooks (dark mode)"
   sudo cp "$script_dir/hooks/chromium-upgrade-helper" \
     /usr/local/bin/chromium-upgrade-helper
-  sudo chmod 777 /usr/local/bin/chromium-upgrade-helper
   echo 'DPkg::Post-Invoke {"/usr/local/bin/chromium-upgrade-helper";};' \
     | silent sudo tee /etc/apt/apt.conf.d/80upgradehook
 }
