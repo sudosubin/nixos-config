@@ -34,6 +34,7 @@ install_xft() {
   } | output_box cat
 
   msg_normal "linking symlink"
+  sudo mkdir -p /usr/lib/x86_64-linux-gnu
   sudo ln -sfn /usr/local/lib/libXft.so.2.3.3 \
     /usr/lib/x86_64-linux-gnu/libXft.so.2.3.3
 
