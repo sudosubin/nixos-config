@@ -34,7 +34,6 @@ scripts_02() {
   install_nimf
   install_plank
   install_spotify
-  install_tmux
   install_ulauncher
   install_vscodium
 
