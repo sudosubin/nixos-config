@@ -25,12 +25,9 @@ install_ulauncher() {
     ~/.config/ulauncher/user-themes/one-dark-ulauncher
 
   msg_normal "copy icons, configurations"
-  mkdir -p "$HOME/.config/autostart"
   mkdir -p "$HOME/.local/share/icons/ulauncher"
   cp "$script_dir/settings/ulauncher/google.png" \
     ~/.local/share/icons/ulauncher/google.png
-  cp "$script_dir/settings/ulauncher/autostart.desktop" \
-    "$HOME/.config/autostart/ulauncher.desktop"
 
   cp "$script_dir/settings/ulauncher/settings.json" \
     ~/.config/ulauncher/settings.json

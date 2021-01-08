@@ -19,11 +19,8 @@ install_plank() {
   msg_step "Configure plank"
 
   msg_normal "restore configurations"
-  mkdir -p "$HOME/.config/autostart"
   dconf load /net/launchpad/plank/docks/ < \
     "$script_dir/settings/plank/settings.ini"
-  cp "$script_dir/settings/plank/autostart.desktop" \
-    "$HOME/.config/autostart/plank.desktop"
 
   msg_normal "copy pinned items"
   mkdir -p ~/.config/plank/dock1/launchers
