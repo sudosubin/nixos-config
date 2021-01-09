@@ -29,6 +29,7 @@ install_vscodium() {
     # language (python)
     timeout 10 codium --install-extension ms-python.python
     timeout 10 codium --install-extension ms-pyright.pyright
+    timeout 10 codium --install-extension batisteo.vscode-django
 
     # language (javascript)
     timeout 10 codium --install-extension dbaeumer.vscode-eslint

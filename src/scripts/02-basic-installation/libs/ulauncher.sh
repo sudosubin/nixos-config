@@ -24,11 +24,7 @@ install_ulauncher() {
   mute git clone https://github.com/sudosubin/one-dark-ulauncher.git \
     ~/.config/ulauncher/user-themes/one-dark-ulauncher
 
-  msg_normal "copy icons, configurations"
-  mkdir -p "$HOME/.local/share/icons/ulauncher"
-  cp "$script_dir/settings/ulauncher/google.png" \
-    ~/.local/share/icons/ulauncher/google.png
-
+  msg_normal "copy configurations"
   cp "$script_dir/settings/ulauncher/settings.json" \
     ~/.config/ulauncher/settings.json
 

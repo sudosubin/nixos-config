@@ -37,7 +37,6 @@ install_requirements() {
   # - qtdeclarative5-dev libkf5plasma-dev libsm-dev plasma-workspace-dev
   #   libxcb-randr0-dev libkf5wayland-dev: Build-deps for applet-window-appmenu
   # - qtbase5-dev libkf5declarative-dev: Build-deps for applet-window-buttons
-  # - inkscape x11-apps: Build-deps for capitaine-cursors
   # - resolvconf: network settings
   # - libharfbuzz-dev libxft-dev: Build-deps for st term
   # - xutils-dev: Build-deps for xft

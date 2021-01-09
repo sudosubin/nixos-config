@@ -14,9 +14,6 @@ source "$script_dir/libs/applet-window-appmenu.sh"
 # shellcheck source=applet-window-buttons.sh
 source "$script_dir/libs/applet-window-buttons.sh"
 
-# shellcheck source=capitaine-cursors.sh
-source "$script_dir/libs/capitaine-cursors.sh"
-
 # shellcheck source=hello.sh
 source "$script_dir/libs/hello.sh"
 
