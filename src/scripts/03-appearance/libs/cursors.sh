@@ -30,10 +30,11 @@ set_cursors() {
 
   # set cursors (gsettings)
   gsettings set org.gnome.desktop.interface cursor-theme "apple-cursor"
+  gsettings set org.gnome.desktop.interface cursor-size 22
 
   # set cursors (plasma)
-  kwriteconfig5 --file kcminputrc --group Mouse \
-    --key cursorTheme "apple-cursor"
+  kwriteconfig5 --file kcminputrc --group Mouse --key cursorTheme "apple-cursor"
+  kwriteconfig5 --file kcminputrc --group Mouse --key cursorSize 22
 
   # set cursors (etc)
   kwriteconfig5 --file ~/.config/gtk-3.0/settings.ini --group Settings \
