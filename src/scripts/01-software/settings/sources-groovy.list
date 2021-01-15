@@ -1,0 +1,3 @@
+deb http://mirror.kakao.com/ubuntu/ groovy main restricted universe multiverse
+deb http://mirror.kakao.com/ubuntu/ groovy-updates main restricted universe multiverse
+deb http://mirror.kakao.com/ubuntu/ groovy-security main restricted universe multiverse

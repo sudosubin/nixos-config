@@ -1,0 +1,7 @@
+Package: fonts-noto-color-emoji
+Pin: release n=groovy
+Pin-Priority: 990
+
+Package: *
+Pin: release o=Ubuntu
+Pin-Priority: -10
