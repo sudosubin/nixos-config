@@ -58,4 +58,14 @@ set_workspace_behaviors() {
   kwriteconfig5 --file kwinrc --group Script-desktopchangeosd \
     --key PopupHideDelay 500
   # kwriteconfig5 --file kwinrc --group Effect-Slide --key SlideDocks true
+
+  # Night color
+  msg_step "Night color"
+  msg_normal "enable night color"
+  kwriteconfig5 --file kwinrc --group NightColor \
+    --key Active true
+  kwriteconfig5 --file kwinrc --group NightColor \
+    --key Mode "Constant"
+  kwriteconfig5 --file kwinrc --group NightColor \
+    --key NightTemperature 5300
 }
