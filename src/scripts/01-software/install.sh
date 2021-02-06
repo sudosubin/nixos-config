@@ -39,6 +39,7 @@ scripts_01() {
   msg_heading "Add packages ppa"
 
   add_ppa_chromium
+  add_ppa_firefox
   add_ppa_insomnia
   add_ppa_jetbrains
   add_ppa_nimf

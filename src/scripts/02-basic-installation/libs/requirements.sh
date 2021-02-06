@@ -24,7 +24,7 @@ install_requirements() {
   # - nimf nimf-libhangul: Basic for Korean input
   # - pass pass-extension-otp oathtool xclip: My password manage
   # - latte-dock plank: For better appearance
-  # - chromium-browser codium net-tools fzf ulauncher
+  # - chromium-browser firefox-trunk codium net-tools fzf ulauncher
   #   openvpn network-manager-openvpn
   #   slack-desktop spotify-client yarn tmux bat zsh: My personal preference
   # - cmake make g++ extra-cmake-modules libkdecorations2-dev
@@ -46,7 +46,7 @@ install_requirements() {
     nimf nimf-libhangul \
     pass pass-extension-otp oathtool xclip \
     latte-dock plank fonts-symbola \
-    chromium-browser codium net-tools fzf ulauncher \
+    chromium-browser firefox-trunk codium net-tools fzf ulauncher \
     openvpn network-manager-openvpn \
     slack-desktop spotify-client yarn tmux bat zsh \
     cmake make g++ extra-cmake-modules libkdecorations2-dev \

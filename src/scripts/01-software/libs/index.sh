@@ -17,6 +17,13 @@ source "$script_dir/libs/jetbrains.sh"
 # shellcheck source=vscodium.sh
 source "$script_dir/libs/vscodium.sh"
 
+# firefox
+add_ppa_firefox() {
+  # Add ppa: ubuntu-mozilla-daily/ppa
+  msg_step "Add ppa: ubuntu-mozilla-daily/ppa"
+  sudo add-apt-repository -ny ppa:ubuntu-mozilla-daily/ppa
+}
+
 # ulauncher
 add_ppa_ulauncher() {
   # Add ppa: agornostal/ulauncher
