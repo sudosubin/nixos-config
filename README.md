@@ -4,19 +4,18 @@ This is a personal KDE setup script. I made this script to set up my laptop and 
 
 ## Requires
 
-- First boot, with Kubuntu 20.04.1 LTS
+- First boot, with Kubuntu 20.04.2 LTS
 
 ## Installation
 
 ```sh
 # install git
 sudo apt update
-sudo apt -y upgrade
 sudo apt install git curl wget --no-install-recommends
 
 # git clone
 git clone https://github.com/sudosubin/setup-script.git
-sh setup-script/install.sh
+bash setup-script/install.sh
 ```
 
 ### for Surface device
@@ -30,6 +29,8 @@ wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/
 
 echo "deb [arch=amd64] https://pkg.surfacelinux.com/debian release main" \
     | sudo tee /etc/apt/sources.list.d/linux-surface.list
+
+sudo apt update
 
 # Install
 sudo apt -y install linux-headers-surface linux-image-surface surface-ipts-firmware libwacom-surface iptsd linux-surface-secureboot-mok

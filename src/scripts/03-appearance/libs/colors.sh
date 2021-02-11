@@ -120,5 +120,5 @@ set_colors() {
     "OneDarkFirefox"
 
   # window rules (override one more time)
-  kwriteconfig5 --file kwinrulesrc --group General --key count 3
+  kwriteconfig5 --file kwinrulesrc --group General --key count 4
 }
