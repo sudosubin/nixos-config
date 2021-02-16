@@ -61,4 +61,8 @@ mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
   msg_heading "Change max fs watch limit"
   echo "fs.inotify.max_user_watches=524288" \
     | silent sudo tee -a /etc/sysctl.conf
+
+  # Add docker to sudo group
+  msg_heading "Add docker to sudo group"
+  sudo usermod -aG docker "$USER"
 }
