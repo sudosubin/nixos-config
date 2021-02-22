@@ -50,6 +50,7 @@ install_vscodium() {
     timeout 10 codium --install-extension eamodio.gitlens
     timeout 10 codium --install-extension shardulm94.trailing-spaces
     timeout 10 codium --install-extension yzhang.markdown-all-in-one
+    timeout 10 codium --install-extension davidanson.vscode-markdownlint
   } | output_box cat
 
   # remove cached directory
