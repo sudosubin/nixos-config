@@ -38,8 +38,6 @@ install_requirements() {
   #   libxcb-randr0-dev libkf5wayland-dev: Build-deps for applet-window-appmenu
   # - qtbase5-dev libkf5declarative-dev: Build-deps for applet-window-buttons
   # - resolvconf: network settings
-  # - libharfbuzz-dev libxft-dev: Build-deps for st term
-  # - xutils-dev: Build-deps for xft
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     git curl wget \
@@ -60,7 +58,5 @@ install_requirements() {
     libxcb-randr0-dev libkf5wayland-dev \
     qtbase5-dev libkf5declarative-dev \
     inkscape x11-apps \
-    resolvconf \
-    libharfbuzz-dev libxft-dev \
-    xutils-dev
+    resolvconf
 }

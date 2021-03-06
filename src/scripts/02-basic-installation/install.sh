@@ -23,8 +23,6 @@ scripts_02() {
   msg_heading "Install softwares"
   install_requirements
   install_latte
-  # installing xft should before st build
-  install_xft
   install_zpl
   install_zsh
 
