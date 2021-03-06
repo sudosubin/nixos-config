@@ -17,11 +17,25 @@ source "$script_dir/libs/jetbrains.sh"
 # shellcheck source=vscodium.sh
 source "$script_dir/libs/vscodium.sh"
 
+# alacritty
+add_ppa_alacritty() {
+  # Add ppa: aslatter/ppa
+  msg_step "Add ppa: aslatter/alacritty"
+  sudo add-apt-repository -ny ppa:aslatter/alacritty
+}
+
 # ulauncher
 add_ppa_ulauncher() {
   # Add ppa: agornostal/ulauncher
   msg_step "Add ppa: agornostal/ulauncher"
   sudo add-apt-repository -ny ppa:agornostal/ulauncher
+}
+
+# git
+add_ppa_git() {
+  # Add ppa: git
+  msg_step "Add ppa: git"
+  sudo add-apt-repository -ny ppa:git-core/ppa
 }
 
 # github cli

@@ -26,7 +26,7 @@ install_requirements() {
   # - latte-dock plank: For better appearance
   # - chromium-browser codium net-tools fzf ulauncher
   #   openvpn network-manager-openvpn
-  #   slack-desktop spotify-client yarn tmux bat zsh: My personal preference
+  #   slack-desktop spotify-client yarn alacritty tmux bat zsh: My personal preference
   # - cmake make g++ extra-cmake-modules libkdecorations2-dev
   #   libkf5guiaddons-dev libkf5configwidgets-dev
   #   libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev
@@ -48,7 +48,7 @@ install_requirements() {
     latte-dock plank fonts-symbola \
     chromium-browser codium net-tools fzf ulauncher \
     openvpn network-manager-openvpn \
-    slack-desktop spotify-client yarn tmux bat zsh \
+    slack-desktop spotify-client yarn alacritty tmux bat zsh \
     cmake make g++ extra-cmake-modules libkdecorations2-dev \
     libkf5guiaddons-dev libkf5configwidgets-dev libtool \
     libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev \

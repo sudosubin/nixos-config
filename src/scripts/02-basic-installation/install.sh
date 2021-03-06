@@ -25,7 +25,6 @@ scripts_02() {
   install_latte
   # installing xft should before st build
   install_xft
-  install_st
   install_zpl
   install_zsh
 

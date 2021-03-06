@@ -59,7 +59,7 @@ set_colors() {
   kwriteconfig5 --file kdeglobals --group General --key ColorScheme "OneDark"
 
   # window rules
-  kwriteconfig5 --file kwinrulesrc --group General --key count 3
+  kwriteconfig5 --file kwinrulesrc --group General --key count 2
 
   # Set ColorScheme per Application
   kwriteconfig5 --file kwinrulesrc --group 1 --key Description \
@@ -74,19 +74,6 @@ set_colors() {
   kwriteconfig5 --file kwinrulesrc --group 1 --key decocolorrule 2
   kwriteconfig5 --file kwinrulesrc --group 1 --key decocolor \
     "OneDarkChrome"
-
-  # Set st-term window size
-  kwriteconfig5 --file kwinrulesrc --group 2 --key Description \
-    "Application settings for st"
-  kwriteconfig5 --file kwinrulesrc --group 2 --key clientmachine \
-    "localhost"
-  kwriteconfig5 --file kwinrulesrc --group 2 --key clientmachinematch 0
-  kwriteconfig5 --file kwinrulesrc --group 2 --key wmclass \
-    "st"
-  kwriteconfig5 --file kwinrulesrc --group 2 --key wmclasscomplete false
-  kwriteconfig5 --file kwinrulesrc --group 2 --key wmclassmatch 1
-  kwriteconfig5 --file kwinrulesrc --group 2 --key size "800,500"
-  kwriteconfig5 --file kwinrulesrc --group 2 --key sizerule 3
 
   # Set ColorScheme per Application
   kwriteconfig5 --file kwinrulesrc --group 3 --key Description \
@@ -103,5 +90,5 @@ set_colors() {
     "OneDarkSpotify"
 
   # window rules (override one more time)
-  kwriteconfig5 --file kwinrulesrc --group General --key count 3
+  kwriteconfig5 --file kwinrulesrc --group General --key count 2
 }
