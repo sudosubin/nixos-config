@@ -22,6 +22,7 @@ scripts_02() {
   # Install softwares
   msg_heading "Install softwares"
   install_requirements
+  install_kime
   install_latte
   install_zpl
   install_zsh
@@ -29,7 +30,6 @@ scripts_02() {
   # Configure softwares
   msg_heading "Configure softwares"
   install_alacritty
-  install_nimf
   install_plank
   install_spotify
   install_ulauncher

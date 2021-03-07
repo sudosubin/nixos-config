@@ -65,22 +65,6 @@ add_ppa_slack() {
     "deb $slack_repo/debian/ jessie main"
 }
 
-# nimf
-add_ppa_nimf() {
-  current_dir="$(dirname "${BASH_SOURCE[0]}")"
-  script_dir="$(dirname "$current_dir")"
-  app_dir="$(dirname "$(dirname "$(dirname "$script_dir")")")"
-
-  # shellcheck source=../../../../src/utils/ppa.sh
-  source "$app_dir/src/utils/ppa.sh"
-
-  msg_step "Add ppa: nimf"
-
-  add_ppa "hamonikr-pkg" \
-    "https://pkg.hamonikr.org/hamonikr-pkg.key" \
-    "deb [arch=amd64] https://pkg.hamonikr.org focal main"
-}
-
 # spotify
 add_ppa_spotify() {
   current_dir="$(dirname "${BASH_SOURCE[0]}")"

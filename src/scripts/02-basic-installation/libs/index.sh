@@ -20,14 +20,14 @@ source "$script_dir/libs/applet-window-buttons.sh"
 # shellcheck source=hello.sh
 source "$script_dir/libs/hello.sh"
 
+# shellcheck source=kime.sh
+source "$script_dir/libs/kime.sh"
+
 # shellcheck source=la-capitaine-icon-theme.sh
 source "$script_dir/libs/la-capitaine-icon-theme.sh"
 
 # shellcheck source=latte.sh
 source "$script_dir/libs/latte.sh"
-
-# shellcheck source=nimf.sh
-source "$script_dir/libs/nimf.sh"
 
 # shellcheck source=plank.sh
 source "$script_dir/libs/plank.sh"

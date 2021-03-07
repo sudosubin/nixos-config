@@ -21,7 +21,6 @@ install_requirements() {
 
   # Install via apt-get
   # - git curl wget: Basic for script installation
-  # - nimf nimf-libhangul: Basic for Korean input
   # - pass pass-extension-otp oathtool xclip: My password manage
   # - latte-dock plank: For better appearance
   # - chromium-browser codium net-tools fzf ulauncher
@@ -41,7 +40,6 @@ install_requirements() {
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     git curl wget \
-    nimf nimf-libhangul \
     pass pass-extension-otp oathtool xclip \
     latte-dock plank fonts-symbola \
     chromium-browser codium net-tools fzf ulauncher \
