@@ -45,4 +45,8 @@ install_kime() {
   # gsettings set org.nimf.engines.nimf-libhangul shortcuts-to-sys "$hangul_keys"
   # gsettings set org.nimf.engines.nimf-libhangul shortcuts-to-lang "$hangul_keys"
   # gsettings set org.nimf.engines.nimf-libhangul hanja-keys "$hanja_keys"
+
+  # clean up
+  msg_normal "clean up"
+  rm -rf kime.deb
 }
