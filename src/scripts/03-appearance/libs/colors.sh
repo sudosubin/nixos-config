@@ -23,17 +23,14 @@ set_colors() {
   local local_dir="$HOME/.local/share/color-schemes"
   local origin_dir="$script_dir/assets/OneDark.colors"
   local chrome_dir="$script_dir/assets/OneDarkChrome.colors"
-  local spotify_dir="$script_dir/assets/OneDarkSpotify.colors"
 
   mkdir -p "$kde_dir"
   cp "$origin_dir" "$kde_dir"
   cp "$chrome_dir" "$kde_dir"
-  cp "$spotify_dir" "$kde_dir"
 
   mkdir -p "$local_dir"
   cp "$origin_dir" "$local_dir"
   cp "$chrome_dir" "$local_dir"
-  cp "$spotify_dir" "$local_dir"
 
   # copy all keys from color to kdeglobals
   msg_step "Copy colors to kdeglobals"
@@ -59,7 +56,7 @@ set_colors() {
   kwriteconfig5 --file kdeglobals --group General --key ColorScheme "OneDark"
 
   # window rules
-  kwriteconfig5 --file kwinrulesrc --group General --key count 2
+  kwriteconfig5 --file kwinrulesrc --group General --key count 1
 
   # Set ColorScheme per Application
   kwriteconfig5 --file kwinrulesrc --group 1 --key Description \
@@ -75,20 +72,6 @@ set_colors() {
   kwriteconfig5 --file kwinrulesrc --group 1 --key decocolor \
     "OneDarkChrome"
 
-  # Set ColorScheme per Application
-  kwriteconfig5 --file kwinrulesrc --group 3 --key Description \
-    "Application settings for spotify"
-  kwriteconfig5 --file kwinrulesrc --group 3 --key clientmachine \
-    "localhost"
-  kwriteconfig5 --file kwinrulesrc --group 3 --key clientmachinematch 0
-  kwriteconfig5 --file kwinrulesrc --group 3 --key wmclass \
-    "spotify"
-  kwriteconfig5 --file kwinrulesrc --group 3 --key wmclasscomplete false
-  kwriteconfig5 --file kwinrulesrc --group 3 --key wmclassmatch 1
-  kwriteconfig5 --file kwinrulesrc --group 3 --key decocolorrule 2
-  kwriteconfig5 --file kwinrulesrc --group 3 --key decocolor \
-    "OneDarkSpotify"
-
   # window rules (override one more time)
-  kwriteconfig5 --file kwinrulesrc --group General --key count 2
+  kwriteconfig5 --file kwinrulesrc --group General --key count 1
 }

@@ -31,7 +31,6 @@ scripts_02() {
   msg_heading "Configure softwares"
   install_alacritty
   install_plank
-  install_spotify
   install_ulauncher
   install_vscodium
 
