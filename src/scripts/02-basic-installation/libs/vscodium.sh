@@ -34,6 +34,7 @@ install_vscodium() {
     timeout 10 codium --install-extension dbaeumer.vscode-eslint
     timeout 10 codium --install-extension esbenp.prettier-vscode
     timeout 10 codium --install-extension jpoissonnier.vscode-styled-components
+    timeout 10 codium --install-extension flowtype.flow-for-vscode
 
     # language (java)
     timeout 10 codium --install-extension redhat.java
@@ -44,6 +45,7 @@ install_vscodium() {
     timeout 10 codium --install-extension exiasr.hadolint
 
     # language (etc)
+    timeout 10 codium --install-extension usernamehw.errorlens
     timeout 10 codium --install-extension bungcip.better-toml
 
     # etc
