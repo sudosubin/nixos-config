@@ -65,4 +65,9 @@ set_plasma_etc() {
   kwriteconfig5 --file dolphinrc \
     --group MainWindow --group "Toolbar mainToolBar" \
     --key ToolButtonStyle "IconOnly"
+
+  # Optimize
+  msg_step "Optimize"
+  msg_normal "disable baloo"
+  balooctl disable
 }
