@@ -20,7 +20,7 @@ source "$script_dir/libs/vscodium.sh"
 # alacritty
 add_ppa_alacritty() {
   # Add ppa: aslatter/ppa
-  msg_step "Add ppa: aslatter/alacritty"
+  msg_step "Add ppa: aslatter/ppa"
   sudo add-apt-repository -ny ppa:aslatter/ppa
 }
 
