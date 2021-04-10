@@ -79,7 +79,7 @@ add_ppa_spotify() {
   local spotify_download="https://download.spotify.com/debian"
   local spotify_repo="http://repository.spotify.com"
 
-  add_ppa slack \
+  add_ppa spotify \
     "$spotify_download/pubkey_0D811D58.gpg" \
     "deb $spotify_repo stable non-free"
 }
