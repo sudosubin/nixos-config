@@ -5,8 +5,8 @@ current_dir="$(dirname "${BASH_SOURCE[0]}")"
 script_dir="$(dirname "$current_dir")"
 app_dir="$(dirname "$(dirname "$(dirname "$script_dir")")")"
 
-# shellcheck source=chromium.sh
-source "$script_dir/libs/chromium.sh"
+# shellcheck source=chrome.sh
+source "$script_dir/libs/chrome.sh"
 
 # shellcheck source=insomnia.sh
 source "$script_dir/libs/insomnia.sh"
@@ -65,7 +65,7 @@ add_ppa_slack() {
     "deb $slack_repo/debian/ jessie main"
 }
 
-# slack
+# spotify
 add_ppa_spotify() {
   current_dir="$(dirname "${BASH_SOURCE[0]}")"
   script_dir="$(dirname "$current_dir")"

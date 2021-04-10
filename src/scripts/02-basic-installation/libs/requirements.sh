@@ -23,7 +23,7 @@ install_requirements() {
   # - git curl wget: Basic for script installation
   # - pass pass-extension-otp oathtool xclip: My password manage
   # - latte-dock plank: For better appearance
-  # - chromium-browser codium net-tools fzf ulauncher
+  # - google-chrome codium net-tools fzf ulauncher
   #   openvpn network-manager-openvpn
   #   slack-desktop spotify-client yarn alacritty tmux bat zsh: My personal preference
   # - cmake make g++ extra-cmake-modules libkdecorations2-dev
@@ -42,7 +42,7 @@ install_requirements() {
     git curl wget \
     pass pass-extension-otp oathtool xclip \
     latte-dock plank fonts-symbola \
-    chromium-browser codium net-tools fzf ulauncher \
+    google-chrome codium net-tools fzf ulauncher \
     openvpn network-manager-openvpn \
     slack-desktop spotify-client yarn alacritty tmux bat zsh \
     cmake make g++ extra-cmake-modules libkdecorations2-dev \

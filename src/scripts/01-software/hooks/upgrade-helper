@@ -1,6 +1,6 @@
 #!/bin/bash
 
-update_chromium_exec() {
+update_exec() {
   # edit Exec options (overlay scroll bar, dark mode, etc)
   local skip_pattern=".*dark-mode.*"
   local search_pattern="^Exec.*$"
@@ -9,14 +9,14 @@ update_chromium_exec() {
   local dark_mode="--force-dark-mode"
   local hard_acc="--enable-accelerated-video-decode"
 
-  # chromium
-  if [ -f /usr/share/applications/chromium-browser.desktop ]; then
+  # add_ppa_chrome
+  if [ -f /usr/share/applications/google-chrome.desktop ]; then
     local replace_pattern="& $flags $dark_mode $hard_acc"
 
     sudo sed -i -Ee "/$skip_pattern/b; s/$search_pattern/$replace_pattern/g" \
-      /usr/share/applications/chromium-browser.desktop
+      /usr/share/applications/google-chrome.desktop
 
-    echo "chromium exec was updated."
+    echo "chrome exec was updated."
   fi
 
   # slack
@@ -30,5 +30,5 @@ update_chromium_exec() {
   fi
 }
 
-update_chromium_exec
-unset -f update_chromium_exec
+update_exec
+unset -f update_exec
