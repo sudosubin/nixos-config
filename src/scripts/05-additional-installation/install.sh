@@ -31,7 +31,7 @@ scripts_05() {
     libmysqlclient-dev libpq-dev python3-venv \
     libcurl4-openssl-dev libssl-dev libaec-dev \
     dirmngr gpg \
-    docker.io docker-compose redis-server insomnia shellcheck jq git-flow \
+    docker.io docker-compose redis-server insomnia shellcheck jq \
     watchman gh
 
   msg_normal "fix Mysql-python my_config.h error"
