@@ -1,10 +1,10 @@
-# Personal KDE setup script
+# Personal Ubuntu setup script
 
-This is a personal KDE setup script. I made this script to set up my laptop and computer easily, keep in sync.
+This is a personal Ubuntu setup script. I made this script to set up my laptop and computer easily, keep in sync.
 
 ## Requires
 
-- First boot, with Kubuntu 20.04.2 LTS
+- First boot, with Ubuntu Server 20.04.2 LTS
 
 ## Installation
 
@@ -17,28 +17,6 @@ sudo apt install git curl wget --no-install-recommends
 git clone https://github.com/sudosubin/setup-script.git
 bash setup-script/install.sh
 ```
-
-### for Surface device
-
-Do below together.
-
-```sh
-# Add package repository
-wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
-    | sudo apt-key add -
-
-echo "deb [arch=amd64] https://pkg.surfacelinux.com/debian release main" \
-    | sudo tee /etc/apt/sources.list.d/linux-surface.list
-
-sudo apt update
-
-# Install
-sudo apt -y install linux-headers-surface linux-image-surface surface-ipts-firmware libwacom-surface iptsd linux-surface-secureboot-mok
-```
-
-## Sources
-
-- Wallpaper: Never Settle Wallpapers
 
 ## Contribute
 

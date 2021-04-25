@@ -24,20 +24,6 @@ add_ppa_alacritty() {
   sudo add-apt-repository -ny ppa:aslatter/ppa
 }
 
-# ulauncher
-add_ppa_ulauncher() {
-  # Add ppa: agornostal/ulauncher
-  msg_step "Add ppa: agornostal/ulauncher"
-  sudo add-apt-repository -ny ppa:agornostal/ulauncher
-}
-
-# git
-add_ppa_git() {
-  # Add ppa: git
-  msg_step "Add ppa: git"
-  sudo add-apt-repository -ny ppa:git-core/ppa
-}
-
 # github cli
 add_ppa_github_cli() {
   # Add ppa: github cli

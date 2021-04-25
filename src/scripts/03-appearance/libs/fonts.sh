@@ -34,33 +34,6 @@ set_fonts() {
   gsettings set org.gnome.desktop.wm.preferences \
     titlebar-font 'SF Pro Text Semibold 10'
 
-  # set global fonts (plasma)
-  kwriteconfig5 --file kdeglobals --group General \
-    --key font "SF Pro Text,10,-1,5,50,0,0,0,0,0"
-  kwriteconfig5 --file kdeglobals --group General \
-    --key menuFont "SF Pro Text,10,-1,5,50,0,0,0,0,0"
-  kwriteconfig5 --file kdeglobals --group General \
-    --key smallestReadableFont "SF Pro Text,8,-1,5,50,0,0,0,0,0"
-  kwriteconfig5 --file kdeglobals --group General \
-    --key toolBarFont "SF Pro Text,10,-1,5,50,0,0,0,0,0"
-  kwriteconfig5 --file kdeglobals --group WM \
-    --key activeFont "SF Pro Text,10,-1,5,63,0,0,0,0,0,Semibold"
-  kwriteconfig5 --file ~/.kde/share/config/kdeglobals --group General \
-    --key font "SF Pro Text,10,-1,5,50,0,0,0,0,0"
-  kwriteconfig5 --file ~/.kde/share/config/kdeglobals --group General \
-    --key menuFont "SF Pro Text,10,-1,5,50,0,0,0,0,0"
-  kwriteconfig5 --file ~/.kde/share/config/kdeglobals --group General \
-    --key smallestReadableFont "SF Pro Text,8,-1,5,50,0,0,0,0,0"
-  kwriteconfig5 --file ~/.kde/share/config/kdeglobals --group General \
-    --key toolBarFont "SF Pro Text,10,-1,5,50,0,0,0,0,0"
-
-  # set global fonts (etc)
-  kwriteconfig5 --file ~/.config/gtk-3.0/settings.ini --group Settings \
-    --key gtk-font-name "SF Pro Text,  10"
-
-  sed -i -E "s|^Gtk\/FontName.*|Gtk/FontName \"SF Pro Text,  10\"|g" \
-    ~/.config/xsettingsd/xsettingsd.conf
-
   # Set fonts: FiraMono Nerd Font Mono
   msg_step "Set fonts: FiraMono Nerd Font Mono (from online)"
 
@@ -81,9 +54,6 @@ Fira%20Mono%20$weight%20Nerd%20Font%20Complete%20Mono.otf" \
       -o "$firamono_dir/FiraMono $weight.otf"
   done
 
-  # set plasma, gsettings
-  kwriteconfig5 --file kdeglobals --group General \
-    --key fixed "FiraMono Nerd Font Mono,10,-1,5,50,0,0,0,0,0"
   gsettings set org.gnome.desktop.interface \
     monospace-font-name "FiraMono Nerd Font Mono 10"
 }

@@ -18,10 +18,12 @@ set_network() {
   # DNS
   msg_step "DNS"
   msg_normal "change dns nameserver"
+
   echo "nameserver 1.1.1.1" \
     | silent sudo tee -a /etc/resolvconf/resolv.conf.d/tail
   echo "nameserver 1.0.0.1" \
     | silent sudo tee -a /etc/resolvconf/resolv.conf.d/tail
+
   sudo resolvconf -u
   sudo service resolvconf restart
 }

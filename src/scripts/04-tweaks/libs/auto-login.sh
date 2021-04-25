@@ -1,6 +1,6 @@
 #!/bin/bash
 
-install_applet_window_buttons() {
+set_auto_login() {
   # Directory
   local current_dir
   local script_dir
@@ -15,18 +15,14 @@ install_applet_window_buttons() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
-  # Build applet-window-buttons
-  msg_step "Build psifidotos/applet-window-buttons"
+  # Set auto login
+  msg_step "Set auto login"
 
-  msg_normal "download from git"
-  mute git clone https://github.com/psifidotos/applet-window-buttons.git \
-    ./temp-git
+  sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
+  sudo touch /etc/systemd/system/getty@tty1.service.d/override.conf
 
-  msg_normal "build and install"
-  cd temp-git || exit
-  output_box silent sh install.sh
-  cd ..
-
-  msg_normal "clean up"
-  rm -rf temp-git
+  echo "[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin $USER --noclear %I 38400 linux
+" | sudo tee "/etc/systemd/system/getty@tty1.service.d/override.conf";
 }

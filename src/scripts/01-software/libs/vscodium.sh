@@ -22,8 +22,10 @@ add_ppa_vscodium() {
 
   # add apt repository
   msg_normal "add apt repository"
-  vscodium_repo="https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo"
-  vscodium_io="https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo"
+
+  local vscodium_repo="https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo"
+  local vscodium_io="https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo"
+
   add_ppa vscodium \
     "$vscodium_repo/raw/master/pub.gpg" \
     "deb $vscodium_io/debs/ vscodium main"

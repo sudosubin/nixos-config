@@ -15,20 +15,9 @@ set_global_theme() {
   # shellcheck source=../../../../src/utils/stdout.sh
   source "$app_dir/src/utils/stdout.sh"
 
-  # Install theme
-  msg_step "Install theme"
-  msg_normal "download theme from git"
-  mute git clone https://github.com/vinceliuice/Qogir-kde.git ./temp-git
+  # Set theme
+  msg_step "Set theme"
 
-  msg_normal "install"
-  cd temp-git || exit
-  output_box ./install.sh
-  cd ..
-
-  msg_normal "clean up"
-  rm -rf temp-git
-
-  # Set global theme: Qogir Dark
-  msg_step "Set global theme: Qogir Dark"
-  lookandfeeltool -a com.github.vinceliuice.Qogir-dark
+  gsettings set org.gnome.desktop.interface gtk-theme "Arc-Dark"
+  gsettings set org.gnome.desktop.wm.preferences theme "Arc-Dark"
 }

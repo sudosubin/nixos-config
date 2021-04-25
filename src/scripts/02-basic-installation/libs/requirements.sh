@@ -20,41 +20,24 @@ install_requirements() {
   output_box sudo apt-get update
 
   # Install via apt-get
-  # - git curl wget: Basic for script installation
-  # - pass pass-extension-otp oathtool xclip: My password manage
-  # - latte-dock plank: For better appearance
-  # - google-chrome-stable codium net-tools fzf ulauncher
-  #   openvpn network-manager-openvpn
-  #   slack-desktop spotify-client yarn alacritty tmux bat zsh: My personal preference
-  # - cmake make g++ extra-cmake-modules libkdecorations2-dev
-  #   libkf5guiaddons-dev libkf5configwidgets-dev
-  #   libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev
-  #   gettext pkg-config: Build-deps for kde-hello window decoration
-  # - qttools5-dev libkf5crash-dev libkf5globalaccel-dev
-  #   libkf5kio-dev libkf5notifications-dev libqt5opengl5-dev
-  #   kinit-dev kwin-dev: Build-deps for kde-hello kwin effects
-  # - qtdeclarative5-dev libkf5plasma-dev libsm-dev plasma-workspace-dev
-  #   libxcb-randr0-dev libkf5wayland-dev: Build-deps for applet-window-appmenu
-  # - qtbase5-dev libkf5declarative-dev: Build-deps for applet-window-buttons
-  # - resolvconf: network settings
+  # - sway rofi xwayland: Window compositor
+  # - pass pass-extension-otp oathtool xclip gnome-keyring: Password
+  # - resolvconf openvpn: Network
+  # - policykit-1 policykit-1-gnome policykit-desktop-privileges: Permission
+  # - arc-theme: Theme
+  # - bat docker.io docker-compose fzf gpg jq shellcheck tmux watchman
+  #     zsh: Development
+  # - alacritty google-chrome-stable insomnia gh slack-desktop spotify-client
+  #     codium yarn: Install from ppa
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
-    git curl wget \
+    sway rofi xwayland \
     pass pass-extension-otp oathtool xclip \
-    latte-dock plank fonts-symbola \
-    google-chrome-stable codium net-tools fzf ulauncher \
-    openvpn network-manager-openvpn \
-    slack-desktop spotify-client yarn alacritty tmux bat zsh \
-    cmake make g++ extra-cmake-modules libkdecorations2-dev \
-    libkf5guiaddons-dev libkf5configwidgets-dev libtool \
-    libkf5windowsystem-dev libkf5package-dev libqt5x11extras5-dev \
-    gettext pkg-config \
-    qttools5-dev libkf5crash-dev libkf5globalaccel-dev \
-    libkf5kio-dev libkf5notifications-dev libqt5opengl5-dev \
-    kinit-dev kwin-dev \
-    qtdeclarative5-dev libkf5plasma-dev libsm-dev plasma-workspace-dev \
-    libxcb-randr0-dev libkf5wayland-dev \
-    qtbase5-dev libkf5declarative-dev \
-    inkscape x11-apps \
-    resolvconf
+    resolvconf openvpn \
+    policykit-1 policykit-1-gnome policykit-desktop-privileges \
+    arc-theme \
+    bat docker.io docker-compose fzf gpg jq shellcheck tmux watchman \
+      zsh \
+    alacritty google-chrome-stable insomnia gh slack-desktop spotify-client \
+      codium yarn
 }

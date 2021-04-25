@@ -9,7 +9,7 @@ update_exec() {
   local dark_mode="--force-dark-mode"
   local hard_acc="--enable-accelerated-video-decode"
 
-  # add_ppa_chrome
+  # chrome
   if [ -f /usr/share/applications/google-chrome.desktop ]; then
     local replace_pattern="& $flags $dark_mode $hard_acc"
 

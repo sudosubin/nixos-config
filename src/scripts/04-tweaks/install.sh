@@ -19,23 +19,15 @@ scripts_04() {
   # 04. Tweaks
   msg_title "04. Tweaks"
 
-  # Workspace behavior
-  msg_heading "Workspace behaviors"
-  set_workspace_behaviors
-
-  # Window management
-  msg_heading "Window management"
-  set_window_management
-
-  # Keyboard & Mouse
-  msg_heading "Keyboard & Mouse"
-  set_keyboard_and_mouse
-
-  # Plasma etc
-  msg_heading "Plasma etc"
-  set_plasma_etc
+  # Auto login
+  msg_heading "Auto Login"
+  set_auto_login
 
   # Network
   msg_heading "Network"
   set_network
+
+  # Timezone
+  msg_heading "Change timezone"
+  sudo timedatectl set-timezone Asia/Seoul
 }

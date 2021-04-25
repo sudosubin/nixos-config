@@ -45,18 +45,13 @@ scripts_01() {
   add_ppa_github_cli
   add_ppa_slack
   add_ppa_spotify
-  add_ppa_ulauncher
   add_ppa_vscodium
   add_ppa_yarn
 
-  # Remove packages
-  msg_heading "Remove packages"
-
-  msg_step "Remove packages"
-  silent sudo apt-get -y remove --purge firefox thunderbird konsole
-
-  ## Remove package: finish
-  msg_step "Remove package: clean up packages"
-  silent sudo apt-get -y --purge autoremove
-  silent sudo apt-get -y clean
+  # Add upgrade hook
+  msg_heading "Add upgrade hook"
+  sudo cp "$current_dir/hooks/upgrade-helper" \
+    /usr/local/bin/upgrade-helper
+  echo 'DPkg::Post-Invoke {"/usr/local/bin/upgrade-helper";};' \
+    | silent sudo tee /etc/apt/apt.conf.d/80upgradehook
 }

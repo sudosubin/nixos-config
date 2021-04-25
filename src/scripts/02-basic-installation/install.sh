@@ -23,21 +23,13 @@ scripts_02() {
   msg_heading "Install softwares"
   install_requirements
   install_kime
-  install_latte
-  install_zpl
   install_zsh
 
   # Configure softwares
   msg_heading "Configure softwares"
-  install_alacritty
-  install_plank
-  install_ulauncher
   install_vscodium
 
   # Build softwares
   msg_heading "Build softwares"
-  install_applet_window_appmenu
-  install_applet_window_buttons
   install_la_capitaine_icon_theme
-  install_hello
 }

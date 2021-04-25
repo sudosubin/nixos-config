@@ -31,23 +31,4 @@ set_cursors() {
   # set cursors (gsettings)
   gsettings set org.gnome.desktop.interface cursor-theme "apple-cursor"
   gsettings set org.gnome.desktop.interface cursor-size 22
-
-  # set cursors (plasma)
-  kwriteconfig5 --file kcminputrc --group Mouse --key cursorTheme "apple-cursor"
-  kwriteconfig5 --file kcminputrc --group Mouse --key cursorSize 22
-
-  # set cursors (etc)
-  kwriteconfig5 --file ~/.config/gtk-3.0/settings.ini --group Settings \
-    --key gtk-cursor-theme-name "apple-cursor"
-
-  local search_pattern="^Gtk\/CursorThemeName.*"
-  local replace_pattern="Gtk/CursorThemeName \"apple-cursor\""
-
-  sed -i -E "s|$search_pattern|$replace_pattern|g" \
-    ~/.config/xsettingsd/xsettingsd.conf
-
-  local search_pattern="^gtk-cursor-theme-name.*"
-  local replace_pattern="gtk-cursor-theme-name=\"apple-cursor\""
-
-  sed -i -E "s|$search_pattern|$replace_pattern|g" ~/.gtkrc-2.0
 }

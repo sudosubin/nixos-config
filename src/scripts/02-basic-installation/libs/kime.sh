@@ -21,7 +21,7 @@ install_kime() {
   # downlaod kime
   msg_normal "download kime from github release"
   curl -sL \
-    https://github.com/Riey/kime/releases/download/v1.3.1/kime_ubuntu-20.04_v1.3.1_amd64.deb \
+    https://github.com/Riey/kime/releases/download/v2.5.2/kime_ubuntu-20.04_v2.5.2_amd64.deb \
     -o kime.deb
 
   # install kime

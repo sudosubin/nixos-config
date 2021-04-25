@@ -38,7 +38,7 @@ install_vscodium() {
 
     # language (java)
     timeout 10 codium --install-extension redhat.java
-    timeout 10 codium --install-extension mathiasfrohlich.kotlin
+    timeout 10 codium --install-extension fwcd.kotlin
 
     # language (bash)
     timeout 10 codium --install-extension timonwong.shellcheck

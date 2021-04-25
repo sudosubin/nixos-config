@@ -23,14 +23,6 @@ scripts_03() {
   msg_heading "Global theme"
   set_global_theme
 
-  # Window decorations
-  msg_heading "Window decorations"
-  set_window_decorations
-
-  # Colors
-  msg_heading "Colors"
-  set_colors
-
   # Fonts
   msg_heading "Fonts"
   set_fonts
@@ -42,12 +34,4 @@ scripts_03() {
   # Cursors
   msg_heading "Cursors"
   set_cursors
-
-  # Latte dock, panel
-  msg_heading "Latte dock, panel"
-  set_latte
-
-  # Wallpaper
-  msg_heading "Wallpaper"
-  set_wallpaper
 }
