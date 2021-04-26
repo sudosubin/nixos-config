@@ -18,11 +18,11 @@ set_auto_login() {
   # Set auto login
   msg_step "Set auto login"
 
+  # override getty tty1 service
   sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
-  sudo touch /etc/systemd/system/getty@tty1.service.d/override.conf
 
   echo "[Service]
 ExecStart=
-ExecStart=-/sbin/agetty --autologin $USER --noclear %I 38400 linux
-" | sudo tee "/etc/systemd/system/getty@tty1.service.d/override.conf";
+ExecStart=-/sbin/agetty --autologin $USER --noclear %I \$TERM
+" | silent sudo tee "/etc/systemd/system/getty@tty1.service.d/override.conf";
 }
