@@ -17,8 +17,9 @@ uninstall_bloats() {
 
   # Uninstall bloats
   msg_step "Uninstall bloats"
+
   silent sudo apt-get -y remove --purge \
-    cloud-init \
+    cloud-init
 
   # clean up
   silent sudo apt-get -y --purge autoremove

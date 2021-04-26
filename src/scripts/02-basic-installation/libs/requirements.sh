@@ -26,7 +26,7 @@ install_requirements() {
   # - pass pass-extension-otp oathtool xclip gnome-keyring: Password
   # - resolvconf openvpn: Network
   # - pulseaudio pavucontrol: Audio
-  # - policykit-1 policykit-1-gnome policykit-desktop-privileges: Permission
+  # - lxpolkit: Permission
   # - arc-theme: Theme
   # - bat docker.io docker-compose fzf gpg jq shellcheck tmux watchman
   #     zsh: Development
@@ -44,7 +44,7 @@ install_requirements() {
     pass pass-extension-otp oathtool xclip gnome-keyring \
     resolvconf openvpn \
     pulseaudio pavucontrol \
-    policykit-1 policykit-1-gnome policykit-desktop-privileges \
+    lxpolkit \
     arc-theme \
     bat docker.io docker-compose fzf gpg jq shellcheck tmux watchman \
       zsh \
@@ -52,6 +52,6 @@ install_requirements() {
       libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev \
       libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev \
     unzip \
-    alacritty google-chrome-stable insomnia gh slack-desktop spotify-client \
+    alacritty google-chrome-stable gh slack-desktop spotify-client \
       codium yarn
 }
