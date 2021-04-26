@@ -30,6 +30,9 @@ scripts_02() {
   msg_heading "Configure softwares"
   install_vscodium
 
+  # fix mako
+  silent sudo aa-disable /etc/apparmor.d/fr.emersion.Mako
+
   # Build softwares
   msg_heading "Build softwares"
   install_la_capitaine_icon_theme

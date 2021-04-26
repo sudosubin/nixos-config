@@ -21,6 +21,7 @@ install_requirements() {
 
   # Install via apt-get
   # - mako-notifier sway rofi waybar xwayland: Window compositor
+  # - apparmor-utils: Fix mako
   # - grim: Screenshot
   # - nautilus: File Explorer
   # - pass pass-extension-otp oathtool xclip gnome-keyring: Password
