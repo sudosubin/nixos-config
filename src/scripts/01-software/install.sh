@@ -50,7 +50,7 @@ scripts_01() {
 
   # Add upgrade hook
   msg_heading "Add upgrade hook"
-  sudo cp "$current_dir/hooks/upgrade-helper" \
+  sudo cp "$(dirname "$current_dir")/hooks/upgrade-helper" \
     /usr/local/bin/upgrade-helper
   echo 'DPkg::Post-Invoke {"/usr/local/bin/upgrade-helper";};' \
     | silent sudo tee /etc/apt/apt.conf.d/80upgradehook

@@ -22,37 +22,37 @@ install_vscodium() {
   msg_normal "install vscodium extensions (takes long time)"
   {
     # theme
-    timeout 10 codium --install-extension zhuangtongfa.Material-theme
-    timeout 10 codium --install-extension PKief.material-icon-theme
-    timeout 10 codium --install-extension iocave.customize-ui
+    codium --install-extension zhuangtongfa.Material-theme
+    codium --install-extension PKief.material-icon-theme
+    codium --install-extension iocave.customize-ui
 
     # language (python)
-    timeout 10 codium --install-extension ms-python.python
-    timeout 10 codium --install-extension ms-pyright.pyright
+    codium --install-extension ms-python.python
+    codium --install-extension ms-pyright.pyright
 
     # language (javascript)
-    timeout 10 codium --install-extension dbaeumer.vscode-eslint
-    timeout 10 codium --install-extension esbenp.prettier-vscode
-    timeout 10 codium --install-extension jpoissonnier.vscode-styled-components
-    timeout 10 codium --install-extension flowtype.flow-for-vscode
+    codium --install-extension dbaeumer.vscode-eslint
+    codium --install-extension esbenp.prettier-vscode
+    codium --install-extension jpoissonnier.vscode-styled-components
+    codium --install-extension flowtype.flow-for-vscode
 
     # language (java)
-    timeout 10 codium --install-extension redhat.java
-    timeout 10 codium --install-extension fwcd.kotlin
+    codium --install-extension redhat.java
+    codium --install-extension fwcd.kotlin
 
     # language (bash)
-    timeout 10 codium --install-extension timonwong.shellcheck
-    timeout 10 codium --install-extension exiasr.hadolint
+    codium --install-extension timonwong.shellcheck
+    codium --install-extension exiasr.hadolint
 
     # language (etc)
-    timeout 10 codium --install-extension usernamehw.errorlens
-    timeout 10 codium --install-extension bungcip.better-toml
+    codium --install-extension usernamehw.errorlens
+    codium --install-extension bungcip.better-toml
 
     # etc
-    timeout 10 codium --install-extension eamodio.gitlens
-    timeout 10 codium --install-extension shardulm94.trailing-spaces
-    timeout 10 codium --install-extension yzhang.markdown-all-in-one
-    timeout 10 codium --install-extension davidanson.vscode-markdownlint
+    codium --install-extension eamodio.gitlens
+    codium --install-extension shardulm94.trailing-spaces
+    codium --install-extension yzhang.markdown-all-in-one
+    codium --install-extension davidanson.vscode-markdownlint
   } | output_box cat
 
   # remove cached directory

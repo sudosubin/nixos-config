@@ -41,7 +41,7 @@ install_requirements() {
     mako-notifier sway rofi waybar xwayland \
     grim \
     nautilus \
-    pass pass-extension-otp oathtool xclip \
+    pass pass-extension-otp oathtool xclip gnome-keyring \
     resolvconf openvpn \
     pulseaudio pavucontrol \
     policykit-1 policykit-1-gnome policykit-desktop-privileges \
