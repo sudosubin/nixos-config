@@ -33,6 +33,7 @@ install_requirements() {
   # - make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev
   #     libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev
   #     libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev: Python Development
+  # - unzip: Kotlin Development
   # - alacritty google-chrome-stable insomnia gh slack-desktop spotify-client
   #     codium yarn: Install from ppa
   msg_step "Install packages via apt-get"
@@ -50,6 +51,7 @@ install_requirements() {
     make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
       libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev \
       libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev \
+    unzip \
     alacritty google-chrome-stable insomnia gh slack-desktop spotify-client \
       codium yarn
 }
