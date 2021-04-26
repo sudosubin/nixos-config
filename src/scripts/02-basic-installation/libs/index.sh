@@ -8,6 +8,9 @@ app_dir="$(dirname "$(dirname "$(dirname "$script_dir")")")"
 # shellcheck source=requirements.sh
 source "$script_dir/libs/requirements.sh"
 
+# shellcheck source=bloats.sh
+source "$script_dir/libs/bloats.sh"
+
 # shellcheck source=kime.sh
 source "$script_dir/libs/kime.sh"
 

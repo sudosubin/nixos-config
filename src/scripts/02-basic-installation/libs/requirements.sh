@@ -20,24 +20,36 @@ install_requirements() {
   output_box sudo apt-get update
 
   # Install via apt-get
-  # - sway rofi xwayland: Window compositor
+  # - mako-notifier sway rofi waybar xwayland: Window compositor
+  # - grim: Screenshot
+  # - nautilus: File Explorer
   # - pass pass-extension-otp oathtool xclip gnome-keyring: Password
   # - resolvconf openvpn: Network
+  # - pulseaudio pavucontrol: Audio
   # - policykit-1 policykit-1-gnome policykit-desktop-privileges: Permission
   # - arc-theme: Theme
   # - bat docker.io docker-compose fzf gpg jq shellcheck tmux watchman
   #     zsh: Development
+  # - make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev
+  #     libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev
+  #     libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev: Python Development
   # - alacritty google-chrome-stable insomnia gh slack-desktop spotify-client
   #     codium yarn: Install from ppa
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
-    sway rofi xwayland \
+    mako-notifier sway rofi waybar xwayland \
+    grim \
+    nautilus \
     pass pass-extension-otp oathtool xclip \
     resolvconf openvpn \
+    pulseaudio pavucontrol \
     policykit-1 policykit-1-gnome policykit-desktop-privileges \
     arc-theme \
     bat docker.io docker-compose fzf gpg jq shellcheck tmux watchman \
       zsh \
+    make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
+      libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev \
+      libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev \
     alacritty google-chrome-stable insomnia gh slack-desktop spotify-client \
       codium yarn
 }

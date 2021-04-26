@@ -21,6 +21,7 @@ scripts_02() {
 
   # Install softwares
   msg_heading "Install softwares"
+  uninstall_bloats
   install_requirements
   install_kime
   install_zsh
