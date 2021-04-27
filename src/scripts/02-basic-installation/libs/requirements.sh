@@ -22,7 +22,7 @@ install_requirements() {
   # Install via apt-get
   # - mako-notifier sway rofi waybar xwayland: Window compositor
   # - apparmor-utils: Fix mako
-  # - grim: Screenshot
+  # - grim slurp wl-clipboard: Screenshot
   # - nautilus: File Explorer
   # - pass pass-extension-otp oathtool xclip gnome-keyring: Password
   # - resolvconf openvpn: Network
@@ -40,7 +40,7 @@ install_requirements() {
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
     mako-notifier sway rofi waybar xwayland \
-    grim \
+    grim slurp wl-clipboard \
     nautilus \
     pass pass-extension-otp oathtool xclip gnome-keyring \
     resolvconf openvpn \
