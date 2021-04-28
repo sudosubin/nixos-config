@@ -22,7 +22,7 @@ scripts_05() {
   msg_title "05. Additional Installation (for development)"
 
   # Install requirements
-  msg_heading "Install requirements"
+  # msg_heading "Install requirements"
 #   msg_normal "install"
 #   output_box sudo apt-get -y --no-install-recommends install \
 #     build-essential libssl-dev zlib1g-dev libbz2-dev libjpeg8-dev \
@@ -32,9 +32,9 @@ scripts_05() {
 #     libcurl4-openssl-dev libssl-dev libaec-dev \
 #     dirmngr redis-server
 
-#   msg_normal "fix Mysql-python my_config.h error"
-#   sudo curl -s "https://raw.githubusercontent.com/paulfitz/\
-# mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
+  msg_normal "fix Mysql-python my_config.h error"
+  sudo curl -s "https://raw.githubusercontent.com/paulfitz/\
+mysql-connector-c/master/include/my_config.h" -o /usr/include/mysql/my_config.h
 
   # Install dotfiles
   git clone --bare https://github.com/sudosubin/dotfiles.git ~/.cfg
