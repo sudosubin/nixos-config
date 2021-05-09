@@ -28,24 +28,6 @@ install_kime() {
   msg_normal "install kime"
   silent sudo dpkg -i kime.deb
 
-  # # configure nimf keys
-  # msg_normal "configure nimf keys"
-
-  # local hangul_keys="['Hangul', 'Alt_R']"
-  # local hanja_keys="['Hangul_Hanja', 'Control_R']"
-  # local xkb_option_ctrl="'ctrl:menu_rctrl', 'ctrl:swapcaps'"
-  # local xkb_option_korean="'korean:ralt_hangul', 'korean:rctrl_hanja'"
-  # local xkb_options="[$xkb_option_ctrl, $xkb_option_korean]"
-
-  # gsettings set org.nimf setup-environment-variables true
-  # gsettings set org.nimf hotkeys "$hangul_keys"
-  # gsettings set org.nimf.clients.gtk hook-gdk-event-key true
-  # gsettings set org.nimf.clients.gtk reset-on-gdk-button-press-event false
-  # gsettings set org.nimf.settings xkb-options "$xkb_options"
-  # gsettings set org.nimf.engines.nimf-libhangul shortcuts-to-sys "$hangul_keys"
-  # gsettings set org.nimf.engines.nimf-libhangul shortcuts-to-lang "$hangul_keys"
-  # gsettings set org.nimf.engines.nimf-libhangul hanja-keys "$hanja_keys"
-
   # clean up
   msg_normal "clean up"
   rm -rf kime.deb

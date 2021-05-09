@@ -20,7 +20,7 @@ install_requirements() {
   output_box sudo apt-get update
 
   # Install via apt-get
-  # - mako-notifier playerctl sway rofi waybar xwayland: Window compositor
+  # - i3 rofi xinit: Window compositor
   # - apparmor-utils: Fix mako
   # - grim slurp wl-clipboard: Screenshot
   # - nautilus: File Explorer
@@ -40,7 +40,7 @@ install_requirements() {
   #     codium yarn: Install from ppa
   msg_step "Install packages via apt-get"
   output_box sudo apt-get -y --no-install-recommends install \
-    mako-notifier playerctl sway rofi waybar xwayland \
+    i3 rofi xinit \
     grim slurp wl-clipboard \
     nautilus \
     pass pass-extension-otp oathtool xclip gnome-keyring \
