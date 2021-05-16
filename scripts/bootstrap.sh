@@ -8,6 +8,8 @@ message() {
     echo "$(tput setaf 2)$*$(tput sgr 0)"
 }
 
+# lsb-release required for debian system
+
 # Install ansible
 if ! which ansible >/dev/null; then
     message "Install ansible"
@@ -22,3 +24,7 @@ if ! which ansible >/dev/null; then
 
     sudo apt install --yes --no-install-recommends ansible
 fi
+
+# Run ansible playbook
+message "Run ansible playbook"
+ansible-playbook -i hosts -K site.yml

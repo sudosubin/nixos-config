@@ -1,0 +1,7 @@
+- name: Change apt mirror on Debian
+  become: true
+  template:
+    src: templates/sources.list.debian.j2
+    dest: /etc/apt/sources.list
+    backup: yes
+  register: change_debian_apt_mirror
