@@ -1,0 +1,5 @@
+# Python venv
+.venv
+
+# asdf-vm
+.tool-versions

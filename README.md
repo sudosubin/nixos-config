@@ -1,5 +1,10 @@
 # Dotfiles
 
+## Commands
+
+- Prepare: `ansible-playbook -i hosts -KCD site.yml`
+- Run: `ansible-playbook -i hosts -K site.yml`
+
 ## License
 
-Setup Script is [MIT Licensed](./LICENSE).
+Dotfiles is [MIT Licensed](./LICENSE).
