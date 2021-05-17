@@ -1,4 +1,5 @@
 - hosts: localhost
   roles:
+    - 'alacritty'
     - 'apt'
     - 'awscli'
