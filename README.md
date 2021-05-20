@@ -1,9 +1,6 @@
 # Dotfiles
 
-## Commands
-
-- Prepare: `ansible-playbook -i hosts -KCD site.yml`
-- Run: `ansible-playbook -i hosts -K site.yml`
+Personal ansible playbook, installs some dotfiles and softwares.
 
 ## License
 
