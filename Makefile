@@ -4,6 +4,10 @@ ANSIBLE_CONFIG := $(root)/ansible.cfg
 PYTHONWARNINGS := ignore:Unverified HTTPS request
 unexport root
 
+ifneq (,$(wildcard $(root)/.makerc))
+	include $(root)/.makerc
+endif
+
 define message
 	echo "$$(tput setaf 2)$(strip $(1))$$(tput sgr 0)"
 endef

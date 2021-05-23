@@ -1,5 +1,8 @@
-# Python venv
-.venv
+# python venv
+/.venv
 
-# asdf-vm
-.tool-versions
+# make
+/.makerc
+
+# ansible
+/collections
