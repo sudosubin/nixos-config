@@ -4,7 +4,7 @@
   changed_when: false
   register: version_output
 
-- name: Check latest GitHub release
+- name: Check latest release
   uri:
     url: https://api.github.com/repos/barnumbirr/alacritty-debian/releases/latest
     return_content: true
@@ -13,33 +13,35 @@
 
 - name: Prepare facts
   set_fact:
-    installed_version: "v{{ version_output.stdout }}"
-    latest_version: "{{ release_output.json.tag_name }}"
-    distribution_name: >-
+    alacritty_version: "v{{ version_output.stdout }}"
+    alacritty_latest_version: "{{ release_output.json.tag_name }}"
+    alacritty_distribution: >-
       {{ ansible_facts['distribution_release'] if ansible_facts['distribution_release'] in ['buster', 'testing', 'unstable'] else 'unstable' }}
 
 - name: Download and install alacritty
   block:
-    - name: Download and Install alacritty {{ latest_version }}
+    - name: Download and install alacritty {{ alacritty_latest_version }}
       become: true
       apt:
         deb: "{{ item.browser_download_url }}"
       loop: "{{ release_output.json.assets }}"
       loop_control:
         label: "{{ item.name }}"
-      when: "distribution_name + '.deb' in item.name"
+      when: "alacritty_distribution + '.deb' in item.name"
 
     - name: Set default terminal as alacritty
       become: true
       shell: "update-alternatives --set x-terminal-emulator $(which alacritty)"
 
-  when: "installed_version != latest_version"
+    - name: Assert alacritty installed
+      shell: "[ v$(dpkg-query --showformat='${Version}' --show alacritty) = '{{ alacritty_latest_version }}' ]"
+      changed_when: false
+
+  when: "alacritty_version != alacritty_latest_version"
 
 - name: Link configurations
-  loop:
-    - { src: 'files/alacritty.yml', path: '~/.config/alacritty/alacritty.yml' }
   file:
-    src: "{{ role_path + '/' + item.src }}"
-    path: "{{ item.path }}"
+    src: "{{ role_path + '/files/alacritty.yml' }}"
+    path: "~/.config/alacritty/alacritty.yml"
     state: link
     force: true

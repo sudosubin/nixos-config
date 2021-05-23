@@ -1,5 +1,9 @@
 - hosts: localhost
+
+  pre_tasks:
+    - import_tasks: roles/pre_tasks.yml
+
   roles:
-    - 'alacritty'
-    - 'apt'
-    - 'awscli'
+    - alacritty
+    - apt
+    - gh

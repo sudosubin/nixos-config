@@ -4,4 +4,4 @@
     src: templates/sources.list.ubuntu.j2
     dest: /etc/apt/sources.list
     backup: true
-  register: change_ubuntu_apt_mirror
+  register: apt_mirror_ubuntu_change

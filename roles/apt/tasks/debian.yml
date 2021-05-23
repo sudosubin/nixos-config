@@ -4,4 +4,4 @@
     src: templates/sources.list.debian.j2
     dest: /etc/apt/sources.list
     backup: true
-  register: change_debian_apt_mirror
+  register: apt_mirror_debian_change

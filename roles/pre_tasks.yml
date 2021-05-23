@@ -1,0 +1,16 @@
+# - name: Get github token
+#   pause:
+#     prompt: "Please enter your github oauth token"
+#     echo: true
+#   register: github_token_output
+
+- name: Get dpkg architecture
+  command: "dpkg --print-architecture"
+  check_mode: false
+  changed_when: false
+  register: dpkg_architecture_output
+
+- name: Prepare facts
+  set_fact:
+    default_architecture: "{{ dpkg_architecture_output.stdout }}"
+    # default_github_token: "{{ github_token_output.user_input }}"

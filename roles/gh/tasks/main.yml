@@ -1,0 +1,58 @@
+- name: Check installed gh version
+  shell: "gh version | grep -Po -m1 '\\d+\\.\\d+\\.\\d+' || echo '0.0.0'"
+  check_mode: false
+  changed_when: false
+  register: version_output
+
+- name: Check latest release
+  uri:
+    url: https://api.github.com/repos/cli/cli/releases/latest
+    return_content: true
+  check_mode: false
+  register: release_output
+
+- name: Prepare facts
+  set_fact:
+    gh_version: "v{{ version_output.stdout }}"
+    gh_latest_version: "{{ release_output.json.tag_name }}"
+
+- name: Download and install gh
+  block:
+    - name: Download and install gh {{ gh_latest_version }}
+      become: true
+      unarchive:
+        src: "{{ item.browser_download_url }}"
+        dest: "/usr/local/bin/"
+        remote_src: true
+        group: "root"
+        owner: "root"
+        extra_opts:
+          - "--strip-components=2"
+          - "--wildcards-match-slash"
+          - "--wildcards"
+          - "*/bin/gh"
+      loop: "{{ release_output.json.assets }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: "'linux_' + default_architecture + '.tar.gz' in item.name"
+
+    - name: Assert gh installed
+      shell: "[ v$(gh version | grep -Po -m1 '\\d+\\.\\d+\\.\\d+') = '{{ gh_latest_version }}' ]"
+      changed_when: false
+
+  when: "gh_version != gh_latest_version"
+
+- name: Template configuration
+  template:
+    src: templates/hosts.yml
+    dest: "{{ role_path + '/secrets/hosts.yml' }}"
+
+- name: Link configurations
+  file:
+    src: "{{ role_path + '/' + item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/config.yml', path: '~/.config/gh/config.yml' }
+    - { src: 'secrets/hosts.yml', path: '~/.config/gh/hosts.yml' }

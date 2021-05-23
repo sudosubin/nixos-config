@@ -1,2 +1,2 @@
-debian_apt_mirror: 'mirror.kakao.com'
-ubuntu_apt_mirror: 'mirror.kakao.com'
+apt_mirror_debian: 'mirror.kakao.com'
+apt_mirror_ubuntu: 'mirror.kakao.com'
