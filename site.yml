@@ -3,7 +3,11 @@
   pre_tasks:
     - import_tasks: roles/pre_tasks.yml
 
+  post_tasks:
+    - import_tasks: roles/post_tasks.yml
+
   roles:
     - alacritty
     - apt
     - gh
+    - slack

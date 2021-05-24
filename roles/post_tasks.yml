@@ -1,0 +1,6 @@
+- name: Install packages
+  become: true
+  apt:
+    name: "{{ default_packages }}"
+    update_cache: true
+    install_recommends: false
