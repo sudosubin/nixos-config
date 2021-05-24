@@ -1,0 +1,44 @@
+- name: Check installed lokalise2 version
+  shell: "lokalise2 --version | grep -Po '\\d+\\.\\d+\\.\\d+' || echo '0.0.0'"
+  check_mode: false
+  changed_when: false
+  register: version_output
+
+- name: Check latest release
+  uri:
+    url: https://api.github.com/repos/lokalise/lokalise-cli-2-go/releases/latest
+    return_content: true
+  check_mode: false
+  register: release_output
+
+- name: Prepare facts
+  set_fact:
+    lokalise2_version: "v{{ version_output.stdout }}"
+    lokalise2_latest_version: "{{ release_output.json.tag_name }}"
+    lokalise2_distribution: x86_64
+
+- name: Download and install lokalise2
+  block:
+    - name: Download and install lokalise2 {{ lokalise2_latest_version }}
+      unarchive:
+        src: "{{ item.browser_download_url }}"
+        dest: "{{ role_path + '/secrets/' }}"
+        remote_src: true
+      loop: "{{ release_output.json.assets }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: "'linux_' + lokalise2_distribution + '.tar.gz' in item.name"
+
+    - name: Link lokalise2
+      become: true
+      file:
+        src: "{{ role_path + '/secrets/lokalise2' }}"
+        path: /usr/local/bin/lokalise2
+        state: link
+        force: true
+
+    - name: Assert alacritty installed
+      shell: "[ v$(lokalise2 --version | grep -Po '\\d+\\.\\d+\\.\\d+') = '{{ lokalise2_latest_version }}' ]"
+      changed_when: false
+
+  when: "lokalise2_version != lokalise2_latest_version"
