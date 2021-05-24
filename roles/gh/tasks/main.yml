@@ -1,46 +1,17 @@
-- name: Check installed gh version
-  shell: "gh version | grep -Po -m1 '\\d+\\.\\d+\\.\\d+' || echo '0.0.0'"
-  check_mode: false
-  changed_when: false
-  register: version_output
+- name: Add apt signing key
+  become: true
+  apt_key:
+    url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xc99b11deb97541f0
 
-- name: Check latest release
-  uri:
-    url: https://api.github.com/repos/cli/cli/releases/latest
-    return_content: true
-  check_mode: false
-  register: release_output
+- name: Add apt repository
+  become: true
+  apt_repository:
+    repo: deb https://cli.github.com/packages stable main
+    filename: github-cli
 
-- name: Prepare facts
+- name: Add packages
   set_fact:
-    gh_version: "v{{ version_output.stdout }}"
-    gh_latest_version: "{{ release_output.json.tag_name }}"
-
-- name: Download and install gh
-  block:
-    - name: Download and install gh {{ gh_latest_version }}
-      become: true
-      unarchive:
-        src: "{{ item.browser_download_url }}"
-        dest: "/usr/local/bin/"
-        remote_src: true
-        group: "root"
-        owner: "root"
-        extra_opts:
-          - "--strip-components=2"
-          - "--wildcards-match-slash"
-          - "--wildcards"
-          - "*/bin/gh"
-      loop: "{{ release_output.json.assets }}"
-      loop_control:
-        label: "{{ item.name }}"
-      when: "'linux_' + default_architecture + '.tar.gz' in item.name"
-
-    - name: Assert gh installed
-      shell: "[ v$(gh version | grep -Po -m1 '\\d+\\.\\d+\\.\\d+') = '{{ gh_latest_version }}' ]"
-      changed_when: false
-
-  when: "gh_version != gh_latest_version"
+    default_packages: "{{ default_packages + [ 'gh' ] }}"
 
 - name: Template configuration
   template:
