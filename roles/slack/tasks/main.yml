@@ -15,7 +15,7 @@
 
 - name: Link configurations
   file:
-    src: "{{ role_path + '/' + item.src }}"
+    src: "{{ role_path }}/{{ item.src }}"
     path: "{{ item.path }}"
     state: link
     force: true

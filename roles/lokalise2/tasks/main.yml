@@ -22,7 +22,7 @@
     - name: Download and install lokalise2 {{ lokalise2_latest_version }}
       unarchive:
         src: "{{ item.browser_download_url }}"
-        dest: "{{ role_path + '/secrets/' }}"
+        dest: "{{ role_path }}/files.private/"
         remote_src: true
       loop: "{{ release_output.json.assets }}"
       loop_control:
@@ -32,7 +32,7 @@
     - name: Link lokalise2
       become: true
       file:
-        src: "{{ role_path + '/secrets/lokalise2' }}"
+        src: "{{ role_path }}/files.private/lokalise2"
         path: /usr/local/bin/lokalise2
         state: link
         force: true

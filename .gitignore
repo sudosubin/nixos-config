@@ -7,6 +7,6 @@
 # ansible
 /collections
 
-# ansible secrets
-/roles/*/secrets/*
-!/roles/*/secrets/.gitkeep
+# ansible private files
+/roles/*/files.private/*
+!/roles/*/files.private/.gitkeep

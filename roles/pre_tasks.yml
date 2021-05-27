@@ -21,3 +21,4 @@
       - gpg
     update_cache: true
     install_recommends: false
+  when: not ansible_check_mode

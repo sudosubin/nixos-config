@@ -41,7 +41,7 @@
 
 - name: Link configurations
   file:
-    src: "{{ role_path + '/files/alacritty.yml' }}"
-    path: "~/.config/alacritty/alacritty.yml"
+    src: "{{ role_path }}/files/alacritty.yml"
+    path: ~/.config/alacritty/alacritty.yml
     state: link
     force: true
