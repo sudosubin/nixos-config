@@ -1,18 +1,3 @@
-- name: Add apt signing key
-  become: true
-  apt_key:
-    url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xc99b11deb97541f0
-
-- name: Add apt repository
-  become: true
-  apt_repository:
-    repo: deb https://cli.github.com/packages stable main
-    filename: github-cli
-
-- name: Add packages
-  set_fact:
-    default_packages: "{{ default_packages + [ 'gh' ] }}"
-
 - name: Template configuration
   template:
     src: templates/hosts.yml
