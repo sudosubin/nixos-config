@@ -1,43 +1,12 @@
-- name: Check installed alacritty version
-  shell: "dpkg-query --showformat='${Version}' --show alacritty || echo '0.0.0'"
-  check_mode: false
-  changed_when: false
-  register: version_output
+- name: Add apt repository
+  become: true
+  apt_repository:
+    repo: ppa:aslatter/ppa
+    filename: alacritty
 
-- name: Check latest release
-  uri:
-    url: https://api.github.com/repos/barnumbirr/alacritty-debian/releases/latest
-    return_content: true
-  check_mode: false
-  register: release_output
-
-- name: Prepare facts
+- name: Add packages
   set_fact:
-    alacritty_version: "v{{ version_output.stdout }}"
-    alacritty_latest_version: "{{ release_output.json.tag_name }}"
-    alacritty_distribution: >-
-      {{ ansible_facts['distribution_release'] if ansible_facts['distribution_release'] in ['buster', 'testing', 'unstable'] else 'unstable' }}
-
-- name: Download and install alacritty
-  block:
-    - name: Download and install alacritty {{ alacritty_latest_version }}
-      become: true
-      apt:
-        deb: "{{ item.browser_download_url }}"
-      loop: "{{ release_output.json.assets }}"
-      loop_control:
-        label: "{{ item.name }}"
-      when: "alacritty_distribution + '.deb' in item.name"
-
-    - name: Set default terminal as alacritty
-      become: true
-      shell: "update-alternatives --set x-terminal-emulator $(which alacritty)"
-
-    - name: Assert alacritty installed
-      shell: "[ v$(dpkg-query --showformat='${Version}' --show alacritty) = '{{ alacritty_latest_version }}' ]"
-      changed_when: false
-
-  when: "alacritty_version != alacritty_latest_version"
+    default_packages: "{{ default_packages + [ 'alacritty' ] }}"
 
 - name: Link configurations
   file:
