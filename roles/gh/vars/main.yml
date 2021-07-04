@@ -1,1 +1,0 @@
-gh_github_oauth_token: "{{ lookup('amazon.aws.aws_ssm', '/ansible/github-oauth-token') }}"
