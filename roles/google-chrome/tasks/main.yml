@@ -1,0 +1,23 @@
+- name: Add apt signing key
+  become: true
+  apt_key:
+    url: https://dl.google.com/linux/linux_signing_key.pub
+
+- name: Add apt repository
+  become: true
+  apt_repository:
+    repo: deb https://dl.google.com/linux/chrome/deb/ stable main
+    filename: google-chrome
+
+- name: Add packages
+  set_fact:
+    default_packages: "{{ default_packages + [ 'google-chrome-stable' ] }}"
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/google-chrome.desktop', path: '~/.local/share/applications/google-chrome.desktop' }
