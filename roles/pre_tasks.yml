@@ -22,3 +22,13 @@
     update_cache: true
     install_recommends: false
   when: not ansible_check_mode
+
+- name: Uninstall bloats
+  become: true
+  apt:
+    name:
+      - cloud-init
+    state: absent
+    purge: true
+    install_recommends: false
+  when: not ansible_check_mode
