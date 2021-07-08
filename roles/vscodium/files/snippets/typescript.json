@@ -1,0 +1,15 @@
+{
+  "react hook": {
+    "prefix": "rh",
+    "body": [
+      "export interface ${1:${TM_FILENAME_BASE/(.)/${1:/upcase}/}Options} {}",
+      "",
+      "const ${2:${TM_FILENAME_BASE}} = ({}: $1) => {",
+      "  return {};",
+      "};",
+      "",
+      "export default $2;",
+      ""
+    ]
+  }
+}
