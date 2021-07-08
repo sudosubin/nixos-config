@@ -1,0 +1,23 @@
+- name: Add apt signing key
+  become: true
+  apt_key:
+    url: https://download.spotify.com/debian/pubkey_0D811D58.gpg
+
+- name: Add apt repository
+  become: true
+  apt_repository:
+    repo: deb http://repository.spotify.com stable non-free
+    filename: spotify
+
+- name: Add packages
+  set_fact:
+    default_packages: "{{ default_packages + [ 'spotify-client' ] }}"
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/spotify.desktop', path: '~/.local/share/applications/spotify.desktop' }
