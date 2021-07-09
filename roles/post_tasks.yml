@@ -5,3 +5,7 @@
     update_cache: true
     install_recommends: false
   when: not ansible_check_mode
+
+- name: Run scripts
+  shell: "{{ item }}"
+  loop: "{{ default_scripts }}"

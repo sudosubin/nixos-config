@@ -8,6 +8,7 @@
   set_fact:
     default_architecture: "{{ dpkg_architecture_output.stdout }}"
     default_packages: []
+    default_scripts: []
 
 - name: Prepare dirs
   file:

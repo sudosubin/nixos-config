@@ -33,6 +33,11 @@ install:
 		-r "$(root)/requirements.yml"
 	@echo ""
 
+.PHONY: backup
+backup:
+	@$(call message, Backup vscodium extensions)
+	@codium --list-extensions > "$(root)/roles/vscodium/files/extensions.txt"
+
 .PHONY: check
 check:
 	@$(call message, Run ansible check)

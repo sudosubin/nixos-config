@@ -12,6 +12,7 @@
 - name: Add packages
   set_fact:
     default_packages: "{{ default_packages + [ 'codium' ] }}"
+    default_scripts: "{{ default_scripts + [ 'xargs -n1 codium --install-extension < ' + role_path + '/files/extensions.txt' ] }}"
 
 - name: Link configurations
   file:
