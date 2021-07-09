@@ -12,7 +12,10 @@
 - name: Add packages, scripts
   set_fact:
     default_packages: "{{ default_packages + [ 'codium' ] }}"
-    default_user_scripts: "{{ default_user_scripts + [ 'xargs -n1 codium --install-extension < ' + role_path + '/files/extensions.txt' ] }}"
+    default_user_scripts: >
+      {{ default_user_scripts
+        + [ 'xargs -n1 codium --install-extension < ' + role_path + '/files/extensions.txt' ]
+        + [ 'rm -rf ~/.config/VSCodium/CachedExtensionVSIXs' ] }}
 
 - name: Link configurations
   file:
