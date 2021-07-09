@@ -9,6 +9,7 @@
     default_architecture: "{{ dpkg_architecture_output.stdout }}"
     default_packages: []
     default_scripts: []
+    default_user_scripts: []
 
 - name: Prepare dirs
   file:

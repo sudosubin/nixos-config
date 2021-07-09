@@ -7,5 +7,11 @@
   when: not ansible_check_mode
 
 - name: Run scripts
+  become: true
   shell: "{{ item }}"
   loop: "{{ default_scripts }}"
+
+- name: Run scripts (user)
+  become: false
+  shell: "{{ item }}"
+  loop: "{{ default_user_scripts }}"

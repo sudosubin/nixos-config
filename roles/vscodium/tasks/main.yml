@@ -9,10 +9,10 @@
     repo: deb https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/debs/ vscodium main
     filename: vscodium
 
-- name: Add packages
+- name: Add packages, scripts
   set_fact:
     default_packages: "{{ default_packages + [ 'codium' ] }}"
-    default_scripts: "{{ default_scripts + [ 'xargs -n1 codium --install-extension < ' + role_path + '/files/extensions.txt' ] }}"
+    default_user_scripts: "{{ default_user_scripts + [ 'xargs -n1 codium --install-extension < ' + role_path + '/files/extensions.txt' ] }}"
 
 - name: Link configurations
   file:

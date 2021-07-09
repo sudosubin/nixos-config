@@ -1,0 +1,4 @@
+- name: Add packages, scripts
+  set_fact:
+    default_packages: "{{ default_packages + [ 'zsh' ] }}"
+    default_scripts: "{{ default_scripts + [ 'chsh -s \"$(command -v zsh)\"' ] }}"
