@@ -1,9 +1,9 @@
 {
   // fonts
-  "markdown.preview.fontFamily": "'SF Pro Text'",
-  "editor.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
-  "debug.console.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
-  "terminal.integrated.fontFamily": "'FiraMono Nerd Font Mono', 'SF Pro Text'",
+  "markdown.preview.fontFamily": "Pretendard",
+  "editor.fontFamily": "'FiraMono Nerd Font Mono', 'Pretendard'",
+  "debug.console.fontFamily": "'FiraMono Nerd Font Mono', 'Pretendard'",
+  "terminal.integrated.fontFamily": "'FiraMono Nerd Font Mono', 'Pretendard'",
   "editor.fontSize": 13,
   "debug.console.fontSize": 13,
   "markdown.preview.fontSize": 13,
@@ -20,7 +20,7 @@
     "stories.tsx": "storybook"
   },
   "customizeUI.activityBar": "bottom",
-  "customizeUI.font.regular": "SF Pro Text",
+  "customizeUI.font.regular": "Pretendard",
   "customizeUI.font.monospace": "FiraMono Nerd Font Mono",
   "customizeUI.stylesheet": {
     ".quick-input-widget": "font-family: monospace !important; font-size: 12px !important;",
