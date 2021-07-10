@@ -9,6 +9,7 @@
   roles:
     - alacritty
     - apt
+    - font
     - gh
     - google-chrome
     - jetbrains
