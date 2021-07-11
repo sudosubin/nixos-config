@@ -23,5 +23,6 @@
     state: link
     force: true
   loop:
+    - { src: 'files/sysctl.conf', path: '/etc/sysctl.conf' }  # Change max fs watch
     - { src: 'files/tail', path: '/etc/resolvconf/resolv.conf.d/tail' }  # Enable dns
     - { src: 'files.private/override.conf', path: '/etc/systemd/system/getty@tty1.service.d/override.conf' }  # Enable auto-login
