@@ -9,6 +9,7 @@
   roles:
     - alacritty
     - apt
+    - docker
     - font
     - gh
     - google-chrome
