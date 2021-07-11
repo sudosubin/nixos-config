@@ -1,0 +1,6 @@
+- name: Set system theme
+  shell: "{{ item }}"
+  loop:
+    - gsettings set org.gnome.desktop.interface cursor-theme 'apple-cursor'
+    - gsettings set org.gnome.desktop.interface cursor-size 22
+    - gsettings set org.gnome.desktop.interface icon-theme 'la-capitaine-icon-theme'
