@@ -24,6 +24,7 @@
     state: link
     force: true
   loop:
+    - { src: 'files/product.json', path: '~/.config/VSCodium/product.json' }
     - { src: 'files/settings.json', path: '~/.config/VSCodium/User/settings.json' }
     - { src: 'files/snippets/typescript.json', path: '~/.config/VSCodium/User/snippets/typescript.json' }
     - { src: 'files/snippets/typescriptreact.json', path: '~/.config/VSCodium/User/snippets/typescriptreact.json' }
