@@ -9,6 +9,7 @@
   roles:
     - alacritty
     - apt
+    - bins
     - docker
     - font
     - gh

@@ -1,0 +1,11 @@
+- name: Install bins
+  git:
+    repo: git@github.com:sudosubin/bins.git
+    dest: "{{ ansible_env.HOME }}/Code/sudosubin/bins"
+
+- name: Add packages, scripts
+  set_fact:
+    default_scripts: >
+      {{ default_scripts
+        + [ 'make -f {{ ansible_env.HOME }}/Code/sudosubin/bins/Makefile prepare' ]
+        + [ 'make -f {{ ansible_env.HOME }}/Code/sudosubin/bins/Makefile install' ] }}
