@@ -1,0 +1,25 @@
+- name: Set system timezone
+  become: true
+  shell: timedatectl set-timezone Asia/Seoul
+
+- name: Add packages
+  set_fact:
+    default_packages: >
+      {{ default_packages
+        + [ 'nautilus', 'pulseaudio', 'pavucontrol' ] }}
+
+- name: Template configuration
+  template:
+    src: templates/override.conf
+    dest: "{{ role_path }}/files.private/override.conf"
+
+- name: Link configurations
+  become: true
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/sysctl.conf', path: '/etc/sysctl.conf' }  # Change max fs watch
+    - { src: 'files.private/override.conf', path: '/etc/systemd/system/getty@tty1.service.d/override.conf' }  # Enable auto-login

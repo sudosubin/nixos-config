@@ -1,0 +1,16 @@
+- name: Add apt repository
+  become: true
+  apt_repository:
+    repo: ppa:aslatter/ppa
+    filename: alacritty
+
+- name: Add packages
+  set_fact:
+    default_packages: "{{ default_packages + [ 'alacritty' ] }}"
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/files/alacritty.yml"
+    path: ~/.config/alacritty/alacritty.yml
+    state: link
+    force: true

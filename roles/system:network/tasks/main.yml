@@ -1,0 +1,17 @@
+- name: Add packages, scripts
+  set_fact:
+    default_packages: "{{ default_packages + [ 'resolvconf', 'openvpn' ] }}"
+    default_scripts: >
+      {{ default_scripts
+        + [ 'resolvconf -u' ]
+        + [ 'service resolvconf restart' ] }}
+
+- name: Link configurations
+  become: true
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/tail', path: '/etc/resolvconf/resolv.conf.d/tail' }  # Enable dns

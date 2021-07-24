@@ -1,0 +1,20 @@
+- name: Registered packages
+  debug: msg={{ default_packages | sort }}
+
+- name: Install packages
+  become: true
+  apt:
+    name: "{{ default_packages | sort }}"
+    update_cache: true
+    install_recommends: false
+  when: not ansible_check_mode
+
+- name: Run scripts
+  become: true
+  shell: "{{ item }}"
+  loop: "{{ default_scripts }}"
+
+- name: Run scripts (user)
+  become: false
+  shell: "{{ item }}"
+  loop: "{{ default_user_scripts }}"

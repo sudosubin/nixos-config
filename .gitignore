@@ -1,13 +1,12 @@
-*~
+# python venv
+/.venv
 
-# temporary files which can be created if a process still has a handle open of a deleted file
-.fuse_hidden*
+# make
+/.makerc
 
-# KDE directory preferences
-.directory
+# ansible
+/collections
 
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
-
-# .nfs files are created when an open file is removed but is still being accessed
-.nfs*
+# ansible private files
+/roles/*/files.private/*
+!/roles/*/files.private/.gitkeep

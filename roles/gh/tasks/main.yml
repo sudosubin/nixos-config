@@ -1,0 +1,14 @@
+- name: Template configuration
+  template:
+    src: templates/hosts.yml
+    dest: "{{ role_path }}/files.private/hosts.yml"
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/config.yml', path: '~/.config/gh/config.yml' }
+    - { src: 'files.private/hosts.yml', path: '~/.config/gh/hosts.yml' }

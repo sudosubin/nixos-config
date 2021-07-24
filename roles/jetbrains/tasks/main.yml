@@ -1,0 +1,10 @@
+- name: Add apt signing key
+  become: true
+  apt_key:
+    url: https://s3.eu-central-1.amazonaws.com/jetbrains-ppa/0xA6E8698A.pub.asc
+
+- name: Add apt repository
+  become: true
+  apt_repository:
+    repo: deb http://jetbrains-ppa.s3-website.eu-central-1.amazonaws.com focal main
+    filename: jetbrains

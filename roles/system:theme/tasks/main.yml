@@ -1,0 +1,12 @@
+- name: Add packages
+  set_fact:
+    default_packages: "{{ default_packages + [ 'arc-theme' ] }}"
+
+- name: Set system theme
+  shell: "{{ item }}"
+  loop:
+    - gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Dark'
+    - gsettings set org.gnome.desktop.wm.preferences theme 'Arc-Dark'
+    - gsettings set org.gnome.desktop.interface cursor-theme 'apple-cursor'
+    - gsettings set org.gnome.desktop.interface cursor-size 22
+    - gsettings set org.gnome.desktop.interface icon-theme 'la-capitaine-icon-theme'

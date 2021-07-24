@@ -1,0 +1,26 @@
+- name: Add packages for password
+  set_fact:
+    default_packages: >
+      {{ default_packages
+        + [ 'pass', 'pass-extension-otp', 'oathtool', 'xclip',
+            'gnome-keyring' ] }}
+
+- name: Add packages for authentication
+  set_fact:
+    default_packages: "{{ default_packages + [ 'lxpolkit' ] }}"
+
+- name: Add packages for development
+  set_fact:
+    default_packages: >
+      {{ default_packages
+        + [ 'bat', 'fzf', 'jq', 'shellcheck', 'tmux', 'watchman', 'unzip' ] }}
+
+- name: Add packages for development (build)
+  set_fact:
+    default_packages: >
+      {{ default_packages
+        + [ 'make', 'build-essential', 'libssl-dev', 'zlib1g-dev', 'libbz2-dev',
+            'libreadline-dev', 'libsqlite3-dev', 'wget', 'curl', 'llvm',
+            'libncurses5-dev', 'xz-utils', 'tk-dev', 'libxml2-dev',
+            'libxmlsec1-dev', 'libxmlsec1-dev', 'libffi-dev', 'liblzma-dev',
+            'libmysqlclient-dev', 'libpq-dev', 'libcurl4-gnutls-dev' ] }}

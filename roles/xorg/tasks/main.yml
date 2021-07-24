@@ -1,0 +1,5 @@
+- name: Add packages
+  set_fact:
+    default_packages: >
+      {{ default_packages
+        + [ 'i3', 'rofi', 'xinit', 'grim', 'slurp', 'wl-clipboard' ] }}

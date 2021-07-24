@@ -1,0 +1,26 @@
+- hosts: localhost
+
+  pre_tasks:
+    - import_tasks: roles/pre_tasks.yml
+
+  post_tasks:
+    - import_tasks: roles/post_tasks.yml
+
+  roles:
+    - alacritty
+    - apt
+    - bins
+    - docker
+    - gh
+    - google-chrome
+    - jetbrains
+    - slack
+    - spotify
+    - system
+    - system:development
+    - system:font
+    - system:network
+    - system:theme
+    - vscodium
+    - xorg
+    - zsh
