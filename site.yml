@@ -17,8 +17,10 @@
     - slack
     - spotify
     - system
+    - system:development
     - system:font
     - system:network
     - system:theme
     - vscodium
+    - xorg
     - zsh

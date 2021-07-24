@@ -2,6 +2,12 @@
   become: true
   shell: timedatectl set-timezone Asia/Seoul
 
+- name: Add packages
+  set_fact:
+    default_packages: >
+      {{ default_packages
+        + [ 'nautilus', 'pulseaudio', 'pavucontrol' ] }}
+
 - name: Template configuration
   template:
     src: templates/override.conf
