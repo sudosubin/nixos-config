@@ -2,14 +2,6 @@
   become: true
   shell: timedatectl set-timezone Asia/Seoul
 
-- name: Add packages, scripts
-  set_fact:
-    default_packages: "{{ default_packages + [ 'resolvconf', 'openvpn' ] }}"
-    default_scripts: >
-      {{ default_scripts
-        + [ 'resolvconf -u' ]
-        + [ 'service resolvconf restart' ] }}
-
 - name: Template configuration
   template:
     src: templates/override.conf
@@ -24,5 +16,4 @@
     force: true
   loop:
     - { src: 'files/sysctl.conf', path: '/etc/sysctl.conf' }  # Change max fs watch
-    - { src: 'files/tail', path: '/etc/resolvconf/resolv.conf.d/tail' }  # Enable dns
     - { src: 'files.private/override.conf', path: '/etc/systemd/system/getty@tty1.service.d/override.conf' }  # Enable auto-login

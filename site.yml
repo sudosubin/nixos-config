@@ -11,13 +11,14 @@
     - apt
     - bins
     - docker
-    - font
     - gh
     - google-chrome
     - jetbrains
     - slack
     - spotify
     - system
-    - theme
+    - system:font
+    - system:network
+    - system:theme
     - vscodium
     - zsh
