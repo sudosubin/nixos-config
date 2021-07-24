@@ -25,7 +25,7 @@
   "customizeUI.stylesheet": {
     ".quick-input-widget": "font-family: monospace !important; font-size: 12px !important;",
     ".search-view .search-widgets-container": "font-family: monospace !important; font-size: 12px !important;",
-    ".monaco-list-rows, .monaco-findInput": "font-family: monospace !important; font-size: 12px !important;",
+    ".monaco-list-rows, .monaco-findInput": "font-family: monospace !important; font-size: 12px !important;"
   },
   "workbench.colorCustomizations": {
     "errorLens.errorBackground": "#E06C751A",
@@ -35,7 +35,7 @@
     "errorLens.infoBackground": "#61AFEF1A",
     "errorLens.infoForeground": "#61AFEF",
     "errorLens.hintBackground": "#98C3791A",
-    "errorLens.hintForeground": "#98C379",
+    "errorLens.hintForeground": "#98C379"
   },
   "explorer.compactFolders": false,
   "workbench.tree.indent": 16,
@@ -65,7 +65,7 @@
   "files.associations": {
     ".dockerignore": "ignore",
     "*.bats": "shellscript",
-    ".env": "shellscript",
+    ".env": "shellscript"
   },
   "files.watcherExclude": {
     "**/.git/*/**": true,
@@ -89,14 +89,14 @@
     "editor.formatOnSave": true,
     "files.insertFinalNewline": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": true,
-    },
+      "source.organizeImports": true
+    }
   },
 
   // language (ruby)
   "[ruby]": {
     "editor.tabSize": 2,
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": true
   },
   "solargraph.diagnostics": true,
   "solargraph.formatting": true,
@@ -120,12 +120,17 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "[typescript]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true,
+      "source.fixAll.eslint": true
     }
   },
   "[javascriptreact]": {
@@ -138,7 +143,7 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true,
+      "source.fixAll.eslint": true
     }
   },
 
@@ -165,7 +170,7 @@
     "editor.tabSize": 2
   },
   "[rust]": {
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": true
   },
   "java.configuration.checkProjectSettingsExclusions": false,
   "errorLens.margin": "6ch",
