@@ -4,6 +4,10 @@
   changed_when: false
   register: dpkg_architecture_output
 
+- name: Gather package facts
+  package_facts:
+    manager: apt
+
 - name: Prepare facts
   set_fact:
     default_architecture: "{{ dpkg_architecture_output.stdout }}"
@@ -18,12 +22,13 @@
 
 - name: Install requirements
   become: true
+  vars:
+    packages: [git, gpg]
   apt:
-    name:
-      - gpg
+    name: "{{ packages }}"
     update_cache: true
     install_recommends: false
-  when: not ansible_check_mode
+  when: ansible_facts.packages | intersect(packages) | length != packages | length
 
 - name: Uninstall bloats
   become: true
