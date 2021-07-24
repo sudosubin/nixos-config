@@ -1,0 +1,8 @@
+- name: Template configurations
+  no_log: true
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: 'templates/id_ed25519', dest: '~/.ssh/id_ed25519' }
+    - { src: 'templates/id_ed25519.pub', dest: '~/.ssh/id_ed25519.pub' }

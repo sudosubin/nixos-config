@@ -16,6 +16,7 @@
     - jetbrains
     - slack
     - spotify
+    - ssh
     - system
     - system:development
     - system:font
