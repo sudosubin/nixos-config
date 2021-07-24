@@ -123,7 +123,10 @@
   "[typescript]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true,
+    }
   },
   "[javascriptreact]": {
     "editor.tabSize": 2,
@@ -133,7 +136,10 @@
   "[typescriptreact]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true,
+    }
   },
 
   // language (bash)
