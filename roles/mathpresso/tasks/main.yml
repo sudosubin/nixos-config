@@ -1,0 +1,48 @@
+- name: Prepare dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - ~/.config/mathpresso
+    - ~/.ssh
+
+- name: Template profile.ovpn
+  no_log: true
+  template:
+    src: "templates/profile.ovpn.j2"
+    dest: "{{ role_path }}/files.private/profile.ovpn"
+
+- name: Check tokens.json exists
+  stat:
+    path: "{{ role_path }}/files.private/tokens.json"
+  register: mathpresso_tokens_stat
+
+- name: Template tokens.json
+  no_log: true
+  template:
+    src: "templates/tokens.json.j2"
+    dest: "{{ role_path }}/files.private/tokens.json"
+  when: not mathpresso_tokens_stat.stat.exists
+
+- name: Check tunnel.json exists
+  stat:
+    path: "{{ role_path }}/files.private/tunnel.json"
+  register: mathpresso_tunnel_stat
+
+- name: Template tunnel.json
+  no_log: true
+  template:
+    src: "templates/tunnel.json.j2"
+    dest: "{{ role_path }}/files.private/tunnel.json"
+  when: not mathpresso_tunnel_stat.stat.exists
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files.private/profile.ovpn', path: '~/.config/mathpresso/profile.ovpn' }
+    - { src: 'files.private/tokens.json', path: '~/.config/mathpresso/tokens.json' }
+    - { src: 'files.private/tunnel.json', path: '~/.ssh/tunnel.json' }
