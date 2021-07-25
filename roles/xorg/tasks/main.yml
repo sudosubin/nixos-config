@@ -6,8 +6,11 @@
 
 - name: Prepare dirs
   file:
-    path: ~/.local/share/scripts
+    path: "{{ item }}"
     state: directory
+  loop:
+    - ~/.config/i3
+    - ~/.local/share/scripts
 
 - name: Link configurations
   file:
@@ -16,4 +19,5 @@
     state: link
     force: true
   loop:
+    - { src: 'files/i3/config', path: '~/.config/i3/config' }
     - { src: 'files/i3.sh', path: '~/.local/share/scripts/i3.sh' }
