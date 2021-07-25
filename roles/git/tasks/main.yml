@@ -1,0 +1,8 @@
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/.gitconfig', path: '~/.gitconfig' }
