@@ -3,3 +3,17 @@
     default_packages: >
       {{ default_packages
         + [ 'i3', 'rofi', 'xinit', 'grim', 'slurp', 'wl-clipboard' ] }}
+
+- name: Prepare dirs
+  file:
+    path: ~/.local/share/scripts
+    state: directory
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/i3.sh', path: '~/.local/share/scripts/i3.sh' }
