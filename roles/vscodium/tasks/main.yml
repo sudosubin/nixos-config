@@ -17,6 +17,11 @@
         + [ 'xargs -n1 codium --install-extension < ' + role_path + '/files/extensions.txt' ]
         + [ 'rm -rf ~/.config/VSCodium/CachedExtensionVSIXs' ] }}
 
+- name: Prepare dirs
+  file:
+    path: ~/.config/VSCodium/User/snippets
+    state: directory
+
 - name: Link configurations
   file:
     src: "{{ role_path }}/{{ item.src }}"
