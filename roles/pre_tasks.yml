@@ -34,7 +34,9 @@
     name: "{{ packages }}"
     update_cache: true
     install_recommends: false
-  when: ansible_facts.packages | intersect(packages) | length != packages | length
+  when: >
+    not ansible_check_mode
+      and ansible_facts.packages | intersect(packages) | length != packages | length
 
 - name: Uninstall bloats
   become: true

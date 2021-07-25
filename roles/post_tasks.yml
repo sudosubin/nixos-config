@@ -7,7 +7,9 @@
     name: "{{ default_packages | sort }}"
     update_cache: true
     install_recommends: false
-  when: not ansible_check_mode
+  when: >
+    not ansible_check_mode
+      and ansible_facts.packages | intersect(default_packages) | length != default_packages | length
 
 - name: Run scripts
   become: true
