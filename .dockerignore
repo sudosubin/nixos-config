@@ -1,8 +1,5 @@
 # python venv
 /.venv
 
-# make
-/.makerc
-
 # ansible
 /collections

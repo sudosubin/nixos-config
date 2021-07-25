@@ -13,7 +13,10 @@ RUN apt-get update \
         make \
     && rm -rf /var/lib/apt/lists/*
 
+COPY Makefile requirements.txt requirements.yml ./
+
+RUN make install
+
 COPY . ./
 
-RUN make install \
-    && make test
+RUN make test
