@@ -8,6 +8,11 @@
   set_fact:
     default_packages: "{{ default_packages + [ 'alacritty' ] }}"
 
+- name: Prepare dirs
+  file:
+    path: ~/.config/alacritty
+    state: directory
+
 - name: Link configurations
   file:
     src: "{{ role_path }}/files/alacritty.yml"
