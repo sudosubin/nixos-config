@@ -13,9 +13,11 @@
     - docker
     - gh
     - google-chrome
+    - gpg
     - jetbrains
     - slack
     - spotify
+    - ssh
     - system
     - system:development
     - system:font

@@ -5,7 +5,7 @@
 
 - name: Add packages, scripts
   set_fact:
-    default_scripts: >
-      {{ default_scripts
+    default_user_scripts: >
+      {{ default_user_scripts
         + [ 'make -f {{ ansible_env.HOME }}/Code/sudosubin/bins/Makefile prepare' ]
         + [ 'make -f {{ ansible_env.HOME }}/Code/sudosubin/bins/Makefile install' ] }}
