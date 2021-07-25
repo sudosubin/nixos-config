@@ -1,0 +1,5 @@
+gtk-theme-name = "Arc-Dark"
+gtk-font-name = "Pretendard 10"
+gtk-icon-theme-name = "la-capitaine-icon-theme"
+gtk-cursor-theme-name = apple-cursor
+gtk-cursor-theme-size = 22
