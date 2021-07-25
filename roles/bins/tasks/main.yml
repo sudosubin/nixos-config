@@ -9,9 +9,15 @@
     src: templates/.makerc.j2
     dest: "~/Code/sudosubin/bins/.makerc"
 
+- name: Check bins exists
+  stat:
+    path: "~/bin"
+  register: bins_stat
+
 - name: Add packages, scripts
   set_fact:
     default_user_scripts: >
       {{ default_user_scripts
         + [ 'make -f ~/Code/sudosubin/bins/Makefile prepare',
             'make -f ~/Code/sudosubin/bins/Makefile install' ] }}
+  when: not bins_stat.stat.exists
