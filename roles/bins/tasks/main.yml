@@ -1,11 +1,17 @@
 - name: Install bins
   git:
     repo: git@github.com:sudosubin/bins.git
-    dest: "{{ ansible_env.HOME }}/Code/sudosubin/bins"
+    dest: "~/Code/sudosubin/bins"
+
+- name: Template configuration
+  no_log: true
+  template:
+    src: templates/.makerc.j2
+    dest: "~/Code/sudosubin/bins/.makerc"
 
 - name: Add packages, scripts
   set_fact:
     default_user_scripts: >
       {{ default_user_scripts
-        + [ 'make -f {{ ansible_env.HOME }}/Code/sudosubin/bins/Makefile prepare' ]
-        + [ 'make -f {{ ansible_env.HOME }}/Code/sudosubin/bins/Makefile install' ] }}
+        + [ 'make -f ~/Code/sudosubin/bins/Makefile prepare',
+            'make -f ~/Code/sudosubin/bins/Makefile install' ] }}
