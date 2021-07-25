@@ -1,0 +1,10 @@
+- name: Install .password-store
+  git:
+    repo: git@github.com:sudosubin/.password-store.git
+    dest: "~/.password-store"
+
+- name: Add packages
+  set_fact:
+    default_packages: >
+      {{ default_packages
+        + [ 'pass', 'pass-extension-otp', 'oathtool', 'xclip' ] }}

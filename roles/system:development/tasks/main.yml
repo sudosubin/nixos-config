@@ -1,9 +1,6 @@
 - name: Add packages for password
   set_fact:
-    default_packages: >
-      {{ default_packages
-        + [ 'pass', 'pass-extension-otp', 'oathtool', 'xclip',
-            'gnome-keyring' ] }}
+    default_packages: "{{ default_packages + [ 'gnome-keyring' ] }}"
 
 - name: Add packages for authentication
   set_fact:
