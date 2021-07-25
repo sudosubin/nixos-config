@@ -21,3 +21,22 @@
             'libncurses5-dev', 'xz-utils', 'tk-dev', 'libxml2-dev',
             'libxmlsec1-dev', 'libxmlsec1-dev', 'libffi-dev', 'liblzma-dev',
             'libmysqlclient-dev', 'libpq-dev', 'libcurl4-gnutls-dev' ] }}
+
+- name: Prepare dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - ~/.config/bat
+    - ~/.config/bpython
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/bat/config', path: '~/.config/bat/config' }
+    - { src: 'files/bpython/base16.theme', path: '~/.config/bpython/base16.theme' }
+    - { src: 'files/bpython/config', path: '~/.config/bpython/config' }
