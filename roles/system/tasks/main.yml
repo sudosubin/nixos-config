@@ -1,12 +1,16 @@
-- name: Set system timezone
-  become: true
-  shell: timedatectl set-timezone Asia/Seoul
-
-- name: Add packages
+- name: Add packages, scripts
   set_fact:
     default_packages: >
       {{ default_packages
-        + [ 'nautilus', 'pulseaudio', 'pavucontrol' ] }}
+        + [ 'nautilus', 'pulseaudio', 'pavucontrol', 'systemd' ] }}
+    default_scripts: >
+      {{ default_scripts + [ 'timedatectl set-timezone Asia/Seoul || true' ] }}
+
+- name: Prepare dirs
+  become: true
+  file:
+    path: /etc/systemd/system/getty@tty1.service.d
+    state: directory
 
 - name: Template configuration
   template:

@@ -6,6 +6,11 @@
         + [ 'resolvconf -u' ]
         + [ 'service resolvconf restart' ] }}
 
+- name: Prepare dirs
+  file:
+    path: /etc/resolvconf/resolv.conf.d
+    state: directory
+
 - name: Link configurations
   become: true
   file:

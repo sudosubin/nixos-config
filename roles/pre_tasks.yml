@@ -23,7 +23,13 @@
 - name: Install requirements
   become: true
   vars:
-    packages: [git, gpg]
+    packages:
+      - dirmngr
+      - git
+      - gpg
+      - gpg-agent
+      - lsb-release
+      - openssh-client
   apt:
     name: "{{ packages }}"
     update_cache: true

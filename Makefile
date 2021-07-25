@@ -47,3 +47,8 @@ check:
 play:
 	@$(call message, Run ansible play)
 	@$(root)/.venv/bin/ansible-playbook -K "$(root)/site.yml"
+
+.PHONY: test
+test:
+	@$(call message, Run ansible play)
+	@$(root)/.venv/bin/ansible-playbook "$(root)/site.yml"

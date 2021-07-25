@@ -1,3 +1,8 @@
+- name: Prepare dirs
+  file:
+    path: ~/.ssh
+    state: directory
+
 - name: Template configurations
   no_log: true
   template:
@@ -9,7 +14,10 @@
     - { src: 'templates/id_ed25519.pub.j2', dest: '~/.ssh/id_ed25519.pub' }
 
 - name: Add ssh key
-  shell: "ssh-add ~/.ssh/id_ed25519"
+  shell: >
+    eval "$(ssh-agent)";
+    ssh-add ~/.ssh/id_ed25519;
+    eval "$(ssh-agent -k)";
 
 - name: Link configurations
   file:
