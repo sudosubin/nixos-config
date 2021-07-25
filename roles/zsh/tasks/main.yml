@@ -10,6 +10,7 @@
     state: link
     force: true
   loop:
+    - { src: 'files/.p10k.zsh', path: '~/.p10k.zsh' }
     - { src: 'files/.zprofile', path: '~/.zprofile' }
     - { src: 'files/.zshenv', path: '~/.zshenv' }
     - { src: 'files/.zshrc', path: '~/.zshrc' }
