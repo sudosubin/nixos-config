@@ -24,6 +24,7 @@
     - system:font
     - system:network
     - system:theme
+    - tmux
     - vscodium
     - xorg
     - zsh

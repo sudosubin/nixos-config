@@ -1,0 +1,13 @@
+
+- name: Add packages
+  set_fact:
+    default_packages: "{{ default_packages + [ 'tmux' ] }}"
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/.tmux.conf', path: '~/.tmux.conf' }

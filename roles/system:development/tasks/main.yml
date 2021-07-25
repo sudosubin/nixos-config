@@ -13,7 +13,7 @@
   set_fact:
     default_packages: >
       {{ default_packages
-        + [ 'bat', 'fzf', 'jq', 'shellcheck', 'tmux', 'watchman', 'unzip' ] }}
+        + [ 'bat', 'fzf', 'jq', 'shellcheck', 'watchman', 'unzip' ] }}
 
 - name: Add packages for development (build)
   set_fact:
