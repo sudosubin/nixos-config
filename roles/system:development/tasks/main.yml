@@ -29,6 +29,8 @@
   loop:
     - ~/.config/bat
     - ~/.config/bpython
+    - ~/.config/pip
+    - ~/.config/pypoetry
 
 - name: Link configurations
   file:
@@ -40,3 +42,5 @@
     - { src: 'files/bat/config', path: '~/.config/bat/config' }
     - { src: 'files/bpython/base16.theme', path: '~/.config/bpython/base16.theme' }
     - { src: 'files/bpython/config', path: '~/.config/bpython/config' }
+    - { src: 'files/pip/pip.conf', path: '~/.config/pip/pip.conf' }
+    - { src: 'files/poetry/config.toml', path: '~/.config/pypoetry/config.toml' }
