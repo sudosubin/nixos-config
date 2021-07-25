@@ -51,4 +51,4 @@ play:
 .PHONY: test
 test:
 	@$(call message, Run ansible play)
-	@$(root)/.venv/bin/ansible-playbook -v "$(root)/site.yml"
+	@$(root)/.venv/bin/ansible-playbook "$(root)/site.yml"
