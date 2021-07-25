@@ -1,0 +1,6 @@
+[default]
+region = ap-northeast-2
+
+[profile mathpresso]
+region = ap-northeast-2
+mfa_serial = {{ lookup('amazon.aws.aws_ssm', '/ansible/awscli/mfa_serial_mathpresso') }}

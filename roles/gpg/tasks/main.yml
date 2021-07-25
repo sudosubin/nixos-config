@@ -15,5 +15,5 @@
 
     EOF
 
-    echo "{{ lookup('amazon.aws.aws_ssm', '/ansible/gpg/recipient') }}:6" \
+    echo "{{ lookup('amazon.aws.aws_ssm', '/ansible/gpg/recipient') }}:5" \
       | gpg --import-ownertrust

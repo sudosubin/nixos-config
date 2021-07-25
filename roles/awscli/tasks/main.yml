@@ -1,0 +1,19 @@
+- name: Prepare dirs
+  file:
+    path: ~/.aws
+    state: directory
+
+- name: Template configuration
+  no_log: true
+  template:
+    src: templates/config.j2
+    dest: "{{ role_path }}/files.private/config"
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files.private/config', path: '~/.aws/config' }
