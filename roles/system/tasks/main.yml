@@ -3,8 +3,8 @@
     default_packages: >
       {{ default_packages
         + [ 'nautilus', 'pulseaudio', 'pavucontrol', 'systemd' ] }}
-    default_user_scripts: >
-      {{ default_user_scripts + [ 'timedatectl set-timezone Asia/Seoul' ] }}
+    default_scripts: >
+      {{ default_scripts + [ 'timedatectl set-timezone Asia/Seoul || true' ] }}
 
 - name: Prepare dirs
   become: true
