@@ -14,7 +14,7 @@
     default_packages: "{{ default_packages + [ 'codium' ] }}"
     default_user_scripts: >
       {{ default_user_scripts
-        + [ 'xargs -n1 codium --install-extension --user-data-dir="$HOME/.config" < ' + role_path + '/files/extensions.txt',
+        + [ 'xargs -n1 codium --user-data-dir="$HOME/.config/VSCodium" --install-extension < ' + role_path + '/files/extensions.txt',
             'rm -rf ~/.config/VSCodium/CachedExtensionVSIXs' ] }}
 
 - name: Prepare dirs
