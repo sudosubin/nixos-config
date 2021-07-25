@@ -14,3 +14,6 @@
     {{ lookup('amazon.aws.aws_ssm', '/ansible/gpg/private.key.2') }}
 
     EOF
+
+    echo "{{ lookup('amazon.aws.aws_ssm', '/ansible/gpg/recipient') }}:6" \
+      | gpg --import-ownertrust
