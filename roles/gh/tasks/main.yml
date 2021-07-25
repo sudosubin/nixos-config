@@ -1,3 +1,8 @@
+- name: Prepare dirs
+  file:
+    path: ~/.config/gh
+    state: directory
+
 - name: Template configuration
   no_log: true
   template:
