@@ -1,10 +1,16 @@
-- name: Set system font
-  shell: "{{ item }}"
-  loop:
-    - gsettings set org.gnome.desktop.interface font-name 'Pretendard 10'
-    - gsettings set org.gnome.desktop.interface document-font-name 'Pretendard 10'
-    - gsettings set org.gnome.desktop.wm.preferences titlebar-font 'Pretendard Semibold 10'
-    - gsettings set org.gnome.desktop.interface monospace-font-name 'FiraMono Nerd Font Mono 10'
+- name: Add scripts
+  set_fact:
+    default_user_scripts: >
+      {{ default_user_scripts
+        + [ 'gsettings set org.gnome.desktop.interface font-name "Pretendard 10"',
+            'gsettings set org.gnome.desktop.interface document-font-name "Pretendard 10"',
+            'gsettings set org.gnome.desktop.wm.preferences titlebar-font "Pretendard Semibold 10"',
+            'gsettings set org.gnome.desktop.interface monospace-font-name "FiraMono Nerd Font Mono 10"' ] }}
+
+- name: Prepare dirs
+  file:
+    path: ~/.config/fontconfig
+    state: directory
 
 - name: Link configurations
   file:
