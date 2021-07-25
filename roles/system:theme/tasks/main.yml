@@ -9,6 +9,11 @@
             'gsettings set org.gnome.desktop.interface cursor-size 22',
             'gsettings set org.gnome.desktop.interface icon-theme "la-capitaine-icon-theme"' ] }}
 
+- name: Prepare dirs
+  file:
+    path: ~/.config/gtk-3.0
+    state: directory
+
 - name: Link configurations
   file:
     src: "{{ role_path }}/{{ item.src }}"
@@ -16,5 +21,6 @@
     state: link
     force: true
   loop:
+    - { src: 'files/gtk-3.0/settings.ini', path: '~/.config/gtk-3.0/settings.ini' }
     - { src: 'files/.gtkrc-2.0', path: '~/.gtkrc-2.0' }
     - { src: 'files/.Xresources', path: '~/.Xresources' }
