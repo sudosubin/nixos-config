@@ -8,8 +8,14 @@
     - { src: 'templates/id_ed25519.j2', dest: '~/.ssh/id_ed25519' }
     - { src: 'templates/id_ed25519.pub.j2', dest: '~/.ssh/id_ed25519.pub' }
 
-- name: Add scripts
-  set_fact:
-    default_user_scripts: >
-      {{ default_user_scripts
-        + [ 'ssh-add ~/.ssh/id_ed25519' ] }}
+- name: Add ssh key
+  shell: "ssh-add ~/.ssh/id_ed25519"
+
+- name: Link configurations
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/config', path: '~/.ssh/config' }

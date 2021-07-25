@@ -1,4 +1,5 @@
 - name: Template configuration
+  no_log: true
   template:
     src: templates/hosts.yml.j2
     dest: "{{ role_path }}/files.private/hosts.yml"
