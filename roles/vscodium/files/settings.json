@@ -41,6 +41,7 @@
   "workbench.tree.indent": 16,
   "workbench.startupEditor": "none",
   "workbench.list.smoothScrolling": true,
+  "workbench.editor.enablePreview": false,
   "editor.semanticHighlighting.enabled": false,
   "editor.smoothScrolling": true,
   "editor.rulers": [80, 120],
