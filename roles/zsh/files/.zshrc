@@ -96,17 +96,11 @@ zinit ice wait lucid
 zinit light tadfisher/pass-otp
 
 # Plugins > completions (asdf)
+typeset -x asdf_dir="$HOME/bin/asdf"
+typeset -x JAVA_HOME="$HOME/.asdf/installs/java/openjdk-11"
 typeset -x NEXT_TELEMETRY_DISABLED="1"
-typeset -x JAVA_HOME="/home/sudosubin/.asdf/installs/java/openjdk-11"
-if [ -d "$HOME/bin/asdf" ]; then
-    autoload -Uz compinit
-    compinit
-    autoload bashcompinit
-    bashcompinit
-
-    source "$(readlink -f $HOME/bin/asdf)/asdf.sh"
-    source "$(readlink -f $HOME/bin/asdf)/completions/asdf.bash"
-fi
+zinit ice wait lucid pick'asdf.plugin.zsh' atload'zicdreplay'
+zinit light kiurchv/asdf.plugin.zsh
 
 # Plugins > auto-pair
 zinit ice wait lucid
