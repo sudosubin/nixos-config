@@ -12,6 +12,7 @@
     - ~/.config/i3
     - ~/.local/share/scripts
     - /etc/default
+    - /etc/X11/xinit
 
 - name: Link configurations
   file:
@@ -32,3 +33,4 @@
     force: true
   loop:
     - { src: 'files/keyboard', path: '/etc/default/keyboard' }
+    - { src: 'files/xserverrc', path: '/etc/X11/xinit/xserverrc' }
