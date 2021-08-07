@@ -137,8 +137,8 @@ exec --no-startup-id lxpolkit
 # exec_always ~/.local/share/scripts/waybar.sh
 
 # Keyboard
-exec --no-startup-id "xset r rate 300 35"
-exec --no-startup-id "setxkbmap -option ctrl:menu_rctrl,ctrl:swapcaps,korean:ralt_hangul,korean:rctrl_hanja"
+# exec --no-startup-id "xset r rate 300 35"
+# exec --no-startup-id "setxkbmap -option ctrl:menu_rctrl,ctrl:swapcaps,korean:ralt_hangul,korean:rctrl_hanja"
 
 # Output
 exec --no-startup-id "xrandr --output DP-1 --mode 2560x1080@75Hz"

@@ -11,6 +11,7 @@
   loop:
     - ~/.config/i3
     - ~/.local/share/scripts
+    - /etc/default
 
 - name: Link configurations
   file:
@@ -21,3 +22,13 @@
   loop:
     - { src: 'files/i3/config', path: '~/.config/i3/config' }
     - { src: 'files/i3.sh', path: '~/.local/share/scripts/i3.sh' }
+
+- name: Link configurations (sudo)
+  become: true
+  file:
+    src: "{{ role_path }}/{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - { src: 'files/keyboard', path: '/etc/default/keyboard' }
