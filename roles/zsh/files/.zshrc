@@ -153,6 +153,18 @@ activate() {
     done
 }
 
+# Functions > openvpn-mathpresso
+openvpn-mathpresso() {
+    local username;
+    local password;
+
+    username="elvin.kim@mathpresso.com";
+    password="$@";
+
+    sudo openvpn --config "$HOME/.config/mathpresso/profile.ovpn" \
+        --auth-user-pass =(echo -e "$username\n$password");
+}
+
 # Bins
 alias bins="make -f $HOME/Code/sudosubin/bins/Makefile"
 export PATH="$PATH:$HOME/bin"
