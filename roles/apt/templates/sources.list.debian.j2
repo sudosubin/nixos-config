@@ -1,8 +1,8 @@
-deb http://{{ apt_mirror_debian }}/debian {{ ansible_distribution_release }} main
-deb-src http://{{ apt_mirror_debian }}/debian {{ ansible_distribution_release }} main
+deb http://{{ apt_mirror_debian }}/debian sid main contrib non-free
+deb-src http://{{ apt_mirror_debian }}/debian sid main contrib non-free
 
-deb http://{{ apt_mirror_debian }}/debian {{ ansible_distribution_release }}-updates main
-deb-src http://{{ apt_mirror_debian }}/debian {{ ansible_distribution_release }}-updates main
+deb http://{{ apt_mirror_debian }}/debian testing-updates main contrib non-free
+deb-src http://{{ apt_mirror_debian }}/debian testing-updates main contrib non-free
 
-deb http://security.debian.org/ {{ ansible_distribution_release }}/updates main
-deb-src http://security.debian.org/ {{ ansible_distribution_release }}/updates main
+deb http://security.debian.org/ testing-security main contrib non-free
+deb-src http://security.debian.org/ testing-security main contrib non-free
