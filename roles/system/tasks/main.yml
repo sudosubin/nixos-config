@@ -2,7 +2,9 @@
   set_fact:
     default_packages: >
       {{ default_packages
-        + [ 'nautilus', 'pulseaudio', 'pavucontrol', 'systemd' ] }}
+        + [ 'nautilus', 'pulseaudio', 'pavucontrol', 'systemd',
+            'firmware-linux', 'firmware-linux-nonfree', 'libdrm-amdgpu1',
+            'xserver-xorg-video-amdgpu'] }}
     default_scripts: >
       {{ default_scripts + [ 'timedatectl set-timezone Asia/Seoul || true' ] }}
 
