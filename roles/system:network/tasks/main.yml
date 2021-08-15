@@ -1,6 +1,6 @@
 - name: Add packages, scripts
   set_fact:
-    default_packages: "{{ default_packages + [ 'resolvconf', 'openvpn' ] }}"
+    default_packages: "{{ default_packages + [ 'openvpn' ] }}"
     default_scripts: >
       {{ default_scripts
         + [ 'resolvconf -u' ]

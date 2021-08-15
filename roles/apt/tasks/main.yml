@@ -2,6 +2,3 @@
   import_tasks: ubuntu.yml
   when: ansible_facts['distribution'] | lower == 'ubuntu'
 
-- name: Debian
-  import_tasks: debian.yml
-  when: ansible_facts['distribution'] | lower == 'debian'

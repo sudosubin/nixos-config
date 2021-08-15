@@ -3,6 +3,7 @@
   apt_repository:
     repo: ppa:aslatter/ppa
     filename: alacritty
+    codename: focal
 
 - name: Add packages
   set_fact:
