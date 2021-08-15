@@ -20,7 +20,7 @@
             'libreadline-dev', 'libsqlite3-dev', 'wget', 'curl', 'llvm',
             'libncurses5-dev', 'xz-utils', 'tk-dev', 'libxml2-dev',
             'libxmlsec1-dev', 'libxmlsec1-dev', 'libffi-dev', 'liblzma-dev',
-            'libmysqlclient-dev', 'libpq-dev', 'libcurl4-gnutls-dev' ] }}
+            'default-libmysqlclient-dev', 'libpq-dev', 'libcurl4-gnutls-dev' ] }}
 
 - name: Prepare dirs
   file:

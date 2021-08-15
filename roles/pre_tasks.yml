@@ -31,6 +31,7 @@
       - lsb-release
       - openssh-client
       - resolvconf
+      - xinit
   apt:
     name: "{{ packages }}"
     update_cache: true
