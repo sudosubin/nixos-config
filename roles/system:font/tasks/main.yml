@@ -1,5 +1,6 @@
 - name: Add scripts
   set_fact:
+    default_packages: "{{ default_packages + [ 'fonts-noto-color-emoji' ] }}"
     default_user_scripts: >
       {{ default_user_scripts
         + [ 'gsettings set org.gnome.desktop.interface font-name "Pretendard 10"',
