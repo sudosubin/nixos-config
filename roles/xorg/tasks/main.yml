@@ -1,7 +1,7 @@
 - name: Add packages
   set_fact:
     default_packages: >
-      {{ default_packages + [ 'i3', 'grim', 'slurp', 'wl-clipboard', 'xorg' ] }}
+      {{ default_packages + [ 'i3', 'maim', 'xorg' ] }}
 
 - name: Prepare dirs
   file:
