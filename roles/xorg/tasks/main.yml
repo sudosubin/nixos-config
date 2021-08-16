@@ -1,27 +1,14 @@
 - name: Add packages
   set_fact:
-    default_packages: >
-      {{ default_packages + [ 'i3', 'maim', 'xorg' ] }}
+    default_packages: "{{ default_packages + [ 'maim', 'xorg' ] }}"
 
 - name: Prepare dirs
   file:
     path: "{{ item }}"
     state: directory
   loop:
-    - ~/.config/i3
-    - ~/.local/share/scripts
     - /etc/default
     - /etc/X11/xinit
-
-- name: Link configurations
-  file:
-    src: "{{ role_path }}/{{ item.src }}"
-    path: "{{ item.path }}"
-    state: link
-    force: true
-  loop:
-    - { src: 'files/i3/config', path: '~/.config/i3/config' }
-    - { src: 'files/i3.sh', path: '~/.local/share/scripts/i3.sh' }
 
 - name: Link configurations (sudo)
   become: true
