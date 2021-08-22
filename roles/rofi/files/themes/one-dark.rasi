@@ -19,92 +19,86 @@
   lines: 8;
 }
 
-#window {
-  background-color: @background;
-  border: 2px;
-  border-radius: 0px;
-  border-color: @bordercolor;
-  padding: 0px;
+window {
+  border-radius: 10px;
 }
 
-#mainbox {
-  border: 0px;
-  padding: 0px;
+mainbox {
 }
 
-#message {
+message {
   border: 2px 0px;
   border-color: @separatorcolor;
   padding: 8px;
 }
 
-#textbox {
+textbox {
   text-color: @foreground;
 }
 
-#listview {
+listview {
   fixed-height: 0;
   spacing: 0;
   scrollbar: false;
   padding: 0;
 }
 
-#element {
+element {
   border: 0;
   padding: 8px;
 }
 
-#element.normal.normal {
+element.normal.normal {
   background-color: @background;
   text-color: @foreground;
 }
 
-#element.normal.urgent {
+element.normal.urgent {
   background-color: @urgent-background;
   text-color: @urgent-foreground;
 }
 
-#element.normal.active {
+element.normal.active {
   background-color: @active-background;
   text-color: @foreground;
 }
 
-#element.selected.normal {
+element.selected.normal {
   background-color: @selected-background;
   text-color: @foreground;
 }
 
-#element.selected.urgent {
+element.selected.urgent {
   background-color: @selected-urgent-background;
   text-color: @foreground;
 }
 
-#element.selected.active {
+element.selected.active {
   background-color: @selected-active-background;
   text-color: @foreground;
 }
 
-#element.alternate.normal {
+element.alternate.normal {
   background-color: @background;
   text-color: @foreground;
 }
 
-#element.alternate.urgent {
+element.alternate.urgent {
   background-color: @urgent-background;
   text-color: @foreground;
 }
 
-#element.alternate.active {
+element.alternate.active {
   background-color: @active-background;
   text-color: @foreground;
 }
 
-#element-icon {
+element-icon {
   size: 24px ;
   padding: 0px 4px 0px 0px;
 }
 
-#scrollbar {
+scrollbar {
   width: 2px;
   border: 0px;
   handle-width: 4px;
@@ -112,42 +106,42 @@
   padding: 0px;
 }
 
-#sidebar {
+sidebar {
   border: 2px dash 0px 0px;
   border-color: @separatorcolor;
 }
 
-#button.selected {
+button.selected {
   background-color: @selected-background;
   text-color: @foreground;
 }
 
-#inputbar {
+inputbar {
   spacing: 0px;
   text-color: @foreground;
   padding: 8px;
 }
 
-#case-indicator {
+case-indicator {
   spacing: 0;
   text-color: @foreground;
 }
 
-#entry {
+entry {
   spacing: 0;
   text-color: @foreground;
 }
 
-#prompt {
+prompt {
   spacing: 0;
   text-color: @foreground;
 }
 
-#inputbar {
+inputbar {
   children: [ prompt,textbox-prompt-colon,entry,case-indicator ];
 }
 
-#textbox-prompt-colon {
+textbox-prompt-colon {
   expand: false;
   str: ":";
   text-color: @foreground;
