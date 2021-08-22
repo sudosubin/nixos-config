@@ -105,15 +105,8 @@
 
   // language (javascript)
   "emmet.excludeLanguages": ["typescriptreact"],
+  "eslint.alwaysShowStatus": true,
   "typescript.preferences.importModuleSpecifier": "non-relative",
-  "[javascript]": {
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    }
-  },
   "[css]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
@@ -122,14 +115,20 @@
   "[json]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
   },
   "[jsonc]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
   },
-  "[typescript]": {
+  "[javascript]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -138,6 +137,14 @@
     }
   },
   "[javascriptreact]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "[typescript]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -190,6 +197,5 @@
   "telemetry.enableCrashReporter": false,
   "telemetry.enableTelemetry": false,
   "extensions.ignoreRecommendations": true,
-  "eslint.alwaysShowStatus": true,
   "update.mode": "none"
 }
