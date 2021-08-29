@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM debian:sid-slim
 
 WORKDIR /app
 
