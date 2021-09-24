@@ -46,6 +46,7 @@
   "editor.smoothScrolling": true,
   "editor.rulers": [80, 120],
   "editor.insertSpaces": true,
+  "editor.suggest.preview": true,
   "trailing-spaces.backgroundColor": "rgba(255, 0, 0, 0.2)",
   "trailing-spaces.borderColor": "rgba(255, 100, 100, 0.1)",
   "window.menuBarVisibility": "hidden",

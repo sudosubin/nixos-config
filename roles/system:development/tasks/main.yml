@@ -10,7 +10,8 @@
   set_fact:
     default_packages: >
       {{ default_packages
-        + [ 'bat', 'fzf', 'jq', 'shellcheck', 'watchman', 'unzip' ] }}
+        + [ 'bat', 'fzf', 'jq', 'shellcheck', 'watchman', 'unzip',
+            'uuid-runtime' ] }}
 
 - name: Add packages for development (build)
   set_fact:

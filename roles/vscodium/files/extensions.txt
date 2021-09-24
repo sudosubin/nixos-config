@@ -10,6 +10,7 @@ fwcd.kotlin
 iocave.customize-ui
 iocave.monkey-patch
 jpoissonnier.vscode-styled-components
+KevinRose.vsc-python-indent
 ms-pyright.pyright
 ms-python.python
 nimsaem.nimvscode
