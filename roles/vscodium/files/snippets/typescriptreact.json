@@ -6,7 +6,7 @@
       "",
       "export interface ${1:${TM_DIRECTORY/^.+\\/(.*)$/$1/}}Props {}",
       "",
-      "const $1: FC<$1Props> = ({}: $1Props) => {",
+      "const $1: FC<$1Props> = ({}) => {",
       "  return <></>;",
       "};",
       "",
