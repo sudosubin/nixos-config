@@ -13,6 +13,7 @@ jpoissonnier.vscode-styled-components
 KevinRose.vsc-python-indent
 ms-pyright.pyright
 ms-python.python
+ms-vsliveshare.vsliveshare
 nimsaem.nimvscode
 njpwerner.autodocstring
 PKief.material-icon-theme
