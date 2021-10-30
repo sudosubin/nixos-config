@@ -42,12 +42,6 @@ source "$HOME/bin/zinit/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
-# Load a few important annexes, without Turbo (this is currently required for annexes)
-zinit light-mode for \
-    zinit-zsh/z-a-patch-dl \
-    zinit-zsh/z-a-readurl \
-    zinit-zsh/z-a-bin-gem-node
-
 ### End of Zinit's installer chunk
 
 # Async
@@ -65,7 +59,7 @@ typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#808080'
 
 zinit light-mode wait lucid nocd for \
     atinit'ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay' \
-        zdharma/fast-syntax-highlighting \
+        zdharma-continuum/fast-syntax-highlighting \
     atload'!_zsh_autosuggest_start' \
         zsh-users/zsh-autosuggestions \
     blockf \
