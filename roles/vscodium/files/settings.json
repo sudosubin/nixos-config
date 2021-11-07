@@ -10,7 +10,7 @@
   "terminal.integrated.fontSize": 13,
 
   // theme
-  "oneDarkPro.editorTheme": "oneDarkPro",
+  "oneDarkPro.editorTheme": "One Dark Pro",
   "workbench.colorTheme": "One Dark Pro",
   "workbench.iconTheme": "material-icon-theme",
   "material-icon-theme.activeIconPack": "react",

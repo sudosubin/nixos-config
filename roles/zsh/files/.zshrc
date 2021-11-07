@@ -128,6 +128,9 @@ alias ls='ll -a'
 # Softwares > minikube
 alias mubectl='minikube kubectl --'
 
+# Softwares > node
+typeset -x npm_config_devdir="/tmp/.gyp"
+
 # Softwares > pipenv
 typeset -x PIPENV_VENV_IN_PROJECT="enabled"
 
