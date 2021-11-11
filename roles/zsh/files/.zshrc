@@ -100,10 +100,6 @@ zinit light kiurchv/asdf.plugin.zsh
 zinit ice wait lucid
 zinit light hlissner/zsh-autopair
 
-# Plugins > auto-update
-zinit ice wait lucid pick'update.sh'
-zinit light sudosubin/zsh-auto-update
-
 # Plugins > fzf
 typeset -g FZF_DEFAULT_OPTS='
     --color=dark
