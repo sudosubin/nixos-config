@@ -1,13 +1,11 @@
 { config, pkgs, ... }:
 
 {
-  home.packages = with pkgs; [
-    git
+  imports = [
+    ./programs/git.nix
   ];
 
-  programs.git = {
-    enable = true;
-    userName = "sudosubin";
-    userEmail = "sudosubin@gmail.com";
-  };
+  # home.packages = with pkgs; [
+  #   git
+  # ];
 }
