@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal ansible playbook, installs some dotfiles and softwares.
+Personal nix files, installs some dotfiles and softwares.
 
 ## License
 

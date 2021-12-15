@@ -1,6 +1,0 @@
-- name: Change apt mirror on Ubuntu
-  become: true
-  template:
-    src: templates/sources.list.ubuntu.j2
-    dest: /etc/apt/sources.list
-  register: apt_mirror_ubuntu_change
