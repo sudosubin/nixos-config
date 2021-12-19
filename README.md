@@ -5,8 +5,8 @@ Personal nix files, installs some dotfiles and softwares.
 ## Installation
 
 ```sh
-$ nix build .#homeManagerConfigurations.sudosubin.activationPackage
-$ ./result/activate
+# TODO: Add darwin variant
+$ sudo nixos-rebuild --flake '.#linux'
 ```
 
 ## Update lock
