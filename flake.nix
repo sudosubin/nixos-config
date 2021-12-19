@@ -1,5 +1,5 @@
 {
-  description = "Nix home manager flake";
+  description = "Nix Configurations";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
@@ -9,13 +9,16 @@
   };
 
   outputs = { self, nixpkgs, home-manager, ... }: {
-    homeManagerConfigurations = {
-      sudosubin = home-manager.lib.homeManagerConfiguration { 
-        system = "x86_64-linux";
-        homeDirectory = "/home/sudosubin";
-        username = "sudosubin";
-        configuration.imports = [ ./home.nix ];
-      };
+    nixosConfigurations.linux = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        ./system/configuration.nix
+        home-manager.nixosModules.home-manager {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.sudosubin = import ./home/linux.nix;
+        }
+      ];
     };
   };
 }
