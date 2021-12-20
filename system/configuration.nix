@@ -47,7 +47,9 @@
   # Enable the X11 windowing system.
   # services.xserver.enable = true;
 
-
+  hardware.opengl = {
+    enable = true;
+  };
   
 
   # Configure keymap in X11
@@ -106,4 +108,3 @@
   system.stateVersion = "21.11"; # Did you read the comment?
 
 }
-

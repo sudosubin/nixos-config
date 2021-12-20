@@ -6,9 +6,6 @@
 
   imports = [
     ./programs/git.nix
-  ];
-
-  home.packages = with pkgs; [
-    git
+    ./programs/wayland.nix
   ];
 }
