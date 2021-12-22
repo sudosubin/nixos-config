@@ -51,7 +51,6 @@
     enable = true;
   };
   
-
   # Configure keymap in X11
   # services.xserver.layout = "us";
   # services.xserver.xkbOptions = "eurosign:e";
@@ -71,6 +70,8 @@
     isNormalUser = true;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
+
+  services.getty.autologinUser = "sudosubin";
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -106,5 +107,4 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "21.11"; # Did you read the comment?
-
 }
