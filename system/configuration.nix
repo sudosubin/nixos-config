@@ -81,6 +81,12 @@
   #   firefox
   # ];
 
+  environment.loginShellInit = ''
+    if [[ "$(tty)" == "/dev/tty1" ]]; then
+      [ $(command -v start-sway) ] && start-sway
+    fi
+  '';
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
