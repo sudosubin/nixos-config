@@ -13,6 +13,13 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.grub.configurationLimit = 3;
+
+  # Boot output
+  boot.kernelParams = [ "quiet" "rd.udev.log_level=3" ];
+  boot.consoleLogLevel = 0;
+  boot.initrd.verbose = false;
+  boot.plymouth.enable = true;
 
   nix = {
     package = pkgs.nixFlakes;
