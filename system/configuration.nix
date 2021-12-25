@@ -90,7 +90,7 @@
 
   environment.loginShellInit = ''
     if [[ "$(tty)" == "/dev/tty1" ]]; then
-      [ $(command -v start-sway) ] && start-sway
+      [ $(command -v sway) ] && sway
     fi
   '';
 
