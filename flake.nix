@@ -22,6 +22,11 @@
           home-manager.useUserPackages = true;
           home-manager.users.sudosubin = import ./home/linux.nix;
         }
+        (
+          { ... }: {
+            nixpkgs.overlays = [ (import ./home/overlays/pretendard.nix) ];
+          }
+        )
       ];
     };
   };
