@@ -7,6 +7,7 @@
   imports = [
     ./programs/alacritty.nix
     ./programs/awscli.nix
+    ./programs/docker.nix
     ./programs/fonts.nix
     ./programs/git.nix
     ./programs/wayland.nix
