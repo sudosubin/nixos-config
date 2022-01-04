@@ -9,6 +9,7 @@
     ./programs/awscli.nix
     ./programs/docker.nix
     ./programs/fonts.nix
+    ./programs/gh.nix
     ./programs/git.nix
     ./programs/wayland.nix
   ];
