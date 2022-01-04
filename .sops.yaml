@@ -1,8 +1,0 @@
-keys:
-  - &sudosubin age1x6elxlgx3v2k00rtguuka2wht57s9gjdjdsnhg5mrxzaz7nmcqjqy56gdl
-
-creation_rules:
-  - path_regex: secrets/[^/]+\.yaml$
-    key_groups:
-      - age:
-        - *sudosubin
