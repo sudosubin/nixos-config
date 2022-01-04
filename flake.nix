@@ -20,7 +20,10 @@
         }
         (
           { ... }: {
-            nixpkgs.overlays = [ (import ./home/overlays/pretendard.nix) ];
+            nixpkgs.overlays = [
+              (import ./home/overlays/google-chrome.nix)
+              (import ./home/overlays/pretendard.nix)
+            ];
           }
         )
       ];

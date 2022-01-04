@@ -11,6 +11,7 @@
     ./programs/fonts.nix
     ./programs/gh.nix
     ./programs/git.nix
+    ./programs/google-chrome.nix
     ./programs/wayland.nix
   ];
 }
