@@ -13,6 +13,7 @@
     ./programs/git.nix
     ./programs/google-chrome.nix
     ./programs/gpg.nix
+    ./programs/pass.nix
     ./programs/wayland.nix
   ];
 }
