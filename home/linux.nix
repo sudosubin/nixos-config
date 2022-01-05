@@ -7,6 +7,8 @@
   home.packages = with pkgs; [
     act
     google-chrome
+    hadolint
+    kubectl
     slack
   ];
 
