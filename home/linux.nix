@@ -14,6 +14,7 @@
     ./programs/google-chrome.nix
     ./programs/gpg.nix
     ./programs/pass.nix
+    ./programs/ssh.nix
     ./programs/wayland.nix
   ];
 }
