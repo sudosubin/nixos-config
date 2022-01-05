@@ -15,6 +15,7 @@
     pipenv
     poetry
     slack
+    xdg-utils
     yarn
   ];
 
@@ -29,6 +30,7 @@
     ./programs/pass.nix
     ./programs/ssh.nix
     ./programs/wayland.nix
+    ./programs/zpl-open.nix
     ./programs/zsh.nix
   ];
 }

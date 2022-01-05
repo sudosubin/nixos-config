@@ -24,6 +24,7 @@
               (import ./home/overlays/google-chrome.nix)
               (import ./home/overlays/ll.nix)
               (import ./home/overlays/pretendard.nix)
+              (import ./home/overlays/zpl-open.nix)
             ];
           }
         )
