@@ -10,7 +10,12 @@
     hadolint
     kubectl
     ll
+    lokalise2-cli
+    minikube
+    pipenv
+    poetry
     slack
+    yarn
   ];
 
   imports = [
