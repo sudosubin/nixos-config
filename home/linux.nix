@@ -25,5 +25,6 @@
     ./programs/pass.nix
     ./programs/ssh.nix
     ./programs/wayland.nix
+    ./programs/zsh.nix
   ];
 }
