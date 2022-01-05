@@ -9,12 +9,9 @@
     google-chrome
     hadolint
     kubectl
+    ll
     slack
   ];
-
-  home.sessionVariables = {
-    TEST_ELVIN = "elvin";
-  };
 
   imports = [
     ./programs/alacritty.nix
