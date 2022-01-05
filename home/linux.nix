@@ -5,9 +5,14 @@
   home.homeDirectory = "/home/sudosubin";
 
   home.packages = with pkgs; [
+    act
     google-chrome
     slack
   ];
+
+  home.sessionVariables = {
+    TEST_ELVIN = "elvin";
+  };
 
   imports = [
     ./programs/alacritty.nix
