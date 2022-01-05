@@ -12,6 +12,7 @@
     ./programs/gh.nix
     ./programs/git.nix
     ./programs/google-chrome.nix
+    ./programs/gpg.nix
     ./programs/wayland.nix
   ];
 }
