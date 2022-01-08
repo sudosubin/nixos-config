@@ -35,7 +35,7 @@
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Set your time zone.
-  # time.timeZone = "Europe/Amsterdam";
+  time.timeZone = "Asia/Seoul";
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -92,8 +92,6 @@
   };
 
   services.getty.autologinUser = "sudosubin";
-
-  # programs.zsh.enable = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
