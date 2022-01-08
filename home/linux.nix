@@ -22,8 +22,10 @@
   imports = [
     ./programs/alacritty.nix
     ./programs/awscli.nix
+    ./programs/bat.nix
     ./programs/docker.nix
     ./programs/fonts.nix
+    ./programs/fzf.nix
     ./programs/gh.nix
     ./programs/git.nix
     ./programs/gpg.nix

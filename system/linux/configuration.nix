@@ -92,6 +92,8 @@
 
   services.getty.autologinUser = "sudosubin";
 
+  # programs.zsh.enable = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   # environment.systemPackages = with pkgs; [
@@ -99,6 +101,8 @@
   #   wget
   #   firefox
   # ];
+
+  environment.pathsToLink = [ "/share/zsh" ];
 
   environment.loginShellInit = ''
     if [[ "$(tty)" == "/dev/tty1" ]]; then
