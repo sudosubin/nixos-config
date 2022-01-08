@@ -29,6 +29,7 @@
     ./programs/gh.nix
     ./programs/git.nix
     ./programs/gpg.nix
+    ./programs/input-method.nix
     ./programs/pass.nix
     ./programs/ssh.nix
     ./programs/wayland.nix
