@@ -17,6 +17,9 @@
 
   # Boot output
   boot.kernelParams = [ "quiet" "rd.udev.log_level=3" ];
+  boot.kernel.sysctl = {
+    "fs.inotify.max_user_watches" = 524288;
+  };
   boot.consoleLogLevel = 0;
   boot.initrd.verbose = false;
   boot.plymouth.enable = true;
