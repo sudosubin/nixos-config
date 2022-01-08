@@ -14,6 +14,7 @@
       modules = [
         ./system/linux/configuration.nix
         home-manager.nixosModules.home-manager {
+          nixpkgs.config.allowUnfree = true;
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.sudosubin = import ./home/linux.nix;
