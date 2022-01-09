@@ -12,8 +12,6 @@
     ll
     lokalise2-cli
     minikube
-    pipenv
-    poetry
     yarn
 
     # Utility
@@ -38,6 +36,7 @@
     ./programs/gpg.nix
     ./programs/input-method.nix
     ./programs/pass.nix
+    ./programs/python.nix
     ./programs/ssh.nix
     ./programs/xorg.nix
     ./programs/zpl-open.nix

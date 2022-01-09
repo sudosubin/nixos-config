@@ -50,10 +50,6 @@
       NEXT_TELEMETRY_DISABLED = "1";
       NPM_CONFIG_DEVDIR = "/tmp/.gyp";
 
-      # Python
-      PYTHONDONTWRITEBYTECODE = "1";
-      PIPENV_VENV_IN_PROJECT = "enabled";
-
       # Jetbrains
       _JAVA_AWT_WM_NONREPARENTING = "1";
     };
