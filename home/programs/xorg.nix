@@ -38,6 +38,10 @@ in {
         placeholder = { border = "#1E2127"; background = "#1E2127"; text = "#ABB2BF"; indicator = "#1E2127"; childBorder = "#1E2127"; };
         background = "#FFFFFF";
       };
+      bars = [];
+      startup = [
+        { command = "i3-msg workspace 1"; notification = false; }
+      ];
       keybindings = {
         # Core i3
         "${mod}+Shift+c" = "reload";
@@ -105,6 +109,19 @@ in {
         # Scratchpad
         "${mod}+Shift+minus" = "move scratchpad";
         "${mod}+minus" = "scratchpad show";
+
+        # Modes
+        "${mod}+r" = "mode resize";
+      };
+      modes = {
+        resize = {
+          "${left}" = "resize shrink width 10px";
+          "${down}" = "resize grow height 10px";
+          "${up}" = "resize shrink height 10px";
+          "${right}" = "resize grow width 10px";
+          "Return" = "mode default";
+          "Escape" = "mode default";
+        };
       };
     };
 
