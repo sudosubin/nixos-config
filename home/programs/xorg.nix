@@ -10,6 +10,7 @@ let
 in {
   home.packages = with pkgs; [
     i3
+    rofi
   ];
 
   xsession = {
@@ -50,7 +51,8 @@ in {
         # Kill window
         "Mod1+Escape" = "kill";
 
-        # Run rofi (TODO)
+        # Run rofi
+        "Mod1+space" = "exec ${pkgs.rofi}/bin/rofi -show drun";
 
         # Focus window
         "${mod}+${left}" = "focus left";
@@ -110,4 +112,16 @@ in {
       default_border pixel 1
     '';
   };
+
+  programs.rofi = {
+    enable = true;
+    font = "mono 12";
+    terminal = "${pkgs.alacritty}/bin/alacritty";
+    cycle = true;
+    theme = "Arc-Dark";
+    extraConfig = {
+      modi = "window,run";
+    };
+  };
 }
+
