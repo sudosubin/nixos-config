@@ -5,8 +5,8 @@
   home.homeDirectory = "/home/sudosubin";
 
   home.packages = with pkgs; [
+    # Development
     act
-    google-chrome
     hadolint
     kubectl
     ll
@@ -14,9 +14,15 @@
     minikube
     pipenv
     poetry
+    yarn
+
+    # Utility
+    gnome.nautilus
+    google-chrome
+    pavucontrol
+    pulseaudio
     slack
     xdg-utils
-    yarn
   ];
 
   imports = [
@@ -32,7 +38,7 @@
     ./programs/input-method.nix
     ./programs/pass.nix
     ./programs/ssh.nix
-    ./programs/wayland.nix
+    ./programs/xorg.nix
     ./programs/zpl-open.nix
     ./programs/zsh.nix
   ];

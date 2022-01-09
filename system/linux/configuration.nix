@@ -69,8 +69,8 @@
   # services.printing.enable = true;
 
   # Enable sound.
-  # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
@@ -91,8 +91,6 @@
     ];
   };
 
-  services.getty.autologinUser = "sudosubin";
-
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   # environment.systemPackages = with pkgs; [
@@ -103,11 +101,22 @@
 
   environment.pathsToLink = [ "/share/zsh" ];
 
-  environment.loginShellInit = ''
-    if [[ "$(tty)" == "/dev/tty1" ]]; then
-      [ $(command -v sway) ] && sway
-    fi
-  '';
+  services.xserver = {
+    enable = true;
+    desktopManager = {
+      xterm.enable = false;
+    };
+    displayManager = {
+      defaultSession = "none+i3";
+      autoLogin = {
+        enable = true;
+        user = "sudosubin";
+      };
+    };
+    windowManager.i3 = {
+      enable = true;
+    };
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
