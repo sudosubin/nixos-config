@@ -29,6 +29,7 @@
     ./programs/alacritty.nix
     ./programs/awscli.nix
     ./programs/bat.nix
+    ./programs/bpython.nix
     ./programs/docker.nix
     ./programs/fonts.nix
     ./programs/fzf.nix
