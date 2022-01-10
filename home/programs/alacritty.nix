@@ -15,6 +15,10 @@ in {
   programs.alacritty = {
     enable = true;
     settings = {
+      env = {
+        TERM = "screen-256color";
+      };
+
       window = {
         dimensions = {
           columns = 96;
@@ -56,7 +60,7 @@ in {
         bright.blue = colors.blue;
         bright.magenta = colors.magenta;
         bright.cyan = colors.cyan;
-        bright.white = colors.white;        
+        bright.white = colors.white;
       };
 
       mouse = {

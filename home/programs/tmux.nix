@@ -9,6 +9,8 @@
     enable = true;
     terminal = "screen-256color";
     extraConfig = ''
+      set -ga terminal-overrides ',*-256color*:Tc'
+
       # ctrl+b highlight
       set -g status-right '#{?client_prefix,#[reverse] ^B #[noreverse],} | %a %Y-%m-%d %H:%M'
 
