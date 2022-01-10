@@ -13,6 +13,12 @@
     enable = true;
   };
 
+  gtk = {
+    enable = true;
+    font.name = "Pretendard";
+    font.size = 10;
+  };
+
   xdg.configFile = {
     "fontconfig/fonts.conf".text = ''
       <?xml version="1.0"?>

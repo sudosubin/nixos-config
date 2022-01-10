@@ -22,6 +22,7 @@
         (
           { ... }: {
             nixpkgs.overlays = [
+              (import ./home/overlays/apple-cursor-theme.nix)
               (import ./home/overlays/google-chrome.nix)
               (import ./home/overlays/ll.nix)
               (import ./home/overlays/pipenv.nix)

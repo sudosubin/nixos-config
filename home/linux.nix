@@ -38,6 +38,7 @@
     ./programs/pass.nix
     ./programs/python.nix
     ./programs/ssh.nix
+    ./programs/theme.nix
     ./programs/xorg.nix
     ./programs/zpl-open.nix
     ./programs/zsh.nix
