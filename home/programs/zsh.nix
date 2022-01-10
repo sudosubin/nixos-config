@@ -57,6 +57,7 @@
     shellAliases = {
       l = "ll";
       ls = "ll -a";
+      code = "codium";
       mubectl = "minikube kubectl --";
     };
 
