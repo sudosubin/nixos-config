@@ -62,15 +62,28 @@
   # };
 
   # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-
-  hardware.opengl = {
+  services.xserver = {
     enable = true;
+    autoRepeatDelay = 250;
+    autoRepeatInterval = 50;
+    desktopManager = {
+      xterm.enable = false;
+    };
+    displayManager = {
+      defaultSession = "none+i3";
+      autoLogin.enable = true;
+      autoLogin.user = "sudosubin";
+    };
+    windowManager.i3 = {
+      enable = true;
+    };
   };
-  
+
   # Configure keymap in X11
-  # services.xserver.layout = "us";
-  # services.xserver.xkbOptions = "eurosign:e";
+  services.xserver = {
+    layout = "us";
+    xkbOptions = "ctrl:menu_rctrl,ctrl:swapcaps,korean:ralt_hangul,korean:rctrl_hanja";
+  };
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
@@ -81,6 +94,12 @@
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
+
+  programs.dconf.enable = true;
+
+  hardware.opengl = {
+    enable = true;
+  };
 
   # Docker
   virtualisation.docker = {
@@ -107,25 +126,6 @@
   # ];
 
   environment.pathsToLink = [ "/share/zsh" ];
-
-  services.xserver = {
-    enable = true;
-    desktopManager = {
-      xterm.enable = false;
-    };
-    displayManager = {
-      defaultSession = "none+i3";
-      autoLogin = {
-        enable = true;
-        user = "sudosubin";
-      };
-    };
-    windowManager.i3 = {
-      enable = true;
-    };
-  };
-
-  programs.dconf.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
