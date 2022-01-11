@@ -10,6 +10,7 @@ let
 in {
   home.packages = with pkgs; [
     i3
+    polkit_gnome
     rofi
   ];
 
@@ -41,6 +42,7 @@ in {
       bars = [];
       startup = [
         { command = "i3-msg workspace 1"; notification = false; }
+        { command = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"; notification = false; }
       ];
       keybindings = {
         # Core i3

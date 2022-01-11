@@ -96,6 +96,7 @@
   # services.xserver.libinput.enable = true;
 
   programs.dconf.enable = true;
+  programs.zsh.enable = true;
 
   hardware.opengl = {
     enable = true;
@@ -125,7 +126,12 @@
   #   firefox
   # ];
 
-  environment.pathsToLink = [ "/share/zsh" ];
+  environment.pathsToLink = [ "/libexec" "/share/polkit-1" "/share/zsh" ];
+  environment.shellAliases = {
+    l = null;
+    ll = null;
+    ls = null;
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
