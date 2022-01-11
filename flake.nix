@@ -27,6 +27,7 @@
               (import ./home/overlays/ll.nix)
               (import ./home/overlays/pipenv.nix)
               (import ./home/overlays/pretendard.nix)
+              (import ./home/overlays/vscode.nix)
               (import ./home/overlays/zpl-open.nix)
             ];
           }

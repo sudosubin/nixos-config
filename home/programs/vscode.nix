@@ -21,25 +21,25 @@
       dbaeumer.vscode-eslint
       eamodio.gitlens
       esbenp.prettier-vscode
+      exiasr.hadolint
+      flowtype.flow-for-vscode
+      fwcd.kotlin
+      iocave.customize-ui
+      iocave.monkey-patch
       jpoissonnier.vscode-styled-components
+      kevinrose.vsc-python-indent
       ms-python.vscode-pylance
       ms-vsliveshare.vsliveshare
+      nimsaem.nimvscode
       pkief.material-icon-theme
       redhat.java
+      rust-lang.rust
       shardulm94.trailing-spaces
       tamasfe.even-better-toml
       timonwong.shellcheck
       usernamehw.errorlens
       yzhang.markdown-all-in-one
       zhuangtongfa.material-theme
-      # exiasr.hadolint
-      # flowtype.flow-for-vscode
-      # fwcd.kotlin
-      # iocave.customize-ui
-      # iocave.monkey-patch
-      # kevinrose.vsc-python-indent
-      # nimsaem.nimvscode
-      # rust-lang.rust
     ];
   };
 }
