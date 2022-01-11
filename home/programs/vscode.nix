@@ -16,7 +16,7 @@
     enable = true;
     package = pkgs.vscodium;
     extensions = with pkgs.vscode-extensions; [
-      tamasfe.even-better-toml
+      bbenoist.nix
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
       eamodio.gitlens
@@ -27,6 +27,7 @@
       pkief.material-icon-theme
       redhat.java
       shardulm94.trailing-spaces
+      tamasfe.even-better-toml
       timonwong.shellcheck
       usernamehw.errorlens
       yzhang.markdown-all-in-one
