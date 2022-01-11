@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1641644109,
-        "narHash": "sha256-srI1S+sy3HlSZMz0PTXt9AV9E3uDrsH+rliLvh1Bqi4=",
+        "lastModified": 1641803078,
+        "narHash": "sha256-HqotfwnLIA/xkSGCl4TTs1CQ3x8Lqtj+WM00gZK2phg=",
         "owner": "sudosubin",
         "repo": "home-manager",
-        "rev": "f84ae6a6ca2553299ee23fd555dadcf5ae92115f",
+        "rev": "6de7eab29b74107822ad6a74d70cf652efb06883",
         "type": "github"
       },
       "original": {
@@ -22,11 +22,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1641577433,
-        "narHash": "sha256-T7lS8vpbC3dgtrkb2ueC9HWaX4RYUwdP7IEttnvKQ8Y=",
+        "lastModified": 1641850495,
+        "narHash": "sha256-V+luTtgE/W1ldiGJBPGjjBw6B+yKG62owwOs/Kj9fI8=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "568e0bc498ee51fdd88e1e94089de05f2fdbd18b",
+        "rev": "81f05d871faf75d1456df6adec1d2118d787f65c",
         "type": "github"
       },
       "original": {
