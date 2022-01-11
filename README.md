@@ -19,6 +19,8 @@ $ nix flake update .
 
 - SSH Keys `~/.ssh/id_ed25519`, `~/.ssh/id_ed25519.pub`
 
+- Password Store `~/.password-store`
+
 - GitHub CLI `~/.config/gh/hosts.yml`
 
   ```yml
