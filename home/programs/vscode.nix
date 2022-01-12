@@ -24,14 +24,14 @@
       exiasr.hadolint
       flowtype.flow-for-vscode
       fwcd.kotlin
-      iocave.customize-ui
-      iocave.monkey-patch
       jpoissonnier.vscode-styled-components
       kevinrose.vsc-python-indent
+      ms-python.python
       ms-python.vscode-pylance
       ms-vsliveshare.vsliveshare
       nimsaem.nimvscode
       pkief.material-icon-theme
+      pkief.material-product-icons
       redhat.java
       rust-lang.rust
       shardulm94.trailing-spaces

@@ -10,9 +10,10 @@
   "terminal.integrated.fontSize": 13,
 
   // theme
-  "oneDarkPro.editorTheme": "One Dark Pro",
+  "oneDarkPro.editorTheme": "oneDarkPro",
   "workbench.colorTheme": "One Dark Pro",
   "workbench.iconTheme": "material-icon-theme",
+  "workbench.productIconTheme": "material-product-icons",
   "material-icon-theme.activeIconPack": "react",
   "material-icon-theme.hidesExplorerArrows": true,
   "material-icon-theme.showWelcomeMessage": false,
@@ -195,8 +196,7 @@
   "errorLens.gutterIconSet": "defaultOutline",
 
   // telemetry, etc
-  "telemetry.enableCrashReporter": false,
-  "telemetry.enableTelemetry": false,
+  "telemetry.telemetryLevel": "off",
   "extensions.ignoreRecommendations": true,
   "extensions.autoCheckUpdates": false,
   "extensions.autoUpdate": false,

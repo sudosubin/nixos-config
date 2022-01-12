@@ -23,20 +23,6 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "sha256-nKhQrDdpKnZmC5nnfSTevUES1G6H8WNlLF26zFWnTmQ=";
     };
 
-    iocave.customize-ui = vscode-utils.extensionFromVscodeMarketplace {
-      name = "customize-ui";
-      publisher = "iocave";
-      version = "0.1.56";
-      sha256 = "sha256-JwSuA2PI5pYBcYoHHE5fxbI2EJ12nAPPifULG9CTQjY=";
-    };
-
-    iocave.monkey-patch = vscode-utils.extensionFromVscodeMarketplace {
-      name = "monkey-patch";
-      publisher = "iocave";
-      version = "0.1.16";
-      sha256 = "sha256-g3nPCcXWXUqiGqSUrMTXqVDJSA8LmOqmM4aNaEbwo6k=";
-    };
-
     kevinrose.vsc-python-indent = vscode-utils.extensionFromVscodeMarketplace {
       name = "vsc-python-indent";
       publisher = "kevinrose";
@@ -49,6 +35,13 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "nimsaem";
       version = "0.1.25";
       sha256 = "sha256-f0zDCFmCu7nh0d8jg0lBIJRoDphZX5XUrtqZXd8E2P8=";
+    };
+
+    pkief.material-product-icons = vscode-utils.extensionFromVscodeMarketplace {
+      name = "material-product-icons";
+      publisher = "PKief";
+      version = "1.1.1";
+      sha256 = "sha256-oL0O/2d5OCh2gTX9g58o2wlJ2poxDbMSvrB4HyFk/Uc=";
     };
 
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
