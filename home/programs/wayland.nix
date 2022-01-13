@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  mod = config.xsession.windowManager.i3.config.modifier;
+  mod = config.wayland.windowManager.sway.config.modifier;
   left = "h";
   right = "l";
   up = "k";
@@ -9,16 +9,12 @@ let
 
 in {
   home.packages = with pkgs; [
-    i3
     polkit_gnome
-    rofi
+    sway
+    wofi
   ];
 
-  xsession = {
-    enable = true;
-  };
-
-  xsession.windowManager.i3 = {
+  wayland.windowManager.sway = {
     enable = true;
     config = {
       modifier = "Mod4";
@@ -41,18 +37,18 @@ in {
       };
       bars = [];
       startup = [
-        { command = "i3-msg workspace 1"; notification = false; }
-        { command = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"; notification = false; }
+        { command = "${pkgs.sway}/bin/swaymsg workspace 1"; }
+        { command = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"; }
       ];
       keybindings = {
-        # Core i3
+        # Core sway
         "${mod}+Shift+c" = "reload";
         "${mod}+Shift+r" = "restart";
         "${mod}+Shift+e" = "exit";
 
         # Terminal
-        "${mod}+Return" = "exec ${config.xsession.windowManager.i3.config.terminal}";
-        "Control+Mod1+t" = "exec ${config.xsession.windowManager.i3.config.terminal}";
+        "${mod}+Return" = "exec ${config.wayland.windowManager.sway.config.terminal}";
+        "Control+Mod1+t" = "exec ${config.wayland.windowManager.sway.config.terminal}";
 
         # Kill window
         "Mod1+Escape" = "kill";
@@ -96,7 +92,7 @@ in {
         "${mod}+Shift+7" = "move container to workspace number 7";
         "${mod}+Shift+8" = "move container to workspace number 8";
         "${mod}+Shift+9" = "move container to workspace number 9";
-        "${mod}+Shift+10" = "move container to workspace number 10";
+        "${mod}+Shift+0" = "move container to workspace number 10";
 
         # Split, Layout
         "${mod}+b" = "splith";
@@ -125,6 +121,10 @@ in {
           "Escape" = "mode default";
         };
       };
+      input."*" = {
+        xkb_layout = "us";
+        xkb_options = "ctrl:swapcaps,korean:ralt_hangul";
+      };
     };
 
     extraConfig = ''
@@ -132,15 +132,15 @@ in {
     '';
   };
 
-  programs.rofi = {
-    enable = true;
-    font = "mono 12";
-    terminal = "${pkgs.alacritty}/bin/alacritty";
-    cycle = true;
-    theme = "Arc-Dark";
-    extraConfig = {
-      modi = "window,run";
-    };
-  };
+  # programs.rofi = {
+  #   enable = true;
+  #   font = "mono 12";
+  #   terminal = "${pkgs.alacritty}/bin/alacritty";
+  #   cycle = true;
+  #   theme = "Arc-Dark";
+  #   extraConfig = {
+  #     modi = "window,run";
+  #   };
+  # };
 }
 

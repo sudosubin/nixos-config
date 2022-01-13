@@ -41,7 +41,7 @@
     ./programs/theme.nix
     ./programs/tmux.nix
     ./programs/vscode.nix
-    ./programs/xorg.nix
+    ./programs/wayland.nix
     ./programs/zpl-open.nix
     ./programs/zsh.nix
   ];

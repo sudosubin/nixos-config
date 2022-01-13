@@ -61,30 +61,6 @@
   #   keyMap = "us";
   # };
 
-  # Enable the X11 windowing system.
-  services.xserver = {
-    enable = true;
-    autoRepeatDelay = 250;
-    autoRepeatInterval = 50;
-    desktopManager = {
-      xterm.enable = false;
-    };
-    displayManager = {
-      defaultSession = "none+i3";
-      autoLogin.enable = true;
-      autoLogin.user = "sudosubin";
-    };
-    windowManager.i3 = {
-      enable = true;
-    };
-  };
-
-  # Configure keymap in X11
-  services.xserver = {
-    layout = "us";
-    xkbOptions = "ctrl:menu_rctrl,ctrl:swapcaps,korean:ralt_hangul,korean:rctrl_hanja";
-  };
-
   # Enable CUPS to print documents.
   # services.printing.enable = true;
 
@@ -117,6 +93,14 @@
       "docker"
     ];
   };
+
+  services.getty.autologinUser = "sudosubin";
+
+  environment.loginShellInit = ''
+    if [[ "$(tty)" == "/dev/tty1" ]]; then
+      [ $(command -v sway) ] && sway
+    fi
+  '';
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
