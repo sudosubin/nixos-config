@@ -37,13 +37,6 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "sha256-f0zDCFmCu7nh0d8jg0lBIJRoDphZX5XUrtqZXd8E2P8=";
     };
 
-    pkief.material-product-icons = vscode-utils.extensionFromVscodeMarketplace {
-      name = "material-product-icons";
-      publisher = "PKief";
-      version = "1.1.1";
-      sha256 = "sha256-oL0O/2d5OCh2gTX9g58o2wlJ2poxDbMSvrB4HyFk/Uc=";
-    };
-
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
       name = "rust";
       publisher = "rust-lang";
