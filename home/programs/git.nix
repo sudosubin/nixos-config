@@ -14,7 +14,11 @@
       key = "4BB550D927AA2762F341A86068971E6A5D6DE3D6";
       signByDefault = true;
     };
-    ignores = [ ".tool-versions" ];
+    ignores = [
+      ".tool-versions"
+      "flake.nix"
+      "flake.lock"
+    ];
     extraConfig = {
       init.defaultBranch = "main";
     };
