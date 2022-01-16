@@ -6,14 +6,24 @@
       url = "github:nixos/nixpkgs/nixpkgs-unstable";
     };
 
+    darwin = {
+      url = "github:lnl7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:sudosubin/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }: {
-    # nixosConfigurations.darwin = nixpkgs.lib.nixosSystem {};
+  outputs = { self, nixpkgs, darwin, home-manager, ... }: {
+    nixosConfigurations.darwin = darwin.lib.darwinSystem {
+      system = "x86_64-darwin";
+      modules = [
+        home-manager.darwinModules.home-manager
+      ];
+    };
 
     nixosConfigurations.linux = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
