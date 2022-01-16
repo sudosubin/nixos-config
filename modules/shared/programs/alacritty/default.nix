@@ -44,7 +44,7 @@ in {
 
       colors = {
         primary.background = "#1e2127";
-        primary.foreground = "#abb2bf";
+        primary.foreground = colors.white;
         normal.black = colors.black;
         normal.red = colors.red;
         normal.green = colors.green;

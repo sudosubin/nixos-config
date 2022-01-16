@@ -1,17 +1,9 @@
 { config, pkgs, ... }:
 
 {
-  home.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-cjk
-    noto-fonts-emoji
-    pretendard
-    (nerdfonts.override { fonts = [ "FiraMono" ]; })
+  imports = [
+    ../../../shared/programs/fonts
   ];
-
-  fonts.fontconfig = {
-    enable = true;
-  };
 
   gtk = {
     enable = true;

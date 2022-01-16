@@ -9,7 +9,7 @@
     enable = true;
     publicKeys = [
       {
-        source = ../files/gpg/public.key;
+        source = ./gpg/public.key;
         trust = "ultimate";
       }
     ];

@@ -32,7 +32,7 @@ final: { lib, stdenv, fetchFromGitHub, ... }@prev:
       homepage = "https://github.com/sudosubin/zeplin-uri-opener";
       description = "Open zeplin app uri in your default browser";
       license = licenses.mit;
-      platforms = platforms.unix;
+      platforms = platforms.linux;
       maintainers = [ maintainers.sudosubin ];
     };
   };
