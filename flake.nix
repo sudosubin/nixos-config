@@ -12,7 +12,7 @@
     };
 
     home-manager = {
-      url = "github:sudosubin/home-manager";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
