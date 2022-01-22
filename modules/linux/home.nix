@@ -4,7 +4,6 @@
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
     (import ../shared/overlays/ll.nix)
-    (import ../shared/overlays/pipenv.nix)
     (import ../shared/overlays/pretendard.nix)
     (import ../shared/overlays/vscode.nix)
 
