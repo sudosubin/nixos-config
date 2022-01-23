@@ -28,7 +28,6 @@
       kevinrose.vsc-python-indent
       ms-python.python
       ms-python.vscode-pylance
-      ms-vsliveshare.vsliveshare
       nimsaem.nimvscode
       pkief.material-icon-theme
       pkief.material-product-icons
