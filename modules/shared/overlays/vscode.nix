@@ -30,6 +30,13 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "sha256-T0uPywFo0it/4GNNaC8c8vGxHxkr/4S1Pz7ObtNrSMM=";
     };
 
+    ms-pyright.pyright = vscode-utils.extensionFromVscodeMarketplace {
+      name = "pyright";
+      publisher = "ms-pyright";
+      version = "1.1.215";
+      sha256 = "sha256-GIRs6wWKYkgMcTKAkykcRmNjWv1A/bqQk3eF1ucKw+k=";
+    };
+
     nimsaem.nimvscode = vscode-utils.extensionFromVscodeMarketplace {
       name = "nimvscode";
       publisher = "nimsaem";

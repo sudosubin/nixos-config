@@ -26,8 +26,8 @@
       fwcd.kotlin
       jpoissonnier.vscode-styled-components
       kevinrose.vsc-python-indent
+      ms-pyright.pyright
       ms-python.python
-      ms-python.vscode-pylance
       nimsaem.nimvscode
       pkief.material-icon-theme
       pkief.material-product-icons
