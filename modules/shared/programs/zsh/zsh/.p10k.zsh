@@ -35,6 +35,7 @@
     dir                     # current directory
     vcs                     # git status
     asdf                    # asdf version manager
+    nix_shell               # nix shell indicator
     virtualenv              # python virtual environment
     package                 # name@version from package.json
     aws                     # aws profile
@@ -297,6 +298,9 @@
 
   # Haskell version from asdf.
   typeset -g POWERLEVEL9K_ASDF_HASKELL_FOREGROUND=172
+
+  #######[ nix_shell: nix shell indicator ]#######
+  typeset -g POWERLEVEL9K_NIX_SHELL_FOREGROUND=$cyan
 
   ###[ virtualenv: python virtual environment ]###
   # Python virtual environment color.
