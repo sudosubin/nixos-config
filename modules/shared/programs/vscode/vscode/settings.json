@@ -84,7 +84,7 @@
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": true,
   "python.linting.flake8Args": ["--max-line-length=120"],
-  "python.formatting.provider": "yapf",
+  "python.formatting.provider": "black",
 
   "[python]": {
     "editor.rulers": [120],
