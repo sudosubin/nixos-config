@@ -35,6 +35,7 @@
       pavucontrol
       pulseaudio
       slack
+      vmware-horizon-client
       xdg-utils
     ];
 
