@@ -189,6 +189,9 @@
   "[rust]": {
     "editor.formatOnSave": true
   },
+  "[nix]": {
+    "editor.tabSize": 2
+  },
   "java.configuration.checkProjectSettingsExclusions": false,
   "errorLens.margin": "6ch",
   "errorLens.gutterIconsEnabled": true,
