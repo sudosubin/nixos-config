@@ -3,6 +3,7 @@
 {
   home.sessionVariables = {
     PYTHONDONTWRITEBYTECODE = "1";
+    PYTHONSTARTUP = ./files/python/startup.py;
   };
 
   xdg.configFile = {

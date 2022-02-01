@@ -1,2 +1,3 @@
 [general]
 color_scheme = base16
+hist_file = ~/.cache/python_history
