@@ -24,13 +24,6 @@ in
   options.programs.act = {
     enable = mkEnableOption "act";
 
-    package = mkOption {
-      type = types.package;
-      default = pkgs.act;
-      defaultText = literalExpression "pkgs.act";
-      description = "The act package to install.";
-    };
-
     config = mkOption {
       type = with types; attrsOf (either str (either (listOf str) (attrsOf str)));
       default = { };
@@ -45,7 +38,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.package ];
+    home.packages = [ pkgs.act ];
 
     xdg.configFile = {
       ".actrc".text = toConfigFile (formatConfig cfg.config);
