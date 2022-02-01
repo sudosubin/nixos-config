@@ -14,7 +14,7 @@
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.users.sudosubin = {
+  home-manager.users.sudosubin = { config, ... }: {
     home.username = "sudosubin";
     home.homeDirectory = "/home/sudosubin";
 
@@ -38,6 +38,8 @@
       vmware-horizon-client
       xdg-utils
     ];
+
+    secrets.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
 
     imports = [
       ../shared/programs/alacritty

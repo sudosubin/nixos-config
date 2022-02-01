@@ -15,9 +15,22 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    home-manager-secrets = {
+      url = "github:sudosubin/home-manager-secrets";
+      # url = "path:/home/sudosubin/Code/sudosubin/home-manager-secrets";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, ... }: {
+  outputs = {
+    self,
+    nixpkgs,
+    darwin,
+    home-manager,
+    home-manager-secrets,
+    ...
+  }: {
     nixosConfigurations.darwin = darwin.lib.darwinSystem {
       system = "x86_64-darwin";
       modules = [
@@ -29,6 +42,11 @@
       system = "x86_64-linux";
       modules = [
         home-manager.nixosModules.home-manager
+        {
+          home-manager.users.sudosubin.imports = [
+            home-manager-secrets.homeManagerModules.home-manager-secrets
+          ];
+        }
         ./modules/linux/configuration.nix
         ./modules/linux/home.nix
       ];

@@ -20,6 +20,9 @@
     ];
     extraConfig = {
       init.defaultBranch = "main";
+      diff.age-differ = {
+        textconv = "${pkgs.rage}/bin/rage -d -i ${builtins.elemAt config.secrets.identityPaths 0}";
+      };
     };
   };
 }
