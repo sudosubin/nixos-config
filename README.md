@@ -1,4 +1,4 @@
-# Dotfiles
+# NixOS Config
 
 Personal nix files, installs some dotfiles and softwares.
 
@@ -47,4 +47,4 @@ $ nix flake update .
 
 ## License
 
-Dotfiles is [MIT Licensed](./LICENSE).
+NixOS Config is [MIT Licensed](./LICENSE).
