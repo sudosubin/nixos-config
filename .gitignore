@@ -1,12 +1,3 @@
-# python venv
-/.venv
-
-# make
-/.makerc
-
-# ansible
-/collections
-
-# ansible private files
-/roles/*/files.private/*
-!/roles/*/files.private/.gitkeep
+# nix flake
+!/flake.nix
+!/flake.lock

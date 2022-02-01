@@ -1,0 +1,207 @@
+{
+  // fonts
+  "markdown.preview.fontFamily": "Pretendard",
+  "editor.fontFamily": "'FiraMono Nerd Font Mono', 'Pretendard'",
+  "debug.console.fontFamily": "'FiraMono Nerd Font Mono', 'Pretendard'",
+  "terminal.integrated.fontFamily": "'FiraMono Nerd Font Mono', 'Pretendard'",
+  "editor.fontSize": 13,
+  "debug.console.fontSize": 13,
+  "markdown.preview.fontSize": 13,
+  "terminal.integrated.fontSize": 13,
+
+  // theme
+  "oneDarkPro.editorTheme": "oneDarkPro",
+  "workbench.colorTheme": "One Dark Pro",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.productIconTheme": "material-product-icons",
+  "material-icon-theme.activeIconPack": "react",
+  "material-icon-theme.hidesExplorerArrows": true,
+  "material-icon-theme.showWelcomeMessage": false,
+  "material-icon-theme.files.associations": {
+    "stories.tsx": "storybook"
+  },
+  "customizeUI.activityBar": "bottom",
+  "customizeUI.font.regular": "Pretendard",
+  "customizeUI.font.monospace": "FiraMono Nerd Font Mono",
+  "customizeUI.stylesheet": {
+    ".quick-input-widget": "font-family: monospace !important; font-size: 12px !important;",
+    ".search-view .search-widgets-container": "font-family: monospace !important; font-size: 12px !important;",
+    ".monaco-list-rows, .monaco-findInput": "font-family: monospace !important; font-size: 12px !important;"
+  },
+  "workbench.colorCustomizations": {
+    "errorLens.errorBackground": "#E06C751A",
+    "errorLens.errorForeground": "#E06C75",
+    "errorLens.warningBackground": "#D19A661A",
+    "errorLens.warningForeground": "#D19A66",
+    "errorLens.infoBackground": "#61AFEF1A",
+    "errorLens.infoForeground": "#61AFEF",
+    "errorLens.hintBackground": "#98C3791A",
+    "errorLens.hintForeground": "#98C379"
+  },
+  "explorer.compactFolders": false,
+  "workbench.tree.indent": 16,
+  "workbench.startupEditor": "none",
+  "workbench.list.smoothScrolling": true,
+  "workbench.editor.enablePreview": false,
+  "editor.semanticHighlighting.enabled": false,
+  "editor.smoothScrolling": true,
+  "editor.rulers": [80, 120],
+  "editor.insertSpaces": true,
+  "editor.suggest.preview": true,
+  "trailing-spaces.backgroundColor": "rgba(255, 0, 0, 0.2)",
+  "trailing-spaces.borderColor": "rgba(255, 100, 100, 0.1)",
+  "window.menuBarVisibility": "hidden",
+
+  // theme scrollbar / minimap
+  "editor.minimap.enabled": false,
+  "editor.scrollbar.horizontal": "hidden",
+  "editor.hideCursorInOverviewRuler": true,
+  "editor.overviewRulerBorder": false,
+
+  // git
+  "gitlens.currentLine.format": "${author} • ${date}, ${message}",
+  "gitlens.currentLine.dateFormat": "YYYY-MM-DD",
+  "gitlens.codeLens.enabled": false,
+  "gitlens.statusBar.enabled": false,
+
+  // files
+  "files.associations": {
+    ".dockerignore": "ignore",
+    "*.bats": "shellscript",
+    ".env": "shellscript"
+  },
+  "files.watcherExclude": {
+    "**/.git/*/**": true,
+    "**/node_modules/*/**": true,
+    "**/.venv/*/**": true
+  },
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "editor.trimAutoWhitespace": true,
+
+  // language (python)
+  "python.showStartPage": false,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": ["--max-line-length=120"],
+  "python.formatting.provider": "black",
+
+  "[python]": {
+    "editor.rulers": [120],
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "files.insertFinalNewline": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+
+  // language (ruby)
+  "[ruby]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true
+  },
+  "solargraph.diagnostics": true,
+  "solargraph.formatting": true,
+  "solargraph.useBundler": true,
+
+  // language (javascript)
+  "emmet.excludeLanguages": ["typescriptreact"],
+  "eslint.alwaysShowStatus": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "[css]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "[javascriptreact]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "[typescript]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "[typescriptreact]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+
+  // language (bash)
+  "shellcheck.customArgs": ["-x"],
+  "shellcheck.ignorePatterns": {
+    ".env": true
+  },
+
+  // languages (etc)
+  "[html]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false
+  },
+  "[mdx]": {
+    "files.trimTrailingWhitespace": false
+  },
+  "[makefile]": {
+    "editor.insertSpaces": false
+  },
+  "[nim]": {
+    "editor.tabSize": 2
+  },
+  "[rust]": {
+    "editor.formatOnSave": true
+  },
+  "[nix]": {
+    "editor.tabSize": 2
+  },
+  "java.configuration.checkProjectSettingsExclusions": false,
+  "errorLens.margin": "6ch",
+  "errorLens.gutterIconsEnabled": true,
+  "errorLens.gutterIconSize": "65%",
+  "errorLens.gutterIconSet": "defaultOutline",
+
+  // telemetry, etc
+  "telemetry.telemetryLevel": "off",
+  "extensions.ignoreRecommendations": true,
+  "extensions.autoCheckUpdates": false,
+  "extensions.autoUpdate": false,
+  "update.mode": "none"
+}

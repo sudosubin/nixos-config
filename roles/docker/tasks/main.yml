@@ -1,4 +1,0 @@
-- name: Add packages, scripts
-  set_fact:
-    default_packages: "{{ default_packages + [ 'docker.io', 'docker-compose' ] }}"
-    default_scripts: "{{ default_scripts + [ 'usermod -aG docker ' + ansible_user_id ] }}"
