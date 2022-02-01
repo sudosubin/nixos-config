@@ -2,7 +2,8 @@ final: { lib, fetchzip, ... }@prev:
 
 let
   version = "1.2.1";
-in {
+in
+{
   pretendard = fetchzip {
     name = "pretendard-${version}";
 

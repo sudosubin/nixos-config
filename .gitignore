@@ -1,3 +1,6 @@
 # nix flake
 !/flake.nix
 !/flake.lock
+
+# auto generated pre-commit configuration file
+/.pre-commit-config.yaml
