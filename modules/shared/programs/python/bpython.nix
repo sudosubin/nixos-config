@@ -2,7 +2,7 @@
 
 {
   xdg.configFile = {
-    "bpython/config".source = ./bpython/config;
-    "bpython/base16.theme".source = ./bpython/base16.theme;
+    "bpython/config".source = ./files/bpython/config;
+    "bpython/base16.theme".source = ./files/bpython/base16.theme;
   };
 }

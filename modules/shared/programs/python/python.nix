@@ -6,6 +6,6 @@
   };
 
   xdg.configFile = {
-    "pip/pip.conf".source = ./python/pip.conf;
+    "pip/pip.conf".source = ./files/python/pip.conf;
   };
 }
