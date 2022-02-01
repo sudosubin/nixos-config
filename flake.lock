@@ -102,11 +102,11 @@
     "nixos-config-private-toss": {
       "locked": {
         "dir": "toss",
-        "lastModified": 1643690362,
-        "narHash": "sha256-JRpmJXunXOlGYJbBbIW8KaVvcaVfAAdvWlR4RuMoC5o=",
+        "lastModified": 1643700356,
+        "narHash": "sha256-GoOfaQwH3sGupP4YzvclRiidFscwmNUpfhfv/s3Lc3k=",
         "ref": "main",
-        "rev": "de8a75a5a5755772743ba09d9ef0d0767a303db7",
-        "revCount": 12,
+        "rev": "e5aada8bca9cb3644ffdf30049567bf6501d93be",
+        "revCount": 13,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private?dir=toss"
       },
