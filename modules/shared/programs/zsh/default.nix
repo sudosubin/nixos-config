@@ -49,6 +49,7 @@
       # Node.js
       NEXT_TELEMETRY_DISABLED = "1";
       NPM_CONFIG_DEVDIR = "/tmp/.gyp";
+      NODE_REPL_HISTORY = "${config.xdg.cacheHome}/node_repl_history";
 
       # Jetbrains
       _JAVA_AWT_WM_NONREPARENTING = "1";
