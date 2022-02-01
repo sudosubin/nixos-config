@@ -11,7 +11,8 @@ let
     cyan = "#56b6c2";
     white = "#abb2bf";
   };
-in {
+in
+{
   programs.alacritty = {
     enable = true;
     settings = {

@@ -18,7 +18,8 @@ let
       hash = "sha256-J6CwRMyDleJtKgb0A5sUAM2iHhx9wxCaFB0jKFjDfQs=";
     };
   };
-in {
+in
+{
   ll = nimPackages.buildNimPackage rec {
     pname = "ll";
     version = "0.3.2";

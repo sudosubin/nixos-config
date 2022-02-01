@@ -7,7 +7,8 @@ let
   up = "k";
   down = "j";
 
-in {
+in
+{
   home.packages = with pkgs; [
     polkit_gnome
     sway
@@ -34,7 +35,7 @@ in {
         placeholder = { border = "#1E2127"; background = "#1E2127"; text = "#ABB2BF"; indicator = "#1E2127"; childBorder = "#1E2127"; };
         background = "#FFFFFF";
       };
-      bars = [];
+      bars = [ ];
       startup = [
         { command = "${pkgs.sway}/bin/swaymsg workspace 1"; }
         { command = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"; }

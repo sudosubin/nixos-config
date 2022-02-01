@@ -8,7 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: cachix/install-nix-action@v16
-        with:
-            extra_nix_config: |
-              experimental-features = nix-command flakes
-      - run: nix flake check
+      - run: |
+          nix-shell \
+            -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/5efc8ca954272c4376ac929f4c5ffefcc20551d5.tar.gz \
+            -p nixpkgs-fmt \
+            --run 'nixpkgs-fmt .'

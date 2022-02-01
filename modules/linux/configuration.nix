@@ -6,7 +6,8 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
+      # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
 
@@ -86,7 +87,7 @@
     shell = pkgs.zsh;
     isNormalUser = true;
     extraGroups = [
-      "wheel"  # Enable ‘sudo’ for the user.
+      "wheel" # Enable ‘sudo’ for the user.
       "docker"
     ];
   };
