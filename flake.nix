@@ -70,6 +70,7 @@
           home-manager.nixosModules.home-manager
           {
             home-manager.users.sudosubin.imports = [
+              ./modules/shared/home-manager
               home-manager-secrets.homeManagerModules.home-manager-secrets
               nixos-config-private-sudosubin.homeManagerModules.sudosubin
               nixos-config-private-toss.homeManagerModules.toss
