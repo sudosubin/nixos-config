@@ -6,10 +6,10 @@
   ];
 
   xdg.configFile = {
-    "VSCodium/product.json".source = ./vscode/product.json;
-    "VSCodium/User/settings.json".source = ./vscode/settings.json;
-    "VSCodium/User/snippets/typescript.json".source = ./vscode/snippets/typescript.json;
-    "VSCodium/User/snippets/typescriptreact.json".source = ./vscode/snippets/typescriptreact.json;
+    "VSCodium/product.json".source = ./files/product.json;
+    "VSCodium/User/settings.json".source = ./files/settings.json;
+    "VSCodium/User/snippets/typescript.json".source = ./files/snippets/typescript.json;
+    "VSCodium/User/snippets/typescriptreact.json".source = ./files/snippets/typescriptreact.json;
   };
 
   programs.vscode = {
