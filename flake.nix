@@ -45,21 +45,16 @@
     };
   };
 
-  outputs =
-    { self
-    , nixpkgs
-    , flake-utils
-    , pre-commit-hooks
-    , nix-darwin
-    , home-manager
-    , home-manager-secrets
-    , nixos-config-private-sudosubin
-    , nixos-config-private-toss
-    , ...
-    }: {
-      nixosConfigurations.darwin = nix-darwin.lib.darwinSystem {
+  outputs = { self, nixpkgs, nix-darwin, home-manager, ... }@inputs:
+    let
+      dev-shell = import ./libraries/dev-shell { inherit inputs; };
+      home-manager-shared = ./libraries/home-manager;
+    in
+    {
+      darwinConfigurations.darwin = nix-darwin.lib.darwinSystem {
         system = "x86_64-darwin";
         modules = [
+          home-manager-shared
           home-manager.darwinModules.home-manager
         ];
       };
@@ -67,32 +62,13 @@
       nixosConfigurations.linux = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
+          home-manager-shared
           home-manager.nixosModules.home-manager
-          {
-            home-manager.users.sudosubin.imports = [
-              ./modules/shared/home-manager
-              home-manager-secrets.homeManagerModules.home-manager-secrets
-              nixos-config-private-sudosubin.homeManagerModules.sudosubin
-              nixos-config-private-toss.homeManagerModules.toss
-            ];
-          }
           ./modules/linux/configuration.nix
           ./modules/linux/home.nix
+          ./modules/linux/nixpkgs.nix
         ];
+        specialArgs = { inherit inputs; };
       };
-    } // flake-utils.lib.eachDefaultSystem (system:
-    {
-      checks = {
-        pre-commit-check = pre-commit-hooks.lib.${system}.run {
-          src = ./.;
-          hooks = {
-            nixpkgs-fmt.enable = true;
-          };
-        };
-      };
-      devShell = nixpkgs.legacyPackages.${system}.mkShell {
-        inherit (self.checks.${system}.pre-commit-check) shellHook;
-      };
-    }
-    );
+    } // dev-shell;
 }
