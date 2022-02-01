@@ -20,7 +20,6 @@
 
     home.packages = with pkgs; [
       # Development
-      act
       hadolint
       kubectl
       ll
@@ -41,6 +40,7 @@
     secrets.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
 
     imports = [
+      ../shared/programs/act
       ../shared/programs/alacritty
       ../shared/programs/aws
       ../shared/programs/bat
