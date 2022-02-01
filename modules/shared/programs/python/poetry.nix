@@ -6,6 +6,6 @@
   ];
 
   xdg.configFile = {
-    "pypoetry/config.toml".source = ./poetry/config.toml;
+    "pypoetry/config.toml".source = ./files/poetry/config.toml;
   };
 }

@@ -6,7 +6,7 @@
   ];
 
   xdg.configFile = {
-    "zsh/.p10k.zsh".source = ./zsh/.p10k.zsh;
+    "zsh/.p10k.zsh".source = ./files/.p10k.zsh;
   };
 
   programs.zsh = {
