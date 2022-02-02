@@ -84,11 +84,11 @@
     "nixos-config-private-sudosubin": {
       "locked": {
         "dir": "sudosubin",
-        "lastModified": 1643703104,
-        "narHash": "sha256-j86NhOsjxP0czK1ulBXt1nC1xWpoBIFT6uBWYv+nt8g=",
+        "lastModified": 1643807432,
+        "narHash": "sha256-n8/GHPq6tt74UGST17iDAJex0dF7oh/sw4asfyzsunA=",
         "ref": "main",
-        "rev": "ae40200ae6dc8926aa95e1de4f3cdce3d4c9dac2",
-        "revCount": 15,
+        "rev": "c3d674581ee3f5eb7dea6ac3f25522c6b0132569",
+        "revCount": 16,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private?dir=sudosubin"
       },
@@ -102,11 +102,11 @@
     "nixos-config-private-toss": {
       "locked": {
         "dir": "toss",
-        "lastModified": 1643703104,
-        "narHash": "sha256-j86NhOsjxP0czK1ulBXt1nC1xWpoBIFT6uBWYv+nt8g=",
+        "lastModified": 1643807432,
+        "narHash": "sha256-n8/GHPq6tt74UGST17iDAJex0dF7oh/sw4asfyzsunA=",
         "ref": "main",
-        "rev": "ae40200ae6dc8926aa95e1de4f3cdce3d4c9dac2",
-        "revCount": 15,
+        "rev": "c3d674581ee3f5eb7dea6ac3f25522c6b0132569",
+        "revCount": 16,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private?dir=toss"
       },
