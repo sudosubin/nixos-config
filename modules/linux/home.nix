@@ -19,7 +19,6 @@
       # Utility
       gnome.nautilus
       google-chrome
-      openconnect
       pavucontrol
       pulseaudio
       slack
