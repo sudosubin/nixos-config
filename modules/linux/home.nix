@@ -11,6 +11,7 @@
     home.packages = with pkgs; [
       # Development
       hadolint
+      jetbrains.datagrip
       kubectl
       ll
       lokalise2-cli
