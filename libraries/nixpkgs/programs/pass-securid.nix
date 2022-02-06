@@ -1,7 +1,7 @@
 final: { lib, stdenv, fetchFromGitHub, stoken, ... }@prev:
 
 let
-  rev = "cd32e2d58db780fc2f0bf7d98742380154bd541d";
+  rev = "99e5da3fa7e2b5c613a3c275de182b82facd54a5";
 in
 {
   pass-securid = stdenv.mkDerivation rec {
@@ -12,7 +12,7 @@ in
       owner = "sudosubin";
       repo = "pass-securid";
       rev = "${rev}";
-      sha256 = "sha256-HaOGaioeL8V8VNUBNzzdpsAz7LTOyFDkacmq82Yyt4E=";
+      sha256 = "sha256-MS+s2GiAgIBzw4jn497aAG8JoGdKhNvY3oTc8J5+PDQ=";
     };
 
     buildInputs = [ stoken ];
