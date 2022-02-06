@@ -15,8 +15,6 @@
     };
     ignores = [
       ".tool-versions"
-      "flake.nix"
-      "flake.lock"
     ];
     extraConfig = {
       init.defaultBranch = "main";
