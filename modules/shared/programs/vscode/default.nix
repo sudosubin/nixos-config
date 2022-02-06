@@ -17,6 +17,7 @@
     package = pkgs.vscodium;
     extensions = with pkgs.vscode-extensions; [
       bbenoist.nix
+      castwide.solargraph
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
       eamodio.gitlens

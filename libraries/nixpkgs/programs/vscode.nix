@@ -2,6 +2,13 @@ final: { lib, vscode-utils, ... }@prev:
 
 {
   vscode-extensions = lib.recursiveUpdate prev.vscode-extensions {
+    castwide.solargraph = vscode-utils.extensionFromVscodeMarketplace {
+      name = "solargraph";
+      publisher = "castwide";
+      version = "0.23.0";
+      sha256 = "sha256-1qQY7WMTxEsf3fQRoV+h1eFFBfGDRU6wkCIcE7Dnakc=";
+    };
+
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
       name = "hadolint";
       publisher = "exiasr";
