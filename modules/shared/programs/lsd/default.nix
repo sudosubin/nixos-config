@@ -11,6 +11,7 @@ in
     settings = {
       color.theme = theme-name;
       date = "+%e %b %H:%M";
+      size = "bytes";
       symlink-arrow = "";
     };
 
@@ -23,7 +24,7 @@ in
       cd = "34;43"; # Character device
       ln = "35"; # Symlink
       or = "31"; # Broken symlink
-    };
+    } // (import ./lscolors.nix);
 
     themes."${theme-name}" = {
       user = "dark_grey";
