@@ -11,7 +11,7 @@
     settings = {
       name = "Subin Kim";
       downloads-dir = "~/Downloads";
-      # default-page-size = 50;
+      default-page-size = 50;
     };
   };
 }
