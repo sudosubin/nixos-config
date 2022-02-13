@@ -13,7 +13,6 @@
       hadolint
       jetbrains.datagrip
       kubectl
-      ll
       lokalise2-cli
       minikube
       yarn
