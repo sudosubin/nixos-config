@@ -59,6 +59,7 @@
           nixpkgs-shared
           home-manager.darwinModules.home-manager
         ];
+        specialArgs = { inherit inputs; };
       };
 
       nixosConfigurations.linux = nixpkgs.lib.nixosSystem {
