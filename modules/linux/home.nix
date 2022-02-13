@@ -43,6 +43,7 @@
       ../shared/programs/fzf
       ../shared/programs/git
       ../shared/programs/gpg
+      ../shared/programs/lsd
       ../shared/programs/nix
       ../shared/programs/password-store
       ../shared/programs/python
