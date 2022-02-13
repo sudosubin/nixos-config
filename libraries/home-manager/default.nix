@@ -7,5 +7,6 @@
 
     # local programs (local)
     ./programs/act
+    ./programs/lsd
   ];
 }

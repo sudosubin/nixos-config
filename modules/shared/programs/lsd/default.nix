@@ -1,21 +1,31 @@
 { config, lib, pkgs, ... }:
 
-{
-  home.packages = with pkgs; [
-    lsd
-  ];
+let
+  theme-name = "custom";
 
+in
+{
   programs.lsd = {
-    enable = true;
+    enablePatch = true;
+
     settings = {
-      color.theme = "custom";
+      color.theme = theme-name;
       date = "+%e %b %H:%M";
       symlink-arrow = "";
     };
-  };
 
-  xdg.configFile."lsd/themes/custom.yaml" = {
-    source = (pkgs.formats.yaml { }).generate "lsd-theme" {
+    colors = {
+      di = "34"; # Directory
+      ex = "31"; # Executable file
+      pi = "33"; # Named pipe
+      so = "32"; # Socket
+      bd = "34;46"; # Block device
+      cd = "34;43"; # Character device
+      ln = "35"; # Symlink
+      or = "31"; # Broken symlink
+    };
+
+    themes."${theme-name}" = {
       user = "dark_grey";
       group = "dark_grey";
       permission = {
