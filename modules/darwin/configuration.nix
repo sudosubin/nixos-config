@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  # Darwin networking configurations
+  # Darwin network configurations
   networking = {
     dns = [ "1.1.1.1" "1.0.0.1" ];
     knownNetworkServices = [ "Thunderbolt Bridge" "USB 10/100/1000 LAN" "Wi-Fi" ];
