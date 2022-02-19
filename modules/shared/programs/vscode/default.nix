@@ -1,20 +1,21 @@
 { config, pkgs, ... }:
 
-{
-  home.packages = with pkgs; [
-    vscodium
-  ];
+let
+  inherit (pkgs) stdenv;
+  package = if stdenv.isLinux then pkgs.vscodium else pkgs.vscode;
+  configDir = if stdenv.isLinux then "${config.xdg.configHome}/VSCodim" else "Library/Application Support/Code";
 
-  xdg.configFile = {
-    "VSCodium/product.json".source = ./files/product.json;
-    "VSCodium/User/settings.json".source = ./files/settings.json;
-    "VSCodium/User/snippets/typescript.json".source = ./files/snippets/typescript.json;
-    "VSCodium/User/snippets/typescriptreact.json".source = ./files/snippets/typescriptreact.json;
+in
+{
+  home.file = {
+    "${configDir}/product.json".source = ./files/product.json;
+    "${configDir}/User/settings.json".source = ./files/settings.json;
+    "${configDir}/User/snippets".source = ./files/snippets;
   };
 
   programs.vscode = {
     enable = true;
-    package = pkgs.vscodium;
+    package = package;
     extensions = with pkgs.vscode-extensions; [
       bbenoist.nix
       castwide.solargraph
