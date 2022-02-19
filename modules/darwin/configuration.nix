@@ -9,7 +9,14 @@
   };
 
   programs.zsh.enable = true;
-  environment.loginShell = pkgs.zsh;
+
+  environment = {
+    shells = [ pkgs.zsh ];
+    loginShell = "${pkgs.zsh}/bin/zsh -l";
+    variables = {
+      SHELL = "${pkgs.zsh}/bin/zsh";
+    };
+  };
 
   users.users."subin.kim" = {
     shell = pkgs.zsh;
