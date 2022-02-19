@@ -1,6 +1,12 @@
 { config, pkgs, ... }:
 
 {
+  # Darwin networking configurations
+  networking = {
+    dns = [ "1.1.1.1" "1.0.0.1" ];
+    knownNetworkServices = [ "Thunderbolt Bridge" "USB 10/100/1000 LAN" "Wi-Fi" ];
+  };
+
   nix = {
     extraOptions = ''
       experimental-features = nix-command flakes
