@@ -3,13 +3,18 @@
 {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.users."subin.kim" = { config, lib, pkgs, ... }: {
+  home-manager.users."subin.kim" = { config, ... }: {
     home.username = "subin.kim";
     home.homeDirectory = "/Users/subin.kim";
 
     home.packages = with pkgs; [
       # Development
       hadolint
+      jetbrains.datagrip
+      kubectl
+      lokalise2-cli
+      minikube
+      yarn
 
       # Utility
       slack
