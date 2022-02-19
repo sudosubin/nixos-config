@@ -5,8 +5,12 @@ Personal nix files, installs some dotfiles and softwares.
 ## Installation
 
 ```sh
-# TODO: Add darwin variant
+# Linux
 $ sudo nixos-rebuild --flake '.#linux'
+
+# Darwin
+$ nix --experimental-features 'nix-command flakes' build '.#darwinConfigurations.darwin.system'
+$ ./result/sw/bin/darwin-rebuild switch --flake '.#darwin'
 ```
 
 ## Update lock
