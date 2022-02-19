@@ -1,4 +1,5 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+with lib;
 
 let
   inherit (pkgs) stdenv;
@@ -42,5 +43,9 @@ in
       yzhang.markdown-all-in-one
       zhuangtongfa.material-theme
     ];
+  };
+
+  home.shellAliases = mkIf stdenv.isLinux {
+    code = "codium";
   };
 }
