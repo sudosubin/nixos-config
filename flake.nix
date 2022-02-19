@@ -16,7 +16,7 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
-    nix-darwin = {
+    darwin = {
       url = "github:lnl7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -45,19 +45,21 @@
     };
   };
 
-  outputs = { self, nixpkgs, nix-darwin, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
     let
       dev-shell = import ./libraries/dev-shell { inherit inputs; };
       home-manager-shared = ./libraries/home-manager;
       nixpkgs-shared = ./libraries/nixpkgs;
     in
     {
-      darwinConfigurations.darwin = nix-darwin.lib.darwinSystem {
-        system = "x86_64-darwin";
+      darwinConfigurations.darwin = darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
         modules = [
           home-manager-shared
           nixpkgs-shared
           home-manager.darwinModules.home-manager
+          ./modules/darwin/configuration.nix
+          ./modules/darwin/home.nix
         ];
         specialArgs = { inherit inputs; };
       };
