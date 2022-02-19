@@ -22,9 +22,10 @@ in
         attrs.src
     );
 
-    sourceRoot = lib.optional stdenv.isDarwin "DataGrip.app";
+    sourceRoot = lib.optionalString stdenv.isDarwin "DataGrip.app";
 
-    nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ (lib.optionals stdenv.isDarwin [ undmg ]);
+    nativeBuildInputs = (attrs.nativeBuildInputs or [ ])
+      ++ (lib.optionals stdenv.isDarwin [ undmg ]);
 
     installPhase = (if stdenv.isDarwin then ''
       runHook preInstall
