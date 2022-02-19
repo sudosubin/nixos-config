@@ -4,7 +4,7 @@ with lib;
 let
   inherit (pkgs) stdenv;
   package = if stdenv.isLinux then pkgs.vscodium else pkgs.vscode;
-  configDir = if stdenv.isLinux then "${config.xdg.configHome}/VSCodim" else "Library/Application Support/Code";
+  configDir = if stdenv.isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/Code";
 
 in
 {
