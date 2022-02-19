@@ -8,13 +8,18 @@
   };
 
   nix = {
+    useDaemon = true;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
-    useDaemon = true;
   };
 
   programs.zsh.enable = true;
+
+  users.users."subin.kim" = {
+    shell = pkgs.zsh;
+    home = "/Users/subin.kim";
+  };
 
   environment = {
     shells = [ pkgs.zsh ];
@@ -22,10 +27,5 @@
     variables = {
       SHELL = "${pkgs.zsh}/bin/zsh";
     };
-  };
-
-  users.users."subin.kim" = {
-    shell = pkgs.zsh;
-    home = "/Users/subin.kim";
   };
 }
