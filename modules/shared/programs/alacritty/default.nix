@@ -1,6 +1,8 @@
 { config, lib, pkgs, ... }:
 
 let
+  inherit (pkgs) stdenv;
+
   colors = {
     black = "#5c6370";
     red = "#e06c75";
@@ -11,6 +13,9 @@ let
     cyan = "#56b6c2";
     white = "#abb2bf";
   };
+
+  font-size = if stdenv.isDarwin then 12 else 10;
+  font-family = "FiraMono Nerd Font Mono";
 in
 {
   programs.alacritty = {
@@ -40,7 +45,11 @@ in
       };
 
       font = {
-        size = 10;
+        size = font-size;
+        normal.family = font-family;
+        bold.family = font-family;
+        italic.family = font-family;
+        bold_italic.family = font-family;
       };
 
       colors = {
