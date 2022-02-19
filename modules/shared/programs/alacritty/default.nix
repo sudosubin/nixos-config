@@ -1,6 +1,8 @@
 { config, lib, pkgs, ... }:
 
 let
+  inherit (pkgs) stdenv;
+
   colors = {
     black = "#5c6370";
     red = "#e06c75";
@@ -11,6 +13,13 @@ let
     cyan = "#56b6c2";
     white = "#abb2bf";
   };
+
+  font-size = if stdenv.isDarwin then 12 else 10;
+  font-family = "FiraMono Nerd Font Mono";
+
+  padding-y = if stdenv.isDarwin then 26 else 6;
+  decorations = if stdenv.isDarwin then "transparent" else "none";
+
 in
 {
   programs.alacritty = {
@@ -27,9 +36,10 @@ in
         };
         padding = {
           x = 8;
-          y = 6;
+          y = padding-y;
         };
         dynamic_padding = true;
+        decorations = decorations;
         title = "Terminal";
         dynamic_title = true;
       };
@@ -40,7 +50,11 @@ in
       };
 
       font = {
-        size = 10;
+        size = font-size;
+        normal.family = font-family;
+        bold.family = font-family;
+        italic.family = font-family;
+        bold_italic.family = font-family;
       };
 
       colors = {
