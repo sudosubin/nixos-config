@@ -15,6 +15,9 @@
   };
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.permittedInsecurePackages = [
+    "openssl-1.0.2u"
+  ];
 
   programs.zsh.enable = true;
 

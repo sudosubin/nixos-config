@@ -21,10 +21,14 @@
     ];
 
     secrets = {
+      mount = "/tmp/user/$UID/secrets";
       identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
     };
 
     imports = [
+      inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
+      inputs.nixos-config-private-toss.homeManagerModules.toss
+
       ../shared/programs/act
       ../shared/programs/alacritty
       ../shared/programs/aws
