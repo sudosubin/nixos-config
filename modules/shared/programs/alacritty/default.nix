@@ -17,7 +17,7 @@ let
   font-size = if stdenv.isDarwin then 12 else 10;
   font-family = "FiraMono Nerd Font Mono";
 
-  padding-y = if stdenv.isDarwin then 26 else 6;
+  padding-y = if stdenv.isDarwin then 24 else 6;
   decorations = if stdenv.isDarwin then "transparent" else "none";
 
 in
