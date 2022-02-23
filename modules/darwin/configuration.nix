@@ -1,12 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  # Darwin network configurations
-  networking = {
-    dns = [ "1.1.1.1" "1.0.0.1" ];
-    knownNetworkServices = [ "Thunderbolt Bridge" "USB 10/100/1000 LAN" "Wi-Fi" ];
-  };
-
   nix = {
     useDaemon = true;
     extraOptions = ''
@@ -32,5 +26,11 @@
     variables = {
       SHELL = "${pkgs.zsh}/bin/zsh";
     };
+  };
+
+  system.defaults = {
+    dock.autohide = true;
+    NSGlobalDomain.InitialKeyRepeat = 10;
+    NSGlobalDomain.KeyRepeat = 10;
   };
 }

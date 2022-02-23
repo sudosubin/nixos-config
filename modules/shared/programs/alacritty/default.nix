@@ -17,9 +17,6 @@ let
   font-size = if stdenv.isDarwin then 12 else 10;
   font-family = "FiraMono Nerd Font Mono";
 
-  padding-y = if stdenv.isDarwin then 24 else 6;
-  decorations = if stdenv.isDarwin then "transparent" else "none";
-
 in
 {
   programs.alacritty = {
@@ -36,10 +33,9 @@ in
         };
         padding = {
           x = 8;
-          y = padding-y;
+          y = 6;
         };
         dynamic_padding = true;
-        decorations = decorations;
         title = "Terminal";
         dynamic_title = true;
       };

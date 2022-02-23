@@ -14,6 +14,7 @@
       signByDefault = true;
     };
     ignores = [
+      "/.vscode"
       ".tool-versions"
     ];
     extraConfig = {
