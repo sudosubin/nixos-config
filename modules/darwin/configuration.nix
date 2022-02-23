@@ -30,7 +30,7 @@
 
   system.defaults = {
     dock.autohide = true;
-    NSGlobalDomain.InitialKeyRepeat = 10;
-    NSGlobalDomain.KeyRepeat = 10;
+    NSGlobalDomain.InitialKeyRepeat = 15;
+    NSGlobalDomain.KeyRepeat = 2;
   };
 }
