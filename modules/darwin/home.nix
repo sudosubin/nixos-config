@@ -17,6 +17,7 @@
       yarn
 
       # Utility
+      keepingyouawake
       slack
     ];
 
