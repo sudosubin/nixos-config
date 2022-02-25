@@ -1,6 +1,11 @@
 { config, pkgs, ... }:
 
 {
+  imports = [
+    ../darwin/programs/skhd
+    ../darwin/programs/yabai
+  ];
+
   nix = {
     useDaemon = true;
     extraOptions = ''
@@ -32,5 +37,8 @@
     dock.autohide = true;
     NSGlobalDomain.InitialKeyRepeat = 15;
     NSGlobalDomain.KeyRepeat = 2;
+
+    NSGlobalDomain.NSWindowResizeTime = null;
+    # NSGlobalDomain.NSAutomaticWindowAnimationsEnabled = false;
   };
 }
