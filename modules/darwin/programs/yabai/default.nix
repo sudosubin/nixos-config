@@ -3,7 +3,7 @@
 {
   services.yabai = {
     enable = true;
-    # enableScriptingAddition = true;
+    enableScriptingAddition = true;
 
     package = pkgs.yabai;
 
