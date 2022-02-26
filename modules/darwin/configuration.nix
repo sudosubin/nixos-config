@@ -35,6 +35,7 @@
 
   system.defaults = {
     dock.autohide = true;
+    dock.mru-spaces = false;
     NSGlobalDomain.InitialKeyRepeat = 15;
     NSGlobalDomain.KeyRepeat = 2;
 
