@@ -1,7 +1,9 @@
-{ config, pkgs, inputs, ... }:
+{ ... }:
 
 {
   nixpkgs.overlays = [
+    (import ./generators/xml.nix)
+
     (import ./programs/apple-cursor-theme.nix)
     (import ./programs/google-chrome.nix)
     (import ./programs/jetbrains.nix)
