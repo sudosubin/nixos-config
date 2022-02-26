@@ -38,6 +38,7 @@
       ../shared/programs/aws
       ../shared/programs/bat
       ../shared/programs/docker
+      ../shared/programs/fonts
       ../shared/programs/fzf
       ../shared/programs/git
       ../shared/programs/gpg
@@ -51,7 +52,6 @@
       ../shared/programs/vscode
       ../shared/programs/zsh
 
-      ../linux/programs/fonts
       ../linux/programs/input-method
       ../linux/programs/theme
       ../linux/programs/wayland
