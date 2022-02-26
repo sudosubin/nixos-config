@@ -19,8 +19,8 @@ final: { lib, vscode-utils, ... }@prev:
     flowtype.flow-for-vscode = vscode-utils.extensionFromVscodeMarketplace {
       name = "flow-for-vscode";
       publisher = "flowtype";
-      version = "1.9.2";
-      sha256 = "sha256-DFjWdnH4m8sw/bR2ti89CKX0WrWe3bPRN8C9ysSjsa0=";
+      version = "2.0.0";
+      sha256 = "sha256-QGs0GwDEsfUdg41R3nYvLTUmERDnzb3j2BO5749dQCs=";
     };
 
     fwcd.kotlin = vscode-utils.extensionFromVscodeMarketplace {
@@ -35,13 +35,6 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "kevinrose";
       version = "1.14.2";
       sha256 = "sha256-T0uPywFo0it/4GNNaC8c8vGxHxkr/4S1Pz7ObtNrSMM=";
-    };
-
-    ms-pyright.pyright = vscode-utils.extensionFromVscodeMarketplace {
-      name = "pyright";
-      publisher = "ms-pyright";
-      version = "1.1.215";
-      sha256 = "sha256-GIRs6wWKYkgMcTKAkykcRmNjWv1A/bqQk3eF1ucKw+k=";
     };
 
     nimsaem.nimvscode = vscode-utils.extensionFromVscodeMarketplace {
