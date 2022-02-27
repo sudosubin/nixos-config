@@ -16,6 +16,10 @@
     ignores = [
       "/.vscode"
       ".tool-versions"
+
+      # direnv
+      ".envrc"
+      ".direnv"
     ];
     extraConfig = {
       init.defaultBranch = "main";

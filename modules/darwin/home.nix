@@ -34,6 +34,7 @@
       ../shared/programs/alacritty
       ../shared/programs/aws
       ../shared/programs/bat
+      ../shared/programs/direnv
       ../shared/programs/docker
       ../shared/programs/fzf
       ../shared/programs/fonts
