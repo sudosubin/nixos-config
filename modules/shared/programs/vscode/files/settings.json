@@ -173,6 +173,15 @@
     ".env": true
   },
 
+  // language (nix)
+  "nix": {
+    "enableLanguageServer": true
+  },
+  "[nix]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true
+  },
+
   // languages (etc)
   "[html]": {
     "editor.tabSize": 2,
@@ -192,9 +201,6 @@
   },
   "[rust]": {
     "editor.formatOnSave": true
-  },
-  "[nix]": {
-    "editor.tabSize": 2
   },
   "java.configuration.checkProjectSettingsExclusions": false,
   "errorLens.margin": "6ch",

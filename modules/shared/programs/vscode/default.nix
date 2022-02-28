@@ -18,7 +18,6 @@ in
     enable = true;
     package = package;
     extensions = with pkgs.vscode-extensions; [
-      bbenoist.nix
       castwide.solargraph
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
@@ -27,6 +26,7 @@ in
       exiasr.hadolint
       flowtype.flow-for-vscode
       fwcd.kotlin
+      jnoortheen.nix-ide
       jpoissonnier.vscode-styled-components
       kevinrose.vsc-python-indent
       ms-pyright.pyright

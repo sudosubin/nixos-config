@@ -17,7 +17,9 @@ let
   '';
 in
 {
-  home.packages = [
+  home.packages = with pkgs; [
+    rnix-lsp
+    nixpkgs-fmt
     nix-activate
   ];
 }
