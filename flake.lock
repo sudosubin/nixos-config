@@ -68,11 +68,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1645956046,
-        "narHash": "sha256-X0rqhBZfKudX9WXOC+pOELF5uUmdiHaJzBtbgg1tqYI=",
+        "lastModified": 1646134646,
+        "narHash": "sha256-tj0JdmBL5fhT+EVzRTjlO+bfkHnJpdDftiMcTdTQT4I=",
         "owner": "sudosubin",
         "repo": "home-manager-secrets",
-        "rev": "b06cc8458e57ef124895440910a7ccef5924ea74",
+        "rev": "76d33d19b2bc08ed3dbbb55cbf66b3a0e9210094",
         "type": "github"
       },
       "original": {
