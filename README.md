@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD014 -->
+
 # NixOS Config
 
 Personal nix files, installs some dotfiles and softwares.
