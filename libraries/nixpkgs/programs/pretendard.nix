@@ -8,11 +8,11 @@ in
     name = "pretendard-${version}";
 
     url = "https://github.com/orioncactus/pretendard/releases/download/v${version}/Pretendard-${version}.zip";
-    sha256 = "sha256-f/BMerTGc2PW98C+0RK8Sm2hIcWAVMMLNZ2zwi8M8Fs=";
+    sha256 = "sha256-tqOKiSwQRx4GYnGK0hlQGk5kUEfXgHv/d4IEG5qleFo=";
 
     postFetch = ''
-      mkdir -p $out/share/fonts
-      unzip -j $downloadedFile "*.otf" -d $out/share/fonts/opentype
+      mkdir -p $out/share/fonts/opentype/pretendard
+      unzip -j $downloadedFile "*.otf" -d $out/share/fonts/opentype/pretendard/
     '';
 
     meta = with lib; {
