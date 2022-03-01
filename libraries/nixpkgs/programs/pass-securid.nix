@@ -1,4 +1,4 @@
-final: { lib, stdenv, fetchFromGitHub, stoken, ... }@prev:
+dfinal: { lib, stdenv, fetchFromGitHub, stoken, ... }@prev:
 
 let
   rev = "99e5da3fa7e2b5c613a3c275de182b82facd54a5";
@@ -6,13 +6,13 @@ in
 {
   pass-securid = stdenv.mkDerivation rec {
     pname = "pass-securid";
-    version = "${builtins.substring 0 8 rev}";
+    version = "0.1.1";
 
     src = fetchFromGitHub {
       owner = "sudosubin";
       repo = "pass-securid";
-      rev = "${rev}";
-      sha256 = "sha256-MS+s2GiAgIBzw4jn497aAG8JoGdKhNvY3oTc8J5+PDQ=";
+      rev = "v${version}";
+      sha256 = "sha256-FF5FIjQTYtNkuwdsyfcQxPOKg9loP7IDKU/nQAiVd1k=";
     };
 
     buildInputs = [ stoken ];
@@ -28,8 +28,8 @@ in
     ];
 
     meta = with lib; {
-      description = "A pass extension for managing RSA SecurIDs";
       homepage = "https://github.com/sudosubin/pass-securid";
+      description = "A pass extension for managing RSA SecurIDs";
       platforms = platforms.unix;
       license = licenses.gpl3Plus;
       maintainers = with maintainers; [ sudosubin ];
