@@ -45,6 +45,7 @@
       ../shared/programs/git
       ../shared/programs/gpg
       ../shared/programs/himalaya
+      ../shared/programs/jq
       ../shared/programs/lsd
       ../shared/programs/nix
       ../shared/programs/password-store

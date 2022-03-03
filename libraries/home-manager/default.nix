@@ -11,6 +11,7 @@ in
 
     # local programs (local)
     ./programs/act
+    ./programs/jq
     ./programs/lsd
 
     # os systems
