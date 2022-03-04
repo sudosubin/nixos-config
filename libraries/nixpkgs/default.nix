@@ -5,6 +5,7 @@
     (import ./generators/xml.nix)
 
     (import ./programs/apple-cursor-theme.nix)
+    (import ./programs/figma-font-helper)
     (import ./programs/google-chrome.nix)
     (import ./programs/jetbrains.nix)
     (import ./programs/keepingyouawake.nix)
