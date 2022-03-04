@@ -55,6 +55,7 @@
       ../shared/programs/vscode
       ../shared/programs/zsh
 
+      ../linux/programs/figma-font-helper
       ../linux/programs/input-method
       ../linux/programs/theme
       ../linux/programs/wayland
