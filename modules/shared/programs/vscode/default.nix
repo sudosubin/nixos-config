@@ -18,7 +18,6 @@ in
     enable = true;
     package = package;
     extensions = with pkgs.vscode-extensions; [
-      bazelbuild.vscode-bazel
       castwide.solargraph
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
@@ -33,9 +32,11 @@ in
       ms-pyright.pyright
       ms-python.python
       nimsaem.nimvscode
+      paulvarache.vscode-taskfile
       pkief.material-icon-theme
       pkief.material-product-icons
       redhat.java
+      redhat.vscode-yaml
       rust-lang.rust
       shardulm94.trailing-spaces
       tamasfe.even-better-toml

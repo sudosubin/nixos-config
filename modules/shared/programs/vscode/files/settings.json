@@ -209,6 +209,7 @@
   "errorLens.gutterIconSet": "defaultOutline",
 
   // telemetry, etc
+  "redhat.telemetry.enabled": false,
   "telemetry.telemetryLevel": "off",
   "extensions.ignoreRecommendations": true,
   "extensions.autoCheckUpdates": false,

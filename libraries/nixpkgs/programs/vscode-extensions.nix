@@ -2,13 +2,6 @@ final: { lib, vscode-utils, ... }@prev:
 
 {
   vscode-extensions = lib.recursiveUpdate prev.vscode-extensions {
-    bazelbuild.vscode-bazel = vscode-utils.extensionFromVscodeMarketplace {
-      name = "vscode-bazel";
-      publisher = "BazelBuild";
-      version = "0.5.0";
-      sha256 = "sha256-JJQSwU3B5C2exENdNsWEcxFSgWHnImYas4t/KLsgTj4=";
-    };
-
     castwide.solargraph = vscode-utils.extensionFromVscodeMarketplace {
       name = "solargraph";
       publisher = "castwide";
@@ -49,6 +42,13 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "nimsaem";
       version = "0.1.25";
       sha256 = "sha256-f0zDCFmCu7nh0d8jg0lBIJRoDphZX5XUrtqZXd8E2P8=";
+    };
+
+    paulvarache.vscode-taskfile = vscode-utils.extensionFromVscodeMarketplace {
+      name = "vscode-taskfile";
+      publisher = "paulvarache";
+      version = "0.0.5";
+      sha256 = "sha256-SdqTfQoSt+YNUrYOg95VEErWkK4EnJNYKQOE1kc1+k8=";
     };
 
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
