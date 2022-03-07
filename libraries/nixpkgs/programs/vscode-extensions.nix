@@ -2,6 +2,13 @@ final: { lib, vscode-utils, ... }@prev:
 
 {
   vscode-extensions = lib.recursiveUpdate prev.vscode-extensions {
+    bazelbuild.vscode-bazel = vscode-utils.extensionFromVscodeMarketplace {
+      name = "vscode-bazel";
+      publisher = "BazelBuild";
+      version = "0.5.0";
+      sha256 = "sha256-JJQSwU3B5C2exENdNsWEcxFSgWHnImYas4t/KLsgTj4=";
+    };
+
     castwide.solargraph = vscode-utils.extensionFromVscodeMarketplace {
       name = "solargraph";
       publisher = "castwide";

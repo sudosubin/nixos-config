@@ -18,6 +18,7 @@ in
     enable = true;
     package = package;
     extensions = with pkgs.vscode-extensions; [
+      bazelbuild.vscode-bazel
       castwide.solargraph
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
