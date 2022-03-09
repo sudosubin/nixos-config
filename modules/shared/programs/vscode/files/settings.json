@@ -14,7 +14,7 @@
   "search.useGlobalIgnoreFiles": true,
 
   // theme
-  "oneDarkPro.editorTheme": "oneDarkPro",
+  "oneDarkPro.editorTheme": "One Dark Pro",
   "workbench.colorTheme": "One Dark Pro",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.productIconTheme": "material-product-icons",
@@ -87,11 +87,10 @@
   "python.showStartPage": false,
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": true,
-  "python.linting.flake8Args": ["--max-line-length=120"],
   "python.formatting.provider": "black",
 
   "[python]": {
-    "editor.rulers": [120],
+    "editor.rulers": [80, 120],
     "editor.tabSize": 4,
     "editor.formatOnSave": true,
     "files.insertFinalNewline": true,
@@ -166,6 +165,9 @@
       "source.fixAll.eslint": true
     }
   },
+
+  // langauge (sql)
+  "sql.linter.executablePath": "/etc/profiles/per-user/sudosubin/bin/sqlfluff",
 
   // language (bash)
   "shellcheck.customArgs": ["-x"],

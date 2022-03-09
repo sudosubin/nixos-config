@@ -21,6 +21,7 @@ in
       castwide.solargraph
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
+      dorzey.vscode-sqlfluff
       eamodio.gitlens
       esbenp.prettier-vscode
       exiasr.hadolint
