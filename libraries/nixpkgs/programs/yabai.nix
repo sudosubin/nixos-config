@@ -1,7 +1,7 @@
 final: { lib, stdenv, fetchFromGitHub, ... }@prev:
 
 let
-  rev = "916d9133f9d13fb38678baa3d0adf3cfb9dff003";
+  rev = "a4030e771f76d4f135f5b830eedd7234592df51e";
 
   buildSymlinks = prev.runCommand "build-symlinks" { } ''
     mkdir -p $out/bin
@@ -18,7 +18,7 @@ in
       inherit rev;
       owner = "koekeishiya";
       repo = pname;
-      sha256 = "sha256-RFEuVIMP9+HXnkSPRobCATzg9fsu48zoAFq7AqodLaQ=";
+      sha256 = "sha256-SwoXH6d0blE+S5i4n0Y9Q8AJuQAAaQs+CK3y1hAQoPU=";
     };
 
     nativeBuildInputs = attrs.nativeBuildInputs ++ [ buildSymlinks ];
