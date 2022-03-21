@@ -22,10 +22,5 @@ in
     };
 
     nativeBuildInputs = attrs.nativeBuildInputs ++ [ buildSymlinks ];
-
-    postInstall = ''
-      $out/bin/yabai --install-sa
-      $out/bin/yabai --load-sa
-    '';
   });
 }
