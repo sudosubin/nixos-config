@@ -24,14 +24,6 @@
   "material-icon-theme.files.associations": {
     "stories.tsx": "storybook"
   },
-  "customizeUI.activityBar": "bottom",
-  "customizeUI.font.regular": "Pretendard",
-  "customizeUI.font.monospace": "FiraMono Nerd Font Mono",
-  "customizeUI.stylesheet": {
-    ".quick-input-widget": "font-family: monospace !important; font-size: 12px !important;",
-    ".search-view .search-widgets-container": "font-family: monospace !important; font-size: 12px !important;",
-    ".monaco-list-rows, .monaco-findInput": "font-family: monospace !important; font-size: 12px !important;"
-  },
   "workbench.colorCustomizations": {
     "errorLens.errorBackground": "#E06C751A",
     "errorLens.errorForeground": "#E06C75",
@@ -61,6 +53,9 @@
   "editor.scrollbar.horizontal": "hidden",
   "editor.hideCursorInOverviewRuler": true,
   "editor.overviewRulerBorder": false,
+
+  // transition
+  "editor.cursorSmoothCaretAnimation": true,
 
   // git
   "gitlens.currentLine.format": "${author} • ${date}, ${message}",
