@@ -14,9 +14,6 @@
       signByDefault = true;
     };
     ignores = [
-      "/.vscode"
-      ".tool-versions"
-
       # direnv
       ".envrc"
       ".direnv"
