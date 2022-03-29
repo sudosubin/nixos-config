@@ -51,13 +51,6 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "sha256-f0zDCFmCu7nh0d8jg0lBIJRoDphZX5XUrtqZXd8E2P8=";
     };
 
-    paulvarache.vscode-taskfile = vscode-utils.extensionFromVscodeMarketplace {
-      name = "vscode-taskfile";
-      publisher = "paulvarache";
-      version = "0.0.5";
-      sha256 = "sha256-SdqTfQoSt+YNUrYOg95VEErWkK4EnJNYKQOE1kc1+k8=";
-    };
-
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
       name = "rust";
       publisher = "rust-lang";

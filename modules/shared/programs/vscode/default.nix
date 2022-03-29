@@ -33,7 +33,6 @@ in
       ms-pyright.pyright
       ms-python.python
       nimsaem.nimvscode
-      paulvarache.vscode-taskfile
       pkief.material-icon-theme
       pkief.material-product-icons
       redhat.java
