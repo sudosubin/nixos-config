@@ -169,6 +169,7 @@
   "shellcheck.ignorePatterns": {
     ".env": true
   },
+  "shellformat.path": "/etc/profiles/per-user/sudosubin/bin/shfmt",
 
   // language (nix)
   "nix": {

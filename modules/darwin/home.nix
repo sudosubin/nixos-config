@@ -15,6 +15,7 @@
       kubectl
       lokalise2-cli
       minikube
+      shfmt
       sqlfluff
       yarn
 

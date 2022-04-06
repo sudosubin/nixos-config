@@ -23,9 +23,11 @@ in
       dbaeumer.vscode-eslint
       dorzey.vscode-sqlfluff
       eamodio.gitlens
+      editorconfig.editorconfig
       esbenp.prettier-vscode
       exiasr.hadolint
       flowtype.flow-for-vscode
+      foxundermoon.shell-format
       fwcd.kotlin
       jnoortheen.nix-ide
       jpoissonnier.vscode-styled-components
