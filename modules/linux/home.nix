@@ -25,6 +25,7 @@
       pavucontrol
       pulseaudio
       slack
+      unzip
       xdg-utils
     ];
 

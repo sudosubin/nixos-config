@@ -22,6 +22,7 @@
       # Utility
       keepingyouawake
       slack
+      unzip
     ];
 
     secrets = {
