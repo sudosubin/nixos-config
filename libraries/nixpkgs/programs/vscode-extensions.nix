@@ -2,6 +2,13 @@ final: { lib, vscode-utils, ... }@prev:
 
 {
   vscode-extensions = lib.recursiveUpdate prev.vscode-extensions {
+    arcanis.vscode-zipfs = vscode-utils.extensionFromVscodeMarketplace {
+      name = "vscode-zipfs";
+      publisher = "arcanis";
+      version = "3.0.0";
+      sha256 = "sha256-yNRC03kV0UvpEp1gF+NK0N3iCoqZMQ+PAqtrHLXFeXM=";
+    };
+
     castwide.solargraph = vscode-utils.extensionFromVscodeMarketplace {
       name = "solargraph";
       publisher = "castwide";
