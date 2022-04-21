@@ -42,6 +42,6 @@
     NSGlobalDomain.KeyRepeat = 2;
 
     NSGlobalDomain.NSWindowResizeTime = null;
-    # NSGlobalDomain.NSAutomaticWindowAnimationsEnabled = false;
+    NSGlobalDomain.NSAutomaticWindowAnimationsEnabled = false;
   };
 }
