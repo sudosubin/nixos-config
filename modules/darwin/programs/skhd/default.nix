@@ -12,7 +12,7 @@ in
   services.skhd = {
     enable = true;
 
-    skhdConfig = builtins.concatStringsSep "\n" [
+    config = builtins.concatStringsSep "\n" [
       # Core skhd
       "${mod} + shift - r : ${pkgs.skhd}/bin/skhd --reload"
 

@@ -14,6 +14,7 @@ in
     ./programs/figma-font-helper
     ./programs/jq
     ./programs/lsd
+    ./programs/skhd
 
     # os systems
     (lib.mkIf (stdenv.isLinux) ./systems/linux)

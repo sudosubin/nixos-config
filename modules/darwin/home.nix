@@ -54,6 +54,8 @@
       ../shared/programs/tmux
       ../shared/programs/vscode
       ../shared/programs/zsh
+
+      ../darwin/programs/skhd
     ];
   };
 }
