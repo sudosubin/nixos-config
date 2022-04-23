@@ -56,6 +56,7 @@
       ../shared/programs/zsh
 
       ../darwin/programs/skhd
+      ../darwin/programs/yabai
     ];
   };
 }

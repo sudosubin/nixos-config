@@ -15,6 +15,7 @@ in
     ./programs/jq
     ./programs/lsd
     ./programs/skhd
+    ./programs/yabai
 
     # os systems
     (lib.mkIf (stdenv.isLinux) ./systems/linux)

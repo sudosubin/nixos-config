@@ -1,10 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ../darwin/programs/yabai
-  ];
-
   nix = {
     useDaemon = true;
     extraOptions = ''
