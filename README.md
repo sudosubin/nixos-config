@@ -8,7 +8,7 @@ Personal nix files, installs some dotfiles and softwares.
 
 ```sh
 # Linux
-$ sudo nixos-rebuild --flake '.#linux'
+$ nixos-rebuild --flake '.#linux' --use-remote-sudo
 
 # Darwin
 $ nix --experimental-features 'nix-command flakes' build '.#darwinConfigurations.darwin.system'
