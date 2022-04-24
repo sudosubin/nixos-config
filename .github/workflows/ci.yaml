@@ -6,8 +6,8 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: cachix/install-nix-action@v16
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v17
       - run: |
           nix-shell \
             -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/3c0f57e36ed0cf9947281e3b31f1bebb7ce5d4a1.tar.gz \
