@@ -20,6 +20,7 @@ jobs:
 
       - name: Add SSH Key
         run: |
+          mkdir -p "$HOME/.ssh"
           echo "${{ secrets.PERSONAL_SSH_KEY }}" > "$HOME/.ssh/id_ed25519"
           chmod 600 "$HOME/.ssh/id_ed25519"
 
