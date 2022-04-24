@@ -10,12 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Install Nix
         uses: cachix/install-nix-action@v17
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add SSH Key
+        run: |
+          echo "${{ secrets.PERSONAL_SSH_KEY }}" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+
       - name: Update flake.lock
         uses: DeterminateSystems/update-flake-lock@v8
         with:
