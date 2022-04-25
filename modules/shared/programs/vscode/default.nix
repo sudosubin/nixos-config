@@ -3,8 +3,7 @@ with lib;
 
 let
   inherit (pkgs) stdenv;
-  package = if stdenv.isLinux then pkgs.vscodium else pkgs.vscode;
-  configDir = if stdenv.isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/Code";
+  configDir = if stdenv.isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/VSCodium";
 
 in
 {
@@ -16,7 +15,7 @@ in
 
   programs.vscode = {
     enable = true;
-    package = package;
+    package = pkgs.vscodium;
     extensions = with pkgs.vscode-extensions; [
       arcanis.vscode-zipfs
       castwide.solargraph
@@ -50,7 +49,7 @@ in
     ];
   };
 
-  home.shellAliases = mkIf stdenv.isLinux {
+  home.shellAliases = {
     code = "codium";
   };
 }
