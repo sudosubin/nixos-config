@@ -1,13 +1,18 @@
-final: { lib, fetchurl, stdenv, ... }@prev:
+final: { lib, fetchzip, stdenv, ... }@prev:
 
 let
   inherit (stdenv.hostPlatform) system;
 
   aarch64-darwin = rec {
     version = "1.66.1";
-    src = fetchurl {
+    src = fetchzip {
       url = "https://github.com/tibeer/vscodium/releases/download/${version}.darwin_arm64/VSCodium.zip";
-      sha256 = "sha256-KZ4dy4Cj6H8/2Q9g3r42U/P/UD8YEDITo4h7OEhxWxU=";
+      sha256 = "sha256-5/FDnXoAPTNfxPkT8RbrQWQBaD1Ur2fGNwCN5NrXEVw=";
+
+      extraPostFetch = ''
+        mv "$out/VSCode-darwin-arm64" "$unpackDir"
+        mv "$unpackDir/VSCode-darwin-arm64/VSCodium.app"/* "$out"
+      '';
     };
   };
 
