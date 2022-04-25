@@ -9,13 +9,6 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "sha256-yNRC03kV0UvpEp1gF+NK0N3iCoqZMQ+PAqtrHLXFeXM=";
     };
 
-    castwide.solargraph = vscode-utils.extensionFromVscodeMarketplace {
-      name = "solargraph";
-      publisher = "castwide";
-      version = "0.23.0";
-      sha256 = "sha256-1qQY7WMTxEsf3fQRoV+h1eFFBfGDRU6wkCIcE7Dnakc=";
-    };
-
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
@@ -26,29 +19,29 @@ final: { lib, vscode-utils, ... }@prev:
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
       name = "hadolint";
       publisher = "exiasr";
-      version = "1.1.0";
-      sha256 = "sha256-pMzWqlfuNC5IakAoOr3rekQexz8eIouM6i4HvFwh7oY=";
+      version = "1.1.1";
+      sha256 = "sha256-L8Kg/laHTCADecRJatlUadaT7TnmwD+Bt1pBNS0BRlM=";
     };
 
     flowtype.flow-for-vscode = vscode-utils.extensionFromVscodeMarketplace {
       name = "flow-for-vscode";
       publisher = "flowtype";
-      version = "2.0.0";
-      sha256 = "sha256-QGs0GwDEsfUdg41R3nYvLTUmERDnzb3j2BO5749dQCs=";
+      version = "2.1.0";
+      sha256 = "sha256-U0XHNPKV3953zJORaWDwA59aMLX4ZpCIn8VqzqLMHBQ=";
     };
 
     fwcd.kotlin = vscode-utils.extensionFromVscodeMarketplace {
       name = "kotlin";
       publisher = "fwcd";
-      version = "0.2.23";
-      sha256 = "sha256-nKhQrDdpKnZmC5nnfSTevUES1G6H8WNlLF26zFWnTmQ=";
+      version = "0.2.24";
+      sha256 = "sha256-l3SDNS/UO91chDYZ7y8/xboSJ70cBw1Arman5fdNsDg=";
     };
 
     kevinrose.vsc-python-indent = vscode-utils.extensionFromVscodeMarketplace {
       name = "vsc-python-indent";
       publisher = "kevinrose";
-      version = "1.14.2";
-      sha256 = "sha256-T0uPywFo0it/4GNNaC8c8vGxHxkr/4S1Pz7ObtNrSMM=";
+      version = "1.15.0";
+      sha256 = "sha256-ZhrwzNJI1yU2ftqJJwWOdrtsnghbLfIJLN53jRZhwIg=";
     };
 
     nimsaem.nimvscode = vscode-utils.extensionFromVscodeMarketplace {

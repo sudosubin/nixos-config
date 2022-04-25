@@ -18,7 +18,6 @@ in
     package = pkgs.vscodium;
     extensions = with pkgs.vscode-extensions; [
       arcanis.vscode-zipfs
-      castwide.solargraph
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
       dorzey.vscode-sqlfluff
