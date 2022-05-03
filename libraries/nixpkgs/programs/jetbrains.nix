@@ -13,7 +13,7 @@ in
       if stdenv.isDarwin && system == "aarch64-darwin" then
         (fetchurl {
           url = "https://download.jetbrains.com/datagrip/${attrs.name}-aarch64.dmg";
-          sha256 = "sha256-ene6n85Wx4Guak/GXqq0vMEHgLa9Z5sE10FGcZ5CiQo=";
+          sha256 = "sha256-K6ku00NmsRGjm6BjLZHbryMmM/X1VXogjdirdpYXm28=";
         }) else if stdenv.isDarwin then
         (fetchurl {
           url = "https://download.jetbrains.com/datagrip/${attrs.name}.dmg";
