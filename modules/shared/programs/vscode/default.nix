@@ -18,6 +18,7 @@ in
     package = pkgs.vscodium;
     extensions = with pkgs.vscode-extensions; [
       arcanis.vscode-zipfs
+      bierner.markdown-preview-github-styles
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
       dorzey.vscode-sqlfluff

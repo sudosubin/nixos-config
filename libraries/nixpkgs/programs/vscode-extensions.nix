@@ -9,6 +9,13 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "sha256-yNRC03kV0UvpEp1gF+NK0N3iCoqZMQ+PAqtrHLXFeXM=";
     };
 
+    bierner.markdown-preview-github-styles = vscode-utils.extensionFromVscodeMarketplace {
+      name = "markdown-preview-github-styles";
+      publisher = "bierner";
+      version = "1.0.1";
+      sha256 = "sha256-UhWbygrGh0whVxfGcEa+hunrTG/gfHpXYii0E7YhXa4=";
+    };
+
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
@@ -57,5 +64,13 @@ final: { lib, vscode-utils, ... }@prev:
       version = "0.7.8";
       sha256 = "sha256-Y33agSNMVmaVCQdYd5mzwjiK5JTZTtzTkmSGTQrSNg0=";
     };
+
+    zhuangtongfa.material-theme = prev.vscode-extensions.zhuangtongfa.material-theme.overrideAttrs (attrs: rec {
+      postInstall = ''
+        ${attrs.postInstall or ""}
+
+        rm -rf "$out/$installPrefix/styles"
+      '';
+    });
   };
 }
