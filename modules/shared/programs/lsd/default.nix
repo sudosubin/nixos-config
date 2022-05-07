@@ -12,6 +12,7 @@ in
       color.theme = theme-name;
       date = "+%e %b %H:%M";
       size = "bytes";
+      sorting.dir-grouping = "first";
       symlink-arrow = "";
     };
 
