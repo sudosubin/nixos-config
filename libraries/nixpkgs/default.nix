@@ -11,6 +11,7 @@
     (import ./programs/keepingyouawake.nix)
     (import ./programs/pass-securid.nix)
     (import ./programs/pretendard.nix)
+    (import ./programs/pyopenssl.nix)
     (import ./programs/vscode-extensions.nix)
     (import ./programs/vscodium.nix)
     (import ./programs/yabai.nix)
