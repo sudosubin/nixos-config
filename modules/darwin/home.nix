@@ -20,6 +20,7 @@
       yarn
 
       # Utility
+      _1password
       keepingyouawake
       slack
       unzip

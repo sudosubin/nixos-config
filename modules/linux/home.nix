@@ -20,6 +20,7 @@
       yarn
 
       # Utility
+      _1password
       gnome.nautilus
       google-chrome
       pavucontrol
