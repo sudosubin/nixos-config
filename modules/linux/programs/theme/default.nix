@@ -23,9 +23,12 @@
     };
   };
 
-  xsession.pointerCursor = {
+  home.pointerCursor = {
     package = pkgs.apple-cursor-theme;
     name = "apple-cursor-theme";
     size = 22;
+
+    x11.enable = true;
+    gtk.enable = true;
   };
 }
