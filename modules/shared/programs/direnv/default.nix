@@ -16,7 +16,10 @@ in
 
   xdg.configFile = {
     "direnv/direnv.toml".source = toml.generate "direnv.toml" {
-      global.load_dotenv = false;
+      global = {
+        load_dotenv = false;
+        warn_timeout = "30s";
+      };
       whitelist.prefix = [ "${config.home.homeDirectory}/Code" ];
     };
   };
