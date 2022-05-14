@@ -56,6 +56,7 @@
       ../shared/programs/vscode
       ../shared/programs/zsh
 
+      ../darwin/programs/caffeinate
       ../darwin/programs/skhd
       ../darwin/programs/yabai
     ];

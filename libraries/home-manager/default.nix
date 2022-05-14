@@ -11,6 +11,7 @@ in
 
     # local programs (local)
     ./programs/act
+    ./programs/caffeinate
     ./programs/figma-font-helper
     ./programs/jq
     ./programs/lsd
