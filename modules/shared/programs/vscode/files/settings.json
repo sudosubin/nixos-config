@@ -159,6 +159,10 @@
       "source.fixAll.eslint": true
     }
   },
+  "[terraform]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true
+  },
 
   // langauge (sql)
   "sql.linter.executablePath": "/etc/profiles/per-user/sudosubin/bin/sqlfluff",

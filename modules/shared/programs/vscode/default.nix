@@ -30,6 +30,7 @@ in
       foxundermoon.shell-format
       fwcd.kotlin
       hashicorp.hcl
+      hashicorp.terraform
       jnoortheen.nix-ide
       jpoissonnier.vscode-styled-components
       kevinrose.vsc-python-indent
