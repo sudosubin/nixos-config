@@ -29,6 +29,7 @@ in
       flowtype.flow-for-vscode
       foxundermoon.shell-format
       fwcd.kotlin
+      hashicorp.hcl
       jnoortheen.nix-ide
       jpoissonnier.vscode-styled-components
       kevinrose.vsc-python-indent
