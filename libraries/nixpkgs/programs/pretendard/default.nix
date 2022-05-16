@@ -17,7 +17,7 @@ let
 
       meta = with lib; {
         homepage = "https://github.com/orioncactus/pretendard";
-        description = "Pretendard Typeface";
+        description = "Pretendard, a system-ui alternative font for all cross-platform.";
         license = licenses.ofl;
         platforms = platforms.all;
         maintainers = with maintainers; [ sudosubin ];
