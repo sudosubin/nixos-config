@@ -34,8 +34,8 @@ in
 
   pretendard-jp = mkPretendard {
     pname = "pretendard-jp";
-    typeface = "PretendardJp";
-    sha256 = "sha256-beCUQmF57kqwxHwOvQhmr+dcoZHvMFOcujOD+ZJUqTo=";
+    typeface = "PretendardJP";
+    sha256 = "sha256-IPchml0KiKiqOxxk0lJDNEwY3omrYfF0SNn2w52abHs=";
   };
 
   pretendard-std = mkPretendard {
