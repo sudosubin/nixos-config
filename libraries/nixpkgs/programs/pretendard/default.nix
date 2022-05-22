@@ -11,8 +11,8 @@ let
       inherit sha256;
 
       postFetch = ''
-        mkdir -p $out/share/fonts/opentype/${typeface}
-        unzip -j $downloadedFile "*.otf" -d $out/share/fonts/opentype/${typeface}/
+        mkdir -p $out/share/fonts/opentype
+        unzip -j $downloadedFile "*.otf" -d $out/share/fonts/opentype
       '';
 
       meta = with lib; {
@@ -29,18 +29,18 @@ in
   pretendard = mkPretendard {
     pname = "pretendard";
     typeface = "Pretendard";
-    sha256 = "sha256-w37Yc4vDbzLJWlP01WhWefQKvx/54sBBMYZZRJ7btg8=";
+    sha256 = "sha256-4DM8PZjxW93sgQChs+qu5Svo+iGlFnpglu6acYMCkSQ=";
   };
 
   pretendard-jp = mkPretendard {
     pname = "pretendard-jp";
     typeface = "PretendardJP";
-    sha256 = "sha256-IPchml0KiKiqOxxk0lJDNEwY3omrYfF0SNn2w52abHs=";
+    sha256 = "sha256-3OOUUDiurCpIGNIVjrr2KW0CB3fCXt11P+13teK5kOQ=";
   };
 
   pretendard-std = mkPretendard {
     pname = "pretendard-std";
     typeface = "PretendardStd";
-    sha256 = "sha256-cHStOwsMLmGmyPHdyNPjcMnXgrBGBIGoWeavDxY4lSw=";
+    sha256 = "sha256-iVAPdA6qAiE7pseaB0NKPJBPNGdw/nT6PzXIsLajJH4=";
   };
 }
