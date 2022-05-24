@@ -9,7 +9,7 @@ let
       url = "https://github.com/tibeer/vscodium/releases/download/${version}.darwin_arm64/VSCodium.zip";
       sha256 = "sha256-5/FDnXoAPTNfxPkT8RbrQWQBaD1Ur2fGNwCN5NrXEVw=";
 
-      extraPostFetch = ''
+      postFetch = ''
         mv "$out/VSCode-darwin-arm64" "$unpackDir"
         mv "$unpackDir/VSCode-darwin-arm64/VSCodium.app"/* "$out"
       '';

@@ -9,7 +9,6 @@
     (import ./programs/google-chrome)
     (import ./programs/jetbrains)
     (import ./programs/pass-securid)
-    (import ./programs/pretendard)
     (import ./programs/python)
     (import ./programs/vscode-extensions)
     (import ./programs/vscodium)
