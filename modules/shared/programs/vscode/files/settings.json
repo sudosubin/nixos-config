@@ -39,6 +39,7 @@
   "workbench.list.smoothScrolling": true,
   "workbench.editor.enablePreview": false,
   "editor.semanticHighlighting.enabled": false,
+  "editor.bracketPairColorization.enabled": false,
   "editor.smoothScrolling": true,
   "editor.rulers": [80, 120],
   "editor.insertSpaces": true,
