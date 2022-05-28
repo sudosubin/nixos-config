@@ -37,6 +37,7 @@
   "workbench.tree.indent": 16,
   "workbench.startupEditor": "none",
   "workbench.list.smoothScrolling": true,
+  "workbench.enableExperiments": false,
   "workbench.editor.enablePreview": false,
   "editor.semanticHighlighting.enabled": false,
   "editor.bracketPairColorization.enabled": false,
@@ -79,7 +80,6 @@
   "editor.trimAutoWhitespace": true,
 
   // language (python)
-  "python.showStartPage": false,
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": true,
   "python.formatting.provider": "black",
@@ -99,13 +99,11 @@
     "editor.tabSize": 2,
     "editor.formatOnSave": true
   },
-  "solargraph.diagnostics": true,
-  "solargraph.formatting": true,
-  "solargraph.useBundler": true,
 
   // language (javascript)
   "emmet.excludeLanguages": ["typescriptreact"],
   "eslint.alwaysShowStatus": true,
+  "typescript.disableAutomaticTypeAcquisition": true,
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "[css]": {
     "editor.tabSize": 2,
@@ -176,9 +174,7 @@
   "shellformat.path": "/etc/profiles/per-user/sudosubin/bin/shfmt",
 
   // language (nix)
-  "nix": {
-    "enableLanguageServer": true
-  },
+  "nix.enableLanguageServer": true,
   "[nix]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true
@@ -216,5 +212,6 @@
   "extensions.ignoreRecommendations": true,
   "extensions.autoCheckUpdates": false,
   "extensions.autoUpdate": false,
+  "update.showReleaseNotes": false,
   "update.mode": "none"
 }
