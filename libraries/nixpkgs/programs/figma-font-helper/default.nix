@@ -1,7 +1,7 @@
 final: { lib, fetchFromGitHub, rustPlatform, freetype, ... }@prev:
 
 let
-  rev = "7139c5d8e3a5d988ce2dedf5a7cfd241ce03c563";
+  rev = "49efd1a37ea690378e88278c2a744dcf66210b23";
 
 in
 {
@@ -13,12 +13,12 @@ in
       inherit rev;
       owner = "Figma-Linux";
       repo = "figma-linux-font-helper";
-      sha256 = "sha256-H2GRmGr874EJMXG8f4qf/c0mbrrnjLzLyuhvjSGnWqY=";
+      sha256 = "sha256-U66UPuNpbGqmrTlYSK+pGfejTaly3VIyIazghu/Xvco=";
     };
 
-    patches = [ ./config.patch ./log.patch ];
+    patches = [ ./config.patch ./main.patch ];
 
-    cargoSha256 = "sha256-69WEzDh90UFdIvOmpM+H30ayC7wClf0jLoI1vH5mbp4=";
+    cargoSha256 = "sha256-9WtSxQJIN/rIXBMydeknJiwDXxvK88zx0DvX+j0SEvg=";
 
     buildInputs = [ freetype ];
 
