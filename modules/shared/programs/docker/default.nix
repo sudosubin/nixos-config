@@ -7,6 +7,6 @@ in
 {
   home.packages = with pkgs; [
     docker
-    docker-compose_2
+    docker-compose
   ] ++ lib.optionals stdenv.isDarwin [ colima ];
 }
