@@ -1,8 +1,8 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ./aws-vault.nix
-    ./awscli.nix
+  home.packages = with pkgs; [
+    awscli2
+    aws-vault
   ];
 }
