@@ -20,7 +20,7 @@ in
       modifier = "Mod4";
       terminal = "${pkgs.alacritty}/bin/alacritty";
       fonts = {
-        names = [ "FiraMono Nerd Font Mono" ];
+        names = [ "PragmataProMono Nerd Font Mono" ];
         style = "";
         size = 9.0;
       };
