@@ -34,7 +34,6 @@
     # =========================[ Line #1 ]=========================
     dir                     # current directory
     vcs                     # git status
-    asdf                    # asdf version manager
     nix_shell               # nix shell indicator
     virtualenv              # python virtual environment
     package                 # name@version from package.json
@@ -235,69 +234,6 @@
   typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=$red
   typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=$red
   typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=$red
-
-  ###############[ asdf: asdf version manager ]###############
-  # Default asdf color. Only used to display tools for which there is no color override (see below).
-  typeset -g POWERLEVEL9K_ASDF_FOREGROUND=$yellow
-  typeset -g POWERLEVEL9K_ASDF_SOURCES=(shell local global)
-
-  # If set to false, hide tool versions that are the same as global.
-  typeset -g POWERLEVEL9K_ASDF_PROMPT_ALWAYS_SHOW=false
-
-  # If set to false, hide tool versions that are equal to "system".
-  typeset -g POWERLEVEL9K_ASDF_SHOW_SYSTEM=true
-
-  # If set to non-empty value, hide tools unless there is a file matching the specified file pattern
-  # in the current directory, or its parent diretory, or its grandparent directory, and so on.
-  typeset -g POWERLEVEL9K_ASDF_SHOW_ON_UPGLOB=
-
-  # Ruby version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_RUBY_FOREGROUND=168
-  # typeset -g POWERLEVEL9K_ASDF_RUBY_VISUAL_IDENTIFIER_EXPANSION='⭐'
-  # typeset -g POWERLEVEL9K_ASDF_RUBY_SHOW_ON_UPGLOB='*.foo|*.bar'
-
-  # Python version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_PYTHON_FOREGROUND=$blue
-
-  # Go version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_GOLANG_FOREGROUND=37
-
-  # Node.js version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_NODEJS_FOREGROUND=$green
-  typeset -g POWERLEVEL9K_ASDF_NODEJS_VISUAL_IDENTIFIER_EXPANSION=''
-
-  # Rust version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_RUST_FOREGROUND=37
-
-  # .NET Core version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_DOTNET_CORE_FOREGROUND=134
-
-  # Flutter version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_FLUTTER_FOREGROUND=38
-
-  # Lua version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_LUA_FOREGROUND=32
-
-  # Java version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_JAVA_FOREGROUND=4
-
-  # Perl version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_PERL_FOREGROUND=67
-
-  # Erlang version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_ERLANG_FOREGROUND=125
-
-  # Elixir version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_ELIXIR_FOREGROUND=129
-
-  # Postgres version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_POSTGRES_FOREGROUND=31
-
-  # PHP version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_PHP_FOREGROUND=99
-
-  # Haskell version from asdf.
-  typeset -g POWERLEVEL9K_ASDF_HASKELL_FOREGROUND=172
 
   #######[ nix_shell: nix shell indicator ]#######
   typeset -g POWERLEVEL9K_NIX_SHELL_FOREGROUND=$cyan
