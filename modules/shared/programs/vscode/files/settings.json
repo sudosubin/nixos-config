@@ -1,13 +1,13 @@
 {
   // fonts
   "markdown.preview.fontFamily": "Pretendard",
-  "editor.fontFamily": "'FiraMono Nerd Font Mono', 'Pretendard'",
-  "debug.console.fontFamily": "'FiraMono Nerd Font Mono', 'Pretendard'",
-  "terminal.integrated.fontFamily": "'FiraMono Nerd Font Mono', 'Pretendard'",
-  "editor.fontSize": 13,
-  "debug.console.fontSize": 13,
-  "markdown.preview.fontSize": 13,
-  "terminal.integrated.fontSize": 13,
+  "editor.fontFamily": "'PragmataProMono Nerd Font Mono', 'Pretendard'",
+  "debug.console.fontFamily": "'PragmataProMono Nerd Font Mono', 'Pretendard'",
+  "terminal.integrated.fontFamily": "'PragmataProMono Nerd Font Mono', 'Pretendard'",
+  "editor.fontSize": 13.25,
+  "debug.console.fontSize": 13.25,
+  "markdown.preview.fontSize": 13.25,
+  "terminal.integrated.fontSize": 13.25,
 
   // search
   "search.useIgnoreFiles": true,

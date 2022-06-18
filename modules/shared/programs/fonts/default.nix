@@ -16,7 +16,7 @@ let
       "Noto Sans CJK HK"
     ];
     monospace = [
-      "FiraMono Nerd Font Mono"
+      "PragmataProMono Nerd Font Mono"
     ];
   };
 
@@ -33,8 +33,8 @@ in
     noto-fonts
     noto-fonts-cjk
     noto-fonts-emoji
+    pragmatapro
     pretendard
-    (nerdfonts.override { fonts = [ "FiraMono" ]; })
   ];
 
   fonts.fontconfig = {

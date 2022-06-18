@@ -15,7 +15,7 @@ let
   };
 
   font-size = if stdenv.isDarwin then 12 else 10;
-  font-family = "FiraMono Nerd Font Mono";
+  font-family = "PragmataProMono Nerd Font Mono";
 
 in
 {
