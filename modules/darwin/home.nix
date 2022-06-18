@@ -19,7 +19,6 @@
       yarn
 
       # Utility
-      _1password
       slack
       unzip
     ];
@@ -34,6 +33,7 @@
       inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
       inputs.nixos-config-private-toss.homeManagerModules.toss
 
+      ../shared/programs/1password
       ../shared/programs/act
       ../shared/programs/alacritty
       ../shared/programs/aws
