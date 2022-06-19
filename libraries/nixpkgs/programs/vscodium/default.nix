@@ -1,4 +1,4 @@
-final: { lib, ... }@prev:
+final: { lib, stdenv, ... }@prev:
 with lib;
 
 let
@@ -15,6 +15,8 @@ in
   vscodium = prev.vscodium.overrideDerivation (attrs: rec {
     nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ prev.nodejs ];
 
+    resources = if stdenv.isDarwin then "Contents/Resources" else "resources";
+
     preInstall = ''
       ${attrs.preInstall or ""}
 
@@ -26,15 +28,15 @@ in
           const crypto = require('crypto');
           const fs = require('fs');
 
-          const contents = fs.readFileSync('resources/app/out/$filename');
+          const contents = fs.readFileSync('$resources/app/out/$filename');
           console.log(crypto.createHash('md5').update(contents).digest('base64').replace(/=+$/, '''));
         """)
 
         sed -r "s/\"($filename_escaped)\": \"(.*)\"/\"\1\": \"''${checksum//\//\\\/}\"/" \
-            -i "resources/app/product.json"
+            -i "$resources/app/product.json"
       }
 
-      echo "${toCss stylesheet}" >> resources/app/out/vs/workbench/workbench.desktop.main.css
+      echo "${toCss stylesheet}" >> $resources/app/out/vs/workbench/workbench.desktop.main.css
       recalculateChecksum "vs/workbench/workbench.desktop.main.css"
     '';
   });
