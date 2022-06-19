@@ -34,6 +34,7 @@ in
       jnoortheen.nix-ide
       jpoissonnier.vscode-styled-components
       kevinrose.vsc-python-indent
+      ms-kubernetes-tools.vscode-kubernetes-tools
       ms-pyright.pyright
       ms-python.python
       nimsaem.nimvscode
