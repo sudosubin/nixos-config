@@ -14,7 +14,7 @@ let
     white = "#abb2bf";
   };
 
-  font-size = if stdenv.isDarwin then 12 else 10;
+  font-size = if stdenv.isDarwin then 13 else 10;
   font-family = "PragmataProMono Nerd Font Mono";
 
 in
