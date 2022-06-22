@@ -15,7 +15,7 @@
     dotDir = ".config/zsh";
 
     autocd = true;
-    history.path = "${dotDir}/.zsh_history";
+    history.path = "$HOME/${dotDir}/.zsh_history";
     history.ignoreDups = true;
     history.ignoreSpace = true;
 
