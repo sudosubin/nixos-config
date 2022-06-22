@@ -59,5 +59,7 @@
       ../darwin/programs/skhd
       ../darwin/programs/yabai
     ];
+
+    home.stateVersion = "22.05";
   };
 }
