@@ -9,12 +9,13 @@
     "zsh/.p10k.zsh".source = ./files/.p10k.zsh;
   };
 
-  programs.zsh = {
+  programs.zsh = rec {
     enable = true;
     enableCompletion = true;
     dotDir = ".config/zsh";
 
     autocd = true;
+    history.path = "${dotDir}/.zsh_history";
     history.ignoreDups = true;
     history.ignoreSpace = true;
 
