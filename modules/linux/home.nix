@@ -65,5 +65,7 @@
       ../linux/programs/wayland
       ../linux/programs/zpl-open
     ];
+
+    home.stateVersion = "22.05";
   };
 }
