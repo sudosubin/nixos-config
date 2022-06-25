@@ -73,6 +73,8 @@
       # Use word jump for zsh, tmux
       bindkey "^[[1;5C" forward-word
       bindkey "^[[1;5D" backward-word
+      bindkey "^[[1;3C" forward-word
+      bindkey "^[[1;3D" backward-word
 
       # Powerlevel10k theme
       source "$HOME/.config/zsh/.p10k.zsh"
