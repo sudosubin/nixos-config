@@ -21,6 +21,7 @@
       # Utility
       gnome.nautilus
       google-chrome
+      openvpn
       pavucontrol
       pulseaudio
       slack
