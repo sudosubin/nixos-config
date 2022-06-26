@@ -5,9 +5,47 @@ let
   inherit (pkgs) stdenv;
   configDir = if stdenv.isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/VSCodium";
 
-  # vscodium = pkgs.vscodium.overrideAttrs
+  monospace = "'PragmataProMono Nerd Font Mono'";
+
+  stylesheet = {
+    ".mac, .windows, .linux" = "--monaco-monospace-font: ${monospace}, monospace !important;";
+    ".quick-input-widget" = "font-family: ${monospace} !important;";
+    ".search-view .search-widgets-container" = "font-family: ${monospace} !important;";
+    ".monaco-list-rows, .monaco-findInput, .monaco-inputbox" = "font-family: ${monospace} !important;";
+  };
+
+  toCss = stylesheet: strings.concatStrings (attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
+    vscodium = pkgs.vscodium.overrideDerivation (attrs: rec {
+      nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
+
+      resources = if stdenv.isDarwin then "Contents/Resources" else "resources";
+
+      preInstall = ''
+        ${attrs.preInstall or ""}
+
+        recalculateChecksum() {
+          filename="$1"
+          filename_escaped="$(echo "$filename" | sed "s/\//\\\\\//g" | sed "s/\./\\\\\./g")"
+
+          checksum=$(node -e """
+            const crypto = require('crypto');
+            const fs = require('fs');
+
+            const contents = fs.readFileSync('$resources/app/out/$filename');
+            console.log(crypto.createHash('md5').update(contents).digest('base64').replace(/=+$/, '''));
+          """)
+
+          sed -r "s/\"($filename_escaped)\": \"(.*)\"/\"\1\": \"''${checksum//\//\\\/}\"/" \
+              -i "$resources/app/product.json"
+        }
+
+        echo "${toCss stylesheet}" >> $resources/app/out/vs/workbench/workbench.desktop.main.css
+        recalculateChecksum "vs/workbench/workbench.desktop.main.css"
+      '';
+    });
+
     pkief.material-icon-theme = pkgs.vscode-extensions.pkief.material-icon-theme.overrideAttrs (attrs: rec {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
@@ -37,7 +75,7 @@ in
 
   programs.vscode = {
     enable = true;
-    package = pkgs.vscodium;
+    package = overlays.vscodium;
     extensions = with pkgs.vscode-extensions; [
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles

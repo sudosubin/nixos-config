@@ -11,12 +11,6 @@ const parse = (content) => {
 const vscodeConfig = parse(fs.readFileSync(argument));
 const extensionConfig = parse(fs.readFileSync("./dist/material-icons.json"));
 
-// extension material-icons.json
-extensionConfig.fileExtensions = {
-  ...extensionConfig.fileExtensions,
-  gotmpl: "template",
-};
-
 // vscode settings.json "material-icon-theme.*"
 const options = Object.entries(vscodeConfig).reduce((prev, [key, value]) => {
   if (!key.startsWith("material-icon-theme.")) {
@@ -30,6 +24,12 @@ const options = Object.entries(vscodeConfig).reduce((prev, [key, value]) => {
   return prev;
 }, extensionConfig.options);
 
-const data = JSON.stringify({ ...extensionConfig, options }, undefined, 2);
+// extension material-icons.json
+const data = {
+  ...extensionConfig,
+  fileExtensions: { ...extensionConfig.fileExtensions, gotmpl: "template" },
+  options,
+  hidesExplorerArrows: options.hidesExplorerArrows,
+};
 
-fs.writeFileSync("./dist/material-icons.json", data);
+fs.writeFileSync("./dist/material-icons.json", JSON.stringify(data, null, 2));

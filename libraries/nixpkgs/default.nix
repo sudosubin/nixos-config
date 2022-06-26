@@ -13,7 +13,6 @@
     (import ./programs/pragmatapro)
     (import ./programs/python)
     (import ./programs/vscode-extensions)
-    (import ./programs/vscodium)
     (import ./programs/yabai)
     (import ./programs/zpl-open)
   ];
