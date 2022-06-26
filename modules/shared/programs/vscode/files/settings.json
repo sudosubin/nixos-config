@@ -80,6 +80,11 @@
   "files.trimTrailingWhitespace": true,
   "editor.trimAutoWhitespace": true,
 
+  // kubernetes
+  "vs-kubernetes": {
+    "checkForMinikubeUpgrade": false
+  },
+
   // language (python)
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": true,
