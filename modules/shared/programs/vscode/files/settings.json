@@ -21,7 +21,7 @@
   "material-icon-theme.hidesExplorerArrows": true,
   "material-icon-theme.showWelcomeMessage": false,
   "material-icon-theme.files.associations": {
-    "stories.tsx": "storybook"
+    "*.gotmpl": "template"
   },
   "workbench.colorCustomizations": {
     "errorLens.errorBackground": "#E06C751A",
@@ -66,6 +66,7 @@
 
   // files
   "files.associations": {
+    "*.yaml.gotmpl": "goyaml",
     ".dockerignore": "ignore",
     "*.bats": "shellscript",
     ".env": "shellscript"

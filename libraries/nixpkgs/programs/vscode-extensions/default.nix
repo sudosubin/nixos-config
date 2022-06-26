@@ -16,6 +16,13 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "sha256-UhWbygrGh0whVxfGcEa+hunrTG/gfHpXYii0E7YhXa4=";
     };
 
+    casualjim.gotemplate = vscode-utils.extensionFromVscodeMarketplace {
+      name = "gotemplate";
+      publisher = "casualjim";
+      version = "0.4.0";
+      sha256 = "sha256-L9nmK012obEDuv1ljtx7+zrKlzEmyCflYPHOR1wKwmQ=";
+    };
+
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
@@ -71,13 +78,5 @@ final: { lib, vscode-utils, ... }@prev:
       version = "0.7.8";
       sha256 = "sha256-Y33agSNMVmaVCQdYd5mzwjiK5JTZTtzTkmSGTQrSNg0=";
     };
-
-    zhuangtongfa.material-theme = prev.vscode-extensions.zhuangtongfa.material-theme.overrideAttrs (attrs: rec {
-      postInstall = ''
-        ${attrs.postInstall or ""}
-
-        rm -rf "$out/$installPrefix/styles"
-      '';
-    });
   };
 }

@@ -5,6 +5,28 @@ let
   inherit (pkgs) stdenv;
   configDir = if stdenv.isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/VSCodium";
 
+  # vscodium = pkgs.vscodium.overrideAttrs
+
+  overlays = {
+    pkief.material-icon-theme = pkgs.vscode-extensions.pkief.material-icon-theme.overrideAttrs (attrs: rec {
+      nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
+
+      preInstall = ''
+        ${attrs.preInstall or ""}
+
+        node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
+      '';
+    });
+
+    zhuangtongfa.material-theme = pkgs.vscode-extensions.zhuangtongfa.material-theme.overrideAttrs (attrs: rec {
+      preInstall = ''
+        ${attrs.preInstall or ""}
+
+        rm -rf ./styles
+      '';
+    });
+  };
+
 in
 {
   home.file = {
@@ -19,6 +41,7 @@ in
     extensions = with pkgs.vscode-extensions; [
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
+      casualjim.gotemplate
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
       dorzey.vscode-sqlfluff
@@ -29,6 +52,7 @@ in
       flowtype.flow-for-vscode
       foxundermoon.shell-format
       fwcd.kotlin
+      golang.go
       hashicorp.hcl
       hashicorp.terraform
       jnoortheen.nix-ide
@@ -38,7 +62,6 @@ in
       ms-pyright.pyright
       ms-python.python
       nimsaem.nimvscode
-      pkief.material-icon-theme
       pkief.material-product-icons
       redhat.java
       redhat.vscode-yaml
@@ -48,7 +71,9 @@ in
       timonwong.shellcheck
       usernamehw.errorlens
       yzhang.markdown-all-in-one
-      zhuangtongfa.material-theme
+
+      overlays.pkief.material-icon-theme
+      overlays.zhuangtongfa.material-theme
     ];
   };
 
