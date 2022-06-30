@@ -3,7 +3,8 @@
 {
   home.sessionVariables = {
     PYTHONDONTWRITEBYTECODE = "1";
-    PYTHONSTARTUP = ./files/python/startup.py;
+    # PYTHONSTARTUP = ./files/python/startup.py;
+    # PYTHONPYCACHEPREFIX = "$HOME/.cache/python";
   };
 
   xdg.configFile = {
