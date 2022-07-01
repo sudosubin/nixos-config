@@ -17,11 +17,11 @@ let
     LS_COLORS = builtins.concatStringsSep ":" (mapLsColors cfg.colors);
   };
 
-  package = pkgs.lsd.overrideAttrs (oldAttrs: {
-    nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+  package = pkgs.lsd.overrideAttrs (attrs: {
+    nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
 
     postInstall = ''
-      ${oldAttrs.postInstall or ""}
+      ${attrs.postInstall or ""}
 
       wrapProgram $out/bin/lsd \
         --prefix LS_COLORS : "${prefix.LS_COLORS}"
