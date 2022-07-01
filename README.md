@@ -15,10 +15,14 @@ $ nix --experimental-features 'nix-command flakes' build '.#darwinConfigurations
 $ ./result/sw/bin/darwin-rebuild switch --flake '.#darwin'
 ```
 
-## Update lock
+## Update (flake lock, custom packages)
 
 ```sh
 $ nix flake update .
+fetching ...
+
+$ ./libraries/nixpkgs/programs/vscode-extensions/update.py
+fetching ...
 ```
 
 ## Additional steps
