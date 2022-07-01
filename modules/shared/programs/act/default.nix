@@ -2,10 +2,6 @@
 with lib;
 
 {
-  home.packages = with pkgs; [
-    act
-  ];
-
   programs.act = {
     enable = true;
     config = {

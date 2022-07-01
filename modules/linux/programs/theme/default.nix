@@ -1,16 +1,18 @@
 { config, pkgs, ... }:
 
 {
-  home.packages = with pkgs; [
-    apple-cursor-theme
-    arc-theme
-    la-capitaine-icon-theme
-  ];
-
   gtk = {
     enable = true;
-    theme.name = "Arc-Dark";
-    iconTheme.name = "la-capitaine-icon-theme";
+
+    theme = {
+      package = pkgs.arc-theme;
+      name = "Arc-Dark";
+    };
+
+    iconTheme = {
+      package = pkgs.la-capitaine-icon-theme;
+      name = "la-capitaine-icon-theme";
+    };
   };
 
   gtk.gtk2 = {

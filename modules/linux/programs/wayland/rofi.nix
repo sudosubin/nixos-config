@@ -1,10 +1,6 @@
 { config, pkgs, lib, ... }:
 
 {
-  home.packages = with pkgs; [
-    rofi
-  ];
-
   programs.rofi = {
     enable = true;
     font = "mono 12";

@@ -19,6 +19,7 @@
       yarn
 
       # Utility
+      _1password
       gnome.nautilus
       google-chrome
       openvpn
@@ -38,7 +39,6 @@
       inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
       inputs.nixos-config-private-toss.homeManagerModules.toss
 
-      ../shared/programs/1password
       ../shared/programs/act
       ../shared/programs/alacritty
       ../shared/programs/aws

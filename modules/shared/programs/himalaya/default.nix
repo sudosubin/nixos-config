@@ -1,10 +1,6 @@
 { config, lib, pkgs, ... }:
 
 {
-  home.packages = with pkgs; [
-    himalaya
-  ];
-
   programs.himalaya = {
     enable = true;
 

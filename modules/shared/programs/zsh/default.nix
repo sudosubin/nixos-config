@@ -1,10 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  home.packages = with pkgs; [
-    zsh
-  ];
-
   xdg.configFile = {
     "zsh/.p10k.zsh".source = ./files/.p10k.zsh;
   };
