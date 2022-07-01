@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 
 {
   nixpkgs.overlays = [
@@ -16,4 +16,11 @@
     (import ./programs/yabai)
     (import ./programs/zpl-open)
   ];
+
+  nixpkgs.config.allowUnfreePredicate = (pkg: builtins.elem (lib.getName pkg) [
+    "1password-cli"
+    "datagrip"
+    "google-chrome"
+    "slack"
+  ]);
 }
