@@ -120,6 +120,21 @@
         "url": "ssh://git@github.com/sudosubin/nixos-config-private?dir=toss"
       }
     },
+    "nixos-hardware": {
+      "locked": {
+        "lastModified": 1656702262,
+        "narHash": "sha256-BdVdx6LoGgAeIYrHnzk+AgbtkaVlV3JNcC6+vltLuh0=",
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "rev": "c5308381432cdbf14d5b1128747a2845f5c6871e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1656490020,
@@ -167,6 +182,7 @@
         "home-manager-secrets": "home-manager-secrets",
         "nixos-config-private-sudosubin": "nixos-config-private-sudosubin",
         "nixos-config-private-toss": "nixos-config-private-toss",
+        "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "pre-commit-hooks": "pre-commit-hooks"
       }
