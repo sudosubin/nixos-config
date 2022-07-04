@@ -26,6 +26,9 @@ jobs:
 
       - name: Update dependencies
         run: |
+          # prepare nixpkgs
+          nix run '.#nix' '--version'
+
           # vscode extensions
           ./libraries/nixpkgs/programs/vscode-extensions/update.py
           git add . && git commit -m "chore: Update vscode extensions" -m "VSCode extensions file updates"
