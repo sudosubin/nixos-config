@@ -8,7 +8,6 @@ let
 in
 {
   apps = {
-    nix = flake-utils.lib.mkApp { drv = pkgs.nix; };
     format = flake-utils.lib.mkApp { drv = pkgs.nixpkgs-fmt; };
   };
   checks = {

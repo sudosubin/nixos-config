@@ -14,6 +14,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v17
         with:
+          nix_path: nixpkgs=channel:nixpkgs-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
@@ -26,9 +27,6 @@ jobs:
 
       - name: Update dependencies
         run: |
-          # prepare nixpkgs
-          nix run '.#nix' '--version'
-
           # vscode extensions
           ./libraries/nixpkgs/programs/vscode-extensions/update.py
           git add . && git commit -m "chore: Update vscode extensions" -m "VSCode extensions file updates"
