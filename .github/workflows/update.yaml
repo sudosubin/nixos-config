@@ -24,9 +24,19 @@ jobs:
           echo "${{ secrets.PERSONAL_SSH_KEY }}" > "$HOME/.ssh/id_ed25519"
           chmod 600 "$HOME/.ssh/id_ed25519"
 
-      - name: Update flake.lock
+      - name: Update dependencies
         run: |
+          # vscode extensions
+          ./libraries/nixpkgs/programs/vscode-extensions/update.py
+          git add . && git commit -m "chore: Update vscode extensions" -m "VSCode extensions file updates"
+
+          # nix flake lock
           nix flake update --commit-lock-file --commit-lockfile-summary "chore: Update flake lock"
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: <github-actions[bot]@users.noreply.github.com>
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: <github-actions[bot]@users.noreply.github.com>
 
       - id: commit-msg
         run: |
@@ -34,11 +44,6 @@ jobs:
           content="${content//$'\n'/'%0A'}"
           content="${content//$'\r'/'%0D'}"
           echo "::set-output name=content::$content"
-
-      - name: Update dependencies
-        run: |
-          # vscode extensions
-          ./libraries/nixpkgs/programs/vscode-extensions/update.py
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v4
