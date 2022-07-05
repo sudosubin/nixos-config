@@ -1,15 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  nix = {
-    useDaemon = true;
-    extraOptions = ''
-      keep-outputs = true
-      keep-derivations = true
-      experimental-features = nix-command flakes
-    '';
-  };
-
   nixpkgs.config.permittedInsecurePackages = [
     "openssl-1.0.2u"
   ];

@@ -54,15 +54,19 @@
     let
       dev-shell = import ./libraries/dev-shell { inherit inputs; };
       home-manager-shared = ./libraries/home-manager;
+      nix-darwin-shared = ./libraries/nix-darwin;
       nixpkgs-shared = ./libraries/nixpkgs;
+
     in
-    {
+    dev-shell // {
       darwinConfigurations.darwin = darwin.lib.darwinSystem {
         system = "aarch64-darwin";
         modules = [
           home-manager-shared
+          nix-darwin-shared
           nixpkgs-shared
           home-manager.darwinModules.home-manager
+          ./modules/shared/configuration.nix
           ./modules/darwin/configuration.nix
           ./modules/darwin/home.nix
         ];
@@ -75,10 +79,11 @@
           home-manager-shared
           nixpkgs-shared
           home-manager.nixosModules.home-manager
+          ./modules/shared/configuration.nix
           ./modules/linux/configuration.nix
           ./modules/linux/home.nix
         ];
         specialArgs = { inherit inputs; };
       };
-    } // dev-shell;
+    };
 }
