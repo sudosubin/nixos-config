@@ -30,14 +30,6 @@
   boot.initrd.verbose = false;
   boot.plymouth.enable = true;
 
-  nix = {
-    extraOptions = ''
-      keep-outputs = true
-      keep-derivations = true
-      experimental-features = nix-command flakes
-    '';
-  };
-
   # networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
