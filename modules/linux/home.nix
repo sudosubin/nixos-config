@@ -9,6 +9,7 @@
 
     home.packages = with pkgs; [
       # Development
+      bun
       hadolint
       jetbrains.datagrip
       kubectl

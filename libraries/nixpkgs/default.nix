@@ -7,6 +7,7 @@
     (import ./programs/apple-cursor-theme)
     (import ./programs/aws-vault)
     (import ./programs/awscli2)
+    (import ./programs/bun)
     (import ./programs/figma-font-helper)
     (import ./programs/google-chrome)
     (import ./programs/pass-securid)
