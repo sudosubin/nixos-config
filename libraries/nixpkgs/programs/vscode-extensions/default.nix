@@ -54,8 +54,8 @@ final: { lib, vscode-utils, ... }@prev:
     hashicorp.hcl = vscode-utils.extensionFromVscodeMarketplace {
       name = "hcl";
       publisher = "hashicorp";
-      version = "0.2.0";
-      sha256 = "08rfjd5imy8vkkgr9g2hsaqckmxxg8k2z9isghdlwnhwa6fq3hx2";
+      version = "0.2.1";
+      sha256 = "15ydllrridf1kc7867h0r7ykc2mnn5d94d1nvklzx0nnkq64pl75";
     };
 
     kevinrose.vsc-python-indent = vscode-utils.extensionFromVscodeMarketplace {
