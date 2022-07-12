@@ -23,5 +23,6 @@
     "datagrip"
     "google-chrome"
     "slack"
+    "zoom"
   ]);
 }

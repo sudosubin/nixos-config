@@ -23,6 +23,7 @@
       _1password
       slack
       unzip
+      zoom-us
     ];
 
     secrets = {
