@@ -31,9 +31,6 @@ jobs:
           ./libraries/nixpkgs/programs/vscode-extensions/update.py
           git add --all && git diff-index --quiet HEAD || git commit -m "chore: Update vscode extensions" -m "VSCode extensions file updates"
 
-          # nix flake lock (shells)
-          cd shells; nix flake update --commit-lock-file --commit-lockfile-summary "chore(shells): Update flake lock"; cd ..;
-
           # nix flake lock (root)
           nix flake update --commit-lock-file --commit-lockfile-summary "chore(root): Update flake lock"
         env:
