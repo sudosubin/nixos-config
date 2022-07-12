@@ -8,7 +8,22 @@
 
   outputs = { self, nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = import nixpkgs { inherit system; }; in
+      let
+        pkgs = import nixpkgs { inherit system overlays; };
+        overlays = [
+          (final: prev: {
+            openldap = prev.openldap.overrideAttrs (attrs: {
+              postInstall = ''
+                ${attrs.postInstall or ""}
+                ln -s $out/lib/libldap.la $out/lib/libldap_r.la
+                ln -s $out/lib/libldap.dylib $out/lib/libldap_r.dylib
+                ln -s $out/lib/libldap.2.dylib $out/lib/libldap_r.2.dylib
+              '';
+            });
+          })
+        ];
+
+      in
       {
         devShell = pkgs.mkShell rec {
           venvDir = "./.venv";
