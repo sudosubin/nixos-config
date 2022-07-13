@@ -10,4 +10,8 @@
       DSDontWriteUSBStores = true;
     };
   };
+
+  targets.darwin.keybindings = {
+    "₩" = [ "insertText:" "`" ];
+  };
 }
