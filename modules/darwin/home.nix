@@ -58,6 +58,7 @@
       ../shared/programs/zsh
 
       ../darwin/programs/caffeinate
+      ../darwin/programs/desktop
       ../darwin/programs/skhd
       ../darwin/programs/yabai
     ];
