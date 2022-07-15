@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import contextlib
 import datetime
 import functools
@@ -21,40 +22,45 @@ def main():
     history_db = get_atuin_history_db()
 
     query = """
-        SELECT id, timestamp, duration, command
+        SELECT timestamp, duration, command
         FROM history
         ORDER BY timestamp DESC
         LIMIT 10000;
     """
 
+    args = get_args()
+    columns = args.columns.split(",")
     commands: typing.Set[str] = set()
 
     with contextlib.closing(sqlite3.connect(history_db)) as con:
-        for id, timestamp, duration, command in con.execute(query):
+        for timestamp, duration, command in con.execute(query):
             if command in commands:
                 continue
 
             commands.add(command)
+            output: typing.List[str] = []
 
-            ago = get_human_datetime(now, timestamp)
-            ms = get_human_duration(duration)
-            cmd = command.encode("unicode_escape").decode("utf-8")
+            if "timestamp" in columns:
+                ago = get_human_datetime(now, timestamp)
+                output.append(color(ago, "yellow"))
+            if "duration" in columns:
+                ms = get_human_duration(duration)
+                output.append(color(ms, "black"))
+            if "command" in columns:
+                cmd = command.encode("unicode_escape").decode("utf-8")
+                output.append(cmd)
 
-            print(color(ago, "yellow"), color(ms, "black"), cmd, flush=True)
+            print(*output, flush=True)
+
+
+def get_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(prog="zsh-atuin")
+    parser.add_argument("--columns", type=str, default="timestamp,duration,command")
+    return parser.parse_args()
 
 
 def get_atuin_history_db() -> str:
-    os_name = platform.system()
-
-    if os_name == "Linux":
-        db = "~/.local/share/atuin/history.db"
-        return os.path.expanduser(db)
-
-    if os_name == "Darwin":
-        db = "~/Library/Application Support/com.elliehuxtable.atuin/history.db"
-        return os.path.expanduser(db)
-
-    raise AtuinError(f"Unknown os name: {os_name}")
+    return os.path.expanduser("~/.local/share/atuin/history.db")
 
 
 def color(text: str, color: TermColorType):

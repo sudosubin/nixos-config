@@ -53,6 +53,11 @@
 
       # Jetbrains
       _JAVA_AWT_WM_NONREPARENTING = "1";
+
+      # Shell
+      ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE = "20";
+      ZSH_AUTOSUGGEST_USE_ASYNC = "true";
+      ZSH_AUTOSUGGEST_MANUAL_REBIND = "true";
     };
 
     shellAliases = {
