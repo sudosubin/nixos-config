@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+import argparse
+import contextlib
+import datetime
+import functools
+import os
+import sqlite3
+import sys
+import typing
+
+TermColorType = typing.Literal[
+    "black", "red", "green", "yellow", "blue", "magenta", "cyan"
+]
+
+
+def main():
+    now = datetime.datetime.now()
+    history_db = get_atuin_history_db()
+
+    query = """
+        SELECT timestamp, duration, command
+        FROM history
+        ORDER BY timestamp DESC
+        LIMIT 10000;
+    """
+
+    args = get_args()
+    columns = args.columns.split(",")
+    commands: typing.Set[str] = set()
+
+    with contextlib.closing(sqlite3.connect(history_db)) as con:
+        for timestamp, duration, command in con.execute(query):
+            if command in commands:
+                continue
+
+            commands.add(command)
+            output: typing.List[str] = []
+
+            if "timestamp" in columns:
+                ago = get_human_datetime(now, timestamp)
+                output.append(color(ago, "yellow"))
+            if "duration" in columns:
+                ms = get_human_duration(duration)
+                output.append(color(ms, "black"))
+            if "command" in columns:
+                cmd = command.encode("unicode_escape").decode("utf-8")
+                output.append(cmd)
+
+            print(*output, flush=True)
+
+
+def get_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(prog="zsh-atuin")
+    parser.add_argument("--columns", type=str, default="timestamp,duration,command")
+    return parser.parse_args()
+
+
+def get_atuin_history_db() -> str:
+    return os.path.expanduser("~/.local/share/atuin/history.db")
+
+
+def color(text: str, color: TermColorType):
+    class Color:
+        BLACK = "\033[30m"
+        RED = "\033[91m"
+        GREEN = "\033[92m"
+        YELLOW = "\033[93m"
+        BLUE = "\033[94m"
+        MAGENTA = "\033[95m"
+        CYAN = "\033[96m"
+        RESET = "\033[0m"
+
+    if color == "black":
+        return f"{Color.BLACK}{text}{Color.RESET}"
+    elif color == "red":
+        return f"{Color.RED}{text}{Color.RESET}"
+    elif color == "green":
+        return f"{Color.GREEN}{text}{Color.RESET}"
+    elif color == "yellow":
+        return f"{Color.YELLOW}{text}{Color.RESET}"
+    elif color == "blue":
+        return f"{Color.BLUE}{text}{Color.RESET}"
+    elif color == "magenta":
+        return f"{Color.MAGENTA}{text}{Color.RESET}"
+    elif color == "cyan":
+        return f"{Color.CYAN}{text}{Color.RESET}"
+
+
+def get_human_datetime(now: datetime.datetime, timestamp: int) -> str:
+    def hook(value: str) -> str:
+        return value.rjust(8, " ")
+
+    dt = datetime.datetime.fromtimestamp(timestamp // 1_000_000_000)
+    diff = now - dt
+
+    if diff.days >= 365:
+        return hook(f"{diff.days // 365}y ago")
+    elif diff.days >= 30:
+        return hook(f"{diff.days // 30}mo ago")
+    elif diff.days >= 7:
+        return hook(f"{diff.days // 7}w ago")
+    elif diff.days > 0:
+        return hook(f"{diff.days}d ago")
+    elif diff.seconds >= 60 * 60:
+        return hook(f"{diff.seconds // (60 * 60)}h ago")
+    elif diff.seconds >= 60:
+        return hook(f"{diff.seconds // 60}m ago")
+    else:
+        return hook(f"{diff.seconds}s ago")
+
+
+@functools.cache
+def get_human_duration(duration: int) -> str:
+    def hook(value: str) -> str:
+        return value.rjust(5, " ")
+
+    ms = duration // 1_000_000
+
+    if ms > 60 * 60 * 1_000:
+        return hook(f"{ms // (60 * 60 * 1_000)}h")
+    elif ms > 60 * 1_000:
+        return hook(f"{ms // (60 * 1_000)}m")
+    elif ms > 1_000:
+        return hook(f"{ms // 1_000}s")
+    elif ms > 0:
+        return hook(f"{ms}ms")
+    else:
+        return hook("0s")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except BrokenPipeError:
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
