@@ -4,17 +4,13 @@ import contextlib
 import datetime
 import functools
 import os
-import platform
 import sqlite3
+import sys
 import typing
 
 TermColorType = typing.Literal[
     "black", "red", "green", "yellow", "blue", "magenta", "cyan"
 ]
-
-
-class AtuinError(Exception):
-    pass
 
 
 def main():
@@ -136,4 +132,5 @@ if __name__ == "__main__":
     try:
         main()
     except BrokenPipeError:
-        pass
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())

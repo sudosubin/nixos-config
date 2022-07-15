@@ -2,9 +2,7 @@ export ATUIN_NOBIND=1
 source <(atuin init zsh)
 unset ATUIN_NOBIND
 
-ZSH_AUTOSUGGEST_STRATEGY=('atuin')  # _zsh_autosuggest_strategy_atuin
-ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=('atuin-up-line-or-history')
-ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=('atuin-down-line-or-history')
+typeset -g ZSH_AUTOSUGGEST_STRATEGY=('atuin')  # -> _zsh_autosuggest_strategy_atuin
 
 _atuin-history() {
   local SCRIPT_DIR=${${(%):-%x}:A:h}
@@ -46,25 +44,7 @@ _zsh_autosuggest_strategy_atuin() {
 	typeset -g suggestion="${atuin_history[(r)$pattern]}"
 }
 
-_atuin-line-or-history() {
-  local operator="$1"
-  typeset -g suggestion=""
-}
-
-atuin-up-line-or-history() {
-  _atuin-line-or-history "+"
-}
-
-atuin-down-line-or-history() {
-  _atuin-line-or-history "-"
-}
-
 zle -N atuin-history-widget
 bindkey -M emacs '^R' atuin-history-widget
 bindkey -M vicmd '^R' atuin-history-widget
 bindkey -M viins '^R' atuin-history-widget
-
-zle -N atuin-up-line-or-history
-zle -N atuin-down-line-or-history
-bindkey '^[[A' atuin-up-line-or-history
-bindkey '^[[B' atuin-down-line-or-history
