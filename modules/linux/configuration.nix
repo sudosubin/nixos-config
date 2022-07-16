@@ -22,25 +22,27 @@
   boot.loader.grub.configurationLimit = 3;
 
   # Boot output
-  boot.kernelParams = [ "quiet" "rd.udev.log_level=3" ];
   boot.kernel.sysctl = {
     "fs.inotify.max_user_watches" = 524288;
   };
+  boot.kernelParams = [ "quiet" "rd.udev.log_level=3" ];
   boot.consoleLogLevel = 0;
   boot.initrd.verbose = false;
   boot.plymouth.enable = true;
+
+  # Enable opengl, vdpau
+  hardware.opengl.enable = true;
+
+  environment.variables = {
+    LIBVA_DRIVER_NAME = "radeonsi";
+    VDPAU_DRIVER = "radeonsi";
+  };
 
   # networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Set your time zone.
   time.timeZone = "Asia/Seoul";
-
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-  networking.interfaces.enp6s0.useDHCP = true;
 
   # Network nameservers
   networking = {
@@ -56,6 +58,7 @@
   # console = {
   #   font = "Lat2-Terminus16";
   #   keyMap = "us";
+  #   useXkbConfig = true; # use xkbOptions in tty.
   # };
 
   # Enable CUPS to print documents.
@@ -68,12 +71,9 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
+  # Enable dconf, zsh
   programs.dconf.enable = true;
   programs.zsh.enable = true;
-
-  hardware.opengl = {
-    enable = true;
-  };
 
   # Docker
   virtualisation.docker = {
@@ -93,11 +93,6 @@
 
   services.getty.autologinUser = "sudosubin";
 
-  environment.variables = {
-    LIBVA_DRIVER_NAME = "radeonsi";
-    VDPAU_DRIVER = "radeonsi";
-  };
-
   environment.loginShellInit = ''
     if [[ "$(tty)" == "/dev/tty1" ]]; then
       [ $(command -v sway) ] && sway
@@ -113,11 +108,6 @@
   # ];
 
   environment.pathsToLink = [ "/libexec" "/share/polkit-1" "/share/zsh" ];
-  environment.shellAliases = {
-    l = null;
-    ll = null;
-    ls = null;
-  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -141,6 +131,11 @@
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+
+  # Copy the NixOS configuration file and link it from the resulting system
+  # (/run/current-system/configuration.nix). This is useful in case you
+  # accidentally delete configuration.nix.
+  # system.copySystemConfiguration = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
