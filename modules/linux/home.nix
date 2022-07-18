@@ -17,7 +17,6 @@
       minikube
       shfmt
       sqlfluff
-      yarn
 
       # Utility
       _1password
