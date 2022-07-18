@@ -13,7 +13,6 @@
       hadolint
       jetbrains.datagrip
       kubectl
-      lokalise2-cli
       minikube
       shfmt
       sqlfluff
