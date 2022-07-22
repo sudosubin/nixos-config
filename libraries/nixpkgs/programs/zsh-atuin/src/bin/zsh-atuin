@@ -43,7 +43,7 @@ def main():
                 ms = get_human_duration(duration)
                 output.append(color(ms, "black"))
             if "command" in columns:
-                cmd = command.encode("unicode_escape").decode("utf-8")
+                cmd = command.replace('\n', '\\n')
                 output.append(cmd)
 
             print(*output, flush=True)
