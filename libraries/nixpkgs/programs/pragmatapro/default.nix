@@ -19,8 +19,8 @@ final: { lib, stdenv, nerd-font-patcher, ... }@prev:
     installPhase = ''
       runHook preInstall
 
-      find -name "PragmataPro*.otf" \
-        -exec ${nerd-font-patcher}/bin/nerd-font-patcher -s -l -q -c --no-progressbars -out "$out/share/fonts/opentype" {} \;
+      find -name "PragmataPro_Mono*.otf" ! -name "*_liga_*" \
+        -exec nerd-font-patcher -s -q -c --no-progressbars -out "$out/share/fonts/opentype" {} \;
     '';
 
     meta = with lib; {
