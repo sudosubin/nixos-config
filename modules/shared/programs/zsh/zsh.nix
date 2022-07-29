@@ -39,9 +39,14 @@
         src = pkgs.zsh-completions;
       }
       {
-        name = "fzf-zsh";
-        src = pkgs.fzf-zsh;
-        file = "share/zsh/plugins/fzf-zsh/fzf-zsh.plugin.zsh";
+        name = "zsh-fzf";
+        src = pkgs.fzf;
+        file = "share/fzf/completion.zsh";
+      }
+      {
+        name = "zsh-fzf";
+        src = pkgs.fzf;
+        file = "share/fzf/key-bindings.zsh";
       }
       {
         name = "zsh-atuin";
