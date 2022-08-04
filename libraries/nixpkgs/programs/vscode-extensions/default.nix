@@ -40,8 +40,8 @@ final: { lib, vscode-utils, ... }@prev:
     flowtype.flow-for-vscode = vscode-utils.extensionFromVscodeMarketplace {
       name = "flow-for-vscode";
       publisher = "flowtype";
-      version = "2.1.0";
-      sha256 = "050wrjicwsn5ky490rpqnlq5m7q3y1h6k4ckrivxxpwmy8scfiak";
+      version = "2.2.0";
+      sha256 = "0mp10h68a47hwi6vw9807f65qv9mkzdgs6hwya0dglbc35p2y11p";
     };
 
     fwcd.kotlin = vscode-utils.extensionFromVscodeMarketplace {
