@@ -14,6 +14,7 @@
       jetbrains.datagrip
       kubectl
       minikube
+      procps
       shfmt
       sqlfluff
 
