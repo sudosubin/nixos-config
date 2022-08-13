@@ -26,15 +26,15 @@ final: { lib, vscode-utils, ... }@prev:
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "0.0.5";
-      sha256 = "14zyz4gjwvia1sl32zv758havjhgp8yz5xjcga7w3ix9kdm0irhs";
+      version = "0.0.6";
+      sha256 = "0kxp9g9q2ws5wg5ddq4lb14yx7m02zq43g8qwasgxlg9gpcgarzz";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
       name = "hadolint";
       publisher = "exiasr";
-      version = "1.1.1";
-      sha256 = "0ls604nkahasny0kzh7677nr7mk9akcnljf4g41j0k47avza1hig";
+      version = "1.1.2";
+      sha256 = "00x6bnjm0yk0fcw91c47g8c5shgbcvxyyz49r4y23q4gqizvaqz8";
     };
 
     flowtype.flow-for-vscode = vscode-utils.extensionFromVscodeMarketplace {
