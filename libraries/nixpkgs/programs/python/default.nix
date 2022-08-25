@@ -3,8 +3,9 @@ final: { lib, fetchzip, stdenv, ... }@prev:
 {
   python310 = prev.python310.override {
     packageOverrides = self: super: {
-      inherit (import ./debugpy self super) debugpy;
-      inherit (import ./pyopenssl self super) pyopenssl;
+      debugpy = (import ./debugpy self super);
+      diff-cover = (import ./diff-cover self super);
+      pyopenssl = (import ./pyopenssl self super);
     };
   };
 }
