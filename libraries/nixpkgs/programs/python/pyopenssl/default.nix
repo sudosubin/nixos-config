@@ -1,5 +1,5 @@
-self: super: {
-  pyopenssl = super.pyopenssl.overridePythonAttrs (attrs: {
-    meta.broken = false;
-  });
-}
+self: super:
+
+super.pyopenssl.overridePythonAttrs (attrs: {
+  meta.broken = false;
+})

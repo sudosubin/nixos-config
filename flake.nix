@@ -54,7 +54,6 @@
     let
       dev-shell = import ./libraries/dev-shell { inherit inputs; };
       home-manager-shared = ./libraries/home-manager;
-      nix-darwin-shared = ./libraries/nix-darwin;
       nixpkgs-shared = ./libraries/nixpkgs;
 
     in
@@ -63,7 +62,6 @@
         system = "aarch64-darwin";
         modules = [
           home-manager-shared
-          nix-darwin-shared
           nixpkgs-shared
           home-manager.darwinModules.home-manager
           ./modules/shared/configuration.nix
