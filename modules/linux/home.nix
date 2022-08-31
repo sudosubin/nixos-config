@@ -21,6 +21,7 @@
       _1password
       gnome.nautilus
       google-chrome
+      ngrok
       openvpn
       pavucontrol
       pulseaudio

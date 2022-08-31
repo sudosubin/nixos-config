@@ -21,6 +21,7 @@
     "1password-cli"
     "datagrip"
     "google-chrome"
+    "ngrok"
     "slack"
     "zoom"
   ]);

@@ -20,6 +20,7 @@
 
       # Utility
       _1password
+      ngrok
       slack
       unzip
       zoom-us
