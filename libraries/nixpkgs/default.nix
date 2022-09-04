@@ -11,6 +11,7 @@
     (import ./programs/pass-securid)
     (import ./programs/pragmatapro)
     (import ./programs/python)
+    (import ./programs/raycast)
     (import ./programs/vscode-extensions)
     (import ./programs/yabai)
     (import ./programs/zpl-open)
@@ -22,6 +23,7 @@
     "datagrip"
     "google-chrome"
     "ngrok"
+    "raycast"
     "slack"
     "zoom"
   ]);

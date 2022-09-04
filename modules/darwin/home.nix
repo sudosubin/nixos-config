@@ -59,6 +59,7 @@
 
       ../darwin/programs/caffeinate
       ../darwin/programs/desktop
+      ../darwin/programs/raycast
       ../darwin/programs/skhd
       ../darwin/programs/yabai
     ];
