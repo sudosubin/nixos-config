@@ -12,6 +12,7 @@
       bun
       hadolint
       jetbrains.datagrip
+      jetbrains.idea-community
       kubectl
       minikube
       shfmt
