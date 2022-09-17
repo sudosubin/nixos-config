@@ -38,6 +38,7 @@ in
         dynamic_padding = true;
         title = "Terminal";
         dynamic_title = true;
+        decorations = if stdenv.isDarwin then "buttonless" else "full";
       };
 
       scrolling = {
