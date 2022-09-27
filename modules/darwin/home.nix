@@ -55,6 +55,7 @@
       ../shared/programs/python
       ../shared/programs/ssh
       ../shared/programs/tmux
+      ../shared/programs/vim
       ../shared/programs/vscode
       ../shared/programs/zsh
 
