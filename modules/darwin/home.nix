@@ -23,6 +23,7 @@
       _1password
       ngrok
       slack
+      slack-cli-bin
       unzip
       zoom-us
     ];

@@ -11,6 +11,7 @@
     (import ./programs/pass-securid)
     (import ./programs/pragmatapro)
     (import ./programs/python)
+    (import ./programs/slack-cli-bin)
     (import ./programs/vscode-extensions)
     (import ./programs/yabai)
     (import ./programs/zpl-open)
@@ -23,6 +24,7 @@
     "google-chrome"
     "ngrok"
     "slack"
+    "slack-cli-bin"
     "zoom"
   ]);
 }
