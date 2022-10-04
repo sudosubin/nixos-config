@@ -26,8 +26,8 @@ final: { lib, vscode-utils, ... }@prev:
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "0.0.8";
-      sha256 = "17b1lbsrnpqnhbk6x6l1fp454856bgnfk32h2b7kxqi59c82q0ar";
+      version = "0.1.3";
+      sha256 = "0wqkljj0hnrh8lqydjhi9l9k1hamkzk03yh0mpzrn7agymn0jxfr";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
@@ -61,8 +61,8 @@ final: { lib, vscode-utils, ... }@prev:
     kevinrose.vsc-python-indent = vscode-utils.extensionFromVscodeMarketplace {
       name = "vsc-python-indent";
       publisher = "kevinrose";
-      version = "1.17.0";
-      sha256 = "14vf5p7pn2zgi4lhp6vkndclcxlw3lfdz0immi05gjyx20gp69i1";
+      version = "1.18.0";
+      sha256 = "1z8ydwz43znccrhpms0v34236nx4nic65mpfd9ka3w4ng1q8q8w6";
     };
 
     nimsaem.nimvscode = vscode-utils.extensionFromVscodeMarketplace {
