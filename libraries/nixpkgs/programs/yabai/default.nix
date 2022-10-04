@@ -1,4 +1,4 @@
-final: { lib, stdenv, fetchFromGitHub, ... }@prev:
+final: { fetchFromGitHub, ... }@prev:
 
 let
   buildSymlinks = prev.runCommand "build-symlinks" { } ''
@@ -10,13 +10,14 @@ in
 {
   yabai = prev.yabai.overrideDerivation (attrs: rec {
     pname = "yabai";
-    version = "4.0.2";
+    version = "5.0.1";
+    name = "${pname}-${version}";
 
     src = fetchFromGitHub {
       owner = "koekeishiya";
       repo = pname;
       rev = "v${version}";
-      sha256 = "sha256-DXDdjI4kkLcRUNtMoSu7fJ0f3fUty88o5ZS6lJz0cGU=";
+      sha256 = "sha256-5WtWLfiWVOqshbsx50fuEv8ab3U0y6z5+yvXoxpLokU=";
     };
 
     nativeBuildInputs = attrs.nativeBuildInputs ++ [ buildSymlinks ];
