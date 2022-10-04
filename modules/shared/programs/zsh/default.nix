@@ -5,4 +5,8 @@
     ./atuin.nix
     ./zsh.nix
   ];
+
+  home.file = {
+    ".hushlogin".text = "";
+  };
 }
