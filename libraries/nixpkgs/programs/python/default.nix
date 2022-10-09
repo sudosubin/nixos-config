@@ -1,4 +1,4 @@
-final: { lib, fetchzip, stdenv, ... }@prev:
+final: prev:
 
 {
   python310 = prev.python310.override {

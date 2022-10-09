@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  inherit (pkgs) stdenv;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isLinux;
 
   font-family = {
     serif = [
@@ -41,13 +41,13 @@ in
     enable = true;
   };
 
-  gtk = lib.mkIf stdenv.isLinux {
+  gtk = lib.mkIf isLinux {
     enable = true;
     font.name = "Pretendard";
     font.size = 10;
   };
 
-  xdg.configFile = lib.mkIf stdenv.isLinux {
+  xdg.configFile = lib.mkIf isLinux {
     "fontconfig/fonts.conf".text = generateFontConfig {
       fontconfig = [
         {

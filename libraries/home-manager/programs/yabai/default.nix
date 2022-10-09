@@ -2,7 +2,7 @@
 with lib;
 
 let
-  inherit (pkgs) stdenv;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
   cfg = config.services.yabai;
 
   hasYabaiConfig = (cfg.config != { } || cfg.extraConfig != "");
@@ -11,17 +11,13 @@ let
     concatStringsSep "\n" (mapAttrsToList
       (p: v: "yabai -m config ${p} ${toString v}")
       config);
-in
 
+in
 {
   options.services.yabai = {
     enable = mkEnableOption "yabai";
 
-    package = mkOption {
-      type = types.package;
-      default = pkgs.yabai;
-      description = "A yabai package.";
-    };
+    package = mkPackageOption pkgs "yabai" { };
 
     config = mkOption {
       type = types.attrs;
@@ -50,7 +46,7 @@ in
     {
       assertions = [
         {
-          assertion = cfg.enable -> stdenv.isDarwin;
+          assertion = cfg.enable -> isDarwin;
           message = "Nix yabai only supports darwin.";
         }
       ];

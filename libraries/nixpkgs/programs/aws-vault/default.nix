@@ -1,4 +1,4 @@
-final: { lib, stdenv, ... }@prev:
+final: prev:
 
 {
   aws-vault = prev.aws-vault.overrideDerivation (attrs: rec {

@@ -1,7 +1,7 @@
-final: { lib, stdenv, fetchzip, ... }@prev:
+final: { lib, stdenvNoCC, fetchzip, ... }@prev:
 
 {
-  apple-cursor-theme = stdenv.mkDerivation rec {
+  apple-cursor-theme = stdenvNoCC.mkDerivation rec {
     pname = "apple-cursor-theme";
     version = "1.2.3";
 

@@ -31,8 +31,6 @@ fetching ...
 
 - GPG private keys
 
-- Password Store `~/.password-store`
-
 ## License
 
 NixOS Config is [MIT Licensed](./LICENSE).

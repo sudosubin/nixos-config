@@ -1,7 +1,7 @@
-final: { lib, stdenv, fetchFromGitHub, ... }@prev:
+final: { lib, stdenvNoCC, fetchFromGitHub, ... }@prev:
 
 {
-  zpl-open = stdenv.mkDerivation rec {
+  zpl-open = stdenvNoCC.mkDerivation rec {
     pname = "zpl-open";
     version = "1.1.0";
 

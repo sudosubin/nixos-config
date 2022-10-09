@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (pkgs) stdenv;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
 
   colors = {
     black = "#5c6370";
@@ -14,7 +14,7 @@ let
     white = "#abb2bf";
   };
 
-  font-size = if stdenv.isDarwin then 13 else 10;
+  font-size = if isDarwin then 13 else 10;
   font-family = "PragmataProMono Nerd Font Mono";
 
 in
@@ -38,7 +38,7 @@ in
         dynamic_padding = true;
         title = "Terminal";
         dynamic_title = true;
-        decorations = if stdenv.isDarwin then "buttonless" else "full";
+        decorations = if isDarwin then "buttonless" else "full";
       };
 
       scrolling = {

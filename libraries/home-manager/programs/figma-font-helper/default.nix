@@ -2,7 +2,7 @@
 with lib;
 
 let
-  inherit (pkgs) stdenv;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isLinux;
   cfg = config.services.figma-font-helper;
 
 in
@@ -23,7 +23,7 @@ in
     };
   };
 
-  config = mkIf (cfg.enable && stdenv.isLinux) {
+  config = mkIf (cfg.enable && isLinux) {
     xdg.configFile = {
       "figma-linux/fonthelper".text = builtins.toJSON {
         port = cfg.port;

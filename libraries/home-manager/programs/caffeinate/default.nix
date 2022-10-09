@@ -2,7 +2,7 @@
 with lib;
 
 let
-  inherit (pkgs) stdenv;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
   cfg = config.services.caffeinate;
 
 in
@@ -27,7 +27,7 @@ in
     {
       assertions = [
         {
-          assertion = cfg.enable -> stdenv.isDarwin;
+          assertion = cfg.enable -> isDarwin;
           message = "Nix caffeinate only supports darwin.";
         }
       ];
