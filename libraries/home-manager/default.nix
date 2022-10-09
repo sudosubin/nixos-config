@@ -19,7 +19,7 @@ in
     ./programs/yabai
 
     # os systems
-    (lib.mkIf (isDarwin) ./systems/darwin)
-    (lib.mkIf (isLinux) ./systems/linux)
+    (lib.mkIf isDarwin ./systems/darwin)
+    (lib.mkIf isLinux ./systems/linux)
   ];
 }

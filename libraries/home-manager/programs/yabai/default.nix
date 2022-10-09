@@ -52,10 +52,10 @@ in
       ];
     }
 
-    (mkIf (cfg.enable) {
+    (mkIf cfg.enable {
       home.packages = [ cfg.package ];
 
-      xdg.configFile = mkIf (hasYabaiConfig)
+      xdg.configFile = mkIf hasYabaiConfig
         {
           "yabai/yabairc" = {
             text = "${toYabaiConfig cfg.config}"

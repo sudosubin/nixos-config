@@ -33,7 +33,7 @@ in
       ];
     }
 
-    (mkIf (cfg.enable) {
+    (mkIf cfg.enable {
       launchd.agents.caffeinate = {
         enable = true;
         config = {
