@@ -2,9 +2,9 @@
 with lib;
 
 let
-  inherit (pkgs) stdenv;
-  configDir = if stdenv.isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/VSCodium";
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
 
+  configDir = if isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/VSCodium";
   monospace = "'PragmataProMono Nerd Font Mono'";
 
   stylesheet = {
@@ -20,7 +20,7 @@ let
     vscodium = pkgs.vscodium.overrideDerivation (attrs: rec {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
-      resources = if stdenv.isDarwin then "Contents/Resources" else "resources";
+      resources = if isDarwin then "Contents/Resources" else "resources";
 
       preInstall = ''
         ${attrs.preInstall or ""}

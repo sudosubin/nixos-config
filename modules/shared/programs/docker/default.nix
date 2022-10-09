@@ -1,12 +1,12 @@
 { config, pkgs, lib, ... }:
 
 let
-  inherit (pkgs) stdenv;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
 
 in
 {
   home.packages = with pkgs; [
     docker
     docker-compose
-  ] ++ lib.optionals stdenv.isDarwin [ colima ];
+  ] ++ lib.optionals isDarwin [ colima ];
 }

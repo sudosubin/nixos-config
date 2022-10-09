@@ -54,7 +54,6 @@
       ../shared/programs/jq
       ../shared/programs/lsd
       ../shared/programs/nix
-      ../shared/programs/password-store
       ../shared/programs/python
       ../shared/programs/ssh
       ../shared/programs/tmux

@@ -1,13 +1,13 @@
-final: { lib, stdenv, fzf, python3, ... }@prev:
+final: { lib, stdenvNoCC, python3, ... }@prev:
 
 {
-  zsh-atuin = stdenv.mkDerivation rec {
+  zsh-atuin = stdenvNoCC.mkDerivation rec {
     pname = "zsh-atuin";
     version = "0.1.0";
 
     src = ./src;
 
-    buildInputs = [ fzf python3 ];
+    buildInputs = [ python3 ];
 
     postPatch = ''
       substituteInPlace bin/zsh-atuin --replace "/usr/bin/env python3" "${python3}/bin/python3"

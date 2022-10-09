@@ -1,7 +1,7 @@
-final: { lib, stdenv, nerd-font-patcher, ... }@prev:
+final: { lib, stdenvNoCC, nerd-font-patcher, ... }@prev:
 
 {
-  pragmatapro = stdenv.mkDerivation rec {
+  pragmatapro = stdenvNoCC.mkDerivation rec {
     pname = "pragmatapro";
     version = "0.829";
 

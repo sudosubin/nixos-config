@@ -2,7 +2,7 @@
 with lib;
 
 let
-  inherit (pkgs) stdenv;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
   cfg = config.services.skhd;
 
 in
@@ -10,11 +10,7 @@ in
   options.services.skhd = {
     enable = mkEnableOption "skhd";
 
-    package = mkOption {
-      type = types.package;
-      default = pkgs.skhd;
-      description = "A skhd package.";
-    };
+    package = mkPackageOption pkgs "skhd" { };
 
     config = mkOption {
       type = types.lines;
@@ -28,7 +24,7 @@ in
     {
       assertions = [
         {
-          assertion = cfg.enable -> stdenv.isDarwin;
+          assertion = cfg.enable -> isDarwin;
           message = "Nix skhd only supports darwin.";
         }
       ];

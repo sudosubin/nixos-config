@@ -1,7 +1,7 @@
 { config, pkgs, lib, inputs, ... }:
 
 let
-  inherit (pkgs) stdenv;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
 
 in
 {
@@ -19,7 +19,7 @@ in
     ./programs/yabai
 
     # os systems
-    (lib.mkIf (stdenv.isLinux) ./systems/linux)
-    (lib.mkIf (stdenv.isDarwin) ./systems/darwin)
+    (lib.mkIf (isDarwin) ./systems/darwin)
+    (lib.mkIf (isLinux) ./systems/linux)
   ];
 }

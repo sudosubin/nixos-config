@@ -1,9 +1,5 @@
-{ config, lib, pkgs, ... }:
+{ ... }:
 
-let
-  inherit (pkgs) stdenv;
-
-in
 {
   nix = {
     settings = {

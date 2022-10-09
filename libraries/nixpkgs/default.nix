@@ -8,7 +8,6 @@
     (import ./programs/aws-vault)
     (import ./programs/figma-font-helper)
     (import ./programs/google-chrome)
-    (import ./programs/pass-securid)
     (import ./programs/pragmatapro)
     (import ./programs/python)
     (import ./programs/slack-cli-bin)
