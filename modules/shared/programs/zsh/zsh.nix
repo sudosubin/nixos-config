@@ -39,6 +39,11 @@
         src = pkgs.zsh-completions;
       }
       {
+        name = "zsh-git-auto-fetch";
+        src = pkgs.oh-my-zsh;
+        file = "share/oh-my-zsh/plugins/git-auto-fetch/git-auto-fetch.plugin.zsh";
+      }
+      {
         name = "zsh-fzf";
         src = pkgs.fzf;
         file = "share/fzf/completion.zsh";
