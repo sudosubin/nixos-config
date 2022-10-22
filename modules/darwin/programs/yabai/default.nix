@@ -8,7 +8,6 @@
       # Global Settings
       mouse_follows_focus = "on";
       window_origin_display = "focused";
-      window_topmost = "on";
       window_shadow = "float";
       auto_balance = "on";
       mouse_modifier = "ctrl";
