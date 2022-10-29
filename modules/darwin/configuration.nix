@@ -52,10 +52,4 @@
     NSGlobalDomain.NSWindowResizeTime = null;
     NSGlobalDomain.NSAutomaticWindowAnimationsEnabled = false;
   };
-
-  # TODO(sudosubin): Fix https://github.com/LnL7/nix-darwin/issues/551, before https://github.com/LnL7/nix-darwin/pull/552
-  documentation = {
-    enable = false;
-    doc.enable = false;
-  };
 }
