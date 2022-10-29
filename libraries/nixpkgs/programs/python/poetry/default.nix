@@ -2,15 +2,14 @@ self: super:
 
 let
   inherit (super.pkgs) lib;
-  inherit (super.pkgs.stdenvNoCC.hostPlatform) isAarch64 isDarwin;
+  inherit (super.pkgs.stdenvNoCC.hostPlatform) isDarwin;
 
 in
 super.poetry.overridePythonAttrs (attrs: {
-  preCheck = lib.optionalString (isDarwin && isAarch64) ''
-    export no_proxy='*';
-  '';
-
-  postCheck = lib.optionalString (isDarwin && isAarch64) ''
-    unset no_proxy
+  # TODO: https://github.com/NixOS/nixpkgs/pull/198143
+  postPatch = lib.optionalString isDarwin ''
+    substituteInPlace pyproject.toml \
+      --replace 'crashtest = "^0.3.0"' 'crashtest = "*"' \
+      --replace 'xattr = { version = "^0.9.7"' 'xattr = { version = "*"'
   '';
 })
