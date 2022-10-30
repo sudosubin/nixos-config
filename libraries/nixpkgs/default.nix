@@ -10,6 +10,7 @@
     (import ./programs/google-chrome)
     (import ./programs/pragmatapro)
     (import ./programs/python)
+    (import ./programs/servicex)
     (import ./programs/slack-cli-bin)
     (import ./programs/vscode-extensions)
     (import ./programs/yabai)

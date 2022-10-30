@@ -16,6 +16,7 @@
       kubectl
       minikube
       procps
+      servicex
       shfmt
       sqlfluff
 
