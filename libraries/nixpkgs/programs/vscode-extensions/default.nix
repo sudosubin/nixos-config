@@ -26,8 +26,8 @@ final: { lib, vscode-utils, ... }@prev:
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "0.1.9";
-      sha256 = "0n1083ap8bsp4b5gbh6bxzyb1z3ffxixsl7yac9f4qld4i6rhmxa";
+      version = "2.0.1";
+      sha256 = "030g2bidf7inqkkvm3zskfkkzpd8g7m93kc725dw4qp77dsvrr8m";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
@@ -54,8 +54,8 @@ final: { lib, vscode-utils, ... }@prev:
     hashicorp.hcl = vscode-utils.extensionFromVscodeMarketplace {
       name = "hcl";
       publisher = "hashicorp";
-      version = "0.2.1";
-      sha256 = "15ydllrridf1kc7867h0r7ykc2mnn5d94d1nvklzx0nnkq64pl75";
+      version = "0.3.0";
+      sha256 = "16yhaql25l1h02gb7lhm48hiyaxfzmgh4mz8bd7c0517gfswg85g";
     };
 
     kevinrose.vsc-python-indent = vscode-utils.extensionFromVscodeMarketplace {
@@ -75,8 +75,8 @@ final: { lib, vscode-utils, ... }@prev:
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
       name = "rust";
       publisher = "rust-lang";
-      version = "0.7.8";
-      sha256 = "039ns854v1k4jb9xqknrjkj8lf62nfcpfn0716ancmjc4f0xlzb3";
+      version = "0.7.9";
+      sha256 = "0asmr7c9jmik1047n359s9zmv2m7d0i8sixki4p02z7qzyrpxrfs";
     };
   };
 }

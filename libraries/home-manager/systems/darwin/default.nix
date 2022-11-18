@@ -19,8 +19,10 @@ in
     mkdir -p "$BASE_DIR"
     for app_file in ${apps}/Applications/*; do
       target="$BASE_DIR/$(basename "$app_file")"
-      $DRY_RUN_CMD cp ''${VERBOSE_ARG:+-v} -fHRL "$app_file" "$BASE_DIR"
-      $DRY_RUN_CMD chmod ''${VERBOSE_ARG:+-v} -R +w "$target"
+      $DRY_RUN_CMD cp ''$VERBOSE_ARG -fHRL "$app_file" "$BASE_DIR"
+      $DRY_RUN_CMD chmod ''$VERBOSE_ARG -R +w "$target"
     done
   '';
+
+  disabledModules = [ "targets/darwin/linkapps.nix" ];
 }
