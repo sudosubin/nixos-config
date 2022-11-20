@@ -9,12 +9,10 @@
 
     home.packages = with pkgs; [
       # Development
-      bun
       hadolint
       jetbrains.datagrip
       jetbrains.idea-community
       kubectl
-      minikube
       procps
       servicex
       shfmt

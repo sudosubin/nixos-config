@@ -9,21 +9,17 @@
 
     home.packages = with pkgs; [
       # Development
-      bun
       hadolint
       jetbrains.datagrip
-      jetbrains.idea-community
       kubectl
-      minikube
       shfmt
       sqlfluff
 
       # Utility
       _1password
+      ngrok
       gnome.nautilus
       google-chrome
-      ngrok
-      openvpn
       pavucontrol
       pulseaudio
       slack
