@@ -4,6 +4,7 @@
   nixpkgs.overlays = [
     (import ./generators/xml.nix)
 
+    (import ./programs/alfred5)
     (import ./programs/apple-cursor-theme)
     (import ./programs/aws-vault)
     (import ./programs/figma-font-helper)
@@ -20,6 +21,7 @@
 
   nixpkgs.config.allowUnfreePredicate = (pkg: builtins.elem (lib.getName pkg) [
     "1password-cli"
+    "alfred"
     "datagrip"
     "google-chrome"
     "ngrok"

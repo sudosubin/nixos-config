@@ -20,6 +20,7 @@
 
       # Utility
       _1password
+      alfred5
       ngrok
       slack
       slack-cli-bin
