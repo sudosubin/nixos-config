@@ -11,6 +11,7 @@
     (import ./programs/google-chrome)
     (import ./programs/pragmatapro)
     (import ./programs/python)
+    (import ./programs/raycast)
     (import ./programs/servicex)
     (import ./programs/slack-cli-bin)
     (import ./programs/vscode-extensions)
@@ -25,6 +26,7 @@
     "datagrip"
     "google-chrome"
     "ngrok"
+    "raycast"
     "slack"
     "slack-cli-bin"
     "zoom"

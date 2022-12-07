@@ -20,8 +20,8 @@
 
       # Utility
       _1password
-      alfred5
       ngrok
+      raycast
       slack
       slack-cli-bin
       unzip
