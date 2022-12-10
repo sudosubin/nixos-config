@@ -13,6 +13,7 @@
       jetbrains.datagrip
       jetbrains.idea-community
       kubectl
+      poetry
       procps
       servicex
       shfmt

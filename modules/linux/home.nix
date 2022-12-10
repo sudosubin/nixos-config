@@ -12,6 +12,7 @@
       hadolint
       jetbrains.datagrip
       kubectl
+      poetry
       shfmt
       sqlfluff
 
