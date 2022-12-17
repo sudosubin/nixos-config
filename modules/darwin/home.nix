@@ -24,7 +24,6 @@
       ngrok
       raycast
       slack
-      slack-cli-bin
       unzip
       zoom-us
     ];
