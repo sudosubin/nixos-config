@@ -87,7 +87,6 @@ in
       editorconfig.editorconfig
       esbenp.prettier-vscode
       exiasr.hadolint
-      flowtype.flow-for-vscode
       foxundermoon.shell-format
       fwcd.kotlin
       golang.go

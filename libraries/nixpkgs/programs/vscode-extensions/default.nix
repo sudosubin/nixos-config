@@ -37,13 +37,6 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "00x6bnjm0yk0fcw91c47g8c5shgbcvxyyz49r4y23q4gqizvaqz8";
     };
 
-    flowtype.flow-for-vscode = vscode-utils.extensionFromVscodeMarketplace {
-      name = "flow-for-vscode";
-      publisher = "flowtype";
-      version = "2.2.0";
-      sha256 = "0mp10h68a47hwi6vw9807f65qv9mkzdgs6hwya0dglbc35p2y11p";
-    };
-
     fwcd.kotlin = vscode-utils.extensionFromVscodeMarketplace {
       name = "kotlin";
       publisher = "fwcd";
@@ -54,8 +47,8 @@ final: { lib, vscode-utils, ... }@prev:
     hashicorp.hcl = vscode-utils.extensionFromVscodeMarketplace {
       name = "hcl";
       publisher = "hashicorp";
-      version = "0.3.1";
-      sha256 = "1w9sg1jjlmrp2swjfvw3xgij9msrm2q7m3wm4fpcjiwyk7dpzr9j";
+      version = "0.3.2";
+      sha256 = "0snjivxdhr3s0lqarrzdzkv2f4qv28plbr3s9zpx7nqqfs97f4bk";
     };
 
     kevinrose.vsc-python-indent = vscode-utils.extensionFromVscodeMarketplace {
