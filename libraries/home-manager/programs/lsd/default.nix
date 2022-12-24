@@ -13,10 +13,6 @@ let
 
   mapLsColors = lsColors: attrsets.mapAttrsToList (key: value: "${key}=${value}") lsColors;
 
-  prefix = {
-    LS_COLORS = builtins.concatStringsSep ":" (mapLsColors cfg.colors);
-  };
-
   package = pkgs.lsd.overrideAttrs (attrs: {
     nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
 
@@ -24,7 +20,7 @@ let
       ${attrs.postInstall or ""}
 
       wrapProgram $out/bin/lsd \
-        --prefix LS_COLORS : "${prefix.LS_COLORS}"
+        --prefix LS_COLORS : "${builtins.concatStringsSep ":" (mapLsColors cfg.colors)}"
     '';
   });
 in
