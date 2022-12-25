@@ -46,6 +46,7 @@
       ../shared/programs/fonts
       ../shared/programs/fzf
       ../shared/programs/git
+      ../shared/programs/go
       ../shared/programs/gpg
       ../shared/programs/himalaya
       ../shared/programs/jq
