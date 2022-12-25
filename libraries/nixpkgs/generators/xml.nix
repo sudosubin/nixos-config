@@ -1,70 +1,62 @@
-final: prev:
+{ lib }:
 
-{
-  lib = prev.lib.extend (self: super: {
-    generators = prev.lib.generators // {
-      # Generate an XML-style config file from an attrset.
-      toXML =
-        { version ? "1.0"
-        , encoding ? null
-        , standalone ? null
-        , dtd ? null
-        }: attrset:
-        let
-          lib = super;
-          inherit (lib) optionalString;
+{ version ? "1.0"
+, encoding ? null
+, standalone ? null
+, dtd ? null
+}: attrset:
 
-          isNotNull = value: !builtins.isNull value;
-          makeXmlBool = value: if value then "yes" else "no";
+let
+  inherit (lib) optionalString;
 
-          repeatString = string: count:
-            optionalString (count > 0) (string + (repeatString string (count - 1)));
+  isNotNull = value: !builtins.isNull value;
+  makeXmlBool = value: if value then "yes" else "no";
 
-          indent = level: repeatString " " level;
+  repeatString = string: count:
+    optionalString (count > 0) (string + (repeatString string (count - 1)));
 
-          declaration = "<?xml"
-            + optionalString (isNotNull version) " version=\"${version}\""
-            + optionalString (isNotNull encoding) " encoding=\"${encoding}\""
-            + optionalString (isNotNull standalone) " standalone=\"${makeXmlBool standalone}\""
-            + "?>";
+  indent = level: repeatString " " level;
 
-          documentTypeDefinition = optionalString (isNotNull dtd) ("<!DOCTYPE"
-            + optionalString (isNotNull dtd.rootElement) " ${dtd.rootElement}"
-            + " SYSTEM"
-            + optionalString (isNotNull dtd.sourceFile) " \"${dtd.sourceFile}\""
-            + ">"
-          );
+  declaration = "<?xml"
+    + optionalString (isNotNull version) " version=\"${version}\""
+    + optionalString (isNotNull encoding) " encoding=\"${encoding}\""
+    + optionalString (isNotNull standalone) " standalone=\"${makeXmlBool standalone}\""
+    + "?>";
 
-          makeXmlContent = level: attrs: builtins.concatStringsSep "\n" (lib.mapAttrsToList
-            (key: value:
-              if builtins.isAttrs value then
-                lib.removeSuffix "\n" ''
-                  ${indent level}<${key}>
-                  ${makeXmlContent (level + 2) value}
-                  ${indent level}</${key}>
-                ''
-              else if builtins.isList value then
-                lib.removeSuffix "\n" ''
-                  ${indent level}<${key}>
-                  ${(builtins.concatStringsSep "\n" (
-                    builtins.map (item: (makeXmlContent (level + 2) item)) value
-                  ))}
-                  ${indent level}</${key}>
-                ''
-              else
-                lib.removeSuffix "\n" ''
-                  ${indent level}<${key}>${value}</${key}>
-                ''
-            )
-            attrs);
+  documentTypeDefinition = optionalString (isNotNull dtd) ("<!DOCTYPE"
+    + optionalString (isNotNull dtd.rootElement) " ${dtd.rootElement}"
+    + " SYSTEM"
+    + optionalString (isNotNull dtd.sourceFile) " \"${dtd.sourceFile}\""
+    + ">"
+  );
 
-          xmlContent = makeXmlContent 0 attrset;
-        in
+  makeXmlContent = level: attrs: builtins.concatStringsSep "\n" (lib.mapAttrsToList
+    (key: value:
+      if builtins.isAttrs value then
+        lib.removeSuffix "\n" ''
+          ${indent level}<${key}>
+          ${makeXmlContent (level + 2) value}
+          ${indent level}</${key}>
         ''
-          ${declaration}
-          ${documentTypeDefinition}
-          ${xmlContent}
-        '';
-    };
-  });
-}
+      else if builtins.isList value then
+        lib.removeSuffix "\n" ''
+          ${indent level}<${key}>
+          ${(builtins.concatStringsSep "\n" (
+            builtins.map (item: (makeXmlContent (level + 2) item)) value
+          ))}
+          ${indent level}</${key}>
+        ''
+      else
+        lib.removeSuffix "\n" ''
+          ${indent level}<${key}>${value}</${key}>
+        ''
+    )
+    attrs);
+
+  xmlContent = makeXmlContent 0 attrset;
+in
+''
+  ${declaration}
+  ${documentTypeDefinition}
+  ${xmlContent}
+''

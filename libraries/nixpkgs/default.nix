@@ -2,7 +2,7 @@
 
 {
   nixpkgs.overlays = [
-    (import ./generators/xml.nix)
+    (import ./generators)
 
     (import ./programs/apple-cursor-theme)
     (import ./programs/aws-vault)

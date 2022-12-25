@@ -1,0 +1,3 @@
+plugin_cache_dir             = "$HOME/.config/terraform/plugin-cache"
+disable_checkpoint           = true
+disable_checkpoint_signature = true
