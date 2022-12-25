@@ -52,6 +52,7 @@
       ../shared/programs/jq
       ../shared/programs/lsd
       ../shared/programs/nix
+      ../shared/programs/node
       ../shared/programs/python
       ../shared/programs/ssh
       ../shared/programs/terraform
