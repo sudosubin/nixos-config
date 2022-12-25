@@ -59,6 +59,7 @@
       ../shared/programs/tmux
       ../shared/programs/vim
       ../shared/programs/vscode
+      ../shared/programs/xdg
       ../shared/programs/zsh
 
       ../darwin/programs/caffeinate
