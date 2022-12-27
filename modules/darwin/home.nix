@@ -21,6 +21,7 @@
 
       # Utility
       _1password
+      discord
       ngrok
       raycast
       slack

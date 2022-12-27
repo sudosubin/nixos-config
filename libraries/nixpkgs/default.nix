@@ -21,6 +21,7 @@
   nixpkgs.config.allowUnfreePredicate = (pkg: builtins.elem (lib.getName pkg) [
     "1password-cli"
     "datagrip"
+    "discord"
     "google-chrome"
     "ngrok"
     "raycast"

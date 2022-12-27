@@ -18,6 +18,7 @@
 
       # Utility
       _1password
+      discord
       ngrok
       gnome.nautilus
       google-chrome
