@@ -63,6 +63,10 @@
       ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE = "20";
       ZSH_AUTOSUGGEST_USE_ASYNC = "true";
       ZSH_AUTOSUGGEST_MANUAL_REBIND = "true";
+
+      # Etc
+      LESSHISTFILE = "${config.xdg.cacheHome}/lesshst";
+      MYSQL_HISTFILE = "${config.xdg.cacheHome}/mysql_history";
     };
 
     shellAliases = {
