@@ -24,6 +24,7 @@
       discord
       ngrok
       raycast
+      ripgrep
       slack
       unzip
       zoom-us

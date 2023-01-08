@@ -19,11 +19,12 @@
       # Utility
       _1password
       discord
-      ngrok
       gnome.nautilus
       google-chrome
+      ngrok
       pavucontrol
       pulseaudio
+      ripgrep
       slack
       unzip
       xdg-utils
