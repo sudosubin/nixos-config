@@ -39,6 +39,7 @@
     NSGlobalDomain.AppleShowAllFiles = true;
     NSGlobalDomain.AppleInterfaceStyle = "Dark";
     NSGlobalDomain.AppleInterfaceStyleSwitchesAutomatically = false;
+    NSGlobalDomain.AppleICUForce24HourTime = true;
     NSGlobalDomain.AppleShowAllExtensions = true;
 
     NSGlobalDomain.NSAutomaticCapitalizationEnabled = false;
