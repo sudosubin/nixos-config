@@ -7,10 +7,10 @@ on:
   pull_request:
 
 jobs:
-  format:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v17
       - run: |
-          nix run '.#format' .
+          nix flake check
