@@ -7,6 +7,9 @@ let
 
 in
 {
+  apps = {
+    format = flake-utils.lib.mkApp { drv = pkgs.nixpkgs-fmt; };
+  };
   checks = {
     pre-commit-check = pre-commit-hooks.lib.${system}.run {
       src = ../.;
