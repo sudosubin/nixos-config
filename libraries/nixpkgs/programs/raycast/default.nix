@@ -3,11 +3,11 @@ final: { lib, fetchurl, stdenvNoCC, undmg, ... }@prev:
 {
   raycast = stdenvNoCC.mkDerivation rec {
     pname = "raycast";
-    version = "1.44.0";
+    version = "1.46.0";
 
     src = fetchurl {
-      url = "https://api.raycast.app/v2/download";
-      sha256 = "12xdvqqjbbyaiivlqc3br51nb8181ylavlgryzb655lwkg3jshyz";
+      url = "https://releases.raycast.com/download";
+      sha256 = "1w8hnh1miiwvckhg7ipp0lgv9l85b4wmkma7mjvxrv07szicbqj2";
     };
 
     sourceRoot = "Raycast.app";

@@ -29,6 +29,6 @@ self.buildPythonPackage rec {
     homepage = "https://github.com/microsoft/lsprotocol";
     description = "Python implementation of the Language Server Protocol.";
     license = licenses.mit;
-    maintainers = with maintainers; [ sudosubin ];
+    maintainers = [ maintainers.sudosubin ];
   };
 }
