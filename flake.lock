@@ -20,22 +20,6 @@
         "type": "github"
       }
     },
-    "flake-compat": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1673956053,
-        "narHash": "sha256-4gtG9iQuiKITOjNQQeQIpoIB6b16fm+504Ch3sNKLd8=",
-        "owner": "edolstra",
-        "repo": "flake-compat",
-        "rev": "35bb57c0c8d8b62bbfd284272c928ceb64ddbde9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "edolstra",
-        "repo": "flake-compat",
-        "type": "github"
-      }
-    },
     "flake-utils": {
       "locked": {
         "lastModified": 1667395993,
@@ -48,27 +32,6 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "gitignore": {
-      "inputs": {
-        "nixpkgs": [
-          "pre-commit-hooks",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1660459072,
-        "narHash": "sha256-8DFJjXG8zqoONA1vXtgeKXy68KdJL5UaXR8NtVMUbx8=",
-        "owner": "hercules-ci",
-        "repo": "gitignore.nix",
-        "rev": "a20de23b925fd8264fd7fad6454652e142fd7f73",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hercules-ci",
-        "repo": "gitignore.nix",
         "type": "github"
       }
     },
@@ -100,19 +63,19 @@
         "flake-utils": [
           "flake-utils"
         ],
+        "lefthook": [
+          "lefthook"
+        ],
         "nixpkgs": [
           "nixpkgs"
-        ],
-        "pre-commit-hooks": [
-          "pre-commit-hooks"
         ]
       },
       "locked": {
-        "lastModified": 1665417179,
-        "narHash": "sha256-uKeZAcSoal9CMI5vyolWAZNf6zKL1fKVFc1e/bn3kiE=",
+        "lastModified": 1674402930,
+        "narHash": "sha256-eS7zu8/HxNBA0kHIKWOFCjKK114MCXHK7kcstr2bt0Q=",
         "owner": "sudosubin",
         "repo": "home-manager-secrets",
-        "rev": "4a9f8e8bfdc53b5cf67cec17f82d1302695e3451",
+        "rev": "cf19da3f14f9219fb0f69e8376d0b0fdbe4eec57",
         "type": "github"
       },
       "original": {
@@ -121,14 +84,37 @@
         "type": "github"
       }
     },
+    "lefthook": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1674402903,
+        "narHash": "sha256-TKbkmlQuKDVFzJ73b92Z/UzO4OjsAGjTlMKX5+Fpjsg=",
+        "owner": "sudosubin",
+        "repo": "lefthook.nix",
+        "rev": "fcb7f651b6dc488a396311f25714d166a653b615",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sudosubin",
+        "repo": "lefthook.nix",
+        "type": "github"
+      }
+    },
     "nixos-config-private-sudosubin": {
       "locked": {
         "dir": "sudosubin",
-        "lastModified": 1673848974,
-        "narHash": "sha256-d2/aX6isDBI2dh7vtoxomkNbvPUcz2r6kIYOKMH16VA=",
+        "lastModified": 1674403078,
+        "narHash": "sha256-bdcXHYq/xl7ENSqCcfVIThn2vmwuguPNiEiTYv/TTCg=",
         "ref": "main",
-        "rev": "8c8befbfdea5cd087842530ab39b20e1eff623ba",
-        "revCount": 49,
+        "rev": "f3b4f059004ead237b99f7e23f927835eddac419",
+        "revCount": 50,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private?dir=sudosubin"
       },
@@ -142,11 +128,11 @@
     "nixos-config-private-toss": {
       "locked": {
         "dir": "toss",
-        "lastModified": 1673848974,
-        "narHash": "sha256-d2/aX6isDBI2dh7vtoxomkNbvPUcz2r6kIYOKMH16VA=",
+        "lastModified": 1674403078,
+        "narHash": "sha256-bdcXHYq/xl7ENSqCcfVIThn2vmwuguPNiEiTYv/TTCg=",
         "ref": "main",
-        "rev": "8c8befbfdea5cd087842530ab39b20e1eff623ba",
-        "revCount": 49,
+        "rev": "f3b4f059004ead237b99f7e23f927835eddac419",
+        "revCount": 50,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private?dir=toss"
       },
@@ -188,45 +174,17 @@
         "type": "github"
       }
     },
-    "pre-commit-hooks": {
-      "inputs": {
-        "flake-compat": "flake-compat",
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "gitignore": "gitignore",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "nixpkgs-stable": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1674122161,
-        "narHash": "sha256-9QM4rvgUSEwO8DWtJN9sR/afEqrH1s3b6ACsZT5wiAM=",
-        "owner": "cachix",
-        "repo": "pre-commit-hooks.nix",
-        "rev": "53e766957b73298fa68b47478c48cbcc005cc18a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "cachix",
-        "repo": "pre-commit-hooks.nix",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "darwin": "darwin",
         "flake-utils": "flake-utils",
         "home-manager": "home-manager",
         "home-manager-secrets": "home-manager-secrets",
+        "lefthook": "lefthook",
         "nixos-config-private-sudosubin": "nixos-config-private-sudosubin",
         "nixos-config-private-toss": "nixos-config-private-toss",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs",
-        "pre-commit-hooks": "pre-commit-hooks"
+        "nixpkgs": "nixpkgs"
       }
     }
   },

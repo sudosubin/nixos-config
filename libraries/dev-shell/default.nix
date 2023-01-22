@@ -11,15 +11,19 @@ in
     format = flake-utils.lib.mkApp { drv = pkgs.nixpkgs-fmt; };
   };
   checks = {
-    pre-commit-check = pre-commit-hooks.lib.${system}.run {
-      src = ../.;
-      hooks = {
-        nixpkgs-fmt.enable = true;
+    lefthook-check = lefthook.lib.${system}.run {
+      src = ./.;
+      config = {
+        pre-commit.commands = {
+          nixpkgs-fmt = {
+            run = "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt {staged_files}";
+            glob = "*.nix";
+          };
+        };
       };
     };
   };
-  devShell = pkgs.mkShell {
-    buildInputs = with pkgs; [ pre-commit ];
-    inherit (self.checks.${system}.pre-commit-check) shellHook;
+  devShell = nixpkgs.legacyPackages.${system}.mkShell {
+    inherit (self.checks.${system}.lefthook-check) shellHook;
   };
 })

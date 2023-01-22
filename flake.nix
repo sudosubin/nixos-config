@@ -14,10 +14,9 @@
       url = "github:numtide/flake-utils";
     };
 
-    pre-commit-hooks = {
-      url = "github:cachix/pre-commit-hooks.nix";
+    lefthook = {
+      url = "github:sudosubin/lefthook.nix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.nixpkgs-stable.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
 
@@ -37,7 +36,7 @@
       # url = "path:/home/sudosubin/Code/sudosubin/home-manager-secrets";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
-      inputs.pre-commit-hooks.follows = "pre-commit-hooks";
+      inputs.lefthook.follows = "lefthook";
     };
 
     nixos-config-private-sudosubin = {

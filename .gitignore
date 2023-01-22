@@ -1,5 +1,5 @@
-# auto generated pre-commit configuration file
-/.pre-commit-config.yaml
-
 # nix build result
 /result
+
+# auto generated lefthook configuration file
+/lefthook.yml
