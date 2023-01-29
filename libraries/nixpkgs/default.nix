@@ -6,6 +6,7 @@
 
     (import ./programs/apple-cursor-theme)
     (import ./programs/aws-vault)
+    (import ./programs/cleanshot)
     (import ./programs/figma-font-helper)
     (import ./programs/gdb)
     (import ./programs/google-chrome)
@@ -20,6 +21,7 @@
 
   nixpkgs.config.allowUnfreePredicate = (pkg: builtins.elem (lib.getName pkg) [
     "1password-cli"
+    "cleanshot"
     "datagrip"
     "discord"
     "google-chrome"

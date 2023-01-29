@@ -21,6 +21,7 @@
 
       # Utility
       _1password
+      cleanshot
       discord
       ngrok
       raycast
