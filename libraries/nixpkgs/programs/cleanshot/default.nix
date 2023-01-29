@@ -19,8 +19,8 @@ final: { lib, fetchurl, stdenvNoCC, undmg, ... }@prev:
     '';
 
     installPhase = ''
-      mkdir -p "$out/Applications/CleanShot X.app"
-      cp -R . "$out/Applications/CleanShot X.app"
+      mkdir -p "$out/Applications/${sourceRoot}"
+      cp -R . "$out/Applications/${sourceRoot}"
     '';
 
     meta = with lib; {

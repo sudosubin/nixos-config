@@ -25,6 +25,7 @@
       discord
       ngrok
       raycast
+      redisinsight
       ripgrep
       slack
       unzip

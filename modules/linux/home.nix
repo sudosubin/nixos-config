@@ -18,6 +18,7 @@
 
       # Utility
       _1password
+      _1password-gui
       discord
       gnome.nautilus
       google-chrome

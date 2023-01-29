@@ -13,6 +13,7 @@
     (import ./programs/pragmatapro)
     (import ./programs/python)
     (import ./programs/raycast)
+    (import ./programs/redisinsight)
     (import ./programs/servicex)
     (import ./programs/vscode-extensions)
     (import ./programs/zpl-open)
@@ -20,6 +21,7 @@
   ];
 
   nixpkgs.config.allowUnfreePredicate = (pkg: builtins.elem (lib.getName pkg) [
+    "1password"
     "1password-cli"
     "cleanshot"
     "datagrip"
@@ -27,6 +29,7 @@
     "google-chrome"
     "ngrok"
     "raycast"
+    "redisinsight"
     "slack"
     "zoom"
   ]);
