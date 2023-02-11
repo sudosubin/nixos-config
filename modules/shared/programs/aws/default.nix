@@ -3,7 +3,6 @@
 {
   home.sessionVariables = {
     AWS_VAULT_BACKEND = "file";
-    AWS_VAULT_PROMPT = "1password";
     AWS_VAULT_FILE_DIR = "~/.config/aws-vault/keys";
     AWS_VAULT_FILE_PASSPHRASE = "";
   };

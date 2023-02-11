@@ -20,7 +20,6 @@
       sqlfluff
 
       # Utility
-      _1password
       cleanshot
       discord
       ngrok
@@ -42,6 +41,7 @@
       inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
       inputs.nixos-config-private-toss.homeManagerModules.toss
 
+      ../shared/programs/1password
       ../shared/programs/act
       ../shared/programs/alacritty
       ../shared/programs/aws

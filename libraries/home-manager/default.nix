@@ -10,6 +10,7 @@ in
     inputs.home-manager-secrets.homeManagerModules.home-manager-secrets
 
     # local programs (local)
+    ./programs/1password
     ./programs/act
     ./programs/caffeinate
     ./programs/figma-font-helper
