@@ -56,7 +56,7 @@
   "editor.overviewRulerBorder": false,
 
   // transition
-  "editor.cursorSmoothCaretAnimation": true,
+  "editor.cursorSmoothCaretAnimation": "on",
 
   // git
   "gitlens.currentLine.format": "${author} • ${date}, ${message}",
@@ -206,7 +206,7 @@
   "[rust]": {
     "editor.formatOnSave": true
   },
-  "java.configuration.checkProjectSettingsExclusions": false,
+  "java.import.generatesMetadataFilesAtProjectRoot": false,
   "errorLens.margin": "6ch",
   "errorLens.gutterIconsEnabled": true,
   "errorLens.gutterIconSize": "65%",
