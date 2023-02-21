@@ -21,6 +21,7 @@
 
       # Utility
       cleanshot
+      clop
       discord
       ngrok
       raycast
