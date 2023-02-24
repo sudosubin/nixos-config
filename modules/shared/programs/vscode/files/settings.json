@@ -172,6 +172,13 @@
   // langauge (sql)
   "sql.linter.executablePath": "/etc/profiles/per-user/sudosubin/bin/sqlfluff",
 
+  // language (yaml)
+  "yaml.format.enable": true,
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": true
+  },
+
   // language (bash)
   "shellcheck.customArgs": ["-x"],
   "shellcheck.ignorePatterns": {
