@@ -14,6 +14,7 @@ in
     ./programs/act
     ./programs/caffeinate
     ./programs/cleanshot
+    ./programs/clop
     ./programs/figma-font-helper
     ./programs/jq
     ./programs/lsd

@@ -20,7 +20,6 @@
       sqlfluff
 
       # Utility
-      clop
       discord
       ngrok
       raycast
@@ -69,6 +68,7 @@
 
       ../darwin/programs/caffeinate
       ../darwin/programs/cleanshot
+      ../darwin/programs/clop
       ../darwin/programs/desktop
       ../darwin/programs/skhd
       ../darwin/programs/yabai
