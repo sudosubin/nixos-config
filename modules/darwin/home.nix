@@ -20,7 +20,6 @@
       sqlfluff
 
       # Utility
-      cleanshot
       clop
       discord
       ngrok
@@ -69,6 +68,7 @@
       ../shared/programs/zsh
 
       ../darwin/programs/caffeinate
+      ../darwin/programs/cleanshot
       ../darwin/programs/desktop
       ../darwin/programs/skhd
       ../darwin/programs/yabai
