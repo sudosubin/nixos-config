@@ -26,8 +26,8 @@ final: { lib, vscode-utils, ... }@prev:
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "2.2.3";
-      sha256 = "165qrdcd42vya8s8xs1yfwdhz1rznrik6cx67wgr14yhnhcgy66p";
+      version = "2.2.4";
+      sha256 = "10dh2na8q7lam7mzn8jh4w12cbvybbax2sxwbxb1xn4pabml2846";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {

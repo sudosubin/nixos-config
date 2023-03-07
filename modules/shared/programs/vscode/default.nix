@@ -102,7 +102,7 @@ in
       pkief.material-product-icons
       redhat.java
       redhat.vscode-yaml
-      rust-lang.rust
+      rust-lang.rust-analyzer
       shardulm94.trailing-spaces
       tamasfe.even-better-toml
       timonwong.shellcheck
