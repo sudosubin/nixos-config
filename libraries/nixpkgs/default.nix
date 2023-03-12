@@ -5,11 +5,9 @@
     (import ./generators)
 
     (import ./programs/apple-cursor-theme)
-    (import ./programs/aws-vault)
     (import ./programs/cleanshot)
     (import ./programs/clop)
     (import ./programs/figma-font-helper)
-    (import ./programs/gdb)
     (import ./programs/google-chrome)
     (import ./programs/pragmatapro)
     (import ./programs/python)
