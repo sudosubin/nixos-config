@@ -1,12 +1,12 @@
 final: { lib, stdenvNoCC, fetchzip, makeWrapper, grpcurl, ... }@prev:
 
 let
-  version = "0.37.1";
+  version = "0.40.0";
 
   sources = {
     darwin = {
       url = "https://github.com/servicex-sh/httpx/releases/download/v${version}/httpx-${version}-x86_64-apple-darwin.tar";
-      sha256 = "sha256-qKil+4o9cEmQzoTSK5mNXp2PE34w3JiKeYQgNITXFwE=";
+      sha256 = "sha256-+SdxlBjBiKSUMrIykDy6eAiwkK+F0sxwP0qP+PLVjMM=";
     };
 
     linux = {
