@@ -23,6 +23,10 @@ sha() {
   @sha256sum@ "$1" | cut -d" " -f1
 }
 
+if [ ! -f "$(dirname "$dest")" ]; then
+  sudo mkdir -p "$(dirname "$dest")"
+fi
+
 if [ ! -f "$dest" ] || [ "$(sha "$hidden")" != "$(sha "$dest")" ]; then
   sudo cp "$hidden" "$dest"
 fi
