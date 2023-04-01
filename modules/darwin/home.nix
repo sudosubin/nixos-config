@@ -70,6 +70,7 @@
       ../darwin/programs/cleanshot
       ../darwin/programs/clop
       ../darwin/programs/desktop
+      ../darwin/programs/homerow
       ../darwin/programs/skhd
       ../darwin/programs/yabai
     ];

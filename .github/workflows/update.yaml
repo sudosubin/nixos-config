@@ -3,7 +3,7 @@ name: Update
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   update:
@@ -27,8 +27,12 @@ jobs:
 
       - name: Update dependencies
         run: |
-          # vscode extensions
-          ./libraries/nixpkgs/programs/vscode-extensions/update.py
+          # programs
+          ./scripts/update-nixpkgs-cleanshot.py
+          ./scripts/update-nixpkgs-clop.py
+          ./scripts/update-nixpkgs-homerow.py
+          ./scripts/update-nixpkgs-redisinsight.py
+          ./scripts/update-nixpkgs-vscode-extensions.py
           git add --all && git diff-index --quiet HEAD || git commit -m "chore: Update vscode extensions" -m "VSCode extensions file updates"
 
           # nix flake lock (root)

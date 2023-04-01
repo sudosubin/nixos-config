@@ -9,6 +9,7 @@
     (import ./programs/clop)
     (import ./programs/figma-font-helper)
     (import ./programs/google-chrome)
+    (import ./programs/homerow)
     (import ./programs/pragmatapro)
     (import ./programs/python)
     (import ./programs/raycast)
@@ -26,6 +27,7 @@
     "datagrip"
     "discord"
     "google-chrome"
+    "homerow"
     "ngrok"
     "raycast"
     "redisinsight"

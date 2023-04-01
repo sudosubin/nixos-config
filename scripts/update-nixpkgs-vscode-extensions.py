@@ -9,8 +9,8 @@ import sys
 import typing
 from dataclasses import dataclass
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_NIX_FILE = os.path.join(CURRENT_DIR, "default.nix")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_NIX_FILE = os.path.join(BASE_DIR, "libraries/nixpkgs/programs/vscode-extensions/default.nix")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
