@@ -16,6 +16,7 @@
     (import ./programs/redisinsight)
     (import ./programs/servicex)
     (import ./programs/vscode-extensions)
+    (import ./programs/yabai)
     (import ./programs/zpl-open)
     (import ./programs/zsh-atuin)
   ];
