@@ -15,10 +15,11 @@
       ".direnv"
     ];
     extraConfig = {
-      init.defaultBranch = "main";
+      credential.helper = "";
       diff.age-differ = {
         textconv = "${pkgs.rage}/bin/rage -d -i ${builtins.elemAt config.secrets.identityPaths 0}";
       };
+      init.defaultBranch = "main";
     };
   };
 }
