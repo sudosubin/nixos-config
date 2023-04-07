@@ -79,6 +79,7 @@ in
     extensions = with pkgs.vscode-extensions; [
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
+      castwide.solargraph
       casualjim.gotemplate
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
@@ -104,6 +105,7 @@ in
       redhat.vscode-yaml
       rust-lang.rust-analyzer
       shardulm94.trailing-spaces
+      shopify.ruby-lsp
       tamasfe.even-better-toml
       timonwong.shellcheck
       usernamehw.errorlens

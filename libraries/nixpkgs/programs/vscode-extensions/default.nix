@@ -16,6 +16,13 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "1bjx46v17d18c9bplz70dx6fpsc6pr371ihpawhlr1y61b59n5aj";
     };
 
+    castwide.solargraph = vscode-utils.extensionFromVscodeMarketplace {
+      name = "solargraph";
+      publisher = "castwide";
+      version = "0.24.0";
+      sha256 = "0pcd4gwzg4rla5mz6kj4dqq30pyvsv6290an15yr89wxwcvk6qzf";
+    };
+
     casualjim.gotemplate = vscode-utils.extensionFromVscodeMarketplace {
       name = "gotemplate";
       publisher = "casualjim";
@@ -26,8 +33,8 @@ final: { lib, vscode-utils, ... }@prev:
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "2.2.6";
-      sha256 = "10bzimpdk8qz0wwk4agmsa8d9pfahsrpy5d0ww6ssap3x5c33i1i";
+      version = "2.2.7";
+      sha256 = "0gl9k3cp9gh9m8wp97pr4qwvz62pvw862z0d1xhww5344m3l7r1b";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
@@ -70,6 +77,13 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "rust-lang";
       version = "0.7.9";
       sha256 = "0asmr7c9jmik1047n359s9zmv2m7d0i8sixki4p02z7qzyrpxrfs";
+    };
+
+    shopify.ruby-lsp = vscode-utils.extensionFromVscodeMarketplace {
+      name = "ruby-lsp";
+      publisher = "Shopify";
+      version = "0.2.4";
+      sha256 = "06qxppdhih936r52w8sf468jl3vhrivgrcgsjpybxsnnlz46pk04";
     };
   };
 }
