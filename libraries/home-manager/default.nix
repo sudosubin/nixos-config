@@ -15,7 +15,9 @@ in
     ./programs/caffeinate
     ./programs/cleanshot
     ./programs/clop
+    ./programs/defaults
     ./programs/figma-font-helper
+    ./programs/hammerspoon
     ./programs/homerow
     ./programs/jq
     ./programs/lsd

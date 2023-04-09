@@ -29,8 +29,7 @@ in
       launchd.agents.cleanshot = {
         enable = true;
         config = {
-          ProgramArguments =
-            [ "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/CleanShot X" ];
+          ProgramArguments = [ "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/CleanShot X" ];
           KeepAlive = true;
           ProcessType = "Interactive";
           StandardOutPath = "${config.xdg.cacheHome}/cleanshot.log";

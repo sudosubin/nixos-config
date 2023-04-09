@@ -29,8 +29,7 @@ in
       launchd.agents.homerow = {
         enable = true;
         config = {
-          ProgramArguments =
-            [ "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Homerow" ];
+          ProgramArguments = [ "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Homerow" ];
           KeepAlive = true;
           ProcessType = "Interactive";
           StandardOutPath = "${config.xdg.cacheHome}/homerow.log";
