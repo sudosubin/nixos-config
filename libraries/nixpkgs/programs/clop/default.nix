@@ -7,7 +7,7 @@ final: { lib, fetchurl, stdenvNoCC, unzip, ... }@prev:
 
     src = fetchurl {
       url = "https://files.lowtechguys.com/Clop.zip";
-      sha256 = "1kdc88jg1zkb0086g8ag6ic6d43jxbrvr1zmnq4hlq82dc2c58iq";
+      sha256 = "1m6mxassc9d2758473vngr4gr7idqxc1chyg1mcgflcwawvc42wl";
     };
 
     sourceRoot = "Clop.app";

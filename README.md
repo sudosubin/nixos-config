@@ -21,11 +21,8 @@ $ ./result/sw/bin/darwin-rebuild switch --flake '.#darwin'
 $ nix flake update .
 fetching ...
 
-$ ./scripts/update-nixpkgs-cleanshot.py
-$ ./scripts/update-nixpkgs-clop.py
-$ ./scripts/update-nixpkgs-homerow.py
-$ ./scripts/update-nixpkgs-redisinsight.py
-$ ./scripts/update-nixpkgs-vscode-extensions.py
+$ ./scripts/auto-update-modules.py
+$ ./scripts/auto-update-vscode-extensions.py
 fetching ...
 ```
 

@@ -28,11 +28,8 @@ jobs:
       - name: Update dependencies
         run: |
           # programs
-          ./scripts/update-nixpkgs-cleanshot.py
-          ./scripts/update-nixpkgs-clop.py
-          ./scripts/update-nixpkgs-homerow.py
-          ./scripts/update-nixpkgs-redisinsight.py
-          ./scripts/update-nixpkgs-vscode-extensions.py
+          ./scripts/auto-update-modules.py
+          ./scripts/auto-update-vscode-extensions.py
           git add --all && git diff-index --quiet HEAD || git commit -m "chore: Update vscode extensions" -m "VSCode extensions file updates"
 
           # nix flake lock (root)

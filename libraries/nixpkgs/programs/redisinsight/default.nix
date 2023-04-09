@@ -39,7 +39,7 @@ in
       homepage = "https://redis.com/redis-enterprise/redis-insight/";
       description = "GUI for streamlined Redis application development";
       license = licenses.unfree;
-      platforms = platforms.darwin;
+      platforms = builtins.attrNames sources;
       maintainers = [ maintainers.sudosubin ];
     };
   };
