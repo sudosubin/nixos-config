@@ -2,23 +2,9 @@
   description = "Nix Configurations";
 
   inputs = {
-    nixpkgs = {
-      url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    };
-
-    nixos-hardware = {
-      url = "github:NixOS/nixos-hardware";
-    };
-
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-    };
-
-    lefthook = {
-      url = "github:sudosubin/lefthook.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
+    flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
 
     darwin = {
       url = "github:lnl7/nix-darwin";
@@ -37,6 +23,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
       inputs.lefthook.follows = "lefthook";
+    };
+
+    lefthook = {
+      url = "github:sudosubin/lefthook.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
     };
 
     nixos-config-private-sudosubin = {
