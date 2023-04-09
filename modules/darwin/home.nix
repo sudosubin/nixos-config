@@ -21,6 +21,7 @@
 
       # Utility
       discord
+      hammerspoon
       ngrok
       raycast
       redisinsight

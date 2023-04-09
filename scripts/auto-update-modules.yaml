@@ -20,6 +20,15 @@ modules:
           | tail -n 1 \
           | sed -r "s/.*MARKETING_VERSION = (.*);/\1/g"
 
+  - path: ./libraries/nixpkgs/programs/hammerspoon/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        curl -s "https://api.github.com/repos/Hammerspoon/hammerspoon/releases/latest" | jq -r ".name"
+
   - path: ./libraries/nixpkgs/programs/homerow/default.nix
     args:
       read_from_file: ["url"]

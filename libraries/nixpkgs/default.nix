@@ -9,6 +9,7 @@
     (import ./programs/clop)
     (import ./programs/figma-font-helper)
     (import ./programs/google-chrome)
+    (import ./programs/hammerspoon)
     (import ./programs/homerow)
     (import ./programs/pragmatapro)
     (import ./programs/python)
