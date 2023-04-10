@@ -9,9 +9,14 @@
     enable = true;
     enableCompletion = true;
     dotDir = ".config/zsh";
-
     autocd = true;
-    history.save = 0;
+
+    history = {
+      size = 1000000;
+      save = 1000000;
+      path = "${config.home.homeDirectory}/${dotDir}/.zsh_history";
+      extended = true;
+    };
 
     plugins = [
       {
@@ -47,11 +52,6 @@
         name = "zsh-fzf";
         src = pkgs.fzf;
         file = "share/fzf/key-bindings.zsh";
-      }
-      {
-        name = "zsh-atuin";
-        src = pkgs.zsh-atuin;
-        file = "share/zsh-atuin/zsh-atuin.plugin.zsh";
       }
     ];
 

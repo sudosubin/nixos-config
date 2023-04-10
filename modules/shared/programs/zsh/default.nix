@@ -2,7 +2,6 @@
 
 {
   imports = [
-    ./atuin.nix
     ./zsh.nix
   ];
 

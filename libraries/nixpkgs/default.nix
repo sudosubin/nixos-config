@@ -19,7 +19,6 @@
     (import ./programs/vscode-extensions)
     (import ./programs/yabai)
     (import ./programs/zpl-open)
-    (import ./programs/zsh-atuin)
   ];
 
   nixpkgs.config.allowUnfreePredicate = (pkg: builtins.elem (lib.getName pkg) [
