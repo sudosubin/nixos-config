@@ -24,7 +24,8 @@ in
       applications+=("$(basename "$app_dir")")
     done
 
-    for app in $(printf "%s\n" "''${applications[@]}" | sort -u); do
+    for ((i = 0; i < ''${#applications[@]}; i++)); do
+      app="''${applications[$i]}"
       rm -rf "$BASE_DIR/$app"
 
       if [ -d "${apps}/Applications/$app" ] && [ "$app" = "1Password.app" ]; then
