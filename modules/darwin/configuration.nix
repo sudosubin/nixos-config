@@ -24,33 +24,48 @@
 
   system.defaults = {
     # dock configurations
-    dock.autohide = true;
-    dock.mineffect = "suck";
-    dock.mru-spaces = false;
-    dock.showhidden = false;
-    dock.show-recents = false;
-    dock.tilesize = 36;
+    dock = {
+      autohide = true;
+      mineffect = "suck";
+      mru-spaces = false;
+      showhidden = false;
+      show-recents = false;
+      tilesize = 36;
+      wvous-tl-corner = 1;
+      wvous-bl-corner = 1;
+      wvous-tr-corner = 1;
+      wvous-br-corner = 1;
+      persistent-apps = [
+        "/System/Applications/Launchpad.app"
+        "/System/Applications/System Settings.app"
+        "/Applications/Google Chrome.app"
+      ];
+    };
 
     # finder configurations
-    finder.AppleShowAllFiles = true;
-    finder.AppleShowAllExtensions = true;
+    finder = {
+      AppleShowAllFiles = true;
+      AppleShowAllExtensions = true;
+    };
 
     # system configurations
-    NSGlobalDomain.AppleShowAllFiles = true;
-    NSGlobalDomain.AppleInterfaceStyle = "Dark";
-    NSGlobalDomain.AppleInterfaceStyleSwitchesAutomatically = false;
-    NSGlobalDomain.AppleICUForce24HourTime = true;
-    NSGlobalDomain.AppleShowAllExtensions = true;
+    NSGlobalDomain = {
+      AppleShowAllFiles = true;
+      AppleInterfaceStyle = "Dark";
+      AppleInterfaceStyleSwitchesAutomatically = false;
+      AppleICUForce24HourTime = true;
+      AppleShowAllExtensions = true;
 
-    NSGlobalDomain.NSAutomaticCapitalizationEnabled = false;
-    NSGlobalDomain.NSAutomaticDashSubstitutionEnabled = false;
-    NSGlobalDomain.NSAutomaticPeriodSubstitutionEnabled = false;
-    NSGlobalDomain.NSAutomaticQuoteSubstitutionEnabled = false;
-    NSGlobalDomain.NSAutomaticSpellingCorrectionEnabled = false;
+      NSAutomaticCapitalizationEnabled = false;
+      NSAutomaticDashSubstitutionEnabled = false;
+      NSAutomaticPeriodSubstitutionEnabled = false;
+      NSAutomaticQuoteSubstitutionEnabled = false;
+      NSAutomaticSpellingCorrectionEnabled = false;
 
-    NSGlobalDomain.InitialKeyRepeat = 15;
-    NSGlobalDomain.KeyRepeat = 2;
-    NSGlobalDomain.NSWindowResizeTime = null;
-    NSGlobalDomain.NSAutomaticWindowAnimationsEnabled = false;
+      InitialKeyRepeat = 15;
+      KeyRepeat = 2;
+      NSWindowResizeTime = null;
+      NSAutomaticWindowAnimationsEnabled = false;
+    };
   };
 }

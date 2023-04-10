@@ -7,7 +7,7 @@
     flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
 
     darwin = {
-      url = "github:lnl7/nix-darwin";
+      url = "github:dfrankland/nix-darwin/dock-persistent-apps";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
