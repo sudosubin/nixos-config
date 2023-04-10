@@ -67,5 +67,17 @@
       NSWindowResizeTime = null;
       NSAutomaticWindowAnimationsEnabled = false;
     };
+
+    CustomUserPreferences."-g" = {
+      AppleReduceDesktopTinting = 1;
+    };
+
+    CustomUserPreferences."com.apple.menuextra.clock" = {
+      DateFormat = "d MMM HH:mm:ss";
+      IsAnalog = 0;
+      ShowDate = 1;
+      ShowDayOfWeek = 0;
+      ShowSeconds = 1;
+    };
   };
 }
