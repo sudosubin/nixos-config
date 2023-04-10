@@ -13,7 +13,6 @@
     (import ./programs/homerow)
     (import ./programs/pragmatapro)
     (import ./programs/python)
-    (import ./programs/raycast)
     (import ./programs/redisinsight)
     (import ./programs/servicex)
     (import ./programs/vscode-extensions)
@@ -30,7 +29,6 @@
     "google-chrome"
     "homerow"
     "ngrok"
-    "raycast"
     "redisinsight"
     "slack"
     "zoom"

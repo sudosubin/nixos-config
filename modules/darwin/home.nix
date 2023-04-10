@@ -22,7 +22,6 @@
       # Utility
       discord
       ngrok
-      raycast
       redisinsight
       ripgrep
       slack
