@@ -7,7 +7,7 @@
     flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
 
     darwin = {
-      url = "github:dfrankland/nix-darwin/dock-persistent-apps";
+      url = "github:lnl7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -42,10 +42,11 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, darwin, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, nixos-hardware, home-manager, ... }@inputs:
     let
       dev-shell = import ./libraries/dev-shell { inherit inputs; };
       home-manager-shared = ./libraries/home-manager;
+      darwin = import ./libraries/nix-darwin { inherit inputs; };
       nixpkgs-shared = ./libraries/nixpkgs;
 
     in

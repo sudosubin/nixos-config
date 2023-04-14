@@ -30,6 +30,13 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "0r6219f4gkpic3jjgj1666bwlfpvggf8wrgxp81v38bn9lmydn9g";
     };
 
+    charliermarsh.ruff = vscode-utils.extensionFromVscodeMarketplace {
+      name = "ruff";
+      publisher = "charliermarsh";
+      version = "2023.13.10931546";
+      sha256 = "sha256-2FAq5jEbnQbfXa7O9O231aun/pJ8mkoBf1u4ekkBQu8=";
+    };
+
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
@@ -58,6 +65,13 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "0snjivxdhr3s0lqarrzdzkv2f4qv28plbr3s9zpx7nqqfs97f4bk";
     };
 
+    jasonnutter.vscode-codeowners = vscode-utils.extensionFromVscodeMarketplace {
+      name = "vscode-codeowners";
+      publisher = "jasonnutter";
+      version = "1.1.1";
+      sha256 = "1bhp1dr9i7vivb0ap43v8rh5r9x8khpjq304kv8p6isjfgqn03vf";
+    };
+
     kevinrose.vsc-python-indent = vscode-utils.extensionFromVscodeMarketplace {
       name = "vsc-python-indent";
       publisher = "kevinrose";
@@ -70,6 +84,13 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "nimsaem";
       version = "0.1.26";
       sha256 = "0aiaid81wx0vp340mz5pdyfi25pvvrfizdsiflrcnwbn0jfmqz5s";
+    };
+
+    phgn.vscode-starlark = vscode-utils.extensionFromVscodeMarketplace {
+      name = "vscode-starlark";
+      publisher = "phgn";
+      version = "0.3.1";
+      sha256 = "0xl8kff93wxb5x9vp4krkyfg542h9r3249sy7wp7vc95d9k1zkql";
     };
 
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {

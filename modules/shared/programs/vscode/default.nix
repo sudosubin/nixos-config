@@ -81,6 +81,7 @@ in
       bierner.markdown-preview-github-styles
       castwide.solargraph
       casualjim.gotemplate
+      charliermarsh.ruff
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
       dorzey.vscode-sqlfluff
@@ -93,6 +94,7 @@ in
       golang.go
       hashicorp.hcl
       hashicorp.terraform
+      jasonnutter.vscode-codeowners
       jnoortheen.nix-ide
       jpoissonnier.vscode-styled-components
       kevinrose.vsc-python-indent
@@ -100,6 +102,7 @@ in
       ms-pyright.pyright
       ms-python.python
       nimsaem.nimvscode
+      phgn.vscode-starlark
       pkief.material-product-icons
       redhat.java
       redhat.vscode-yaml
