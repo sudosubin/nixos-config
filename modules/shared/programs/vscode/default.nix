@@ -102,7 +102,6 @@ in
       ms-pyright.pyright
       ms-python.python
       nimsaem.nimvscode
-      phgn.vscode-starlark
       pkief.material-product-icons
       redhat.java
       redhat.vscode-yaml

@@ -12,8 +12,8 @@ final: { lib, vscode-utils, ... }@prev:
     bierner.markdown-preview-github-styles = vscode-utils.extensionFromVscodeMarketplace {
       name = "markdown-preview-github-styles";
       publisher = "bierner";
-      version = "1.0.1";
-      sha256 = "1bjx46v17d18c9bplz70dx6fpsc6pr371ihpawhlr1y61b59n5aj";
+      version = "2.0.2";
+      sha256 = "01hxkgw6sjbmj4nhz1a948bz4dzlpjbq9nmw0vnfg64203v9490s";
     };
 
     castwide.solargraph = vscode-utils.extensionFromVscodeMarketplace {
@@ -40,8 +40,8 @@ final: { lib, vscode-utils, ... }@prev:
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "2.2.7";
-      sha256 = "0gl9k3cp9gh9m8wp97pr4qwvz62pvw862z0d1xhww5344m3l7r1b";
+      version = "2.2.8";
+      sha256 = "1b59gb30hjxhifpkhxajdaxbqil4ajz19m9vmm7zfwbhkcya97nb";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
@@ -54,8 +54,8 @@ final: { lib, vscode-utils, ... }@prev:
     fwcd.kotlin = vscode-utils.extensionFromVscodeMarketplace {
       name = "kotlin";
       publisher = "fwcd";
-      version = "0.2.26";
-      sha256 = "1br0vr4v1xcl4c7bcqwzfqd4xr6q2ajwkipqrwm928mj96dkafkn";
+      version = "0.2.31";
+      sha256 = "1yngrbqndb7jccmakpjv98y8amffvk2zbj3dhz0khdxz6ym18vb3";
     };
 
     hashicorp.hcl = vscode-utils.extensionFromVscodeMarketplace {
@@ -84,13 +84,6 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "nimsaem";
       version = "0.1.26";
       sha256 = "0aiaid81wx0vp340mz5pdyfi25pvvrfizdsiflrcnwbn0jfmqz5s";
-    };
-
-    phgn.vscode-starlark = vscode-utils.extensionFromVscodeMarketplace {
-      name = "vscode-starlark";
-      publisher = "phgn";
-      version = "0.3.1";
-      sha256 = "0xl8kff93wxb5x9vp4krkyfg542h9r3249sy7wp7vc95d9k1zkql";
     };
 
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
