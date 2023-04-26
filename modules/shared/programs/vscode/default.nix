@@ -79,7 +79,6 @@ in
     extensions = with pkgs.vscode-extensions; [
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
-      castwide.solargraph
       casualjim.gotemplate
       charliermarsh.ruff
       davidanson.vscode-markdownlint
@@ -92,7 +91,6 @@ in
       foxundermoon.shell-format
       fwcd.kotlin
       golang.go
-      hashicorp.hcl
       hashicorp.terraform
       jasonnutter.vscode-codeowners
       jnoortheen.nix-ide
@@ -101,13 +99,11 @@ in
       ms-kubernetes-tools.vscode-kubernetes-tools
       ms-pyright.pyright
       ms-python.python
-      nimsaem.nimvscode
       pkief.material-product-icons
       redhat.java
       redhat.vscode-yaml
       rust-lang.rust-analyzer
       shardulm94.trailing-spaces
-      shopify.ruby-lsp
       tamasfe.even-better-toml
       timonwong.shellcheck
       usernamehw.errorlens

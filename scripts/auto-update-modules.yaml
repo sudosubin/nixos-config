@@ -39,6 +39,15 @@ modules:
         curl -s "https://install.appcenter.ms/api/v0.1/apps/dexterleng/homerow-redux/distribution_groups/production/public_releases" \
           | jq -r "first | .short_version"
 
+  - path: ./libraries/nixpkgs/programs/orbstack/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        curl -s "https://formulae.brew.sh/api/cask/orbstack.json" | jq -r ".version"
+
   - path: ./libraries/nixpkgs/programs/redisinsight/default.nix
     args:
       read_from_file: ["url"]

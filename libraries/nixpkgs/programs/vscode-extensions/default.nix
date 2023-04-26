@@ -16,13 +16,6 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "01hxkgw6sjbmj4nhz1a948bz4dzlpjbq9nmw0vnfg64203v9490s";
     };
 
-    castwide.solargraph = vscode-utils.extensionFromVscodeMarketplace {
-      name = "solargraph";
-      publisher = "castwide";
-      version = "0.24.0";
-      sha256 = "0pcd4gwzg4rla5mz6kj4dqq30pyvsv6290an15yr89wxwcvk6qzf";
-    };
-
     casualjim.gotemplate = vscode-utils.extensionFromVscodeMarketplace {
       name = "gotemplate";
       publisher = "casualjim";
@@ -58,13 +51,6 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "1yngrbqndb7jccmakpjv98y8amffvk2zbj3dhz0khdxz6ym18vb3";
     };
 
-    hashicorp.hcl = vscode-utils.extensionFromVscodeMarketplace {
-      name = "hcl";
-      publisher = "hashicorp";
-      version = "0.3.2";
-      sha256 = "0snjivxdhr3s0lqarrzdzkv2f4qv28plbr3s9zpx7nqqfs97f4bk";
-    };
-
     jasonnutter.vscode-codeowners = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-codeowners";
       publisher = "jasonnutter";
@@ -79,25 +65,11 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "1z8ydwz43znccrhpms0v34236nx4nic65mpfd9ka3w4ng1q8q8w6";
     };
 
-    nimsaem.nimvscode = vscode-utils.extensionFromVscodeMarketplace {
-      name = "nimvscode";
-      publisher = "nimsaem";
-      version = "0.1.26";
-      sha256 = "0aiaid81wx0vp340mz5pdyfi25pvvrfizdsiflrcnwbn0jfmqz5s";
-    };
-
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
       name = "rust";
       publisher = "rust-lang";
       version = "0.7.9";
       sha256 = "0asmr7c9jmik1047n359s9zmv2m7d0i8sixki4p02z7qzyrpxrfs";
-    };
-
-    shopify.ruby-lsp = vscode-utils.extensionFromVscodeMarketplace {
-      name = "ruby-lsp";
-      publisher = "Shopify";
-      version = "0.2.4";
-      sha256 = "06qxppdhih936r52w8sf468jl3vhrivgrcgsjpybxsnnlz46pk04";
     };
   };
 }

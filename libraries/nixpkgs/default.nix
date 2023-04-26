@@ -11,6 +11,7 @@
     (import ./programs/google-chrome)
     (import ./programs/hammerspoon)
     (import ./programs/homerow)
+    (import ./programs/orbstack)
     (import ./programs/pragmatapro)
     (import ./programs/python)
     (import ./programs/redisinsight)
@@ -29,6 +30,7 @@
     "google-chrome"
     "homerow"
     "ngrok"
+    "orbstack"
     "redisinsight"
     "slack"
     "zoom"

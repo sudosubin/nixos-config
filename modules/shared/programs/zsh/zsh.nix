@@ -25,11 +25,6 @@
         file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
       }
       {
-        name = "zsh-autopair";
-        src = pkgs.zsh-autopair;
-        file = "share/zsh/zsh-autopair/autopair.zsh";
-      }
-      {
         name = "zsh-fast-syntax-highlighting";
         src = pkgs.zsh-fast-syntax-highlighting;
         file = "share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh";
@@ -99,5 +94,9 @@
       # Add awscli2 completion
       source ${pkgs.awscli2}/share/zsh/site-functions/aws_zsh_completer.sh
     '';
+
+    profileExtra = "
+      # do nothing
+    ";
   };
 }
