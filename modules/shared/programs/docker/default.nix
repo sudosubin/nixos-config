@@ -8,4 +8,9 @@ in
   home.packages = with pkgs; [ ]
     ++ lib.optionals isDarwin [ orbstack ]
     ++ lib.optionals isLinux [ docker docker-compose ];
+
+
+  home.sessionVariables = {
+    DOCKER_DEFAULT_PLATFORM = "linux/amd64";
+  };
 }
