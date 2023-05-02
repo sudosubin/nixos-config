@@ -10,7 +10,7 @@ let
     patches = [
       (pkgs.fetchpatch {
         url = "https://github.com/LnL7/nix-darwin/pull/619.patch";
-        sha256 = "0y690rhq74k90f63c06hr02gifmw390n4l22zgsjxgvfrggv61qc";
+        sha256 = "03ykb7dsay8lv7pncyhdzwlwrqvdwc5i21dvrv5bxhlnf6rl4rfp";
       })
     ];
   };

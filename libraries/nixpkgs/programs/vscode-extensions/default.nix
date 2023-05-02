@@ -26,15 +26,15 @@ final: { lib, vscode-utils, ... }@prev:
     charliermarsh.ruff = vscode-utils.extensionFromVscodeMarketplace {
       name = "ruff";
       publisher = "charliermarsh";
-      version = "2023.13.10931546";
-      sha256 = "sha256-2FAq5jEbnQbfXa7O9O231aun/pJ8mkoBf1u4ekkBQu8=";
+      version = "2023.13.11221613";
+      sha256 = "sha256-uB5ujqmNKModYFgNPPHTeDGDFnqXpOHuaFZ0I0E49Vk=";
     };
 
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "2.2.8";
-      sha256 = "1b59gb30hjxhifpkhxajdaxbqil4ajz19m9vmm7zfwbhkcya97nb";
+      version = "2.2.9";
+      sha256 = "1cp74b1flmrbj7cm4l71l0lbazl7sjy7zsmn59r3j7njdgg36xmg";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
