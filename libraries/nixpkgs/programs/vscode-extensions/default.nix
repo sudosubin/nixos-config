@@ -26,8 +26,8 @@ final: { lib, vscode-utils, ... }@prev:
     charliermarsh.ruff = vscode-utils.extensionFromVscodeMarketplace {
       name = "ruff";
       publisher = "charliermarsh";
-      version = "2023.13.11221613";
-      sha256 = "sha256-uB5ujqmNKModYFgNPPHTeDGDFnqXpOHuaFZ0I0E49Vk=";
+      version = "2023.15.11260347";
+      sha256 = "sha256-HA+Zt1v+Zk6Vh7Y8Qr0g4DN5WKfvBMbGy1x3RfM3xl8=";
     };
 
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
