@@ -33,8 +33,8 @@ final: { lib, vscode-utils, ... }@prev:
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "2.2.9";
-      sha256 = "1cp74b1flmrbj7cm4l71l0lbazl7sjy7zsmn59r3j7njdgg36xmg";
+      version = "2.3.0";
+      sha256 = "1pwb207p9g0l8z7xz55ksikvilix59k4wnxfi12pkxbps820x8fr";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
@@ -70,6 +70,13 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "rust-lang";
       version = "0.7.9";
       sha256 = "0asmr7c9jmik1047n359s9zmv2m7d0i8sixki4p02z7qzyrpxrfs";
+    };
+
+    _42crunch.vscode-openapi = vscode-utils.extensionFromVscodeMarketplace {
+      name = "vscode-openapi";
+      publisher = "42Crunch";
+      version = "4.16.6";
+      sha256 = "0xcrm9qddxlsbhhzwfsddpqwjwgr8wj52g0n9v4ghb94idr54wdb";
     };
   };
 }

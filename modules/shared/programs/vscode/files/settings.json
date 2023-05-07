@@ -78,6 +78,7 @@
   },
   "files.eol": "\n",
   "files.trimTrailingWhitespace": true,
+  "editor.accessibilitySupport": "off",
   "editor.trimAutoWhitespace": true,
 
   // kubernetes
