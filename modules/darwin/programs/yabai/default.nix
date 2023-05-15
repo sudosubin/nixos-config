@@ -24,6 +24,7 @@
       # Third-party
       yabai -m rule --add app="^CleanShot X$" manage="off"
       yabai -m rule --add app="^Homerow$" manage="off"
+      yabai -m rule --add app="^Loom$" manage="off"
     '';
   };
 }

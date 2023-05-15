@@ -26,15 +26,15 @@ final: { lib, vscode-utils, ... }@prev:
     charliermarsh.ruff = vscode-utils.extensionFromVscodeMarketplace {
       name = "ruff";
       publisher = "charliermarsh";
-      version = "2023.15.11260347";
-      sha256 = "sha256-HA+Zt1v+Zk6Vh7Y8Qr0g4DN5WKfvBMbGy1x3RfM3xl8=";
+      version = "2023.17.11351528";
+      sha256 = "sha256-GMa3xMrPz3EEyPWTNSLzdZU3zKcVvbLmMVdStSHc8V4=";
     };
 
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "2.3.1";
-      sha256 = "1gkrm7spw9y1d8w6703y86dm4ws13s25gz8xhnncm248xhyzx719";
+      version = "2.3.2";
+      sha256 = "19mv5amz316yxs9wivd9kvr7x3qqkygwp2xn1gvkxp3fgr742gxn";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
@@ -65,6 +65,13 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "1z8ydwz43znccrhpms0v34236nx4nic65mpfd9ka3w4ng1q8q8w6";
     };
 
+    rome.rome = vscode-utils.extensionFromVscodeMarketplace {
+      name = "rome";
+      publisher = "rome";
+      version = "0.24.0";
+      sha256 = "sha256-vxZ0QvbY0bM1ka7pFsV2oYFzAbeofT/jQXGAoW1LUNc=";
+    };
+
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
       name = "rust";
       publisher = "rust-lang";
@@ -75,8 +82,8 @@ final: { lib, vscode-utils, ... }@prev:
     _42crunch.vscode-openapi = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-openapi";
       publisher = "42Crunch";
-      version = "4.16.6";
-      sha256 = "0xcrm9qddxlsbhhzwfsddpqwjwgr8wj52g0n9v4ghb94idr54wdb";
+      version = "4.17.0";
+      sha256 = "0bkif379hm2pwvjsy59735svp0qbr3imnk9cy3wzaikzh73bxki9";
     };
   };
 }
