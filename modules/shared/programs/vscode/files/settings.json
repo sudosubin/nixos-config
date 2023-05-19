@@ -63,6 +63,8 @@
   "gitlens.currentLine.dateFormat": "YYYY-MM-DD",
   "gitlens.codeLens.enabled": false,
   "gitlens.statusBar.enabled": false,
+  "gitlens.showWelcomeOnInstall": false,
+  "gitlens.showWhatsNewAfterUpgrades": false,
 
   // files
   "files.associations": {
@@ -170,9 +172,6 @@
     "editor.formatOnSave": true
   },
 
-  // langauge (sql)
-  "sql.linter.executablePath": "/etc/profiles/per-user/sudosubin/bin/sqlfluff",
-
   // language (yaml)
   "yaml.format.enable": true,
   "[yaml]": {
@@ -185,6 +184,7 @@
   "shellcheck.ignorePatterns": {
     ".env": true
   },
+  "shellcheck.disableVersionCheck": true,
   "shellformat.path": "/etc/profiles/per-user/sudosubin/bin/shfmt",
 
   // language (nix)
@@ -227,5 +227,6 @@
   "extensions.autoCheckUpdates": false,
   "extensions.autoUpdate": false,
   "update.showReleaseNotes": false,
-  "update.mode": "none"
+  "update.mode": "none",
+  "workbench.welcomePage.walkthroughs.openOnInstall": false
 }

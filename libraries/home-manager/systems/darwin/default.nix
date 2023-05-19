@@ -28,7 +28,7 @@ in
       app="''${applications[$i]}"
       rm -rf "$BASE_DIR/$app"
 
-      if [ -d "${apps}/Applications/$app" ] && [ "$app" = "1Password.app" ]; then
+      if [ -d "${apps}/Applications/$app" ] && [[ "$app" = "1Password.app" || "$app" = "Slack.app" ]]; then
         rm -rf "/Applications/$app"
         $DRY_RUN_CMD cp ''$VERBOSE_ARG -fHRL "${apps}/Applications/$app" "/Applications"
         $DRY_RUN_CMD chmod ''$VERBOSE_ARG -R +w "/Applications/$app"
