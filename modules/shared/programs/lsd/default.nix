@@ -13,7 +13,7 @@ in
       date = "+%e %b %H:%M";
       size = "bytes";
       sorting.dir-grouping = "first";
-      symlink-arrow = "";
+      symlink-arrow = "";
     };
 
     colors = {

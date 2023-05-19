@@ -1,17 +1,17 @@
 final: { lib, fetchurl, stdenvNoCC, ... }@prev:
 
 let
-  version = "0.10.1_1427";
+  version = "0.10.2_1450";
   hdiutil = "/usr/bin/hdiutil";
 
   sources = {
     "aarch64-darwin" = {
       url = "https://cdn-updates.orbstack.dev/arm64/OrbStack_v${version}_arm64.dmg";
-      sha256 = "13gg8baj4mcncdk4w1lp5mws1vwx2lr4h74sypmxda9pnp6a1rni";
+      sha256 = "1prxbzhdssn576x6cq0zpc29n5zaann2ajfrbr6jxj2iixs7c5n0";
     };
     "x86_64-darwin" = {
       url = "https://cdn-updates.orbstack.dev/amd64/OrbStack_v${version}_amd64.dmg";
-      sha256 = "06w4xginmkvxr5pnpb09n6i9kbfm2yg040wnh5kgdkq7mz3igpjr";
+      sha256 = "15ds11mgxb3dxmv1d5n4v4pw1ffaby76vmg1n0hqbrrbn131iyq8";
     };
   };
 
