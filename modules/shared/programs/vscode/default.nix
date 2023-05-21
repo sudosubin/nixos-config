@@ -55,14 +55,6 @@ let
         node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
       '';
     });
-
-    zhuangtongfa.material-theme = pkgs.vscode-extensions.zhuangtongfa.material-theme.overrideAttrs (attrs: rec {
-      preInstall = ''
-        ${attrs.preInstall or ""}
-
-        rm -rf ./styles
-      '';
-    });
   };
 
 in
@@ -90,6 +82,7 @@ in
       exiasr.hadolint
       foxundermoon.shell-format
       fwcd.kotlin
+      github.github-vscode-theme
       golang.go
       hashicorp.terraform
       jasonnutter.vscode-codeowners
@@ -112,7 +105,6 @@ in
       _42crunch.vscode-openapi
 
       overlays.pkief.material-icon-theme
-      overlays.zhuangtongfa.material-theme
     ];
   };
 

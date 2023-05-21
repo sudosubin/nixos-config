@@ -48,11 +48,6 @@
         src = pkgs.oh-my-zsh;
         file = "share/oh-my-zsh/plugins/git-auto-fetch/git-auto-fetch.plugin.zsh";
       }
-      {
-        name = "zsh-fzf";
-        src = pkgs.oh-my-zsh;
-        file = "share/oh-my-zsh/plugins/fzf/fzf.plugin.zsh";
-      }
     ];
 
     sessionVariables = {
@@ -61,8 +56,9 @@
 
       # Shell
       ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE = "20";
-      ZSH_AUTOSUGGEST_USE_ASYNC = "true";
+      ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE = "fg=#8c959f";
       ZSH_AUTOSUGGEST_MANUAL_REBIND = "true";
+      ZSH_AUTOSUGGEST_USE_ASYNC = "true";
 
       # Etc
       LESSHISTFILE = "${config.xdg.cacheHome}/lesshst";

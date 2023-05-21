@@ -14,7 +14,7 @@
   "search.useGlobalIgnoreFiles": true,
 
   // theme
-  "workbench.colorTheme": "One Dark Pro",
+  "workbench.colorTheme": "GitHub Light",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.productIconTheme": "material-product-icons",
   "material-icon-theme.activeIconPack": "react",

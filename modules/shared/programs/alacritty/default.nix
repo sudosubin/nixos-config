@@ -4,14 +4,14 @@ let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
 
   colors = {
-    black = "#5c6370";
-    red = "#e06c75";
-    green = "#98c379";
-    yellow = "#e5c07b";
-    blue = "#61afef";
-    magenta = "#c678dd";
-    cyan = "#56b6c2";
-    white = "#abb2bf";
+    black = "#24292f";
+    red = "#cf222e";
+    green = "#1a7f37";
+    yellow = "#9a6700";
+    blue = "#0969da";
+    magenta = "#8250df";
+    cyan = "#3192aa";
+    white = "#6e7781";
   };
 
   font-size = if isDarwin then 13 else 10;
@@ -55,8 +55,8 @@ in
       };
 
       colors = {
-        primary.background = "#1e2127";
-        primary.foreground = colors.white;
+        primary.background = "#ffffff";
+        primary.foreground = "#0E1116";
         normal.black = colors.black;
         normal.red = colors.red;
         normal.green = colors.green;
@@ -73,6 +73,10 @@ in
         bright.magenta = colors.magenta;
         bright.cyan = colors.cyan;
         bright.white = colors.white;
+        indexed_colors = [
+          { index = 16; color = "#d18616"; }
+          { index = 17; color = "#a40e26"; }
+        ];
       };
 
       mouse = {

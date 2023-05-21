@@ -51,7 +51,7 @@
     # system configurations
     NSGlobalDomain = {
       AppleShowAllFiles = true;
-      AppleInterfaceStyle = "Dark";
+      AppleInterfaceStyle = null;
       AppleInterfaceStyleSwitchesAutomatically = false;
       AppleICUForce24HourTime = true;
       AppleShowAllExtensions = true;
