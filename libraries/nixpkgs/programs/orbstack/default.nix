@@ -1,4 +1,4 @@
-final: { lib, fetchurl, stdenvNoCC, ... }@prev:
+final: { lib, fetchurl, fetchFromGitHub, stdenvNoCC, docker, installShellFiles, ... }@prev:
 
 let
   version = "0.11.0_1576";
@@ -15,6 +15,16 @@ let
     };
   };
 
+  completions = {
+    docker = docker.src;
+    docker-compose = fetchFromGitHub {
+      owner = "docker";
+      repo = "compose";
+      rev = "1.29.2";
+      sha256 = "sha256-Zx/gVGmYNDWBo/iYr5SDIPTQlzlgLjUx1VMQx5oeV8w=";
+    };
+  };
+
 in
 {
   orbstack = stdenvNoCC.mkDerivation rec {
@@ -27,6 +37,8 @@ in
     };
 
     sourceRoot = "OrbStack.app";
+
+    nativeBuildInputs = [ installShellFiles ];
 
     unpackPhase = ''
       mkdir -p ./Applications
@@ -46,6 +58,16 @@ in
       ln -s "$out/Applications/${sourceRoot}/Contents/MacOS/xbin/docker-credential-osxkeychain" "$out/bin/docker-credential-osxkeychain"
       ln -s "$out/Applications/${sourceRoot}/Contents/MacOS/bin/orb" "$out/bin/orb"
       ln -s "$out/Applications/${sourceRoot}/Contents/MacOS/bin/orbctl" "$out/bin/orbctl"
+
+      # completion for docker
+      installShellCompletion --bash ${completions.docker}/contrib/completion/bash/docker
+      installShellCompletion --fish ${completions.docker}/contrib/completion/fish/docker.fish
+      installShellCompletion --zsh  ${completions.docker}/contrib/completion/zsh/_docker
+
+      # completion for docker-compose
+      installShellCompletion --bash ${completions.docker-compose}/contrib/completion/bash/docker-compose
+      installShellCompletion --fish ${completions.docker-compose}/contrib/completion/fish/docker-compose.fish
+      installShellCompletion --zsh ${completions.docker-compose}/contrib/completion/zsh/_docker-compose
     '';
 
     meta = with lib; {
