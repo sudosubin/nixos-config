@@ -125,13 +125,13 @@
   )
   typeset -g POWERLEVEL9K_SHORTEN_FOLDER_MARKER="(${(j:|:)anchor_files})"
   typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_with_folder_marker
-  typeset -g POWERLEVEL9K_SHORTEN_DELIMITER=""
+  typeset -g POWERLEVEL9K_SHORTEN_DELIMITER=""
 
   #####################################[ vcs: git status ]######################################
   # VCS icons
   typeset -g POWERLEVEL9K_VCS_{GIT,GIT_GITHUB,GIT_BITBUCKET,GIT_GITLAB,HG,SVN}_ICON=""
-  typeset -g POWERLEVEL9K_VCS_BRANCH_ICON="\ue0a0"
-  typeset -g POWERLEVEL9K_VCS_TAG_ICON="\uf9f8"
+  typeset -g POWERLEVEL9K_VCS_BRANCH_ICON=""
+  typeset -g POWERLEVEL9K_VCS_TAG_ICON="󰓹"
 
   # Untracked files icon.
   typeset -g POWERLEVEL9K_VCS_STAGED_ICON="+"
@@ -251,6 +251,7 @@
   ###[ package: name@version from package.json ]####
   # Package color.
   typeset -g POWERLEVEL9K_PACKAGE_FOREGROUND=$yellow
+  typeset -g POWERLEVEL9K_PACKAGE_ICON="󰏗"
 
   ###[ aws: aws profile ]####
   typeset -g POWERLEVEL9K_AWS_FOREGROUND=$yellow

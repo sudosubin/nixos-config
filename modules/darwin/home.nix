@@ -20,7 +20,6 @@
       sqlfluff
 
       # Utility
-      discord
       ngrok
       redisinsight
       ripgrep
@@ -51,7 +50,6 @@
       ../shared/programs/git
       ../shared/programs/go
       ../shared/programs/gpg
-      ../shared/programs/himalaya
       ../shared/programs/jq
       ../shared/programs/lsd
       ../shared/programs/nix

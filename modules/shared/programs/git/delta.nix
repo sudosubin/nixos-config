@@ -14,7 +14,7 @@
       minus-emph-style = "syntax #FFC1BF";
       plus-style = "syntax #E6FFEC";
       plus-emph-style = "syntax #ABF2BC";
-      whitespace-error-style = "22 reverse";
+      whitespace-error-style = "#ABF2BC #ABF2BC";
       side-by-side = true;
       line-numbers-minus-style = "#6e7781 #FFEBE9";
       line-numbers-zero-style = "#6e7781";

@@ -22,8 +22,8 @@
       bind c new-window -c "#{pane_current_path}"
 
       # bottom status bar color
-      set -g status-bg green
-      set -g status-fg '#1e2127'
+      set -g status-bg "#DAFBE1"
+      set -g status-fg white
     '';
   };
 }
