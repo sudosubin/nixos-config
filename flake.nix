@@ -41,11 +41,10 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, nixos-hardware, darwin, home-manager, ... }@inputs:
     let
       dev-shell = import ./libraries/dev-shell { inherit inputs; };
       home-manager-shared = ./libraries/home-manager;
-      darwin = import ./libraries/nix-darwin { inherit inputs; };
       nixpkgs-shared = ./libraries/nixpkgs;
 
     in

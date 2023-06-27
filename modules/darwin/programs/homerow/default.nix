@@ -2,6 +2,6 @@
 
 {
   services.homerow = {
-    enable = true;
+    enable = false;
   };
 }

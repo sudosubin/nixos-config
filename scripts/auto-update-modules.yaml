@@ -56,3 +56,12 @@ modules:
     methods:
       get_version: |-
         curl -s "https://formulae.brew.sh/api/cask/redisinsight.json" | jq -r ".version"
+
+  - path: ./libraries/nixpkgs/programs/slack-cli-bin/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        curl -s "https://formulae.brew.sh/api/cask/slack-cli.json" | jq -r ".version"

@@ -35,11 +35,11 @@
       wvous-bl-corner = 1;
       wvous-tr-corner = 1;
       wvous-br-corner = 1;
-      persistent-apps = [
-        "/System/Applications/Launchpad.app"
-        "/System/Applications/System Settings.app"
-        "/Applications/Google Chrome.app"
-      ];
+      # persistent-apps = [
+      #   "/System/Applications/Launchpad.app"
+      #   "/System/Applications/System Settings.app"
+      #   "/Applications/Google Chrome.app"
+      # ];
     };
 
     # finder configurations
@@ -63,7 +63,7 @@
       NSAutomaticSpellingCorrectionEnabled = false;
 
       InitialKeyRepeat = 15;
-      KeyRepeat = 2;
+      KeyRepeat = 1;
       NSWindowResizeTime = null;
       NSAutomaticWindowAnimationsEnabled = false;
     };

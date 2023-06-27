@@ -17,6 +17,7 @@
     (import ./programs/python)
     (import ./programs/redisinsight)
     (import ./programs/servicex)
+    (import ./programs/slack-cli-bin)
     (import ./programs/vscode-extensions)
     (import ./programs/yabai)
     (import ./programs/zpl-open)
@@ -34,6 +35,7 @@
     "orbstack"
     "redisinsight"
     "slack"
+    "slack-cli-bin"
     "zoom"
   ]);
 }

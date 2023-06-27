@@ -3,11 +3,11 @@ final: { lib, fetchurl, stdenvNoCC, unzip, ... }@prev:
 {
   homerow = stdenvNoCC.mkDerivation rec {
     pname = "homerow";
-    version = "0.21";
+    version = "0.20";
 
     src = fetchurl {
       url = "https://appcenter-download-api.vercel.app/api/dexterleng/homerow-redux/production/${version}";
-      sha256 = "0j5dncq5j58q1yrszbly651lf9ywdb23ddi0n45j23hx590sp97l";
+      sha256 = "0fppbdk48ddy39rm7spbx2212f2ryj6z808q8205ba9vkj5yys8j";
     };
 
     sourceRoot = "Homerow.app";
