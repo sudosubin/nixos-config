@@ -34,7 +34,7 @@ in
     unpackPhase = ''
       mkdir -p ./Applications
       ${hdiutil} attach -readonly -mountpoint mnt $src
-      cp -r mnt/${sourceRoot} .
+      cp -r "mnt/${sourceRoot}" .
       ${hdiutil} detach -force mnt
     '';
 

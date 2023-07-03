@@ -1,21 +1,26 @@
-final: { lib, fetchurl, stdenvNoCC, undmg, ... }@prev:
+final: { lib, fetchurl, stdenvNoCC, ... }@prev:
 
+let
+  hdiutil = "/usr/bin/hdiutil";
+
+in
 {
   cleanshot = stdenvNoCC.mkDerivation rec {
     pname = "cleanshot";
-    version = "4.5";
+    version = "4.5.1";
 
     src = fetchurl {
       url = "https://updates.getcleanshot.com/v3/CleanShot-X-${version}.dmg";
-      sha256 = "1xi5bcvc4586n347zxd5f2a57q00syx8kxc43p65c9n1fjpaml7c";
+      sha256 = "1l8jqyaqlfw9irl75l9ld7dl2qzyyyji21631bvwgynhb9is837q";
     };
 
     sourceRoot = "CleanShot X.app";
 
-    nativeBuildInputs = [ undmg ];
-
     unpackPhase = ''
-      undmg $src
+      mkdir -p ./Applications
+      ${hdiutil} attach -readonly -mountpoint mnt $src
+      cp -r "mnt/${sourceRoot}" .
+      ${hdiutil} detach -force mnt
     '';
 
     installPhase = ''

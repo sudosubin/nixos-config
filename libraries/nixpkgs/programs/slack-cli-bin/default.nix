@@ -1,12 +1,12 @@
 final: { lib, fetchzip, stdenvNoCC, makeWrapper, deno, ... }@prev:
 
 let
-  version = "2.4.0";
+  version = "2.5.0";
 
   sources = {
     darwin = {
       url = "https://downloads.slack-edge.com/slack-cli/slack_cli_${version}_macOS_64-bit.tar.gz";
-      sha256 = "sha256-6G6yeFd0vq8nSInDeBztakQkeE9kmWpVyTC5bqXXscc=";
+      sha256 = "sha256-gKjkVHNviYdA8ctOnonCzl2vzqSCdqF+kxTrkN4dI6Q=";
     };
 
     linux = {

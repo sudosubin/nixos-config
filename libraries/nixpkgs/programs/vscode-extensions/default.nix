@@ -68,8 +68,8 @@ final: { lib, vscode-utils, ... }@prev:
     rome.rome = vscode-utils.extensionFromVscodeMarketplace {
       name = "rome";
       publisher = "rome";
-      version = "0.25.20230614";
-      sha256 = "sha256-+B1QK2tI577cJx6J3bDUeprf7D/sRBC8GQ7O3i8S/7k=";
+      version = "0.25.20230627";
+      sha256 = "sha256-we+yBmGCrY0dhfTLCv20jVHsGP8DhlB0dZC/WOI6bDE=";
     };
 
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
@@ -82,8 +82,8 @@ final: { lib, vscode-utils, ... }@prev:
     _42crunch.vscode-openapi = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-openapi";
       publisher = "42Crunch";
-      version = "4.18.4";
-      sha256 = "1xny0ws1wahz2gx1x1fnxd6xxy7wfqylq61gpnkgf56fj181vzln";
+      version = "4.18.5";
+      sha256 = "1r7vkr8jhdf8pxlpx4a6d6mrsm8v9k3rih2yb1sr564w8524bfim";
     };
   };
 }
