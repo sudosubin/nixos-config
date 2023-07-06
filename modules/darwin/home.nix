@@ -25,7 +25,6 @@
       redisinsight
       ripgrep
       slack
-      slack-cli-bin
       unzip
       zoom-us
     ];

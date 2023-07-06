@@ -75,6 +75,7 @@ in
       charliermarsh.ruff
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
+      denoland.vscode-deno
       dorzey.vscode-sqlfluff
       eamodio.gitlens
       editorconfig.editorconfig
