@@ -13,6 +13,7 @@
       hadolint
       jetbrains.datagrip
       jetbrains.idea-community
+      k3d
       kubectl
       poetry
       procps

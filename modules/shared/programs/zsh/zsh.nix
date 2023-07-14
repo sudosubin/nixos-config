@@ -69,7 +69,6 @@
       k = "kubectl";
       l = "lsd -l";
       ls = "lsd -al";
-      mubectl = "minikube kubectl --";
     };
 
     initExtraFirst = ''
