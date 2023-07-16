@@ -12,7 +12,6 @@
       bob
       hadolint
       jetbrains.datagrip
-      kubectl
       poetry
       shfmt
       sqlfluff
@@ -52,6 +51,7 @@
       ../shared/programs/go
       ../shared/programs/gpg
       ../shared/programs/jq
+      ../shared/programs/kubernetes
       ../shared/programs/lsd
       ../shared/programs/nix
       ../shared/programs/node

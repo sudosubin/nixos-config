@@ -13,11 +13,8 @@
       hadolint
       jetbrains.datagrip
       jetbrains.idea-community
-      k3d
-      kubectl
       poetry
       procps
-      servicex
       shfmt
       sqlfluff
 
@@ -53,6 +50,7 @@
       ../shared/programs/go
       ../shared/programs/gpg
       ../shared/programs/jq
+      ../shared/programs/kubernetes
       ../shared/programs/lsd
       ../shared/programs/nix
       ../shared/programs/node

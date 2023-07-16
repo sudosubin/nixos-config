@@ -66,7 +66,6 @@
     };
 
     shellAliases = {
-      k = "kubectl";
       l = "lsd -l";
       ls = "lsd -al";
     };

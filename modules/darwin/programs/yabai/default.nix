@@ -14,6 +14,7 @@
 
       # Space Settings
       layout = "bsp";
+      window_gap = "4";
       window_placement = "second_child";
     };
 
