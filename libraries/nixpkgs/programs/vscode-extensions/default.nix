@@ -33,8 +33,8 @@ final: { lib, vscode-utils, ... }@prev:
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "2.3.7";
-      sha256 = "1mhgxs2n2213djdyvkbc0yhsl55kd419474175ckxgk7skl1w3h0";
+      version = "2.3.8";
+      sha256 = "1q18qqs6x8pv1539ca59vq6aaq51s22yhzaxchxsvh16vs2ypgyz";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
@@ -61,8 +61,8 @@ final: { lib, vscode-utils, ... }@prev:
     rome.rome = vscode-utils.extensionFromVscodeMarketplace {
       name = "rome";
       publisher = "rome";
-      version = "0.25.20230705";
-      sha256 = "sha256-B1E1ieViaa15dvtO6JACmqJ3yC6v/QEGgkb4L430ebA=";
+      version = "0.25.20230719";
+      sha256 = "sha256-umDKW9JH+P3vJQ8pYO2o9fkEFOtvRzWi7XqlJwkVg2E=";
     };
 
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {
