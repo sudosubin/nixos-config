@@ -86,7 +86,6 @@ in
       github.github-vscode-theme
       golang.go
       hashicorp.terraform
-      jasonnutter.vscode-codeowners
       jnoortheen.nix-ide
       jpoissonnier.vscode-styled-components
       kevinrose.vsc-python-indent

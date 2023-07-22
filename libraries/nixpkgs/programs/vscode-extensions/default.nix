@@ -33,8 +33,8 @@ final: { lib, vscode-utils, ... }@prev:
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "2.3.4";
-      sha256 = "1hcmkifpvx9agks59znf7vis9kbf3zv462va8cv9v8z1baqary6b";
+      version = "2.3.7";
+      sha256 = "1mhgxs2n2213djdyvkbc0yhsl55kd419474175ckxgk7skl1w3h0";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {
@@ -49,13 +49,6 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "fwcd";
       version = "0.2.31";
       sha256 = "1yngrbqndb7jccmakpjv98y8amffvk2zbj3dhz0khdxz6ym18vb3";
-    };
-
-    jasonnutter.vscode-codeowners = vscode-utils.extensionFromVscodeMarketplace {
-      name = "vscode-codeowners";
-      publisher = "jasonnutter";
-      version = "1.1.1";
-      sha256 = "1bhp1dr9i7vivb0ap43v8rh5r9x8khpjq304kv8p6isjfgqn03vf";
     };
 
     kevinrose.vsc-python-indent = vscode-utils.extensionFromVscodeMarketplace {

@@ -9,6 +9,9 @@
         install -D _output/local/go/bin/kubectl $out/bin/k
       '';
     }))
+    (kubectl-node-shell.overrideAttrs (attrs: {
+      meta.platforms = lib.platforms.all;
+    }))
   ];
 
   home.shellAliases = {

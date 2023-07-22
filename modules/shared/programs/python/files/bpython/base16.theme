@@ -1,19 +1,19 @@
 [syntax]
 keyword = m
-name = w
-comment = k
+name = k
+comment = w
 string = g
 error = r
 number = y
 operator = c
 punctuation = y
-token = C
-paren = w
+token = c
+paren = k
 
 [interface]
 background = d
-output = w
-main = w
+output = k
+main = k
 prompt = g
-prompt_more = k
-right_arrow_suggestion = k
+prompt_more = w
+right_arrow_suggestion = w
