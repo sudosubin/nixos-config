@@ -10,9 +10,9 @@
       signByDefault = true;
     };
     ignores = [
-      # direnv
       ".envrc"
       ".direnv"
+      ".DS_Store"
     ];
     extraConfig = {
       credential.helper = "";

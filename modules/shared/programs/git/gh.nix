@@ -7,6 +7,8 @@
       git_protocol = "ssh";
       prompt = "enabled";
     };
-    enableGitCredentialHelper = false;
+    gitCredentialHelper = {
+      enable = false;
+    };
   };
 }
