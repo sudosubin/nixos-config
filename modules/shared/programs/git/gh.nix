@@ -8,7 +8,7 @@
       prompt = "enabled";
     };
     gitCredentialHelper = {
-      enable = false;
+      enable = true;
     };
   };
 }

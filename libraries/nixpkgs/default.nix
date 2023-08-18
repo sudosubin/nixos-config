@@ -33,6 +33,7 @@
     "orbstack"
     "redisinsight"
     "slack"
+    "vscode-extension-github-copilot"
     "zoom"
   ]);
 }
