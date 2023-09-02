@@ -1,4 +1,4 @@
-final: { lib, stdenvNoCC, fetchurl, unzip, ... }@prev:
+final: { lib, stdenvNoCC, fetchurl, unzip, makeWrapper, jdk, ... }@prev:
 
 {
   ijhttp = stdenvNoCC.mkDerivation rec {
@@ -10,7 +10,7 @@ final: { lib, stdenvNoCC, fetchurl, unzip, ... }@prev:
       sha256 = "055j0pls9b5ml8j0csf63wwi001l1a0hbqxds3jdjf86v7d7kg5i";
     };
 
-    nativeBuildInputs = [ unzip ];
+    nativeBuildInputs = [ unzip makeWrapper ];
 
     unpackPhase = ''
       unzip $src
@@ -25,6 +25,15 @@ final: { lib, stdenvNoCC, fetchurl, unzip, ... }@prev:
       substituteInPlace $out/bin/ijhttp --replace \
         "app_path=\$0" \
         "app_path=\"$out/\""
+
+      wrapProgram $out/bin/ijhttp \
+        --prefix JAVA_HOME : "${jdk}"
+    '';
+
+    doInstallCheck = true;
+
+    installCheckPhase = ''
+      $out/bin/ijhttp --version
     '';
 
     meta = with lib; {

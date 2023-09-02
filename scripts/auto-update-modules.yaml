@@ -39,6 +39,17 @@ modules:
         curl -s "https://install.appcenter.ms/api/v0.1/apps/dexterleng/homerow-redux/distribution_groups/production/public_releases" \
           | jq -r "first | .short_version"
 
+  - path: ./libraries/nixpkgs/programs/ijhttp/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        curl -v "https://jb.gg/ijhttp/latest" 2>&1 \
+          | grep location \
+          | sed -r "s|.*/http-client/([0-9.]+)/.*|\1|g"
+
   - path: ./libraries/nixpkgs/programs/orbstack/default.nix
     args:
       read_from_file: ["url"]
