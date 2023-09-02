@@ -13,6 +13,7 @@
     (import ./programs/hadolint)
     (import ./programs/hammerspoon)
     (import ./programs/homerow)
+    (import ./programs/ijhttp)
     (import ./programs/orbstack)
     (import ./programs/pragmatapro)
     (import ./programs/python)
@@ -29,6 +30,7 @@
     "discord"
     "google-chrome"
     "homerow"
+    "ijhttp"
     "ngrok"
     "orbstack"
     "redisinsight"

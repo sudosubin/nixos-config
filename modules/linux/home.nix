@@ -11,6 +11,7 @@
       # Development
       curl
       hadolint
+      ijhttp
       jetbrains.datagrip
       poetry
       shfmt
