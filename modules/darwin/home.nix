@@ -9,7 +9,6 @@
 
     home.packages = with pkgs; [
       # Development
-      bob
       hadolint
       jetbrains.datagrip
       jetbrains.idea-community

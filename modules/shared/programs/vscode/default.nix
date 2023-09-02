@@ -109,7 +109,6 @@ in
       timonwong.shellcheck
       usernamehw.errorlens
       yzhang.markdown-all-in-one
-      _42crunch.vscode-openapi
 
       overlays.pkief.material-icon-theme
     ];

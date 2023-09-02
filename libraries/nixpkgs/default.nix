@@ -10,6 +10,7 @@
     (import ./programs/clop)
     (import ./programs/figma-font-helper)
     (import ./programs/google-chrome)
+    (import ./programs/hadolint)
     (import ./programs/hammerspoon)
     (import ./programs/homerow)
     (import ./programs/orbstack)
@@ -17,7 +18,6 @@
     (import ./programs/python)
     (import ./programs/redisinsight)
     (import ./programs/vscode-extensions)
-    (import ./programs/yabai)
     (import ./programs/zpl-open)
   ];
 

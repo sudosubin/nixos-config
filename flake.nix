@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixos-hardware.url = "github:NixOS/nixos-hardware";
+    nixos-hardware.url = "github:nixos/nixos-hardware";
     flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
 
     darwin = {
