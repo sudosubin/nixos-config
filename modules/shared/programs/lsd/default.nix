@@ -1,15 +1,11 @@
 { config, lib, pkgs, ... }:
 
-let
-  theme-name = "custom";
-
-in
 {
   programs.lsd = {
     enablePatch = true;
 
     settings = {
-      color.theme = theme-name;
+      color.theme = "custom";
       date = "+%e %b %H:%M";
       size = "bytes";
       sorting.dir-grouping = "first";
@@ -17,17 +13,6 @@ in
     };
 
     colors = {
-      di = "34"; # Directory
-      ex = "31"; # Executable file
-      pi = "33"; # Named pipe
-      so = "32"; # Socket
-      bd = "34;46"; # Block device
-      cd = "34;43"; # Character device
-      ln = "35"; # Symlink
-      or = "31"; # Broken symlink
-    } // (import ./lscolors.nix);
-
-    themes."${theme-name}" = {
       user = "dark_grey";
       group = "dark_grey";
       permission = {
@@ -36,10 +21,13 @@ in
         exec = "dark_red";
         exec-sticky = "dark_magenta";
         no-access = "dark_grey";
+        octal = 6;
+        acl = "dark_cyan";
+        context = "cyan";
       };
       date = {
-        hour-old = "white";
         day-old = "white";
+        hour-old = "white";
         older = "dark_grey";
       };
       size = {
@@ -48,6 +36,40 @@ in
         medium = "dark_yellow";
         large = "dark_red";
       };
+      inode = {
+        valid = 13;
+        invalid = 245;
+      };
+      links = {
+        valid = 13;
+        invalid = 245;
+      };
+      tree-edge = 245;
+      git-status = {
+        default = 245;
+        unmodified = 245;
+        ignored = 245;
+        new-in-index = "dark_green";
+        new-in-workdir = "dark_green";
+        typechange = "dark_yellow";
+        deleted = "dark_red";
+        renamed = "dark_green";
+        modified = "dark_yellow";
+        conflicted = "dark_red";
+      };
+    };
+
+    lscolors = {
+      ex = "31"; # ExecutableFile
+      fi = "30"; # RegularFile
+      di = "34"; # Dir
+      ln = "35"; # SymLink
+      pi = "33"; # Pipe
+      so = "32"; # Socket
+      bd = "34;46"; # BlockDevice
+      cd = "34;43"; # CharDevice
+      or = "31"; # BrokenSymLink
+      mi = "31"; # MissingSymLinkTarget
     };
   };
 }
