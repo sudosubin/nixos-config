@@ -9,6 +9,7 @@
 
     home.packages = with pkgs; [
       # Development
+      curl
       hadolint
       jetbrains.datagrip
       poetry

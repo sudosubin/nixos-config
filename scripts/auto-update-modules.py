@@ -1,14 +1,14 @@
 #!/usr/bin/env nix-shell
 #!nix-shell -i python3 -p python311 python311Packages.aiofiles python311Packages.pyyaml
 
-import aiofiles  # pyright: ignore [reportMissingModuleSource]
 import asyncio
 import logging
 import os
 import re
 import sys
-import yaml  # pyright: ignore [reportMissingModuleSource]
 
+import aiofiles  # pyright: ignore [reportMissingModuleSource]
+import yaml  # pyright: ignore [reportMissingModuleSource]
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

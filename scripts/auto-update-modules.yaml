@@ -31,9 +31,9 @@ modules:
 
   - path: ./libraries/nixpkgs/programs/homerow/default.nix
     args:
-      read_from_file: ["url"]
+      read_from_file: []
       read_from_method: ["version"]
-      write: ["version", "sha256"]
+      write: ["version"]
     methods:
       get_version: |-
         curl -s "https://install.appcenter.ms/api/v0.1/apps/dexterleng/homerow-redux/distribution_groups/production/public_releases" \

@@ -3,7 +3,7 @@ final: { lib, fetchurl, stdenvNoCC, unzip, ... }@prev:
 {
   clop = stdenvNoCC.mkDerivation rec {
     pname = "clop";
-    version = "2.1.3";
+    version = "2.2.0";
 
     src = fetchurl {
       url = "https://files.lowtechguys.com/Clop.zip";
