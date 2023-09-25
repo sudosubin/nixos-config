@@ -72,9 +72,9 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Enable dconf, zsh
+  # Enable bash, dconf
+  programs.bash.enable = true;
   programs.dconf.enable = true;
-  programs.zsh.enable = true;
 
   # Docker
   virtualisation.docker = {
@@ -84,7 +84,7 @@
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.sudosubin = {
-    shell = pkgs.zsh;
+    shell = pkgs.bash;
     isNormalUser = true;
     extraGroups = [
       "wheel" # Enable ‘sudo’ for the user.
@@ -108,7 +108,11 @@
   #   firefox
   # ];
 
-  environment.pathsToLink = [ "/libexec" "/share/polkit-1" "/share/zsh" ];
+  environment.pathsToLink = [
+    "/libexec"
+    "/share/polkit-1"
+    "/share/qemu"
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

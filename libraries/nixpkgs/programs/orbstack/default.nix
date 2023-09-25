@@ -1,18 +1,18 @@
 final: { lib, fetchurl, fetchFromGitHub, stdenvNoCC, docker, installShellFiles, ... }@prev:
 
 let
-  version = "0.17.1_15969";
+  version = "1.0.0_16230";
   hdiutil = "/usr/bin/hdiutil";
   completions = import ./completions.nix { pkgs = prev; };
 
   sources = {
     "aarch64-darwin" = {
       url = "https://cdn-updates.orbstack.dev/arm64/OrbStack_v${version}_arm64.dmg";
-      sha256 = "175hbyf3rjm6dxalg5950lwg3imsspqbcvlj31n2rcyjmwfc00gm";
+      sha256 = "05zs4qkczjc5rklnvkg95r7iv11d4a18qz22m9iaq7r5nnhczrz1";
     };
     "x86_64-darwin" = {
       url = "https://cdn-updates.orbstack.dev/amd64/OrbStack_v${version}_amd64.dmg";
-      sha256 = "0xq4faxybk8ry3h0pz6is7lxk8myds8bhzgdhvwfn350p1qmblz3";
+      sha256 = "1j4n2362dwz3jvfapli4vxpaipsfda6x0d7hy81aacqzxfg6x768";
     };
   };
 

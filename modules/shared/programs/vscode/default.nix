@@ -25,12 +25,6 @@ let
       preInstall = ''
         ${attrs.preInstall or ""}
 
-        substituteInPlace $resources/app/product.json \
-          --replace '"GitHub.copilot": ["inlineCompletionsAdditions"],' \
-             '"GitHub.copilot": ["inlineCompletions", "inlineCompletionsNew", "inlineCompletionsAdditions", "textDocumentNotebook", "interactive", "terminalDataWriteEvent"],' \
-          --replace '"GitHub.copilot-nightly": ["inlineCompletionsAdditions"],' \
-             '"GitHub.copilot-nightly": ["inlineCompletions", "inlineCompletionsNew", "inlineCompletionsAdditions", "textDocumentNotebook", "interactive", "terminalDataWriteEvent"],'
-
         recalculateChecksum() {
           filename="$1"
           filename_escaped="$(echo "$filename" | sed "s/\//\\\\\//g" | sed "s/\./\\\\\./g")"
@@ -89,7 +83,6 @@ in
       exiasr.hadolint
       foxundermoon.shell-format
       fwcd.kotlin
-      github.copilot
       github.github-vscode-theme
       golang.go
       hashicorp.terraform

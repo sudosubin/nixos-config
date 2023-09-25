@@ -5,7 +5,6 @@
     (import ./generators)
 
     (import ./programs/apple-cursor-theme)
-    (import ./programs/bob)
     (import ./programs/cleanshot)
     (import ./programs/clop)
     (import ./programs/figma-font-helper)
@@ -35,7 +34,6 @@
     "orbstack"
     "redisinsight"
     "slack"
-    "vscode-extension-github-copilot"
     "zoom"
   ]);
 }

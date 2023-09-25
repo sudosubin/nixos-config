@@ -12,8 +12,8 @@ final: { lib, vscode-utils, ... }@prev:
     bierner.markdown-preview-github-styles = vscode-utils.extensionFromVscodeMarketplace {
       name = "markdown-preview-github-styles";
       publisher = "bierner";
-      version = "2.0.2";
-      sha256 = "01hxkgw6sjbmj4nhz1a948bz4dzlpjbq9nmw0vnfg64203v9490s";
+      version = "2.0.3";
+      sha256 = "1dlw0p9zkv0dy5bf6byd0l40f5r9200anw20ps75vldgji67mqfa";
     };
 
     casualjim.gotemplate = vscode-utils.extensionFromVscodeMarketplace {
@@ -26,15 +26,15 @@ final: { lib, vscode-utils, ... }@prev:
     charliermarsh.ruff = vscode-utils.extensionFromVscodeMarketplace {
       name = "ruff";
       publisher = "charliermarsh";
-      version = "2023.35.12491300";
-      sha256 = "sha256-eygA0zYzK85YxCoe+SZAPT0OMEsk5xH6sX9L7rQprxQ=";
+      version = "2023.39.12651833";
+      sha256 = "1q3pcrmkfbx1l61r6vzyb0cwikqq3q7dv8vbimvzk39c1cn39ji1";
     };
 
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
       name = "vscode-sqlfluff";
       publisher = "dorzey";
-      version = "2.4.3";
-      sha256 = "1qga7jw72l6wdfbg1dkryal2aa728bmkm4rir5g14wyrn0z9qn7b";
+      version = "2.4.4";
+      sha256 = "1vlh8jazpzc0a8zziyn4n2ifbkjn16r3hcw30d25x41p2n45nkg3";
     };
 
     exiasr.hadolint = vscode-utils.extensionFromVscodeMarketplace {

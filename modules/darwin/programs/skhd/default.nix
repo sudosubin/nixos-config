@@ -7,6 +7,11 @@ let
   up = "k";
   down = "j";
 
+  bins = {
+    skhd = "${pkgs.skhd}/bin/skhd";
+    yabai = "${pkgs.yabai}/bin/yabai";
+  };
+
 in
 {
   services.skhd = {
@@ -14,59 +19,59 @@ in
 
     config = builtins.concatStringsSep "\n" [
       # Core skhd
-      "${mod} + shift - r : ${pkgs.skhd}/bin/skhd --reload"
+      "${mod} + shift - r : ${bins.skhd} --reload"
 
       # Terminal
       "${mod} - return : open -na Alacritty.app"
       "ctrl + cmd - t : open -na Alacritty.app"
 
       # Kill window
-      "${mod} - w : yabai -m window --close"
+      "${mod} - w : ${bins.yabai} -m window --close"
 
       # Focus window
-      "${mod} - ${left} : yabai -m window --focus west"
-      "${mod} - ${down} : yabai -m window --focus south"
-      "${mod} - ${up} : yabai -m window --focus north"
-      "${mod} - ${right} : yabai -m window --focus east"
-      "${mod} + shift - space : yabai -m window --toggle float && yabai -m window --grid 4:4:1:1:2:2"
+      "${mod} - ${left} : ${bins.yabai} -m window --focus west"
+      "${mod} - ${down} : ${bins.yabai} -m window --focus south"
+      "${mod} - ${up} : ${bins.yabai} -m window --focus north"
+      "${mod} - ${right} : ${bins.yabai} -m window --focus east"
+      "${mod} + shift - space : ${bins.yabai} -m window --toggle float && yabai -m window --grid 4:4:1:1:2:2"
 
       # Move window
-      "${mod} + shift - ${left} : yabai -m window --swap west"
-      "${mod} + shift - ${down} : yabai -m window --swap south"
-      "${mod} + shift - ${up} : yabai -m window --swap north"
-      "${mod} + shift - ${right} : yabai -m window --swap east"
+      "${mod} + shift - ${left} : ${bins.yabai} -m window --swap west"
+      "${mod} + shift - ${down} : ${bins.yabai} -m window --swap south"
+      "${mod} + shift - ${up} : ${bins.yabai} -m window --swap north"
+      "${mod} + shift - ${right} : ${bins.yabai} -m window --swap east"
 
       # Switch workspace
-      "${mod} - 1 : yabai -m space --focus 1"
-      "${mod} - 2 : yabai -m space --focus 2"
-      "${mod} - 3 : yabai -m space --focus 3"
-      "${mod} - 4 : yabai -m space --focus 4"
-      "${mod} - 5 : yabai -m space --focus 5"
-      "${mod} - 6 : yabai -m space --focus 6"
-      "${mod} - 7 : yabai -m space --focus 7"
-      "${mod} - 8 : yabai -m space --focus 8"
-      "${mod} - 9 : yabai -m space --focus 9"
-      "${mod} - 0 : yabai -m space --focus 10"
+      "${mod} - 1 : ${bins.yabai} -m space --focus 1"
+      "${mod} - 2 : ${bins.yabai} -m space --focus 2"
+      "${mod} - 3 : ${bins.yabai} -m space --focus 3"
+      "${mod} - 4 : ${bins.yabai} -m space --focus 4"
+      "${mod} - 5 : ${bins.yabai} -m space --focus 5"
+      "${mod} - 6 : ${bins.yabai} -m space --focus 6"
+      "${mod} - 7 : ${bins.yabai} -m space --focus 7"
+      "${mod} - 8 : ${bins.yabai} -m space --focus 8"
+      "${mod} - 9 : ${bins.yabai} -m space --focus 9"
+      "${mod} - 0 : ${bins.yabai} -m space --focus 10"
 
       # Move to workspace
-      "${mod} + shift - 1 : yabai -m window --space 1"
-      "${mod} + shift - 2 : yabai -m window --space 2"
-      "${mod} + shift - 3 : yabai -m window --space 3"
-      "${mod} + shift - 4 : yabai -m window --space 4"
-      "${mod} + shift - 5 : yabai -m window --space 5"
-      "${mod} + shift - 6 : yabai -m window --space 6"
-      "${mod} + shift - 7 : yabai -m window --space 7"
-      "${mod} + shift - 8 : yabai -m window --space 8"
-      "${mod} + shift - 9 : yabai -m window --space 9"
-      "${mod} + shift - 0 : yabai -m window --space 10"
+      "${mod} + shift - 1 : ${bins.yabai} -m window --space 1"
+      "${mod} + shift - 2 : ${bins.yabai} -m window --space 2"
+      "${mod} + shift - 3 : ${bins.yabai} -m window --space 3"
+      "${mod} + shift - 4 : ${bins.yabai} -m window --space 4"
+      "${mod} + shift - 5 : ${bins.yabai} -m window --space 5"
+      "${mod} + shift - 6 : ${bins.yabai} -m window --space 6"
+      "${mod} + shift - 7 : ${bins.yabai} -m window --space 7"
+      "${mod} + shift - 8 : ${bins.yabai} -m window --space 8"
+      "${mod} + shift - 9 : ${bins.yabai} -m window --space 9"
+      "${mod} + shift - 0 : ${bins.yabai} -m window --space 10"
 
       # Split, Layout
-      "${mod} - b : yabai -m window --insert south"
-      "${mod} - v : yabai -m window --insert east"
-      "${mod} - e : yabai -m window --toggle split"
+      "${mod} - b : ${bins.yabai} -m window --insert south"
+      "${mod} - v : ${bins.yabai} -m window --insert east"
+      "${mod} - e : ${bins.yabai} -m window --toggle split"
 
       # Fullscreen
-      "${mod} - f : yabai -m window --toggle zoom-fullscreen"
+      "${mod} - f : ${bins.yabai} -m window --toggle zoom-fullscreen"
     ];
   };
 }

@@ -13,7 +13,6 @@
       hadolint
       ijhttp
       jetbrains.datagrip
-      jetbrains.idea-community
       poetry
       procps
       shfmt
@@ -43,10 +42,10 @@
       ../shared/programs/alacritty
       ../shared/programs/aws
       ../shared/programs/bat
+      ../shared/programs/container
       ../shared/programs/direnv
-      ../shared/programs/docker
-      ../shared/programs/fzf
       ../shared/programs/fonts
+      ../shared/programs/fzf
       ../shared/programs/git
       ../shared/programs/go
       ../shared/programs/gpg
@@ -56,6 +55,7 @@
       ../shared/programs/nix
       ../shared/programs/node
       ../shared/programs/python
+      ../shared/programs/shell
       ../shared/programs/ssh
       ../shared/programs/terraform
       ../shared/programs/tmux
@@ -63,7 +63,6 @@
       ../shared/programs/vim
       ../shared/programs/vscode
       ../shared/programs/xdg
-      ../shared/programs/zsh
 
       ../darwin/programs/caffeinate
       ../darwin/programs/cleanshot

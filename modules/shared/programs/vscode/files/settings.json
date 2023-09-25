@@ -93,7 +93,7 @@
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": true,
   "python.formatting.provider": "black",
-
+  "ruff.enableExperimentalFormatter": true,
   "[python]": {
     "editor.rulers": [80, 120],
     "editor.tabSize": 4,
@@ -101,7 +101,8 @@
     "files.insertFinalNewline": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": true
-    }
+    },
+    "editor.defaultFormatter": "ms-python.python"
   },
 
   // language (ruby)
@@ -222,6 +223,7 @@
   "errorLens.gutterIconSet": "defaultOutline",
 
   // telemetry, etc
+  "http.proxyStrictSSL": false,
   "redhat.telemetry.enabled": false,
   "telemetry.telemetryLevel": "off",
   "extensions.ignoreRecommendations": true,

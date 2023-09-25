@@ -7,19 +7,17 @@
     enableSudoTouchIdAuth = true;
   };
 
-  programs.zsh.enable = true;
+  programs.bash.enable = true;
 
   users.users."subin.kim" = {
-    shell = pkgs.zsh;
+    shell = pkgs.bash;
     home = "/Users/subin.kim";
   };
 
   environment = {
-    shells = [ pkgs.zsh ];
-    loginShell = "${pkgs.zsh}/bin/zsh -l";
-    variables = {
-      SHELL = "${pkgs.zsh}/bin/zsh";
-    };
+    shells = [ pkgs.bash ];
+    loginShell = "${pkgs.bash}/bin/bash -l";
+    pathsToLink = [ "/share/qemu" ];
   };
 
   system.defaults = {
