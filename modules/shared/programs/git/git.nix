@@ -13,6 +13,7 @@
       ".envrc"
       ".direnv"
       ".DS_Store"
+      "*.pem"
     ];
     extraConfig = {
       credential.helper = "";

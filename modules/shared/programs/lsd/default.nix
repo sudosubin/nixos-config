@@ -5,7 +5,6 @@
     enablePatch = true;
 
     settings = {
-      color.theme = "custom";
       date = "+%e %b %H:%M";
       size = "bytes";
       sorting.dir-grouping = "first";

@@ -28,12 +28,6 @@ in
   options.programs.lsd = {
     enablePatch = mkEnableOption "lsd";
 
-    colors = mkOption {
-      type = yamlFormat.type;
-      default = { };
-      description = "Color theme configurations.";
-    };
-
     lscolors = mkOption {
       type = types.attrsOf types.str;
       default = { };
@@ -44,10 +38,14 @@ in
   config = mkIf cfg.enablePatch {
     home.packages = [ package ];
 
+    programs.lsd =
+      mkIf (cfg.colors != { }) { settings.color.theme = "custom"; };
+
     xdg.configFile = {
       "lsd/colors.yaml" = mkIf (cfg.colors != { }) {
         source = yamlFormat.generate "lsd-colors" cfg.colors;
       };
+
       "lsd/config.yaml" = mkIf (cfg.settings != { }) {
         source = yamlFormat.generate "lsd-config" cfg.settings;
       };

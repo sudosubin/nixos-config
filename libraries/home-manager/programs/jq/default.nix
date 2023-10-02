@@ -6,18 +6,10 @@ let
   c = cfg.colors;
 
   package = pkgs.jq.overrideAttrs (attrs: {
-    patches = (attrs.patches or [ ]) ++ [
-      (pkgs.fetchpatch {
-        name = "set-field-color-using-jq-colors";
-        url = "https://github.com/stedolan/jq/pull/1791.patch";
-        sha256 = "sha256-4wCP//PUDNLvps6JklI1a4PFRFeusQDogSNW1E1utU0=";
-      })
-    ];
-
     nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
 
-    postInstall = ''
-      ${attrs.postInstall or ""}
+    postFixup = ''
+      ${attrs.postFixup or ""}
 
       wrapProgram $bin/bin/jq \
         --prefix JQ_COLORS "" "${c.null}:${c.false}:${c.true}:${c.numbers}:${c.strings}:${c.arrays}:${c.objects}:${c.fields}";

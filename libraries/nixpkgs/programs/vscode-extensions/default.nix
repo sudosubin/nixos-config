@@ -16,6 +16,13 @@ final: { lib, vscode-utils, ... }@prev:
       sha256 = "1dlw0p9zkv0dy5bf6byd0l40f5r9200anw20ps75vldgji67mqfa";
     };
 
+    biomejs.biome = vscode-utils.extensionFromVscodeMarketplace {
+      name = "biome";
+      publisher = "biomejs";
+      version = "1.4.2";
+      sha256 = "1bq3lcfbqff7mhssq32047qsr30ynnl9w6ifsvphs6hhvnmdiv31";
+    };
+
     casualjim.gotemplate = vscode-utils.extensionFromVscodeMarketplace {
       name = "gotemplate";
       publisher = "casualjim";
@@ -56,13 +63,6 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "kevinrose";
       version = "1.18.0";
       sha256 = "1z8ydwz43znccrhpms0v34236nx4nic65mpfd9ka3w4ng1q8q8w6";
-    };
-
-    rome.rome = vscode-utils.extensionFromVscodeMarketplace {
-      name = "rome";
-      publisher = "rome";
-      version = "0.28.0";
-      sha256 = "sha256-i0cdIGKZjPS397xf8NEmW1vsjRmUVdnpX0MJ/imJtvw=";
     };
 
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {

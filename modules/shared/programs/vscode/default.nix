@@ -71,6 +71,7 @@ in
     extensions = with pkgs.vscode-extensions; [
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
+      biomejs.biome
       casualjim.gotemplate
       charliermarsh.ruff
       davidanson.vscode-markdownlint
@@ -95,7 +96,6 @@ in
       pkief.material-product-icons
       redhat.java
       redhat.vscode-yaml
-      rome.rome
       rust-lang.rust-analyzer
       shardulm94.trailing-spaces
       tamasfe.even-better-toml
