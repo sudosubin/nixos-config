@@ -72,8 +72,7 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Enable bash, dconf
-  programs.bash.enable = true;
+  # Enable dconf
   programs.dconf.enable = true;
 
   # Docker

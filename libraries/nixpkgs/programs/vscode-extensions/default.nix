@@ -62,7 +62,7 @@ final: { lib, vscode-utils, ... }@prev:
       name = "rome";
       publisher = "rome";
       version = "0.28.0";
-      sha256 = "19kzk45lq48mynw168kz4qyd3hxj7pwmx58981gfhm711qd5yjqs";
+      sha256 = "sha256-i0cdIGKZjPS397xf8NEmW1vsjRmUVdnpX0MJ/imJtvw=";
     };
 
     rust-lang.rust = vscode-utils.extensionFromVscodeMarketplace {

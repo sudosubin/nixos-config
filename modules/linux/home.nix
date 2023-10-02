@@ -18,7 +18,6 @@
       sqlfluff
 
       # Utility
-      discord
       gnome.nautilus
       google-chrome
       ngrok

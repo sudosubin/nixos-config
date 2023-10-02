@@ -6,7 +6,7 @@
 
     theme = {
       package = pkgs.arc-theme;
-      name = "Arc-Dark";
+      name = "Arc-Light";
     };
 
     iconTheme = {

@@ -2,8 +2,6 @@
 
 {
   nixpkgs.overlays = [
-    (import ./generators)
-
     (import ./programs/apple-cursor-theme)
     (import ./programs/cleanshot)
     (import ./programs/clop)
@@ -26,7 +24,6 @@
     "1password-cli"
     "cleanshot"
     "datagrip"
-    "discord"
     "google-chrome"
     "homerow"
     "ijhttp"
