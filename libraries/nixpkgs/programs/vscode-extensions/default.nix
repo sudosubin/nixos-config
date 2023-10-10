@@ -19,8 +19,8 @@ final: { lib, vscode-utils, ... }@prev:
     biomejs.biome = vscode-utils.extensionFromVscodeMarketplace {
       name = "biome";
       publisher = "biomejs";
-      version = "1.4.2";
-      sha256 = "1bq3lcfbqff7mhssq32047qsr30ynnl9w6ifsvphs6hhvnmdiv31";
+      version = "1.5.20231006";
+      sha256 = "sha256-ikZhFZwC0uTreottDt37phs4vHANitx0vlKZbV5dct8=";
     };
 
     casualjim.gotemplate = vscode-utils.extensionFromVscodeMarketplace {
@@ -28,13 +28,6 @@ final: { lib, vscode-utils, ... }@prev:
       publisher = "casualjim";
       version = "0.4.0";
       sha256 = "0r6219f4gkpic3jjgj1666bwlfpvggf8wrgxp81v38bn9lmydn9g";
-    };
-
-    charliermarsh.ruff = vscode-utils.extensionFromVscodeMarketplace {
-      name = "ruff";
-      publisher = "charliermarsh";
-      version = "2023.39.12651833";
-      sha256 = "1q3pcrmkfbx1l61r6vzyb0cwikqq3q7dv8vbimvzk39c1cn39ji1";
     };
 
     dorzey.vscode-sqlfluff = vscode-utils.extensionFromVscodeMarketplace {
@@ -54,8 +47,8 @@ final: { lib, vscode-utils, ... }@prev:
     fwcd.kotlin = vscode-utils.extensionFromVscodeMarketplace {
       name = "kotlin";
       publisher = "fwcd";
-      version = "0.2.31";
-      sha256 = "1yngrbqndb7jccmakpjv98y8amffvk2zbj3dhz0khdxz6ym18vb3";
+      version = "0.2.32";
+      sha256 = "1rf3xpcfdj8vhd7s6nnd6a4r98mr7iz7b7fpk613gvjd6g0jgdw4";
     };
 
     kevinrose.vsc-python-indent = vscode-utils.extensionFromVscodeMarketplace {
