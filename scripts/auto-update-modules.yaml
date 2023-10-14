@@ -15,10 +15,7 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        curl -s "https://raw.githubusercontent.com/FuzzyIdeas/Clop/main/Clop.xcodeproj/project.pbxproj" \
-          | grep "MARKETING_VERSION =" \
-          | tail -n 1 \
-          | sed -r "s/.*MARKETING_VERSION = (.*);/\1/g"
+        curl -s "https://api.github.com/repos/FuzzyIdeas/Clop/releases/latest" | jq -r ".tag_name" | sed "s/v//g"
 
   - path: ./libraries/nixpkgs/programs/hammerspoon/default.nix
     args:

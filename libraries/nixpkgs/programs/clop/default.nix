@@ -1,21 +1,26 @@
-final: { lib, fetchurl, stdenvNoCC, unzip, ... }@prev:
+final: { lib, fetchurl, stdenvNoCC, undmg, ... }@prev:
 
+let
+  hdiutil = "/usr/bin/hdiutil";
+
+in
 {
   clop = stdenvNoCC.mkDerivation rec {
     pname = "clop";
-    version = "2.2.0";
+    version = "2.2.3";
 
     src = fetchurl {
-      url = "https://files.lowtechguys.com/Clop.zip";
-      sha256 = "1m6mxassc9d2758473vngr4gr7idqxc1chyg1mcgflcwawvc42wl";
+      url = "https://github.com/FuzzyIdeas/Clop/releases/download/v${version}/Clop-${version}.dmg";
+      sha256 = "171lszpx45kb0hcxpy2hxyfk58zf5fpfwqd1173adfy6jl8mg6yx";
     };
 
     sourceRoot = "Clop.app";
 
-    nativeBuildInputs = [ unzip ];
-
     unpackPhase = ''
-      unzip $src
+      mkdir -p ./Applications
+      ${hdiutil} attach -readonly -mountpoint mnt $src
+      cp -r "mnt/${sourceRoot}" .
+      ${hdiutil} detach -force mnt
     '';
 
     installPhase = ''
