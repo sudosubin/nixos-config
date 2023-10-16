@@ -55,7 +55,7 @@ modules:
     methods:
       get_version: |-
         curl -v "https://orbstack.dev/download/stable/latest/arm64" 2>&1 \
-          | grep location \
+          | grep location: \
           | sed -r "s|.*_v(.+)_arm64.dmg|\1|g"
 
   - path: ./libraries/nixpkgs/programs/redisinsight/default.nix
