@@ -19,8 +19,8 @@ final: { lib, vscode-utils, ... }@prev:
     biomejs.biome = vscode-utils.extensionFromVscodeMarketplace {
       name = "biome";
       publisher = "biomejs";
-      version = "1.5.20231014";
-      sha256 = "1w09rqjlf27q65bzmq45m9ya3pw7igac6kbq4zpgpbdigfr9lzmq";
+      version = "1.6.0";
+      sha256 = "sha256-v6z197kqoSUZabHJ31GEcGxvcLD/kJ+nc0ghfkpFXLQ=";
     };
 
     casualjim.gotemplate = vscode-utils.extensionFromVscodeMarketplace {
