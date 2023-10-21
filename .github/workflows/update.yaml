@@ -29,7 +29,6 @@ jobs:
         run: |
           # programs
           ./scripts/auto-update-modules.py
-          ./scripts/auto-update-vscode-extensions.py
           git add --all && git diff-index --quiet HEAD || git commit -m "chore: Update vscode extensions" -m "VSCode extensions file updates"
 
           # nix flake lock (root)

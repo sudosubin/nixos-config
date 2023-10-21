@@ -46,7 +46,7 @@ let
       '';
     });
 
-    pkief.material-icon-theme = pkgs.vscode-extensions.pkief.material-icon-theme.overrideAttrs (attrs: rec {
+    pkief.material-icon-theme = pkgs.vscode-marketplace.pkief.material-icon-theme.overrideAttrs (attrs: rec {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
       preInstall = ''
@@ -68,7 +68,7 @@ in
   programs.vscode = {
     enable = true;
     package = overlays.vscodium;
-    extensions = with pkgs.vscode-extensions; [
+    extensions = with pkgs.vscode-marketplace; [
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
       biomejs.biome
@@ -88,7 +88,6 @@ in
       golang.go
       hashicorp.terraform
       jnoortheen.nix-ide
-      jpoissonnier.vscode-styled-components
       kevinrose.vsc-python-indent
       ms-kubernetes-tools.vscode-kubernetes-tools
       ms-pyright.pyright
@@ -98,6 +97,7 @@ in
       redhat.vscode-yaml
       rust-lang.rust-analyzer
       shardulm94.trailing-spaces
+      styled-components.vscode-styled-components
       tamasfe.even-better-toml
       timonwong.shellcheck
       usernamehw.errorlens

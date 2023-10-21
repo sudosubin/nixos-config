@@ -22,7 +22,6 @@ $ nix flake update .
 fetching ...
 
 $ ./scripts/auto-update-modules.py
-$ ./scripts/auto-update-vscode-extensions.py
 fetching ...
 ```
 

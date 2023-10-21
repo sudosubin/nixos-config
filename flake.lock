@@ -20,6 +20,22 @@
         "type": "github"
       }
     },
+    "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1673956053,
+        "narHash": "sha256-4gtG9iQuiKITOjNQQeQIpoIB6b16fm+504Ch3sNKLd8=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "35bb57c0c8d8b62bbfd284272c928ceb64ddbde9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "locked": {
         "lastModified": 1681036252,
@@ -105,6 +121,30 @@
         "type": "github"
       }
     },
+    "nix-vscode-extensions": {
+      "inputs": {
+        "flake-compat": "flake-compat",
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1697851273,
+        "narHash": "sha256-VMpWy0vANAeYHUyX3nX/RCdA5N2Y32x87MM/fCNuOLU=",
+        "owner": "nix-community",
+        "repo": "nix-vscode-extensions",
+        "rev": "a95373f83e060196b39f8cf0dea685e076121c1a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nix-vscode-extensions",
+        "type": "github"
+      }
+    },
     "nixos-config-private-sudosubin": {
       "locked": {
         "dir": "sudosubin",
@@ -179,6 +219,7 @@
         "home-manager": "home-manager",
         "home-manager-secrets": "home-manager-secrets",
         "lefthook": "lefthook",
+        "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-config-private-sudosubin": "nixos-config-private-sudosubin",
         "nixos-config-private-toss": "nixos-config-private-toss",
         "nixos-hardware": "nixos-hardware",

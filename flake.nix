@@ -30,6 +30,12 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
+    nix-vscode-extensions = {
+      url = "github:nix-community/nix-vscode-extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
     nixos-config-private-sudosubin = {
       url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=sudosubin";
       # url = "path:/home/sudosubin/Code/sudosubin/nixos-config-private/sudosubin";

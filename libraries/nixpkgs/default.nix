@@ -1,7 +1,8 @@
-{ lib, ... }:
+{ inputs, lib, ... }:
 
 {
   nixpkgs.overlays = [
+    inputs.nix-vscode-extensions.overlays.default
     (import ./programs/apple-cursor-theme)
     (import ./programs/cleanshot)
     (import ./programs/clop)
@@ -15,7 +16,6 @@
     (import ./programs/pragmatapro)
     (import ./programs/python)
     (import ./programs/redisinsight)
-    (import ./programs/vscode-extensions)
     (import ./programs/zpl-open)
   ];
 

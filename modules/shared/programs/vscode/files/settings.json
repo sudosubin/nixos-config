@@ -90,9 +90,6 @@
   },
 
   // language (python)
-  "python.linting.pylintEnabled": false,
-  "python.linting.flake8Enabled": true,
-  "python.formatting.provider": "black",
   "ruff.enableExperimentalFormatter": true,
   "[python]": {
     "editor.rulers": [80, 120],
@@ -102,7 +99,7 @@
     "editor.codeActionsOnSave": {
       "source.organizeImports": true
     },
-    "editor.defaultFormatter": "ms-python.python"
+    "editor.defaultFormatter": "charliermarsh.ruff"
   },
 
   // language (ruby)
