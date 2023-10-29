@@ -56,6 +56,7 @@
       ../shared/programs/nix
       ../shared/programs/node
       ../shared/programs/python
+      ../shared/programs/rust
       ../shared/programs/shell
       ../shared/programs/ssh
       ../shared/programs/terraform

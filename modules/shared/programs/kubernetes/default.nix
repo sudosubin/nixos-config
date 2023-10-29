@@ -2,7 +2,6 @@
 
 {
   imports = [
-    ./k9s.nix
     ./kubectl.nix
   ];
 

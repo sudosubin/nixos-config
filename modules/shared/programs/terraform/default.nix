@@ -3,6 +3,7 @@
 {
   home.sessionVariables = {
     TF_CLI_CONFIG_FILE = "${config.xdg.configHome}/terraform/config.tfrc";
+    TFLINT_PLUGIN_DIR = "${config.xdg.configHome}/tflint";
   };
 
   xdg.configFile = {
