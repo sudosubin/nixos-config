@@ -20,6 +20,7 @@ in
     ./programs/hammerspoon
     ./programs/homerow
     ./programs/jq
+    ./programs/kube
     ./programs/lsd
     ./programs/skhd
     ./programs/yabai

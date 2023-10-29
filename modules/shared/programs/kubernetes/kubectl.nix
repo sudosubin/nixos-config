@@ -1,25 +1,16 @@
 { config, lib, pkgs, ... }:
 
 {
-  # Add `k` alias for `kubectl`
-  home.packages = with pkgs; [
-    (kubectl.overrideAttrs (attrs: {
-      postInstall = ''
-        ${attrs.postInstall or ""}
-        install -D _output/local/go/bin/kubectl $out/bin/k
+  programs.kube = {
+    enable = true;
 
-        installShellCompletion --cmd k \
-          --bash <($out/bin/k completion bash | sed "s/kubectl/k/g") \
-          --fish <($out/bin/k completion fish | sed "s/kubectl/k/g") \
-          --zsh <($out/bin/k completion zsh | sed "s/kubectl/k/g")
-      '';
-    }))
-    (kubectl-node-shell.overrideAttrs (attrs: {
-      meta.platforms = lib.platforms.all;
-    }))
-  ];
+    config = "${config.xdg.configHome}/kube/config.yaml";
+    kAlias = true;
 
-  home.shellAliases = {
-    k = "kubectl";
+    plugins = with pkgs; [
+      (kubectl-node-shell.overrideAttrs (attrs: {
+        meta.platforms = lib.platforms.all;
+      }))
+    ];
   };
 }
