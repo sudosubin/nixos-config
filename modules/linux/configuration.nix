@@ -72,6 +72,9 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
+  # Enable sudo
+  security.sudo.enable = true;
+
   # Enable dconf
   programs.dconf.enable = true;
 

@@ -18,6 +18,7 @@
       sqlfluff
 
       # Utility
+      figma-linux
       gnome.nautilus
       google-chrome
       ngrok

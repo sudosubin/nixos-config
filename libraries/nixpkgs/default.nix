@@ -33,4 +33,8 @@
     "slack"
     "zoom"
   ]);
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "figma-linux-0.10.0"
+  ];
 }
