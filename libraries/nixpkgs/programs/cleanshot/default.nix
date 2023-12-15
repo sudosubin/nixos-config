@@ -7,11 +7,11 @@ in
 {
   cleanshot = stdenvNoCC.mkDerivation rec {
     pname = "cleanshot";
-    version = "4.6.1";
+    version = "4.6.2";
 
     src = fetchurl {
       url = "https://updates.getcleanshot.com/v3/CleanShot-X-${version}.dmg";
-      sha256 = "1424mmm58zxav31anl0rfcxbj8q7h3kdg2nwp7g4gi8z4zjg6451";
+      sha256 = "04qf45v7x54729i5zpbq1f60811db6jvy15rax6184zpsdd13fxv";
     };
 
     sourceRoot = "CleanShot X.app";

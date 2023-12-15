@@ -19,7 +19,6 @@
   "workbench.productIconTheme": "material-product-icons",
   "material-icon-theme.activeIconPack": "react",
   "material-icon-theme.hidesExplorerArrows": true,
-  "material-icon-theme.showWelcomeMessage": false,
   "material-icon-theme.files.associations": {
     "*.gotmpl": "template"
   },
@@ -90,14 +89,13 @@
   },
 
   // language (python)
-  "ruff.enableExperimentalFormatter": true,
   "[python]": {
     "editor.rulers": [80, 120],
     "editor.tabSize": 4,
     "editor.formatOnSave": true,
     "files.insertFinalNewline": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": true
+      "source.organizeImports": "explicit"
     },
     "editor.defaultFormatter": "charliermarsh.ruff"
   },
@@ -110,7 +108,6 @@
 
   // language (javascript)
   "emmet.excludeLanguages": ["typescriptreact"],
-  "eslint.alwaysShowStatus": true,
   "typescript.disableAutomaticTypeAcquisition": true,
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "[css]": {
@@ -118,54 +115,16 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "[json]": {
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
+  "[javascript][javascriptreact][json][jsonc][typescript][typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
+      "source.fixAll.eslint": "explicit"
     }
   },
-  "[jsonc]": {
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    }
-  },
-  "[javascript]": {
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    }
-  },
-  "[javascriptreact]": {
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    }
-  },
-  "[typescript]": {
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    }
-  },
-  "[typescriptreact]": {
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    }
-  },
+
+  // language (terraform)
   "[terraform]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true

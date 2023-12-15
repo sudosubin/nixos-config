@@ -3,11 +3,11 @@ final: { lib, stdenvNoCC, fetchurl, unzip, makeWrapper, jdk, ... }@prev:
 {
   ijhttp = stdenvNoCC.mkDerivation rec {
     pname = "ijhttp";
-    version = "232.9559.62";
+    version = "233.11799.241";
 
     src = fetchurl {
       url = "https://download-cdn.jetbrains.com/resources/intellij/http-client/${version}/intellij-http-client.zip";
-      sha256 = "055j0pls9b5ml8j0csf63wwi001l1a0hbqxds3jdjf86v7d7kg5i";
+      sha256 = "03grnjyfvbcmnhasl2zfygx18yvk25l5waadagg56vdc2zvlfqhm";
     };
 
     nativeBuildInputs = [ unzip makeWrapper ];

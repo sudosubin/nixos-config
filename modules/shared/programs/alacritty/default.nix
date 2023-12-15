@@ -19,6 +19,10 @@ let
 
 in
 {
+  home.sessionVariables = {
+    COLORFGBG = "1;15";
+  };
+
   programs.alacritty = {
     enable = true;
     settings = {
