@@ -47,7 +47,6 @@
       ../shared/programs/container
       ../shared/programs/direnv
       ../shared/programs/fonts
-      ../shared/programs/fzf
       ../shared/programs/git
       ../shared/programs/go
       ../shared/programs/gpg

@@ -1,6 +1,11 @@
 { config, pkgs, ... }:
 
 {
+  imports = [
+    ./atuin.nix
+    ./fzf.nix
+  ];
+
   home.file = {
     ".hushlogin".text = "";
   };
@@ -21,18 +26,8 @@
 
   programs.bash = {
     enable = true;
-    historySize = 1000000;
-    historyFileSize = 10000000;
-
-    bashrcExtra = ''
-      set_history() {
-        history -a; history -c; history -r;
-      }
-      starship_precmd_user_func="set_history"
-    '';
-
-    initExtra = ''
-    '';
+    historySize = 0;
+    historyFileSize = 0;
   };
 
   programs.starship = {
