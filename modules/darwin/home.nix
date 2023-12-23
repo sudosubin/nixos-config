@@ -70,7 +70,6 @@
       ../darwin/programs/clop
       ../darwin/programs/desktop
       ../darwin/programs/hammerspoon
-      ../darwin/programs/homerow
       ../darwin/programs/skhd
       ../darwin/programs/yabai
     ];

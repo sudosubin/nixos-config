@@ -26,17 +26,6 @@ modules:
       get_version: |-
         curl -s "https://api.github.com/repos/Hammerspoon/hammerspoon/releases/latest" | jq -r ".name"
 
-  - path: ./libraries/nixpkgs/programs/homerow/default.nix
-    args:
-      read_from_file: []
-      read_from_method: ["version"]
-      write: ["version"]
-    methods:
-      get_version: |-
-        curl -s "https://install.appcenter.ms/api/v0.1/apps/dexterleng/homerow-redux/distribution_groups/production/public_releases" \
-          -H "user-agent: Chrome/118.0.0.0" \
-          | jq -r "first | .short_version"
-
   - path: ./libraries/nixpkgs/programs/ijhttp/default.nix
     args:
       read_from_file: ["url"]
