@@ -1,39 +1,37 @@
-final: { lib, stdenvNoCC, fetchFromGitHub, ... }@prev:
+{ lib, stdenvNoCC, fetchFromGitHub }:
 
-{
-  zpl-open = stdenvNoCC.mkDerivation rec {
-    pname = "zpl-open";
-    version = "1.1.0";
+stdenvNoCC.mkDerivation rec {
+  pname = "zpl-open";
+  version = "1.1.0";
 
-    src = fetchFromGitHub {
-      owner = "sudosubin";
-      repo = "zeplin-uri-opener";
-      rev = "v${version}";
-      sha256 = "sha256-f6r2vnIGl41C52d1LT6mQpkOXLVLzvkpMivXlwfhMQg=";
-    };
+  src = fetchFromGitHub {
+    owner = "sudosubin";
+    repo = "zeplin-uri-opener";
+    rev = "v${version}";
+    sha256 = "sha256-f6r2vnIGl41C52d1LT6mQpkOXLVLzvkpMivXlwfhMQg=";
+  };
 
-    postPatch = ''
-      # fix bash invocation
-      substituteInPlace src/zpl-open --replace "/bin/bash" "/usr/bin/env bash"
+  postPatch = ''
+    # fix bash invocation
+    substituteInPlace src/zpl-open --replace "/bin/bash" "/usr/bin/env bash"
 
-      # fix pkg bin
-      substituteInPlace src/zpl-opener.desktop --replace "Exec=zpl-open" "Exec=$out/bin/zpl-open"
-    '';
+    # fix pkg bin
+    substituteInPlace src/zpl-opener.desktop --replace "Exec=zpl-open" "Exec=$out/bin/zpl-open"
+  '';
 
-    installPhase = ''
-      mkdir -p $out/bin
-      mkdir -p $out/share/applications
+  installPhase = ''
+    mkdir -p $out/bin
+    mkdir -p $out/share/applications
 
-      cp src/zpl-open $out/bin/
-      cp src/zpl-opener.desktop $out/share/applications/
-    '';
+    cp src/zpl-open $out/bin/
+    cp src/zpl-opener.desktop $out/share/applications/
+  '';
 
-    meta = with lib; {
-      homepage = "https://github.com/sudosubin/zeplin-uri-opener";
-      description = "Open zeplin app uri in your default browser";
-      license = licenses.mit;
-      platforms = platforms.linux;
-      maintainers = [ maintainers.sudosubin ];
-    };
+  meta = with lib; {
+    homepage = "https://github.com/sudosubin/zeplin-uri-opener";
+    description = "Open zeplin app uri in your default browser";
+    license = licenses.mit;
+    platforms = platforms.linux;
+    maintainers = [ maintainers.sudosubin ];
   };
 }

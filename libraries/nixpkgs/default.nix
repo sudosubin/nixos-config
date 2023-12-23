@@ -3,20 +3,21 @@
 {
   nixpkgs.overlays = [
     inputs.nix-vscode-extensions.overlays.default
-    (import ./programs/apple-cursor-theme)
-    (import ./programs/cleanshot)
-    (import ./programs/clop)
-    (import ./programs/figma-font-helper)
     (import ./programs/google-chrome)
-    (import ./programs/hadolint)
-    (import ./programs/hammerspoon)
-    (import ./programs/homerow)
-    (import ./programs/ijhttp)
-    (import ./programs/orbstack)
-    (import ./programs/pragmatapro)
     (import ./programs/python)
-    (import ./programs/redisinsight)
-    (import ./programs/zpl-open)
+
+    (final: prev: {
+      apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
+      cleanshot = final.callPackage ./programs/cleanshot { };
+      clop = final.callPackage ./programs/clop { };
+      hammerspoon = final.callPackage ./programs/hammerspoon { };
+      homerow = final.callPackage ./programs/homerow { };
+      ijhttp = final.callPackage ./programs/ijhttp { };
+      orbstack = final.callPackage ./programs/orbstack { };
+      pragmatapro = final.callPackage ./programs/pragmatapro { };
+      redisinsight = final.callPackage ./programs/redisinsight { };
+      zpl-open = final.callPackage ./programs/zpl-open { };
+    })
   ];
 
   nixpkgs.config.allowUnfreePredicate = (pkg: builtins.elem (lib.getName pkg) [

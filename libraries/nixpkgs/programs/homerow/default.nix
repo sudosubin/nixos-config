@@ -1,4 +1,4 @@
-final: { lib, stdenvNoCC, curl, jq, unzip, runCommand, ... }@prev:
+{ lib, stdenvNoCC, curl, jq, unzip, runCommand }:
 
 let
   fetchFromAppCenter = { owner, app, group, version }:
@@ -17,37 +17,35 @@ let
     '';
 
 in
-{
-  homerow = stdenvNoCC.mkDerivation rec {
-    pname = "homerow";
-    version = "0.21";
+stdenvNoCC.mkDerivation rec {
+  pname = "homerow";
+  version = "0.21";
 
-    src = fetchFromAppCenter {
-      inherit version;
-      owner = "dexterleng";
-      app = "homerow-redux";
-      group = "production";
-    };
+  src = fetchFromAppCenter {
+    inherit version;
+    owner = "dexterleng";
+    app = "homerow-redux";
+    group = "production";
+  };
 
-    sourceRoot = "Homerow.app";
+  sourceRoot = "Homerow.app";
 
-    nativeBuildInputs = [ unzip ];
+  nativeBuildInputs = [ unzip ];
 
-    unpackPhase = ''
-      unzip $src
-    '';
+  unpackPhase = ''
+    unzip $src
+  '';
 
-    installPhase = ''
-      mkdir -p "$out/Applications/${sourceRoot}"
-      cp -R . "$out/Applications/${sourceRoot}"
-    '';
+  installPhase = ''
+    mkdir -p "$out/Applications/${sourceRoot}"
+    cp -R . "$out/Applications/${sourceRoot}"
+  '';
 
-    meta = with lib; {
-      homepage = "https://www.homerow.app/";
-      description = "Spotlight for the macOS user interface";
-      license = licenses.unfree;
-      platforms = platforms.darwin;
-      maintainers = [ maintainers.sudosubin ];
-    };
+  meta = with lib; {
+    homepage = "https://www.homerow.app/";
+    description = "Spotlight for the macOS user interface";
+    license = licenses.unfree;
+    platforms = platforms.darwin;
+    maintainers = [ maintainers.sudosubin ];
   };
 }

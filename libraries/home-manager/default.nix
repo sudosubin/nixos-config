@@ -16,7 +16,6 @@ in
     ./programs/cleanshot
     ./programs/clop
     ./programs/defaults
-    ./programs/figma-font-helper
     ./programs/hammerspoon
     ./programs/homerow
     ./programs/jq

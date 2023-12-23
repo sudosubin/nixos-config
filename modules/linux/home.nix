@@ -67,7 +67,6 @@
       ../shared/programs/vscode
       ../shared/programs/xdg
 
-      ../linux/programs/figma-font-helper
       ../linux/programs/input-method
       ../linux/programs/theme
       ../linux/programs/wayland

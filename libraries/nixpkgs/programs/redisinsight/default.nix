@@ -1,4 +1,4 @@
-final: { lib, fetchurl, stdenvNoCC, undmg, ... }@prev:
+{ lib, fetchurl, stdenvNoCC, undmg }:
 
 let
   sources = {
@@ -13,34 +13,32 @@ let
   };
 
 in
-{
-  redisinsight = stdenvNoCC.mkDerivation rec {
-    pname = "redisinsight";
-    version = "2.38.0";
+stdenvNoCC.mkDerivation rec {
+  pname = "redisinsight";
+  version = "2.38.0";
 
-    src = fetchurl {
-      inherit (sources.${stdenvNoCC.hostPlatform.system}) url sha256;
-    };
+  src = fetchurl {
+    inherit (sources.${stdenvNoCC.hostPlatform.system}) url sha256;
+  };
 
-    sourceRoot = "RedisInsight-v2.app";
+  sourceRoot = "RedisInsight-v2.app";
 
-    nativeBuildInputs = [ undmg ];
+  nativeBuildInputs = [ undmg ];
 
-    unpackPhase = ''
-      undmg $src
-    '';
+  unpackPhase = ''
+    undmg $src
+  '';
 
-    installPhase = ''
-      mkdir -p "$out/Applications/${sourceRoot}"
-      cp -R . "$out/Applications/${sourceRoot}"
-    '';
+  installPhase = ''
+    mkdir -p "$out/Applications/${sourceRoot}"
+    cp -R . "$out/Applications/${sourceRoot}"
+  '';
 
-    meta = with lib; {
-      homepage = "https://redis.com/redis-enterprise/redis-insight/";
-      description = "GUI for streamlined Redis application development";
-      license = licenses.unfree;
-      platforms = builtins.attrNames sources;
-      maintainers = [ maintainers.sudosubin ];
-    };
+  meta = with lib; {
+    homepage = "https://redis.com/redis-enterprise/redis-insight/";
+    description = "GUI for streamlined Redis application development";
+    license = licenses.unfree;
+    platforms = builtins.attrNames sources;
+    maintainers = [ maintainers.sudosubin ];
   };
 }
