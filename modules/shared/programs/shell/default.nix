@@ -26,8 +26,8 @@
 
   programs.bash = {
     enable = true;
-    historySize = 0;
-    historyFileSize = 0;
+    historySize = 1000000;
+    historyFileSize = 1000000;
   };
 
   programs.starship = {
