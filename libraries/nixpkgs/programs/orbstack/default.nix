@@ -1,16 +1,12 @@
-{ lib, fetchurl, fetchFromGitHub, stdenvNoCC, docker, installShellFiles }:
+{ lib, fetchurl, fetchFromGitHub, stdenvNoCC, docker, docker-compose_1, installShellFiles }:
 
 let
   version = "1.2.0_16496";
   hdiutil = "/usr/bin/hdiutil";
+
   completions = {
     docker = docker.src;
-    docker-compose = fetchFromGitHub {
-      owner = "docker";
-      repo = "compose";
-      rev = "1.29.2";
-      sha256 = "sha256-Zx/gVGmYNDWBo/iYr5SDIPTQlzlgLjUx1VMQx5oeV8w=";
-    };
+    docker-compose = docker-compose_1.out;
   };
 
   sources = {
@@ -63,9 +59,8 @@ stdenvNoCC.mkDerivation rec {
     installShellCompletion --zsh  ${completions.docker}/contrib/completion/zsh/_docker
 
     # completion for docker-compose
-    installShellCompletion --bash ${completions.docker-compose}/contrib/completion/bash/docker-compose
-    installShellCompletion --fish ${completions.docker-compose}/contrib/completion/fish/docker-compose.fish
-    installShellCompletion --zsh ${completions.docker-compose}/contrib/completion/zsh/_docker-compose
+    installShellCompletion --bash ${completions.docker-compose}/share/bash-completion/completions/docker-compose
+    installShellCompletion --zsh ${completions.docker-compose}/share/zsh/site-functions/_docker-compose
   '';
 
   meta = with lib; {
