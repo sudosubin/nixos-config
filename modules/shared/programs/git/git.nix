@@ -17,6 +17,7 @@
     ];
     extraConfig = {
       credential.helper = "";
+      credential."https://github.com".helper = "!gh auth git-credential";
       diff.age-differ = {
         textconv = "${pkgs.rage}/bin/rage -d -i ${builtins.elemAt config.secrets.identityPaths 0}";
       };

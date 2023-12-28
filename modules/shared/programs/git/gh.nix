@@ -1,14 +1,17 @@
 { config, pkgs, ... }:
 
+let
+  yamlFormat = pkgs.formats.yaml { };
+
+in
 {
-  programs.gh = {
-    enable = true;
-    settings = {
-      git_protocol = "ssh";
+  xdg.configFile = {
+    "gh/config.yml".source = yamlFormat.generate "gh-config.yml" ({
+      aliases = { };
+      editor = "";
+      git_protocol = "https";
       prompt = "enabled";
-    };
-    gitCredentialHelper = {
-      enable = true;
-    };
+      version = "1";
+    });
   };
 }

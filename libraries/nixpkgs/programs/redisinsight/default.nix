@@ -3,25 +3,25 @@
 let
   sources = {
     "aarch64-darwin" = {
-      url = "https://download.redisinsight.redis.com/latest/RedisInsight-v2-mac-arm64.dmg";
-      sha256 = "0mr2s3dz11h67dx295dvvni3zmnfkq7i67iqwdcmb0rs5jl1883b";
+      url = "https://download.redisinsight.redis.com/latest/RedisInsight-mac-arm64.dmg";
+      sha256 = "09a375xydr78y4dgbsczs7rkxzgsbs202gcj54nc17sn30zdcral";
     };
     "x86_64-darwin" = {
-      url = "https://download.redisinsight.redis.com/latest/RedisInsight-v2-mac-x64.dmg";
-      sha256 = "1xf267gqfja7578ggh0cq7bffdhxz8zc6zdrcnmf7s5jfdrqsl1a";
+      url = "https://download.redisinsight.redis.com/latest/RedisInsight-mac-x64.dmg";
+      sha256 = "16xqnlx2ajckbsdhyzkp8ah80x2lb8acx4sw5d8pb29i0qjb1qqr";
     };
   };
 
 in
 stdenvNoCC.mkDerivation rec {
   pname = "redisinsight";
-  version = "2.38.0";
+  version = "2.40.0";
 
   src = fetchurl {
     inherit (sources.${stdenvNoCC.hostPlatform.system}) url sha256;
   };
 
-  sourceRoot = "RedisInsight-v2.app";
+  sourceRoot = "RedisInsight.app";
 
   nativeBuildInputs = [ undmg ];
 
