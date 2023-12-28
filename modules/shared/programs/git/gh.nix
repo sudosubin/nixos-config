@@ -5,6 +5,8 @@ let
 
 in
 {
+  home.packages = with pkgs; [ gh ];
+
   xdg.configFile = {
     "gh/config.yml".source = yamlFormat.generate "gh-config.yml" ({
       aliases = { };
