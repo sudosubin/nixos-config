@@ -215,9 +215,9 @@
       kubernetes = {
         format = "[$symbol$context( \\($namespace\\))]($style) ";
         style = "blue";
-        context_aliases = {
-          ".*/(?P<name>[\\w-]+)" = "$name";
-        };
+        contexts = [
+          { context_pattern = ".*/(?P<name>[\\w-]+)"; context_alias = "$name"; }
+        ];
         disabled = false;
       };
       lua.disabled = true;

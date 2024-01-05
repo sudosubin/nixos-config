@@ -11,6 +11,7 @@
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
+      homerow = final.callPackage ./programs/homerow { };
       ijhttp = final.callPackage ./programs/ijhttp { };
       orbstack = final.callPackage ./programs/orbstack { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
@@ -25,6 +26,7 @@
     "cleanshot"
     "datagrip"
     "google-chrome"
+    "homerow"
     "ijhttp"
     "ngrok"
     "orbstack"

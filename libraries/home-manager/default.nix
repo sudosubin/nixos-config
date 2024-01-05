@@ -17,6 +17,7 @@ in
     ./programs/clop
     ./programs/defaults
     ./programs/hammerspoon
+    ./programs/homerow
     ./programs/jq
     ./programs/kube
     ./programs/lsd

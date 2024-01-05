@@ -101,6 +101,7 @@ in
       tamasfe.even-better-toml
       timonwong.shellcheck
       usernamehw.errorlens
+      yoavbls.pretty-ts-errors
       yzhang.markdown-all-in-one
 
       overlays.pkief.material-icon-theme
