@@ -83,10 +83,6 @@ in
         ];
       };
 
-      mouse = {
-        hints.modifiers = "alt";
-      };
-
       live_config_reload = false;
     };
   };
