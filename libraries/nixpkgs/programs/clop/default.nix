@@ -6,11 +6,11 @@ let
 in
 stdenvNoCC.mkDerivation rec {
   pname = "clop";
-  version = "2.5.3";
+  version = "2.5.4";
 
   src = fetchurl {
     url = "https://github.com/FuzzyIdeas/Clop/releases/download/v${version}/Clop-${version}.dmg";
-    sha256 = "13yrraqccvq6jxi6fcsbasn0s7rqbjd3bfqlldad73rbzz011hax";
+    sha256 = "0na3556n8wkiv5f12ffi0f9r1m6qlj3gqv24c1gxrlzcc1200ina";
   };
 
   sourceRoot = "Clop.app";
