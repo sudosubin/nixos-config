@@ -1,17 +1,17 @@
 { lib, fetchurl, fetchFromGitHub, stdenvNoCC, docker, docker-compose_1, installShellFiles }:
 
 let
-  version = "1.4.2_16657";
+  version = "1.4.3_16673";
   hdiutil = "/usr/bin/hdiutil";
 
   sources = {
     "aarch64-darwin" = {
       url = "https://cdn-updates.orbstack.dev/arm64/OrbStack_v${version}_arm64.dmg";
-      sha256 = "0726vpm9wnicg8b173nm40bywk81rjmp9rxbkrpzrys2nhrxl644";
+      sha256 = "0n9p2ckqhqgywx6bmn0ac4s4fr2dg6n8x79wd4zknwr87lbq5jxg";
     };
     "x86_64-darwin" = {
       url = "https://cdn-updates.orbstack.dev/amd64/OrbStack_v${version}_amd64.dmg";
-      sha256 = "048s3cgyhmy0nkkfvhd4qd8yg2xz1yz75b56ggvmij435ni1k6ir";
+      sha256 = "1614hnliv777q5jx01qb0vxidyvxjvbk4sg89741j3cc23bp19a8";
     };
   };
 

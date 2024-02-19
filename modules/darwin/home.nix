@@ -3,12 +3,13 @@
 {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.users."subin.kim" = { config, ... }: {
-    home.username = "subin.kim";
-    home.homeDirectory = "/Users/subin.kim";
+  home-manager.users.elvin = { config, ... }: {
+    home.username = "elvin";
+    home.homeDirectory = "/Users/elvin";
 
     home.packages = with pkgs; [
       # Development
+      bash
       curl
       hadolint
       ijhttp
@@ -34,8 +35,8 @@
     };
 
     imports = [
+      inputs.nixos-config-private-daangn.homeManagerModules.daangn
       inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
-      inputs.nixos-config-private-toss.homeManagerModules.toss
 
       ../shared/programs/1password
       ../shared/programs/act

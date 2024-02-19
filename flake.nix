@@ -36,14 +36,14 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
-    nixos-config-private-sudosubin = {
-      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=sudosubin";
-      # url = "path:/home/sudosubin/Code/sudosubin/nixos-config-private/sudosubin";
+    nixos-config-private-daangn = {
+      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=daangn";
+      # url = "path:/Users/elvin/Code/sudosubin/nixos-config-private/daangn";
     };
 
-    nixos-config-private-toss = {
-      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=toss";
-      # url = "path:/home/sudosubin/Code/sudosubin/nixos-config-private/toss";
+    nixos-config-private-sudosubin = {
+      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=sudosubin";
+      # url = "path:/Users/elvin/Code/sudosubin/nixos-config-private/sudosubin";
     };
   };
 

@@ -9,9 +9,9 @@
 
   programs.bash.enable = true;
 
-  users.users."subin.kim" = {
+  users.users.elvin = {
     shell = pkgs.bash;
-    home = "/Users/subin.kim";
+    home = "/Users/elvin";
   };
 
   environment = {
