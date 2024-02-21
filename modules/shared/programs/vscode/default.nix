@@ -98,6 +98,7 @@ in
       rust-lang.rust-analyzer
       shardulm94.trailing-spaces
       styled-components.vscode-styled-components
+      svelte.svelte-vscode
       tamasfe.even-better-toml
       timonwong.shellcheck
       usernamehw.errorlens

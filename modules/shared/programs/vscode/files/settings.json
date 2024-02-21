@@ -108,6 +108,7 @@
 
   // language (javascript)
   "emmet.excludeLanguages": ["typescriptreact"],
+  "svelte.enable-ts-plugin": true,
   "typescript.disableAutomaticTypeAcquisition": true,
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "[css]": {
