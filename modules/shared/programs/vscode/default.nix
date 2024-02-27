@@ -72,6 +72,7 @@ in
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
       biomejs.biome
+      bufbuild.vscode-buf
       casualjim.gotemplate
       charliermarsh.ruff
       davidanson.vscode-markdownlint
