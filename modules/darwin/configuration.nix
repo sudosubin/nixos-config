@@ -33,11 +33,9 @@
       wvous-bl-corner = 1;
       wvous-tr-corner = 1;
       wvous-br-corner = 1;
-      # persistent-apps = [
-      #   "/System/Applications/Launchpad.app"
-      #   "/System/Applications/System Settings.app"
-      #   "/Applications/Google Chrome.app"
-      # ];
+      persistent-apps = [
+        "/System/Applications/Launchpad.app"
+      ];
     };
 
     # finder configurations
