@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 let
   nix-activate = pkgs.writeShellScriptBin "nix-activate" ''
@@ -18,7 +18,7 @@ let
 in
 {
   home.packages = with pkgs; [
-    rnix-lsp
+    nil
     nixpkgs-fmt
     nix-activate
   ];
