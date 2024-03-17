@@ -148,6 +148,16 @@
 
   // language (nix)
   "nix.enableLanguageServer": true,
+  "nix.serverSettings": {
+    "nil": {
+      "diagnostics": {
+        "ignored": ["unused_binding", "unused_with"]
+      },
+      "formatting": {
+        "command": ["nixpkgs-fmt"]
+      }
+    }
+  },
   "[nix]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true
