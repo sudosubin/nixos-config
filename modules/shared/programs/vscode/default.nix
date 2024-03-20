@@ -101,6 +101,7 @@ in
       styled-components.vscode-styled-components
       svelte.svelte-vscode
       tamasfe.even-better-toml
+      teticio.python-envy
       timonwong.shellcheck
       usernamehw.errorlens
       yoavbls.pretty-ts-errors
