@@ -7,6 +7,4 @@
     ./poetry.nix
     ./python.nix
   ];
-
-  home.packages = with pkgs; [ rye ];
 }

@@ -13,7 +13,6 @@
       hadolint
       ijhttp
       jetbrains.datagrip
-      poetry
       shfmt
       sqlfluff
 

@@ -7,16 +7,18 @@
     enableSudoTouchIdAuth = true;
   };
 
-  programs.bash.enable = true;
+  programs.bash = {
+    enable = true;
+  };
 
   users.users.elvin = {
-    shell = pkgs.bash;
+    shell = pkgs.bashInteractive;
     home = "/Users/elvin";
   };
 
   environment = {
-    shells = [ pkgs.bash ];
-    loginShell = "${pkgs.bash}/bin/bash -l";
+    shells = [ pkgs.bashInteractive ];
+    loginShell = "${pkgs.bashInteractive}/bin/bash -l";
     pathsToLink = [ "/share/qemu" ];
   };
 

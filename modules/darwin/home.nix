@@ -9,12 +9,10 @@
 
     home.packages = with pkgs; [
       # Development
-      bash
       curl
       hadolint
       ijhttp
       jetbrains.datagrip
-      poetry
       procps
       shfmt
       sqlfluff

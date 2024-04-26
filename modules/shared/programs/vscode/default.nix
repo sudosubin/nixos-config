@@ -17,7 +17,7 @@ let
   toCss = stylesheet: strings.concatStrings (attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
-    vscodium = pkgs.vscodium.overrideDerivation (attrs: rec {
+    vscodium = pkgs.vscodium.overrideDerivation (attrs: {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
       resources = if isDarwin then "Contents/Resources" else "resources";
@@ -46,7 +46,7 @@ let
       '';
     });
 
-    pkief.material-icon-theme = pkgs.vscode-marketplace.pkief.material-icon-theme.overrideAttrs (attrs: rec {
+    pkief.material-icon-theme = pkgs.vscode-marketplace.pkief.material-icon-theme.overrideAttrs (attrs: {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
       preInstall = ''
@@ -65,10 +65,11 @@ in
     "${configDir}/User/snippets".source = ./files/snippets;
   };
 
-  programs.vscode = {
+  programs.vscode = rec {
     enable = true;
     package = overlays.vscodium;
-    extensions = with pkgs.vscode-marketplace; [
+    extensions = with (pkgs.forVSCodeVersion package.version).vscode-marketplace; [
+      adguard.adblock
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
       biomejs.biome
@@ -93,8 +94,10 @@ in
       ms-kubernetes-tools.vscode-kubernetes-tools
       ms-pyright.pyright
       ms-python.debugpy
-      ms-python.python
+      pkgs.vscode-extensions.ms-python.python
+      overlays.pkief.material-icon-theme # TODO
       pkief.material-product-icons
+      prisma.prisma
       redhat.java
       redhat.vscode-yaml
       rust-lang.rust-analyzer
@@ -107,8 +110,6 @@ in
       usernamehw.errorlens
       yoavbls.pretty-ts-errors
       yzhang.markdown-all-in-one
-
-      overlays.pkief.material-icon-theme
     ];
   };
 

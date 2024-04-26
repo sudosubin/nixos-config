@@ -180,6 +180,9 @@
   "[nim]": {
     "editor.tabSize": 2
   },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
   "[rust]": {
     "editor.formatOnSave": true
   },

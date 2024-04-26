@@ -86,7 +86,7 @@
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.sudosubin = {
-    shell = pkgs.bash;
+    shell = pkgs.bashInteractive;
     isNormalUser = true;
     extraGroups = [
       "wheel" # Enable ‘sudo’ for the user.
