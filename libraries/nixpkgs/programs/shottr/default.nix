@@ -5,15 +5,15 @@ let
 
 in
 stdenvNoCC.mkDerivation rec {
-  pname = "cleanshot";
-  version = "4.6.2";
+  pname = "shottr";
+  version = "1.7.2";
 
   src = fetchurl {
-    url = "https://updates.getcleanshot.com/v3/CleanShot-X-${version}.dmg";
-    sha256 = "04qf45v7x54729i5zpbq1f60811db6jvy15rax6184zpsdd13fxv";
+    url = "https://shottr.cc/dl/Shottr-${version}.dmg";
+    sha256 = "0k1fz4fff62njr6niq3r5vlddbyi9729richczwj53kmhv6di8zh";
   };
 
-  sourceRoot = "CleanShot X.app";
+  sourceRoot = "Shottr.app";
 
   unpackPhase = ''
     mkdir -p ./Applications
@@ -28,8 +28,8 @@ stdenvNoCC.mkDerivation rec {
   '';
 
   meta = with lib; {
-    homepage = "https://cleanshot.com/";
-    description = "Screen capturing tool";
+    homepage = "https://shottr.cc/";
+    description = "Screenshot measurement and annotation tool";
     license = licenses.unfree;
     platforms = platforms.darwin;
     maintainers = [ maintainers.sudosubin ];
