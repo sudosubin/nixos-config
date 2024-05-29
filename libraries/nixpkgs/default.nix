@@ -10,6 +10,7 @@
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
+      git-spr = final.callPackage ./programs/git-spr { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };
       ijhttp = final.callPackage ./programs/ijhttp { };
