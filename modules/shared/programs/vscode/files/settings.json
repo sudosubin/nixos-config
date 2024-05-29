@@ -187,6 +187,7 @@
     "editor.formatOnSave": true
   },
   "java.import.generatesMetadataFilesAtProjectRoot": false,
+  "prisma.showPrismaDataPlatformNotification": false,
   "errorLens.margin": "6ch",
   "errorLens.gutterIconsEnabled": true,
   "errorLens.gutterIconSize": "65%",
