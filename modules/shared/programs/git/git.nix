@@ -10,9 +10,10 @@
       signByDefault = true;
     };
     ignores = [
-      ".envrc"
-      ".direnv"
       ".DS_Store"
+      ".direnv"
+      ".envrc"
+      ".spr.yml"
       "*.pem"
     ];
     extraConfig = {
