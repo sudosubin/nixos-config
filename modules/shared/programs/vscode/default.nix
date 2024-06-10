@@ -77,7 +77,7 @@ in
       casualjim.gotemplate
       charliermarsh.ruff
       davidanson.vscode-markdownlint
-      dbaeumer.vscode-eslint
+      pkgs.vscode-extensions.dbaeumer.vscode-eslint # TODO
       denoland.vscode-deno
       dorzey.vscode-sqlfluff
       eamodio.gitlens
@@ -94,7 +94,7 @@ in
       ms-kubernetes-tools.vscode-kubernetes-tools
       ms-pyright.pyright
       ms-python.debugpy
-      pkgs.vscode-extensions.ms-python.python
+      pkgs.vscode-extensions.ms-python.python # TODO
       overlays.pkief.material-icon-theme # TODO
       pkief.material-product-icons
       prisma.prisma

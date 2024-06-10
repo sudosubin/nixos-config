@@ -1,5 +1,9 @@
-{ inputs, lib, ... }:
+{ inputs, lib, pkgs, ... }:
 
+let
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
+
+in
 {
   nixpkgs.overlays = [
     inputs.nix-vscode-extensions.overlays.default
