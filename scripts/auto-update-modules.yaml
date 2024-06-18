@@ -23,26 +23,9 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        curl -s "https://install.appcenter.ms/api/v0.1/apps/dexterleng/homerow-redux/distribution_groups/production/public_releases" \
-          -H "user-agent: Chrome/0.0.0.0" \
-          | jq -r "first | .short_version"
+        echo "1.0.0"
       get_sha256: |-
-        VERSION=$(
-          curl -s "https://install.appcenter.ms/api/v0.1/apps/dexterleng/homerow-redux/distribution_groups/production/public_releases" \
-            -H "user-agent: Chrome/0.0.0.0" \
-            | jq -r "first | .short_version"
-        )
-        RELEASE_ID=$(
-          curl -k "https://install.appcenter.ms/api/v0.1/apps/dexterleng/homerow-redux/distribution_groups/production/public_releases" \
-            -H "user-agent: Chrome/0.0.0.0" \
-            | jq -r ".[] | select(.short_version == \"$VERSION\") | .id"
-        )
-        DOWNLOAD_URL=$(
-          curl -k "https://install.appcenter.ms/api/v0.1/apps/dexterleng/homerow-redux/distribution_groups/production/releases/$RELEASE_ID" \
-            -H "user-agent: Chrome/0.0.0.0" \
-            | jq -r ".download_url"
-        )
-        nix-prefetch-url "$DOWNLOAD_URL" --name "Homerow.app" --unpack
+        nix-prefetch-url "https://builds.homerow.app/latest/Homerow.zip" --name "Homerow.app" --unpack
 
   - path: ./libraries/nixpkgs/programs/ijhttp/default.nix
     args:
