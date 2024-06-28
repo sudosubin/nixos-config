@@ -1,4 +1,13 @@
 modules:
+  - path: ./libraries/nixpkgs/programs/cleanshot/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        echo "4.6.2"
+
   - path: ./libraries/nixpkgs/programs/clop/default.nix
     args:
       read_from_file: ["url"]
@@ -23,7 +32,7 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        echo "1.0.0"
+        echo "1.1.0"
       get_sha256: |-
         nix-prefetch-url "https://builds.homerow.app/latest/Homerow.zip" --name "Homerow.app" --unpack
 
@@ -57,12 +66,3 @@ modules:
     methods:
       get_version: |-
         curl -s "https://api.github.com/repos/RedisInsight/RedisInsight/releases/latest" | jq -r ".tag_name"
-
-  - path: ./libraries/nixpkgs/programs/shottr/default.nix
-    args:
-      read_from_file: ["url"]
-      read_from_method: ["version"]
-      write: ["version", "sha256"]
-    methods:
-      get_version: |-
-        curl -sL "https://formulae.brew.sh/api/cask/shottr.json" | jq -r ".version"

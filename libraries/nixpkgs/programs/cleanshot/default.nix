@@ -1,19 +1,18 @@
 { lib, fetchurl, stdenvNoCC }:
-
 let
   hdiutil = "/usr/bin/hdiutil";
 
 in
 stdenvNoCC.mkDerivation rec {
-  pname = "shottr";
-  version = "1.7.2";
+  pname = "cleanshot";
+  version = "4.6.2";
 
   src = fetchurl {
-    url = "https://shottr.cc/dl/Shottr-${version}.dmg";
-    sha256 = "0k1fz4fff62njr6niq3r5vlddbyi9729richczwj53kmhv6di8zh";
+    url = "https://updates.getcleanshot.com/v3/CleanShot-X-${version}.dmg";
+    sha256 = "04qf45v7x54729i5zpbq1f60811db6jvy15rax6184zpsdd13fxv";
   };
 
-  sourceRoot = "Shottr.app";
+  sourceRoot = "CleanShot X.app";
 
   unpackPhase = ''
     mkdir -p ./Applications
@@ -21,15 +20,14 @@ stdenvNoCC.mkDerivation rec {
     cp -r "mnt/${sourceRoot}" .
     ${hdiutil} detach -force mnt
   '';
-
   installPhase = ''
     mkdir -p "$out/Applications/${sourceRoot}"
     cp -R . "$out/Applications/${sourceRoot}"
   '';
 
   meta = with lib; {
-    homepage = "https://shottr.cc/";
-    description = "Screenshot measurement and annotation tool";
+    homepage = "https://cleanshot.com/";
+    description = "Screen capturing tool";
     license = licenses.unfree;
     platforms = platforms.darwin;
     maintainers = [ maintainers.sudosubin ];

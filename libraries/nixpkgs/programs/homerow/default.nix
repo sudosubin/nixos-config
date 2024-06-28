@@ -2,12 +2,12 @@
 
 stdenvNoCC.mkDerivation rec {
   pname = "homerow";
-  version = "1.0.0";
+  version = "1.1.0";
 
   src = fetchzip {
     url = "https://builds.homerow.app/latest/Homerow.zip";
     name = "Homerow.app";
-    sha256 = "09w6jljrscxrvnwnfq9ywsdnqv08iy7fw1p0v1ygkyd8dai2jx1w";
+    sha256 = "1xvli8prpjvacahgi1h8r86dyjcrsz3qmah6fdyvz1bsy3pa68nr";
   };
 
   sourceRoot = "Homerow.app";

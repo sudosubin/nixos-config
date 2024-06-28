@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 {
-  services.shottr = {
+  services.cleanshot = {
     enable = true;
   };
 }

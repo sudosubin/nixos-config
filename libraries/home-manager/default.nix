@@ -13,6 +13,7 @@ in
     ./programs/1password
     ./programs/act
     ./programs/caffeinate
+    ./programs/cleanshot
     ./programs/clop
     ./programs/defaults
     ./programs/hammerspoon
@@ -20,7 +21,6 @@ in
     ./programs/jq
     ./programs/kube
     ./programs/lsd
-    ./programs/shottr
     ./programs/skhd
     ./programs/yabai
 

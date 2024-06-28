@@ -12,6 +12,7 @@ in
 
     (final: prev: {
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
+      cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       git-spr = final.callPackage ./programs/git-spr { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
@@ -20,7 +21,6 @@ in
       orbstack = final.callPackage ./programs/orbstack { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       redisinsight = final.callPackage ./programs/redisinsight { };
-      shottr = final.callPackage ./programs/shottr { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
   ];
@@ -35,7 +35,7 @@ in
     "ngrok"
     "orbstack"
     "redisinsight"
-    "shottr"
+    "cleanshot"
     "slack"
     "zoom"
   ]);
