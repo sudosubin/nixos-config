@@ -37,7 +37,6 @@ in
     "redisinsight"
     "cleanshot"
     "slack"
-    "zoom"
   ]);
 
   nixpkgs.config.permittedInsecurePackages = [

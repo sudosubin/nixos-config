@@ -24,7 +24,6 @@
       cleanshot
       slack
       unzip
-      zoom-us
     ];
 
     secrets = {
