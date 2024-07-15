@@ -18,11 +18,10 @@
       sqlfluff
 
       # Utility
-      ngrok
+      nodePackages.localtunnel
       redisinsight
       ripgrep
       cleanshot
-      slack
       unzip
     ];
 

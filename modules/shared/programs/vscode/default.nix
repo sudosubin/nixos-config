@@ -75,7 +75,7 @@ in
       biomejs.biome
       bufbuild.vscode-buf
       casualjim.gotemplate
-      charliermarsh.ruff
+      pkgs.vscode-extensions.charliermarsh.ruff # TODO
       davidanson.vscode-markdownlint
       pkgs.vscode-extensions.dbaeumer.vscode-eslint # TODO
       denoland.vscode-deno
@@ -92,7 +92,7 @@ in
       jnoortheen.nix-ide
       kevinrose.vsc-python-indent
       ms-kubernetes-tools.vscode-kubernetes-tools
-      ms-pyright.pyright
+      pkgs.vscode-extensions.ms-pyright.pyright # TODO
       ms-python.debugpy
       pkgs.vscode-extensions.ms-python.python # TODO
       overlays.pkief.material-icon-theme # TODO
