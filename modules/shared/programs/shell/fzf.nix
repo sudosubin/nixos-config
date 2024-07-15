@@ -4,10 +4,11 @@
   programs.fzf = {
     enable = true;
     defaultOptions = [
-      "--color=fg:-1,bg:-1,hl:#1a7f37"
-      "--color=fg+:#0E1116,bg+:#ffffff,hl+:#1a7f37"
-      "--color=info:#9a6700,prompt:#1a7f37,pointer:#3192aa"
-      "--color=marker:#3192aa,spinner:#9a6700,header:#3192aa"
+      "--color=dark"
+      "--color=fg:-1,bg:-1,hl:#98c379"
+      "--color=fg+:#ffffff,bg+:#282c34,hl+:#98c379"
+      "--color=info:#e5c07b,prompt:#98c379,pointer:#56b6c2"
+      "--color=marker:#56b6c2,spinner:#e5c07b,header:#56b6c2"
     ];
   };
 }

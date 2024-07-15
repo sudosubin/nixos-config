@@ -5,7 +5,7 @@
     enable = true;
 
     config = {
-      theme = "GitHub";
+      theme = "base16";
       style = "numbers,changes,header";
       italic-text = "always";
     };

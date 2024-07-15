@@ -55,6 +55,13 @@ let
         node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
       '';
     });
+
+    zhuangtongfa.material-theme = pkgs.vscode-extensions.zhuangtongfa.material-theme.overrideAttrs (attrs: {
+      preInstall = ''
+        ${attrs.preInstall or ""}
+        rm -rf ./styles
+      '';
+    });
   };
 
 in
@@ -86,7 +93,6 @@ in
       exiasr.hadolint
       foxundermoon.shell-format
       fwcd.kotlin
-      github.github-vscode-theme
       golang.go
       hashicorp.terraform
       jnoortheen.nix-ide
@@ -110,6 +116,7 @@ in
       usernamehw.errorlens
       yoavbls.pretty-ts-errors
       yzhang.markdown-all-in-one
+      overlays.zhuangtongfa.material-theme # TODO
     ];
   };
 
