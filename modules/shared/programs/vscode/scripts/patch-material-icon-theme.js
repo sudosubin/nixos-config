@@ -12,17 +12,11 @@ const vscodeConfig = parse(fs.readFileSync(argument));
 const extensionConfig = parse(fs.readFileSync("./dist/material-icons.json"));
 
 // vscode settings.json "material-icon-theme.*"
-const options = Object.entries(vscodeConfig).reduce((prev, [key, value]) => {
-  if (!key.startsWith("material-icon-theme.")) {
-    return prev;
-  }
-
-  const keys = key.replace("material-icon-theme.", "").split(".");
-  const last = keys.pop();
-
-  keys.reduce((o, k) => (o[k] = o[k] || {}), prev)[last] = value;
-  return prev;
-}, extensionConfig.options);
+const options = Object.fromEntries(
+  Object.entries(vscodeConfig)
+    .filter(([key, _]) => key.startsWith("material-icon-theme."))
+    .map(([key, value]) => [key.replace("material-icon-theme.", ""), value])
+);
 
 // extension material-icons.json
 const data = {
