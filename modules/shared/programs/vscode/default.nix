@@ -94,6 +94,8 @@ in
       foxundermoon.shell-format
       fwcd.kotlin
       golang.go
+      graphql.vscode-graphql
+      graphql.vscode-graphql-syntax
       hashicorp.terraform
       jnoortheen.nix-ide
       kevinrose.vsc-python-indent

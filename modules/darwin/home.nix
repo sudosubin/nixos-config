@@ -13,6 +13,7 @@
       hadolint
       ijhttp
       jetbrains.datagrip
+      ngrok
       procps
       shfmt
       sqlfluff
