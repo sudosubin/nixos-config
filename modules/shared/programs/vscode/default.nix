@@ -82,9 +82,9 @@ in
       biomejs.biome
       bufbuild.vscode-buf
       casualjim.gotemplate
-      pkgs.vscode-extensions.charliermarsh.ruff # TODO
+      charliermarsh.ruff
       davidanson.vscode-markdownlint
-      pkgs.vscode-extensions.dbaeumer.vscode-eslint # TODO
+      dbaeumer.vscode-eslint # TODO
       denoland.vscode-deno
       dorzey.vscode-sqlfluff
       eamodio.gitlens
@@ -100,9 +100,9 @@ in
       jnoortheen.nix-ide
       kevinrose.vsc-python-indent
       ms-kubernetes-tools.vscode-kubernetes-tools
-      pkgs.vscode-extensions.ms-pyright.pyright # TODO
+      ms-pyright.pyright
       pkgs.vscode-extensions.ms-python.debugpy # TODO
-      pkgs.vscode-extensions.ms-python.python # TODO
+      ms-python.python
       overlays.pkief.material-icon-theme # TODO
       pkief.material-product-icons
       prisma.prisma
