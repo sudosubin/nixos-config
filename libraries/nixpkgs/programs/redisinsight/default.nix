@@ -1,21 +1,21 @@
-{ lib, fetchurl, stdenvNoCC, undmg }:
+{ lib, fetchurl, stdenvNoCC, _7zz }:
 
 let
   sources = {
     "aarch64-darwin" = {
       url = "https://download.redisinsight.redis.com/latest/Redis-Insight-mac-arm64.dmg";
-      sha256 = "058c99m89bmjrb3mv0il8g5zry8yv4sg940531a69c3sirj4m0hn";
+      sha256 = "0pmaq19f58b1076b4cdsvcjgjkz3cbfc9ij09ignvjl0mgc1ajc2";
     };
     "x86_64-darwin" = {
       url = "https://download.redisinsight.redis.com/latest/Redis-Insight-mac-x64.dmg";
-      sha256 = "1575p5nswi03vpydv3dn4z0z0bgsxnrxdpxvc76dlqrb0ik29w1n";
+      sha256 = "0fxwjfhkcrhwiwqjlw49rqmfzcpzv30wflysfnga9fnrwhaacl2r";
     };
   };
 
 in
 stdenvNoCC.mkDerivation rec {
   pname = "redisinsight";
-  version = "2.52.0";
+  version = "2.54";
 
   src = fetchurl {
     inherit (sources.${stdenvNoCC.hostPlatform.system}) url sha256;
@@ -23,11 +23,7 @@ stdenvNoCC.mkDerivation rec {
 
   sourceRoot = "Redis Insight.app";
 
-  nativeBuildInputs = [ undmg ];
-
-  unpackPhase = ''
-    undmg $src
-  '';
+  nativeBuildInputs = [ _7zz ];
 
   installPhase = ''
     mkdir -p "$out/Applications/${sourceRoot}"

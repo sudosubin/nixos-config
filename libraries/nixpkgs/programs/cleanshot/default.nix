@@ -1,8 +1,5 @@
-{ lib, fetchurl, stdenvNoCC }:
-let
-  hdiutil = "/usr/bin/hdiutil";
+{ lib, fetchurl, stdenvNoCC, _7zz }:
 
-in
 stdenvNoCC.mkDerivation rec {
   pname = "cleanshot";
   version = "4.6.2";
@@ -14,12 +11,8 @@ stdenvNoCC.mkDerivation rec {
 
   sourceRoot = "CleanShot X.app";
 
-  unpackPhase = ''
-    mkdir -p ./Applications
-    ${hdiutil} attach -readonly -mountpoint mnt $src
-    cp -r "mnt/${sourceRoot}" .
-    ${hdiutil} detach -force mnt
-  '';
+  nativeBuildInputs = [ _7zz ];
+
   installPhase = ''
     mkdir -p "$out/Applications/${sourceRoot}"
     cp -R . "$out/Applications/${sourceRoot}"

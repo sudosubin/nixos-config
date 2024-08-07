@@ -1,4 +1,4 @@
-{ lib, fetchurl, fetchFromGitHub, stdenvNoCC, docker, docker-compose_1, installShellFiles }:
+{ lib, fetchurl, fetchFromGitHub, stdenvNoCC, docker, installShellFiles, _7zz }:
 
 let
   version = "1.6.4_17192";
@@ -27,13 +27,10 @@ stdenvNoCC.mkDerivation rec {
 
   sourceRoot = "OrbStack.app";
 
-  nativeBuildInputs = [ installShellFiles ];
+  nativeBuildInputs = [ installShellFiles _7zz ];
 
   unpackPhase = ''
-    mkdir -p ./Applications
-    ${hdiutil} attach -readonly -mountpoint mnt $src
-    cp -r "mnt/${sourceRoot}" .
-    ${hdiutil} detach -force mnt
+    7zz x -snld "$src"
   '';
 
   installPhase = ''
@@ -52,10 +49,6 @@ stdenvNoCC.mkDerivation rec {
     installShellCompletion --bash "$out/Applications/${sourceRoot}/Contents/Resources/completions/docker.bash"
     installShellCompletion --fish "$out/Applications/${sourceRoot}/Contents/Resources/completions/docker.fish"
     installShellCompletion --zsh  "$out/Applications/${sourceRoot}/Contents/Resources/completions/zsh/_docker"
-
-    # completion for docker-compose
-    installShellCompletion --bash ${docker-compose_1.out}/share/bash-completion/completions/docker-compose
-    installShellCompletion --zsh ${docker-compose_1.out}/share/zsh/site-functions/_docker-compose
   '';
 
   meta = with lib; {

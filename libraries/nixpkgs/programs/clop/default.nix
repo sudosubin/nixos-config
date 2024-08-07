@@ -1,26 +1,17 @@
-{ lib, fetchurl, stdenvNoCC }:
+{ lib, fetchurl, stdenvNoCC, _7zz }:
 
-let
-  hdiutil = "/usr/bin/hdiutil";
-
-in
 stdenvNoCC.mkDerivation rec {
   pname = "clop";
-  version = "2.5.5";
+  version = "2.6.0";
 
   src = fetchurl {
     url = "https://github.com/FuzzyIdeas/Clop/releases/download/v${version}/Clop-${version}.dmg";
-    sha256 = "1zyq3avrrgaspp9kxr7jy2ilsk04z1bmmib7ad4sf43x787ig2la";
+    sha256 = "0p2jj4qxj6zqlrnhzhffaj8la3n4gi9kyfmvj3q9r64a17qs60kh";
   };
 
   sourceRoot = "Clop.app";
 
-  unpackPhase = ''
-    mkdir -p ./Applications
-    ${hdiutil} attach -readonly -mountpoint mnt $src
-    cp -r "mnt/${sourceRoot}" .
-    ${hdiutil} detach -force mnt
-  '';
+  nativeBuildInputs = [ _7zz ];
 
   installPhase = ''
     mkdir -p "$out/Applications/${sourceRoot}"

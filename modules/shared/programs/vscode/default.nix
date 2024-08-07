@@ -101,7 +101,7 @@ in
       kevinrose.vsc-python-indent
       ms-kubernetes-tools.vscode-kubernetes-tools
       pkgs.vscode-extensions.ms-pyright.pyright # TODO
-      ms-python.debugpy
+      pkgs.vscode-extensions.ms-python.debugpy # TODO
       pkgs.vscode-extensions.ms-python.python # TODO
       overlays.pkief.material-icon-theme # TODO
       pkief.material-product-icons

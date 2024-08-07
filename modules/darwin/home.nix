@@ -36,7 +36,7 @@
       inputs.nixos-config-private-daangn.homeManagerModules.daangn
       inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
 
-      ../shared/programs/1password
+      # ../shared/programs/1password
       ../shared/programs/act
       ../shared/programs/alacritty
       ../shared/programs/aws
