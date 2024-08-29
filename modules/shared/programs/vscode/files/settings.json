@@ -193,6 +193,7 @@
   "errorLens.gutterIconSet": "defaultOutline",
 
   // telemetry, etc
+  "amazonQ.telemetry": false,
   "http.proxyStrictSSL": false,
   "redhat.telemetry.enabled": false,
   "telemetry.telemetryLevel": "off",

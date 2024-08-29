@@ -2,11 +2,11 @@
 
 stdenvNoCC.mkDerivation rec {
   pname = "ijhttp";
-  version = "241.14494.240";
+  version = "242.21829.56";
 
   src = fetchurl {
     url = "https://download-cdn.jetbrains.com/resources/intellij/http-client/${version}/intellij-http-client.zip";
-    sha256 = "0s389da2xc2ixrfq162zpyddnlh8krdd6y37dn802x9hx03hdrrx";
+    sha256 = "0n99wh3vd023ij2psvb1w7rvjrf69wvdp4w39vrfz904bh4x2a9j";
   };
 
   nativeBuildInputs = [ unzip makeWrapper ];

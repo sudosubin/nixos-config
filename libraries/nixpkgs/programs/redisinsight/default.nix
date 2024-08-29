@@ -15,7 +15,7 @@ let
 in
 stdenvNoCC.mkDerivation rec {
   pname = "redisinsight";
-  version = "2.54";
+  version = "2.54.0";
 
   src = fetchurl {
     inherit (sources.${stdenvNoCC.hostPlatform.system}) url sha256;
