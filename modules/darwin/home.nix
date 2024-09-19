@@ -19,6 +19,7 @@
       sqlfluff
 
       # Utility
+      discord
       nodePackages.localtunnel
       redisinsight
       ripgrep

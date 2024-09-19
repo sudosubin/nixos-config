@@ -79,7 +79,7 @@ in
       adguard.adblock
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
-      biomejs.biome
+      pkgs.vscode-extensions.biomejs.biome # TODO
       bufbuild.vscode-buf
       casualjim.gotemplate
       charliermarsh.ruff
@@ -103,6 +103,7 @@ in
       ms-pyright.pyright
       pkgs.vscode-extensions.ms-python.debugpy # TODO
       ms-python.python
+      pkgs.vscode-extensions.ms-vscode-remote.remote-ssh # TODO
       overlays.pkief.material-icon-theme # TODO
       pkief.material-product-icons
       prisma.prisma

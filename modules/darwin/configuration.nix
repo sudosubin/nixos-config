@@ -78,4 +78,6 @@
       ShowSeconds = 1;
     };
   };
+
+  system.stateVersion = 5;
 }

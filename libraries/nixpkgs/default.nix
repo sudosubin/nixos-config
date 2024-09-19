@@ -29,6 +29,7 @@ in
     "1password"
     "1password-cli"
     "datagrip"
+    "discord"
     "google-chrome"
     "homerow"
     "ijhttp"
@@ -37,6 +38,7 @@ in
     "redisinsight"
     "cleanshot"
     "slack"
+    "vscode-extension-ms-vscode-remote-remote-ssh"
   ]);
 
   nixpkgs.config.permittedInsecurePackages = [

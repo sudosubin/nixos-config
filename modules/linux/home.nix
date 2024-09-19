@@ -17,6 +17,7 @@
       sqlfluff
 
       # Utility
+      discord
       figma-linux
       gnome.nautilus
       google-chrome
