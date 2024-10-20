@@ -17,6 +17,15 @@ modules:
       get_version: |-
         curl -s "https://api.github.com/repos/FuzzyIdeas/Clop/releases/latest" | jq -r ".tag_name" | sed "s/v//g"
 
+  - path: ./libraries/nixpkgs/programs/deskpad/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        curl -s "https://api.github.com/repos/Stengo/DeskPad/releases/latest" | jq -r ".tag_name" | sed "s/v//g"
+
   - path: ./libraries/nixpkgs/programs/hammerspoon/default.nix
     args:
       read_from_file: ["url"]

@@ -14,6 +14,7 @@ in
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
+      deskpad = final.callPackage ./programs/deskpad { };
       git-spr = final.callPackage ./programs/git-spr { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };

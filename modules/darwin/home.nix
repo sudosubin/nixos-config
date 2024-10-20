@@ -19,6 +19,7 @@
       sqlfluff
 
       # Utility
+      deskpad
       discord
       nodePackages.localtunnel
       redisinsight
