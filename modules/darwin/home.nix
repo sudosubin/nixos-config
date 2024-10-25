@@ -40,7 +40,6 @@
 
       # ../shared/programs/1password
       ../shared/programs/act
-      ../shared/programs/alacritty
       ../shared/programs/aws
       ../shared/programs/bat
       ../shared/programs/container
@@ -62,6 +61,7 @@
       ../shared/programs/tmux
       ../shared/programs/vercel
       ../shared/programs/vscode
+      ../shared/programs/wezterm
       ../shared/programs/xdg
 
       ../darwin/programs/caffeinate

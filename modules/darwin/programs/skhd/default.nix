@@ -22,8 +22,8 @@ in
       "${mod} + shift - r : ${bins.skhd} --reload"
 
       # Terminal
-      "${mod} - return : open -na Alacritty.app"
-      "ctrl + cmd - t : open -na Alacritty.app"
+      "${mod} - return : open -na WezTerm.app"
+      "ctrl + cmd - t : open -na WezTerm.app"
 
       # Kill window
       "${mod} - w : ${bins.yabai} -m window --close"

@@ -4,7 +4,7 @@
   programs.rofi = {
     enable = true;
     font = "mono 12";
-    terminal = "${pkgs.alacritty}/bin/alacritty";
+    terminal = "${pkgs.wezterm}/bin/wezterm";
     cycle = true;
     theme = "Arc-Dark";
     extraConfig = {
