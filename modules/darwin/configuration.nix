@@ -18,7 +18,6 @@
 
   environment = {
     shells = [ pkgs.bashInteractive ];
-    loginShell = "${pkgs.bashInteractive}/bin/bash -l";
     pathsToLink = [ "/share/qemu" ];
   };
 
