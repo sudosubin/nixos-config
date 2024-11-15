@@ -93,6 +93,7 @@ in
       exiasr.hadolint
       foxundermoon.shell-format
       fwcd.kotlin
+      github.copilot
       golang.go
       graphql.vscode-graphql
       graphql.vscode-graphql-syntax

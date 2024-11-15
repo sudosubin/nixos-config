@@ -39,6 +39,7 @@ in
     "redisinsight"
     "cleanshot"
     "slack"
+    "vscode-extension-github-copilot"
     "vscode-extension-ms-vscode-remote-remote-ssh"
   ]);
 

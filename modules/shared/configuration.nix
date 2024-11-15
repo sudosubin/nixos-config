@@ -2,8 +2,10 @@
 
 {
   nix = {
+    optimise = {
+      automatic = true;
+    };
     settings = {
-      auto-optimise-store = true;
       substituters = [
         "https://cache.nixos.org"
       ];
