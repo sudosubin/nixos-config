@@ -18,7 +18,7 @@ $ ./result/sw/bin/darwin-rebuild switch --flake '.#darwin'
 ## Update (flake lock, custom packages)
 
 ```sh
-$ nix flake update .
+$ nix flake update --flake .
 fetching ...
 
 $ ./scripts/auto-update-modules.py
