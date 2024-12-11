@@ -94,6 +94,7 @@ in
       foxundermoon.shell-format
       fwcd.kotlin
       github.copilot
+      pkgs.vscode-extensions.github.copilot-chat # TODO
       golang.go
       graphql.vscode-graphql
       graphql.vscode-graphql-syntax
