@@ -41,7 +41,7 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        echo "1.2.2"
+        echo "1.3.2"
       get_sha256: |-
         nix-prefetch-url "https://builds.homerow.app/latest/Homerow.zip" --name "Homerow.app" --unpack
 
