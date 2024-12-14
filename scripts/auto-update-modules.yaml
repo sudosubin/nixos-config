@@ -34,16 +34,18 @@ modules:
     methods:
       get_version: |-
         curl -s "https://api.github.com/repos/Hammerspoon/hammerspoon/releases/latest" | jq -r ".name"
+
   - path: ./libraries/nixpkgs/programs/homerow/default.nix
     args:
-      read_from_file: []
-      read_from_method: ["version", "sha256"]
+      read_from_file: ["url"]
+      read_from_method: ["version"]
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        echo "1.3.2"
-      get_sha256: |-
-        nix-prefetch-url "https://builds.homerow.app/latest/Homerow.zip" --name "Homerow.app" --unpack
+        curl -s https://www.homerow.app/appcast.xml \
+          | grep -m2 "title" \
+          | tail -n1 \
+          | sed -r "s|.*>([0-9.]+)<.*|\1|g"
 
   - path: ./libraries/nixpkgs/programs/ijhttp/default.nix
     args:

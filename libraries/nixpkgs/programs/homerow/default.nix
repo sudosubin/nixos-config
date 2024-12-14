@@ -1,14 +1,20 @@
-{ lib, stdenvNoCC, fetchzip, curl, jq, runCommand }:
+{ lib, stdenvNoCC, fetchurl, curl, jq, runCommand, unzip }:
 
 stdenvNoCC.mkDerivation rec {
   pname = "homerow";
   version = "1.3.2";
 
-  src = fetchzip {
-    url = "https://builds.homerow.app/latest/Homerow.zip";
+  src = fetchurl {
+    url = "https://builds.homerow.app/v${version}/Homerow.zip";
     name = "Homerow.app";
-    sha256 = "0rb620a4zvc7vjwvcdn10y64agvan4bjplspx8d6p27k488bw588";
+    sha256 = "0ckksjfmfn24g5bsg1ws6a8lhnfxp74m5skg0gwzkhz7jh17bh9i";
   };
+
+  nativeBuildInputs = [ unzip ];
+
+  unpackPhase = ''
+    unzip $src
+  '';
 
   sourceRoot = "Homerow.app";
 
