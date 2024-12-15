@@ -6,7 +6,11 @@
 
     config = {
       HSUploadCrashData = 0;
-      MJConfigFile = "~/.config/hammerspoon/init.lua";
+      MJConfigFile = "${config.xdg.configHome}/hammerspoon/init.lua";
     };
+  };
+
+  xdg.configFile = {
+    "hammerspoon/init.lua".source = ./files/init.lua;
   };
 }

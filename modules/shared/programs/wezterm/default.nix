@@ -28,7 +28,7 @@ in
         automatically_reload_config = true,
         color_scheme = 'default',
         font = wezterm.font('${font-family}'),
-        font_size = 13,
+        font_size = ${builtins.toString(font-size)},
         front_end = 'WebGpu',
         hide_tab_bar_if_only_one_tab = true,
         window_decorations = 'RESIZE',

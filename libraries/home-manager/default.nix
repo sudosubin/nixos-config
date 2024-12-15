@@ -21,7 +21,6 @@ in
     ./programs/jq
     ./programs/kube
     ./programs/lsd
-    ./programs/skhd
     ./programs/yabai
 
     # os systems
