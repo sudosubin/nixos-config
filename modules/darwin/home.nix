@@ -13,6 +13,7 @@
       hadolint
       ijhttp
       jetbrains.datagrip
+      jetbrains.idea-community
       ngrok
       procps
       shfmt
