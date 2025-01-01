@@ -36,6 +36,7 @@ in
     "ijhttp"
     "ngrok"
     "orbstack"
+    "raycast"
     "redisinsight"
     "cleanshot"
     "slack"

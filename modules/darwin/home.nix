@@ -20,12 +20,12 @@
       sqlfluff
 
       # Utility
+      cleanshot
       deskpad
       discord
       nodePackages.localtunnel
       redisinsight
       ripgrep
-      cleanshot
       unzip
     ];
 
@@ -71,6 +71,7 @@
       ../darwin/programs/desktop
       ../darwin/programs/hammerspoon
       ../darwin/programs/homerow
+      ../darwin/programs/raycast
       ../darwin/programs/yabai
     ];
 
