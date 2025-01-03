@@ -71,7 +71,6 @@
       ../darwin/programs/desktop
       ../darwin/programs/hammerspoon
       ../darwin/programs/homerow
-      ../darwin/programs/raycast
       ../darwin/programs/yabai
     ];
 
