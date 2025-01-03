@@ -1,7 +1,8 @@
 { config, lib, pkgs, ... }:
+with lib;
 
 let
-  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
 
   colors = {
     black = "#5c6370";
@@ -15,8 +16,14 @@ let
     background = "#1e2127";
   };
 
+  font =
+    if isLinux then [
+      { family = "PragmataProMono Nerd Font Mono"; }
+    ] else [
+      { family = "PragmataProMono Nerd Font Mono"; }
+      { family = "Apple Color Emoji"; assume_emoji_presentation = true; }
+    ];
   font-size = if isDarwin then 13 else 10;
-  font-family = "PragmataProMono Nerd Font Mono";
 
 in
 {
@@ -24,15 +31,17 @@ in
     enable = true;
 
     extraConfig = ''
-      return {
-        automatically_reload_config = true,
-        color_scheme = 'default',
-        font = wezterm.font('${font-family}'),
-        font_size = ${builtins.toString(font-size)},
-        front_end = 'WebGpu',
-        hide_tab_bar_if_only_one_tab = true,
-        window_decorations = 'RESIZE',
-      }
+      return ${generators.toLua { } {
+        automatically_reload_config = true;
+        color_scheme = "default";
+        font = generators.mkLuaInline ''
+          wezterm.font_with_fallback(${generators.toLua {} font})
+        '';
+        font_size = font-size;
+        front_end = "WebGpu";
+        hide_tab_bar_if_only_one_tab = true;
+        window_decorations = "RESIZE";
+      }};
     '';
 
     colorSchemes = {
