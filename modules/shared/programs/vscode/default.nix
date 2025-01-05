@@ -55,13 +55,6 @@ let
         node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
       '';
     });
-
-    zhuangtongfa.material-theme = pkgs.vscode-extensions.zhuangtongfa.material-theme.overrideAttrs (attrs: {
-      preInstall = ''
-        ${attrs.preInstall or ""}
-        rm -rf ./styles
-      '';
-    });
   };
 
 in
@@ -95,6 +88,7 @@ in
       fwcd.kotlin
       github.copilot
       pkgs.vscode-extensions.github.copilot-chat # TODO
+      github.github-vscode-theme
       golang.go
       graphql.vscode-graphql
       graphql.vscode-graphql-syntax
@@ -121,7 +115,6 @@ in
       usernamehw.errorlens
       yoavbls.pretty-ts-errors
       yzhang.markdown-all-in-one
-      overlays.zhuangtongfa.material-theme # TODO
     ];
   };
 

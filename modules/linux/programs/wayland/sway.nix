@@ -28,12 +28,12 @@ in
         followMouse = false;
       };
       colors = {
-        focused = { border = "#61AFEF80"; background = "#61AFEF80"; text = "#ABB2BF"; indicator = "#61AFEF80"; childBorder = "#61AFEF80"; };
-        focusedInactive = { border = "#1E2127"; background = "#1E2127"; text = "#ABB2BF"; indicator = "#1E2127"; childBorder = "#1E2127"; };
-        unfocused = { border = "#1E2127"; background = "#1E2127"; text = "#ABB2BF"; indicator = "#1E2127"; childBorder = "#1E2127"; };
-        urgent = { border = "#1E2127"; background = "#E06C75"; text = "#ABB2BF"; indicator = "#E06C75"; childBorder = "#E06C75"; };
-        placeholder = { border = "#1E2127"; background = "#1E2127"; text = "#ABB2BF"; indicator = "#1E2127"; childBorder = "#1E2127"; };
-        background = "#FFFFFF";
+        focused = { border = "#58a6ff80"; background = "#58a6ff80"; text = "#b1bac4"; indicator = "#58a6ff80"; childBorder = "#58a6ff80"; };
+        focusedInactive = { border = "#0d1117"; background = "#0d1117"; text = "#b1bac4"; indicator = "#0d1117"; childBorder = "#0d1117"; };
+        unfocused = { border = "#0d1117"; background = "#0d1117"; text = "#b1bac4"; indicator = "#0d1117"; childBorder = "#0d1117"; };
+        urgent = { border = "#0d1117"; background = "#ff7b72"; text = "#b1bac4"; indicator = "#ff7b72"; childBorder = "#ff7b72"; };
+        placeholder = { border = "#0d1117"; background = "#0d1117"; text = "#b1bac4"; indicator = "#0d1117"; childBorder = "#0d1117"; };
+        background = "#ffffff";
       };
       bars = [ ];
       startup = [

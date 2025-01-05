@@ -60,7 +60,7 @@
 
     lscolors = {
       ex = "31"; # ExecutableFile
-      fi = "30"; # RegularFile
+      fi = "37"; # RegularFile
       di = "34"; # Dir
       ln = "35"; # SymLink
       pi = "33"; # Pipe

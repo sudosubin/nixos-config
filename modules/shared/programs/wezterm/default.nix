@@ -3,17 +3,31 @@ with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
+  toLua = generators.toLua { };
 
   colors = {
-    black = "#5c6370";
-    red = "#e06c75";
-    green = "#98c379";
-    yellow = "#e5c07b";
-    blue = "#61afef";
-    magenta = "#c678dd";
-    cyan = "#56b6c2";
-    white = "#abb2bf";
-    background = "#1e2127";
+    background = "#0d1117";
+    gray = "#6e7681";
+    ansi = {
+      black = "#484f58";
+      white = "#b1bac4";
+      red = "#ff7b72";
+      green = "#3fb950";
+      yellow = "#d29922";
+      blue = "#58a6ff";
+      magenta = "#bc8cff";
+      cyan = "#39c5cf";
+    };
+    brights = {
+      black = "#6e7681";
+      white = "#ffffff";
+      red = "#ffa198";
+      green = "#56d364";
+      yellow = "#e3b341";
+      blue = "#79c0ff";
+      magenta = "#d2a8ff";
+      cyan = "#56d4dd";
+    };
   };
 
   font =
@@ -31,11 +45,11 @@ in
     enable = true;
 
     extraConfig = ''
-      return ${generators.toLua { } {
+      return ${toLua {
         automatically_reload_config = true;
         color_scheme = "default";
         font = generators.mkLuaInline ''
-          wezterm.font_with_fallback(${generators.toLua {} font})
+          wezterm.font_with_fallback(${toLua font})
         '';
         font_size = font-size;
         front_end = "WebGpu";
@@ -46,12 +60,12 @@ in
 
     colorSchemes = {
       default = {
-        foreground = colors.white;
+        foreground = colors.ansi.white;
         background = colors.background;
 
-        cursor_bg = colors.white;
-        cursor_fg = colors.background;
-        cursor_border = colors.white;
+        cursor_bg = colors.ansi.white;
+        cursor_fg = colors.ansi.black;
+        cursor_border = colors.ansi.white;
 
         selection_fg = "none";
         selection_bg = "rgba(255, 255, 255, 5%)";
@@ -61,26 +75,26 @@ in
         # split = "";
 
         ansi = [
-          colors.black
-          colors.red
-          colors.green
-          colors.yellow
-          colors.blue
-          colors.magenta
-          colors.cyan
-          colors.white
+          colors.ansi.black
+          colors.ansi.red
+          colors.ansi.green
+          colors.ansi.yellow
+          colors.ansi.blue
+          colors.ansi.magenta
+          colors.ansi.cyan
+          colors.ansi.white
         ];
         brights = [
-          colors.black
-          colors.red
-          colors.green
-          colors.yellow
-          colors.blue
-          colors.magenta
-          colors.cyan
-          colors.white
+          colors.brights.black
+          colors.brights.red
+          colors.brights.green
+          colors.brights.yellow
+          colors.brights.blue
+          colors.brights.magenta
+          colors.brights.cyan
+          colors.brights.white
         ];
-        compose_cursor = colors.green;
+        compose_cursor = colors.ansi.green;
       };
     };
 

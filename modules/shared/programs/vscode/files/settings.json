@@ -14,7 +14,7 @@
   "search.useGlobalIgnoreFiles": true,
 
   // theme
-  "workbench.colorTheme": "One Dark Pro",
+  "workbench.colorTheme": "GitHub Dark Default",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.productIconTheme": "material-product-icons",
   "material-icon-theme.hidesExplorerArrows": true,
@@ -22,14 +22,14 @@
     "*.gotmpl": "template"
   },
   "workbench.colorCustomizations": {
-    "errorLens.errorBackground": "#E06C751A",
-    "errorLens.errorForeground": "#E06C75",
-    "errorLens.warningBackground": "#D19A661A",
-    "errorLens.warningForeground": "#D19A66",
-    "errorLens.infoBackground": "#61AFEF1A",
-    "errorLens.infoForeground": "#61AFEF",
-    "errorLens.hintBackground": "#98C3791A",
-    "errorLens.hintForeground": "#98C379"
+    "errorLens.errorBackground": "#ff7b721a",
+    "errorLens.errorForeground": "#ff7b72",
+    "errorLens.warningBackground": "#d299221a",
+    "errorLens.warningForeground": "#d29922",
+    "errorLens.infoBackground": "#58a6ff1a",
+    "errorLens.infoForeground": "#58a6ff",
+    "errorLens.hintBackground": "#56d3641a",
+    "errorLens.hintForeground": "#56d364"
   },
   "explorer.compactFolders": false,
   "workbench.tree.indent": 16,
