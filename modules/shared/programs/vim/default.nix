@@ -80,6 +80,7 @@ in
     extraConfigLuaPre = ''
       require("github-theme").setup(${toLua {
         options = { transparent = true; };
+        groups.github_dark_default = { CursorLine = { bg = "bg2"; }; };
       }})
     '';
   };
