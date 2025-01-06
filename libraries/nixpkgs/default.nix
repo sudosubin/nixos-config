@@ -22,6 +22,9 @@ in
       orbstack = final.callPackage ./programs/orbstack { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       redisinsight = final.callPackage ./programs/redisinsight { };
+      vimPlugins = prev.vimPlugins // {
+        github-nvim-theme = final.callPackage ./programs/vim-plugins/github-nvim-theme { };
+      };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
   ];

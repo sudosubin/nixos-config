@@ -4,12 +4,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixos-hardware.url = "github:nixos/nixos-hardware";
+    flake-compat.url = "github:edolstra/flake-compat";
     flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
-
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
 
     darwin = {
       url = "github:lnl7/nix-darwin";
@@ -33,6 +29,14 @@
       url = "github:sudosubin/lefthook.nix";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
+    };
+
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-compat.follows = "flake-compat";
+      inputs.nix-darwin.follows = "darwin";
+      inputs.home-manager.follows = "home-manager";
     };
 
     nix-vscode-extensions = {

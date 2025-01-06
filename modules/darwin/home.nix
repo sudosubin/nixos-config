@@ -36,6 +36,7 @@
     };
 
     imports = [
+      inputs.nixvim.homeManagerModules.nixvim
       inputs.nixos-config-private-daangn.homeManagerModules.daangn
       inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
 
@@ -61,6 +62,7 @@
       ../shared/programs/terraform
       ../shared/programs/tmux
       ../shared/programs/vercel
+      ../shared/programs/vim
       ../shared/programs/vscode
       ../shared/programs/wezterm
       ../shared/programs/xdg
