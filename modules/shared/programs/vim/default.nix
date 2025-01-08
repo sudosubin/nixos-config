@@ -15,11 +15,6 @@ in
 
     colorscheme = "github_dark_default";
 
-    clipboard = {
-      register = "unnamedplus";
-      providers.wl-copy.enable = isLinux;
-    };
-
     # performance.byteCompileLua = {
     #   enable = true;
     #   configs = true;
@@ -36,6 +31,8 @@ in
     opts = {
       number = true;
       relativenumber = true;
+
+      clipboard = "unnamedplus";
 
       splitbelow = true;
       splitright = true;
