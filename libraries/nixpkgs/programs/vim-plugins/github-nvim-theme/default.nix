@@ -7,7 +7,7 @@ vimUtils.buildVimPlugin {
     owner = "projekt0n";
     repo = "github-nvim-theme";
     rev = "v1.1.2";
-    sha256 = "sha256-ur/65NtB8fY0acTUN/Xw9fT813UiL3YcP4+IwkaUzTE=";
+    sha256 = "0cfdji3c524g7wf7cbr2fpbzrx7my3skgm64d4sgdwa1vgjgmgxs";
   };
 
   meta = with lib; {
