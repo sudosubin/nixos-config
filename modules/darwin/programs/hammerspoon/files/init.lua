@@ -5,14 +5,47 @@ local up = "k";
 local right = "l";
 
 -- Utils
+function merge(a, b)
+  local merged = {}
+  for _, v in ipairs(a) do
+    table.insert(merged, v)
+  end
+  for _, v in ipairs(b) do
+    table.insert(merged, v)
+  end
+  return merged
+end
+
 function strip(string)
   return string:gsub("\n[^\n]*$", "")
 end
 
+function stroke(modifiers, character)
+  hs.eventtap.event.newKeyEvent(modifiers, character, true):post()
+  hs.eventtap.event.newKeyEvent(modifiers, character, false):post()
+end
+
 -- Prepare
+local lrhk = hs.loadSpoon("LeftRightHotkey"):start()
+
 local bin = {
   yabai = strip(hs.execute("command -v yabai", true)),
 }
+
+-- Default
+local mods = {
+  {},
+  {"lCtrl"},
+  {"lShift"},
+  {"lCmd"}
+}
+
+for _, mod in ipairs(mods) do
+  lrhk:bind(merge({"rCmd"}, mod), left, function() stroke(mod, "left") end, nil, function() stroke(mod, "left") end)
+  lrhk:bind(merge({"rCmd"}, mod), down, function() stroke(mod, "down") end, nil, function() stroke(mod, "down") end)
+  lrhk:bind(merge({"rCmd"}, mod), up, function() stroke(mod, "up") end, nil, function() stroke(mod, "up") end)
+  lrhk:bind(merge({"rCmd"}, mod), right, function() stroke(mod, "right") end, nil, function() stroke(mod, "right") end)
+end
 
 -- Hammerspoon
 hs.hotkey.bind({"alt", "shift"}, "r", function() hs.reload() end)
@@ -85,13 +118,5 @@ hs.hotkey.bind({"alt"}, "e", function() yabai({"-m", "window", "--toggle", "spli
 
 -- Yabai (fullscreen)
 hs.hotkey.bind({"alt"}, "f", function() yabai({"-m", "window", "--toggle", "zoom-fullscreen"}) end)
-
--- Homerow
-hs.pathwatcher.new(
-  os.getenv('HOME') .. '/Library/Preferences/com.superultra.Homerow.plist',
-  function(paths)
-    hs.execute('defaults write com.superultra.Homerow activation-count 0')
-  end
-):start()
 
 hs.alert.show("Config loaded")
