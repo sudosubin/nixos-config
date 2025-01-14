@@ -35,9 +35,11 @@ local bin = {
 -- Default
 local mods = {
   {},
+  {"lAlt"},
+  {"lAlt", "lShift"},
+  {"lCmd"},
   {"lCtrl"},
   {"lShift"},
-  {"lCmd"}
 }
 
 for _, mod in ipairs(mods) do
