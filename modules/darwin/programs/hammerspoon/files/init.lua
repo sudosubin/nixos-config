@@ -49,6 +49,9 @@ for _, mod in ipairs(mods) do
   lrhk:bind(merge({"rCmd"}, mod), right, function() stroke(mod, "right") end, nil, function() stroke(mod, "right") end)
 end
 
+-- Default (ignore cmd+h)
+lrhk:bind({"lCmd"}, "h", function() end, nil, function() end)
+
 -- Hammerspoon
 hs.hotkey.bind({"alt", "shift"}, "r", function() hs.reload() end)
 
