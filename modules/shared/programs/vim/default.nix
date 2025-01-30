@@ -7,6 +7,10 @@ let
 
 in
 {
+  home.sessionVariables = {
+    EDITOR = "vi";
+  };
+
   programs.nixvim = {
     enable = true;
 

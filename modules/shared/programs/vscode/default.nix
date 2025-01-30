@@ -106,6 +106,7 @@ in
       redhat.java
       redhat.vscode-yaml
       rust-lang.rust-analyzer
+      samuelcolvin.jinjahtml
       shardulm94.trailing-spaces
       styled-components.vscode-styled-components
       svelte.svelte-vscode
