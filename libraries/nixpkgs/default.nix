@@ -19,6 +19,7 @@ in
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };
       ijhttp = final.callPackage ./programs/ijhttp { };
+      input-source-pro = final.callPackage ./programs/input-source-pro { };
       orbstack = final.callPackage ./programs/orbstack { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       redisinsight = final.callPackage ./programs/redisinsight { };
@@ -37,6 +38,7 @@ in
     "google-chrome"
     "homerow"
     "ijhttp"
+    "input-source-pro"
     "ngrok"
     "orbstack"
     "raycast"
