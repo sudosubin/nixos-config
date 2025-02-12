@@ -1,8 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  nix.useDaemon = true;
-
   security.pam = {
     enableSudoTouchIdAuth = true;
   };
@@ -76,7 +74,12 @@
       ShowDayOfWeek = 0;
       ShowSeconds = 1;
     };
+
+    WindowManager = {
+      EnableStandardClickToShowDesktop = false;
+    };
   };
 
-  system.stateVersion = 5;
+  ids.gids.nixbld = 30000;
+  system.stateVersion = 6;
 }
