@@ -22,7 +22,6 @@
       # Utility
       cleanshot
       deskpad
-      discord
       input-source-pro
       nodePackages.localtunnel
       redisinsight

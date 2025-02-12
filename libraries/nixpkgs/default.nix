@@ -34,7 +34,6 @@ in
     "1password"
     "1password-cli"
     "datagrip"
-    "discord"
     "google-chrome"
     "homerow"
     "ijhttp"
