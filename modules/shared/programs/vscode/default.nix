@@ -86,7 +86,7 @@ in
       exiasr.hadolint
       foxundermoon.shell-format
       fwcd.kotlin
-      github.copilot
+      pkgs.vscode-extensions.github.copilot # TODO
       pkgs.vscode-extensions.github.copilot-chat # TODO
       github.github-vscode-theme
       golang.go
