@@ -68,7 +68,7 @@ in
   programs.vscode = rec {
     enable = true;
     package = overlays.vscodium;
-    extensions = with (pkgs.forVSCodeVersion package.version).vscode-marketplace; [
+    profiles.default.extensions = with (pkgs.forVSCodeVersion package.version).vscode-marketplace; [
       adguard.adblock
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles

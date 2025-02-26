@@ -2,12 +2,12 @@
 
 stdenvNoCC.mkDerivation rec {
   pname = "homerow";
-  version = "1.3.3";
+  version = "1.4.0";
 
   src = fetchurl {
     url = "https://builds.homerow.app/v${version}/Homerow.zip";
     name = "Homerow.app";
-    sha256 = "1jlpqpcik9qqflf0m5gwhskk31vc2bzfhhm3hg9jdl2drx2iq04r";
+    sha256 = "1cb1qc4kwb3w5x7s6ag0q4mygawcngmvy29viyn6sk3n28jng3wd";
   };
 
   nativeBuildInputs = [ unzip ];
