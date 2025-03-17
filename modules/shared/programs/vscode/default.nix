@@ -4,11 +4,11 @@ with lib;
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
 
-  configDir = if isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/VSCodium";
+  configDir = if isLinux then "${config.xdg.configHome}/Cursor" else "Library/Application Support/Cursor";
   monospace = "'PragmataProMono Nerd Font Mono'";
 
   stylesheet = {
-    ".mac, .windows, .linux" = "--monaco-monospace-font: ${monospace}, monospace !important;";
+    ".mac, .windows, .linux" = "font-family: ${monospace}, monospace !important;";
     ".quick-input-widget" = "font-family: ${monospace} !important;";
     ".search-view .search-widgets-container" = "font-family: ${monospace} !important;";
     ".monaco-tree-sticky-container, .monaco-list-rows, .monaco-findInput, .monaco-inputbox" = "font-family: ${monospace} !important;";
@@ -17,10 +17,10 @@ let
   toCss = stylesheet: strings.concatStrings (attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
-    vscodium = pkgs.vscodium.overrideDerivation (attrs: {
+    code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
-      resources = if isDarwin then "Contents/Resources" else "resources";
+      resources = if isDarwin then "Cursor.app/Contents/Resources" else "resources";
 
       preInstall = ''
         ${attrs.preInstall or ""}
@@ -34,7 +34,7 @@ let
             const fs = require('fs');
 
             const contents = fs.readFileSync('$resources/app/out/$filename');
-            console.log(crypto.createHash('md5').update(contents).digest('base64').replace(/=+$/, '''));
+            console.log(crypto.createHash('sha256').update(contents).digest('base64').replace(/=+$/, '''));
           """)
 
           sed -r "s/\"($filename_escaped)\": \"(.*)\"/\"\1\": \"''${checksum//\//\\\/}\"/" \
@@ -65,10 +65,10 @@ in
     "${configDir}/User/snippets".source = ./files/snippets;
   };
 
-  programs.vscode = rec {
+  programs.vscode = {
     enable = true;
-    package = overlays.vscodium;
-    profiles.default.extensions = with (pkgs.forVSCodeVersion package.version).vscode-marketplace; [
+    package = overlays.code-cursor;
+    profiles.default.extensions = with pkgs.vscode-marketplace; [
       adguard.adblock
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
@@ -86,8 +86,6 @@ in
       exiasr.hadolint
       foxundermoon.shell-format
       fwcd.kotlin
-      pkgs.vscode-extensions.github.copilot # TODO
-      pkgs.vscode-extensions.github.copilot-chat # TODO
       github.github-vscode-theme
       golang.go
       graphql.vscode-graphql
@@ -120,6 +118,7 @@ in
   };
 
   home.shellAliases = {
-    code = "codium";
+    code = "open -a Cursor.app";
+    cursor = "open -a Cursor.app";
   };
 }

@@ -8,6 +8,9 @@
   "debug.console.fontSize": 13.25,
   "markdown.preview.fontSize": 13.25,
   "terminal.integrated.fontSize": 13.25,
+  "editor.codeLensFontFamily": "'PragmataProMono Nerd Font Mono'",
+  "editor.inlineSuggest.fontFamily": "'PragmataProMono Nerd Font Mono'",
+  "scm.inputFontFamily": "editor",
 
   // search
   "search.useIgnoreFiles": true,
@@ -193,7 +196,6 @@
   "errorLens.gutterIconSet": "defaultOutline",
 
   // telemetry, etc
-  "amazonQ.telemetry": false,
   "http.proxyStrictSSL": false,
   "redhat.telemetry.enabled": false,
   "telemetry.telemetryLevel": "off",
