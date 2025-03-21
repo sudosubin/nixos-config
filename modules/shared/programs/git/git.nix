@@ -17,12 +17,15 @@
       "*.pem"
     ];
     extraConfig = {
+      branch.sort = "-committerdate";
       credential.helper = "";
       credential."https://github.com".helper = "!gh auth git-credential";
-      diff.age-differ = {
-        textconv = "${pkgs.rage}/bin/rage -d -i ${builtins.elemAt config.secrets.identityPaths 0}";
-      };
       init.defaultBranch = "main";
+      fetch.all = true;
+      fetch.prune = true;
+      fetch.pruneTags = true;
+      push.autoSetupRemote = true;
+      tag.sort = "version:refname";
     };
   };
 }
