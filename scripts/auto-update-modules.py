@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -i python3 -p python311 python311Packages.aiofiles python311Packages.pyyaml
+#!nix-shell -i python3 -p python313 python313Packages.aiofiles python313Packages.pyyaml
 
 import asyncio
 import logging

@@ -72,12 +72,12 @@ in
       adguard.adblock
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
-      pkgs.vscode-extensions.biomejs.biome # TODO
+      biomejs.biome
       bufbuild.vscode-buf
       casualjim.gotemplate
       charliermarsh.ruff
       davidanson.vscode-markdownlint
-      dbaeumer.vscode-eslint # TODO
+      dbaeumer.vscode-eslint
       denoland.vscode-deno
       dorzey.vscode-sqlfluff
       eamodio.gitlens
@@ -95,9 +95,9 @@ in
       kevinrose.vsc-python-indent
       ms-kubernetes-tools.vscode-kubernetes-tools
       ms-pyright.pyright
-      pkgs.vscode-extensions.ms-python.debugpy # TODO
+      ms-python.debugpy
       ms-python.python
-      pkgs.vscode-extensions.ms-vscode-remote.remote-ssh # TODO
+      ms-vscode-remote.remote-ssh
       overlays.pkief.material-icon-theme # TODO
       pkief.material-product-icons
       prisma.prisma
