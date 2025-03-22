@@ -7,5 +7,8 @@
     ./git.nix
   ];
 
-  home.packages = with pkgs; [ git-spr ];
+  home.packages = with pkgs; [
+    git-spr
+    git-who
+  ];
 }
