@@ -15,7 +15,7 @@ let
     throw "invalid value type";
 
   writeDefault = domain: key: value:
-    "defaults write ${domain} '${key}' ${writeValue value}";
+    "/usr/bin/defaults write ${domain} '${key}' ${writeValue value}";
 
   defaultsToList = domain: attrs: mapAttrsToList (writeDefault domain) (filterAttrs (n: v: v != null) attrs);
   defaults = flatten (mapAttrsToList (name: value: defaultsToList name value) cfg.defaults);
