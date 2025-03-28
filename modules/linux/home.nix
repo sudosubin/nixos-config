@@ -19,7 +19,6 @@
       # Utility
       figma-linux
       gnome.nautilus
-      google-chrome
       ngrok
       pavucontrol
       pulseaudio
@@ -43,6 +42,7 @@
       ../shared/programs/act
       ../shared/programs/aws
       ../shared/programs/bat
+      ../shared/programs/chromium
       ../shared/programs/container
       ../shared/programs/direnv
       ../shared/programs/fonts

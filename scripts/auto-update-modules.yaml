@@ -88,6 +88,15 @@ modules:
       get_version: |-
         curl -s "https://api.github.com/repos/RedisInsight/RedisInsight/releases/latest" | jq -r ".tag_name"
 
+  - path: ./libraries/nixpkgs/programs/ungoogled-chromium/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        curl -s "https://api.github.com/repos/ungoogled-software/ungoogled-chromium-macos/releases/latest" | jq -r ".tag_name"
+
   - path: ./libraries/nixpkgs/programs/vim-plugins/github-nvim-theme/default.nix
     args:
       read_from_file: ["url"]

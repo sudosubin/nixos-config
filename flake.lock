@@ -187,6 +187,29 @@
         "type": "github"
       }
     },
+    "nix-chrome-extensions": {
+      "inputs": {
+        "flake-compat": [
+          "flake-compat"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1743171649,
+        "narHash": "sha256-rUJ7Rx9BfuT2zcPk3CPNU8uBAMKC4v0mZzb7SKnWEVE=",
+        "owner": "sudosubin",
+        "repo": "nix-chrome-extensions",
+        "rev": "9cc4b04931ae6c4618a77165c9850038e79109f6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sudosubin",
+        "repo": "nix-chrome-extensions",
+        "type": "github"
+      }
+    },
     "nix-vscode-extensions": {
       "inputs": {
         "flake-utils": [
@@ -330,6 +353,7 @@
         "home-manager": "home-manager",
         "home-manager-secrets": "home-manager-secrets",
         "lefthook": "lefthook",
+        "nix-chrome-extensions": "nix-chrome-extensions",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-config-private-daangn": "nixos-config-private-daangn",
         "nixos-config-private-sudosubin": "nixos-config-private-sudosubin",

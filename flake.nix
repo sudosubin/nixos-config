@@ -36,6 +36,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-chrome-extensions = {
+      url = "github:sudosubin/nix-chrome-extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-compat.follows = "flake-compat";
+    };
+
     nix-vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
       inputs.nixpkgs.follows = "nixpkgs";

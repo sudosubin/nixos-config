@@ -6,8 +6,8 @@ let
 in
 {
   nixpkgs.overlays = [
+    inputs.nix-chrome-extensions.overlays.default
     inputs.nix-vscode-extensions.overlays.default
-    (import ./programs/google-chrome)
     (import ./programs/python)
 
     (final: prev: {
@@ -23,6 +23,7 @@ in
       orbstack = final.callPackage ./programs/orbstack { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       redisinsight = final.callPackage ./programs/redisinsight { };
+      ungoogled-chromium = (lib.mkIf isDarwin (final.callPackage ./programs/ungoogled-chromium { }));
       vimPlugins = prev.vimPlugins // {
         github-nvim-theme = final.callPackage ./programs/vim-plugins/github-nvim-theme { };
       };
@@ -35,7 +36,6 @@ in
     "1password-cli"
     "cursor"
     "datagrip"
-    "google-chrome"
     "homerow"
     "ijhttp"
     "input-source-pro"

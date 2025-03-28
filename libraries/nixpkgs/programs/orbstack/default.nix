@@ -2,7 +2,6 @@
 
 let
   version = "1.10.3_19083";
-  hdiutil = "/usr/bin/hdiutil";
 
   sources = {
     "aarch64-darwin" = {
