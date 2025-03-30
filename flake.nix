@@ -7,8 +7,8 @@
     flake-compat.url = "github:edolstra/flake-compat";
     flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
 
-    darwin = {
-      url = "github:lnl7/nix-darwin";
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -59,7 +59,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, darwin, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, nixos-hardware, nix-darwin, home-manager, ... }@inputs:
     let
       dev-shell = import ./libraries/dev-shell { inherit inputs; };
       home-manager-shared = ./libraries/home-manager;
@@ -67,7 +67,7 @@
 
     in
     dev-shell // {
-      darwinConfigurations.darwin = darwin.lib.darwinSystem {
+      darwinConfigurations.darwin = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";
         modules = [
           home-manager-shared
