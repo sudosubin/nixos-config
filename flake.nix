@@ -2,7 +2,7 @@
   description = "Nix Configurations";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
     nixos-hardware.url = "github:nixos/nixos-hardware";
     flake-compat.url = "github:edolstra/flake-compat";
     flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
@@ -19,9 +19,7 @@
 
     home-manager-secrets = {
       url = "github:sudosubin/home-manager-secrets";
-      # url = "path:/home/sudosubin/Code/sudosubin/home-manager-secrets";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
       inputs.lefthook.follows = "lefthook";
     };
 
@@ -50,12 +48,12 @@
 
     nixos-config-private-daangn = {
       url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=daangn";
-      # url = "path:/Users/elvin/Code/sudosubin/nixos-config-private/daangn";
+      # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/daangn";
     };
 
     nixos-config-private-sudosubin = {
       url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=sudosubin";
-      # url = "path:/Users/elvin/Code/sudosubin/nixos-config-private/sudosubin";
+      # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/sudosubin";
     };
   };
 
