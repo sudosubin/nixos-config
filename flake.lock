@@ -166,19 +166,16 @@
     },
     "lefthook": {
       "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1674403519,
-        "narHash": "sha256-m7wysZrWI2s9MR96ohHk1nJj0C0ljyFG6XtWNdZUbWs=",
+        "lastModified": 1743328981,
+        "narHash": "sha256-q8A98loLPYJ68J+OVlpUZr25Crt0/3ORmrhC6vV6lL8=",
         "owner": "sudosubin",
         "repo": "lefthook.nix",
-        "rev": "4348333fd806e7526548312f1092875a674e3d6c",
+        "rev": "b7d8b2fa51a9e0fe950fa241269603ca1167e448",
         "type": "github"
       },
       "original": {
