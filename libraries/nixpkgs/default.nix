@@ -20,6 +20,7 @@ in
       homerow = final.callPackage ./programs/homerow { };
       ijhttp = final.callPackage ./programs/ijhttp { };
       input-source-pro = final.callPackage ./programs/input-source-pro { };
+      nix-activate = final.callPackage ./programs/nix-activate { };
       orbstack = final.callPackage ./programs/orbstack { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       redisinsight = final.callPackage ./programs/redisinsight { };
