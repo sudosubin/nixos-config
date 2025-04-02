@@ -7,7 +7,7 @@
 
   home.packages = with pkgs; [
     nil
-    nixVersions.nix_2_25
+    nixVersions.nix_2_26
     nixpkgs-fmt
     nix-activate
   ];

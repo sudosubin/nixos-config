@@ -118,7 +118,7 @@ in
   };
 
   home.shellAliases = {
-    code = "open -a Cursor.app";
-    cursor = "open -a Cursor.app";
+    code = "/usr/bin/open -a Cursor.app";
+    cursor = "/usr/bin/open -a Cursor.app";
   };
 }
