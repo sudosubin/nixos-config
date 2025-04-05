@@ -4,7 +4,6 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
     nixos-hardware.url = "github:nixos/nixos-hardware";
-    flake-compat.url = "github:edolstra/flake-compat";
     flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
 
     nix-darwin = {
@@ -36,7 +35,6 @@
     nix-chrome-extensions = {
       url = "github:sudosubin/nix-chrome-extensions";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-compat.follows = "flake-compat";
     };
 
     nix-vscode-extensions = {
@@ -46,12 +44,12 @@
     };
 
     nixos-config-private-daangn = {
-      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=daangn";
+      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=daangn&shallow=1";
       # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/daangn";
     };
 
     nixos-config-private-sudosubin = {
-      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=sudosubin";
+      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=sudosubin&shallow=1";
       # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/sudosubin";
     };
   };
