@@ -14,12 +14,12 @@ let
           let
             copyExtensionCommands = builtins.map
               (extension: ''
-                cp -r "${extension}" "$out/Applications/${attrs.sourceRoot}/Contents/Extensions/${extension.name}"
+                cp -r "${extension}" "$out/Applications/${attrs.sourceRoot}/Contents/Extensions/${extension.id}"
               '')
               cfg.extensions;
 
             extensionPaths = builtins.map
-              (extension: ''''$APP_DIR/Contents/Extensions/${extension.name}'')
+              (extension: ''''$APP_DIR/Contents/Extensions/${extension.id}'')
               cfg.extensions;
           in
           ''
