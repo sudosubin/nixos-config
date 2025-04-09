@@ -97,7 +97,6 @@ in
       ms-pyright.pyright
       ms-python.debugpy
       ms-python.python
-      ms-vscode-remote.remote-ssh
       overlays.pkief.material-icon-theme # TODO
       pkief.material-product-icons
       prisma.prisma
