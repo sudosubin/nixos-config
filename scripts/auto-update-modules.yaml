@@ -75,18 +75,3 @@ modules:
     methods:
       get_version: |-
         curl -s "https://api.github.com/repos/ungoogled-software/ungoogled-chromium-macos/releases/latest" | jq -r ".tag_name"
-
-  - path: ./libraries/nixpkgs/programs/vim-plugins/github-nvim-theme/default.nix
-    args:
-      read_from_file: ["url"]
-      read_from_method: ["version", "sha256"]
-      write: ["version", "sha256"]
-    methods:
-      get_version: |-
-        curl -s "https://api.github.com/repos/projekt0n/github-nvim-theme/releases/latest" | jq -r ".tag_name"
-      get_sha256: |-
-        nix-prefetch-url \
-          --unpack "https://github.com/projekt0n/github-nvim-theme/archive/$(
-            curl -s "https://api.github.com/repos/projekt0n/github-nvim-theme/releases/latest" \
-            | jq -r ".tag_name"
-          ).tar.gz"
