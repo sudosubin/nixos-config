@@ -18,7 +18,6 @@ in
       git-spr = final.callPackage ./programs/git-spr { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };
-      input-source-pro = final.callPackage ./programs/input-source-pro { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       orbstack = final.callPackage ./programs/orbstack { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
@@ -38,7 +37,6 @@ in
     "datagrip"
     "homerow"
     "ijhttp"
-    "input-source-pro"
     "ngrok"
     "orbstack"
     "raycast"

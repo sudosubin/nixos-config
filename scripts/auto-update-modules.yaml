@@ -47,16 +47,6 @@ modules:
           | tail -n1 \
           | sed -r "s|.*>([0-9.]+)<.*|\1|g"
 
-  - path: ./libraries/nixpkgs/programs/input-source-pro/default.nix
-    args:
-      read_from_file: ["url"]
-      read_from_method: ["version"]
-      write: ["version", "sha256"]
-    methods:
-      get_version: |-
-        curl -s "https://formulae.brew.sh/api/cask/input-source-pro.json" \
-          | jq -r ".version"
-
   - path: ./libraries/nixpkgs/programs/orbstack/default.nix
     args:
       read_from_file: ["url"]

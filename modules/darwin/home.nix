@@ -22,7 +22,6 @@
       # Utility
       cleanshot
       deskpad
-      input-source-pro
       nodePackages.localtunnel
       redisinsight
       ripgrep
