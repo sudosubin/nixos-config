@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   push:
@@ -10,7 +10,6 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v17
-      - run: |
-          nix run '.#format' .
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - run: nix fmt **/*.nix -- --check

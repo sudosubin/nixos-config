@@ -2,11 +2,14 @@
 with inputs;
 
 let
+
   inherit (nixpkgs.lib) genAttrs platforms;
   forAllSystems = f: genAttrs platforms.all (system: f (import nixpkgs { inherit system; }));
 
 in
 {
+  formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
+
   checks = forAllSystems (pkgs: {
     lefthook-check = lefthook.lib.${pkgs.system}.run {
       src = ./.;
