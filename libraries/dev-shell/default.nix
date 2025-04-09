@@ -8,8 +8,6 @@ let
 
 in
 {
-  formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
-
   checks = forAllSystems (pkgs: {
     lefthook-check = lefthook.lib.${pkgs.system}.run {
       src = ./.;
@@ -29,4 +27,6 @@ in
       inherit (self.checks.${pkgs.system}.lefthook-check) shellHook;
     };
   });
+
+  formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
 }
