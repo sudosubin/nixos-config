@@ -9,14 +9,13 @@
   lib,
   ...
 }:
-with lib;
 
 let
   cfg = config.programs.lsd;
 
   yamlFormat = pkgs.formats.yaml { };
 
-  mapLsColors = lsColors: attrsets.mapAttrsToList (key: value: "${key}=${value}") lsColors;
+  mapLsColors = lsColors: lib.attrsets.mapAttrsToList (key: value: "${key}=${value}") lsColors;
 
   package = pkgs.lsd.overrideAttrs (attrs: {
     nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
@@ -31,26 +30,26 @@ let
 in
 {
   options.programs.lsd = {
-    enablePatch = mkEnableOption "lsd";
+    enablePatch = lib.mkEnableOption "lsd";
 
-    lscolors = mkOption {
-      type = types.attrsOf types.str;
+    lscolors = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
       default = { };
       description = "LS_COLORS key-value attrset.";
     };
   };
 
-  config = mkIf cfg.enablePatch {
+  config = lib.mkIf cfg.enablePatch {
     home.packages = [ package ];
 
-    programs.lsd = mkIf (cfg.colors != { }) { settings.color.theme = "custom"; };
+    programs.lsd = lib.mkIf (cfg.colors != { }) { settings.color.theme = "custom"; };
 
     xdg.configFile = {
-      "lsd/colors.yaml" = mkIf (cfg.colors != { }) {
+      "lsd/colors.yaml" = lib.mkIf (cfg.colors != { }) {
         source = yamlFormat.generate "lsd-colors" cfg.colors;
       };
 
-      "lsd/config.yaml" = mkIf (cfg.settings != { }) {
+      "lsd/config.yaml" = lib.mkIf (cfg.settings != { }) {
         source = yamlFormat.generate "lsd-config" cfg.settings;
       };
     };

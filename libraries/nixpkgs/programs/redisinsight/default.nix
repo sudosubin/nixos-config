@@ -35,11 +35,11 @@ stdenvNoCC.mkDerivation rec {
     cp -R . "$out/Applications/${sourceRoot}"
   '';
 
-  meta = with lib; {
-    homepage = "https://redis.com/redis-enterprise/redis-insight/";
+  meta = {
     description = "GUI for streamlined Redis application development";
-    license = licenses.unfree;
+    homepage = "https://redis.com/redis-enterprise/redis-insight/";
+    license = lib.licenses.unfree;
+    maintainers = with lib.maintainers; [ sudosubin ];
     platforms = builtins.attrNames sources;
-    maintainers = [ maintainers.sudosubin ];
   };
 }

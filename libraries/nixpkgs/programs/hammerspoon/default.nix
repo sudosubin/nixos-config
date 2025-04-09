@@ -27,11 +27,11 @@ stdenvNoCC.mkDerivation rec {
     cp -R . "$out/Applications/${sourceRoot}"
   '';
 
-  meta = with lib; {
-    homepage = "http://www.hammerspoon.org/";
+  meta = {
     description = "Staggeringly powerful macOS desktop automation with Lua";
-    license = licenses.mit;
-    platforms = platforms.darwin;
-    maintainers = [ maintainers.sudosubin ];
+    homepage = "http://www.hammerspoon.org/";
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ sudosubin ];
+    platforms = lib.platforms.darwin;
   };
 }

@@ -27,7 +27,9 @@ rustPlatform.buildRustPackage rec {
   meta = with lib; {
     description = "A simple script to enable nix flake direnv from current directory or external flake repository";
     homepage = "https://github.com/sudosubin/nix-activate";
-    license = licenses.mit;
-    maintainers = [ maintainers.sudosubin ];
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ sudosubin ];
+    platforms = lib.platforms.unix;
+    mainProgram = "nix-activate";
   };
 }

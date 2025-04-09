@@ -4,7 +4,6 @@
   lib,
   ...
 }:
-with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
@@ -14,13 +13,13 @@ let
 
   writeValue =
     value:
-    if isBool value then
+    if lib.isBool value then
       "-bool ${boolValue value}"
-    else if isInt value then
+    else if lib.isInt value then
       "-int ${toString value}"
-    else if isFloat value then
-      "-float ${strings.floatToString value}"
-    else if isString value then
+    else if lib.isFloat value then
+      "-float ${lib.strings.floatToString value}"
+    else if lib.isString value then
       "-string '${value}'"
     else
       throw "invalid value type";
@@ -30,20 +29,20 @@ let
     "/usr/bin/defaults write ${domain} '${key}' ${writeValue value}";
 
   defaultsToList =
-    domain: attrs: mapAttrsToList (writeDefault domain) (filterAttrs (n: v: v != null) attrs);
-  defaults = flatten (mapAttrsToList (name: value: defaultsToList name value) cfg.defaults);
+    domain: attrs: lib.mapAttrsToList (writeDefault domain) (lib.filterAttrs (n: v: v != null) attrs);
+  defaults = lib.flatten (lib.mapAttrsToList (name: value: defaultsToList name value) cfg.defaults);
 
 in
 {
-  options.darwin.defaults = mkOption {
-    type = types.attrs;
+  options.darwin.defaults = lib.mkOption {
+    type = lib.types.attrs;
     default = { };
   };
 
-  config = mkMerge [
-    (mkIf isDarwin {
+  config = lib.mkMerge [
+    (lib.mkIf isDarwin {
       home.activation.userDefaults = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        ${concatStringsSep "\n" defaults}
+        ${lib.concatStringsSep "\n" defaults}
       '';
     })
   ];

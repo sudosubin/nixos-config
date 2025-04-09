@@ -4,7 +4,6 @@
   lib,
   ...
 }:
-with lib;
 
 {
   programs.act = {

@@ -4,11 +4,10 @@
   pkgs,
   ...
 }:
-with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isLinux;
-  toLua = generators.toLua { };
+  toLua = lib.generators.toLua { };
 
 in
 {

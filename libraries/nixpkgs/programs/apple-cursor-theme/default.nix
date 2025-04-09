@@ -18,11 +18,11 @@ stdenvNoCC.mkDerivation rec {
     cp -r . $out/share/icons/apple-cursor-theme
   '';
 
-  meta = with lib; {
+  meta = {
+    description = "Free & Open source macOS Cursors";
     homepage = "https://github.com/ful1e5/apple_cursor";
-    description = "Opensource macOS Cursors";
-    license = licenses.gpl3;
-    platforms = platforms.linux;
-    maintainers = [ maintainers.sudosubin ];
+    license = lib.licenses.gpl3;
+    maintainers = with lib.maintainers; [ sudosubin ];
+    platforms = lib.platforms.linux;
   };
 }

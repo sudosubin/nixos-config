@@ -4,7 +4,6 @@
   lib,
   ...
 }:
-with lib;
 
 let
   cfg = config.programs._1password;
@@ -34,19 +33,19 @@ let
 in
 {
   options.programs._1password = {
-    enable = mkEnableOption "1password";
+    enable = lib.mkEnableOption "1password";
 
-    package = mkPackageOption pkgs "_1password" { };
+    package = lib.mkPackageOption pkgs "_1password" { };
 
-    enableFHSEnvironment = mkOption {
-      type = types.bool;
+    enableFHSEnvironment = lib.mkOption {
+      type = lib.types.bool;
       default = false;
       description = "Enable /usr/local/bin/op binary to connect with 1Password app.";
     };
   };
 
-  config = mkMerge [
-    (mkIf cfg.enable {
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
       home.packages = [ package ];
     })
   ];

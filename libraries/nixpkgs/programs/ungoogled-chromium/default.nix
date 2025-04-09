@@ -48,12 +48,12 @@ stdenvNoCC.mkDerivation rec {
     runHook postInstall
   '';
 
-  meta = with lib; {
-    homepage = "https://ungoogled-software.github.io/";
+  meta = {
     description = "Google Chromium, sans integration with Google";
-    license = licenses.bsd3;
+    homepage = "https://ungoogled-software.github.io/";
+    license = lib.licenses.bsd3;
+    maintainers = with lib.maintainers; [ sudosubin ];
     platforms = builtins.attrNames sources;
-    maintainers = [ maintainers.sudosubin ];
   };
 
 }

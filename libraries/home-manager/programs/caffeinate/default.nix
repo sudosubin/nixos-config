@@ -4,7 +4,6 @@
   lib,
   ...
 }:
-with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
@@ -13,22 +12,22 @@ let
 in
 {
   options.services.caffeinate = {
-    enable = mkEnableOption "caffeinate";
+    enable = lib.mkEnableOption "caffeinate";
 
-    path = mkOption {
-      type = types.str;
+    path = lib.mkOption {
+      type = lib.types.str;
       default = "/usr/bin/caffeinate";
       description = "Caffeinate bin location.";
     };
 
-    args = mkOption {
-      type = types.str;
+    args = lib.mkOption {
+      type = lib.types.str;
       default = "";
       description = "Caffeinate execute command arguments.";
     };
   };
 
-  config = mkMerge [
+  config = lib.mkMerge [
     {
       assertions = [
         {
@@ -38,7 +37,7 @@ in
       ];
     }
 
-    (mkIf cfg.enable {
+    (lib.mkIf cfg.enable {
       launchd.agents.caffeinate = {
         enable = true;
         config = {

@@ -27,7 +27,7 @@ buildGoModule rec {
     description = "Stacked Pull Requests on GitHub";
     homepage = "https://github.com/ejoffe/spr";
     license = licenses.mit;
-    platforms = platforms.unix;
     maintainers = with maintainers; [ sudosubin ];
+    platforms = platforms.unix;
   };
 }

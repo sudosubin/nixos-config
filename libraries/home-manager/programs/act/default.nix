@@ -4,18 +4,18 @@
   lib,
   ...
 }:
-with lib;
 
 let
   cfg = config.programs.act;
 
   formatConfig =
     config:
-    attrsets.mapAttrs (
-      name: value: if lib.isAttrs value then attrsets.mapAttrsToList (k: v: "${k}=${v}") value else value
+    lib.attrsets.mapAttrs (
+      name: value:
+      if lib.isAttrs value then lib.attrsets.mapAttrsToList (k: v: "${k}=${v}") value else value
     ) config;
 
-  toConfigFile = generators.toKeyValue {
+  toConfigFile = lib.generators.toKeyValue {
     mkKeyValue = key: value: "--${key} ${value}";
     listsAsDuplicateKeys = true;
   };
@@ -23,10 +23,10 @@ let
 in
 {
   options.programs.act = {
-    enable = mkEnableOption "act";
+    enable = lib.mkEnableOption "act";
 
-    config = mkOption {
-      type = with types; attrsOf (either str (either (listOf str) (attrsOf str)));
+    config = lib.mkOption {
+      type = with lib.types; attrsOf (either str (either (listOf str) (attrsOf str)));
       default = { };
       example = {
         actor = "nektos/act";
@@ -38,7 +38,7 @@ in
     };
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     home.packages = [ pkgs.act ];
 
     xdg.configFile = {

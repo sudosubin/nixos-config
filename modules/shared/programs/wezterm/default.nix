@@ -4,11 +4,10 @@
   pkgs,
   ...
 }:
-with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
-  toLua = generators.toLua { };
+  toLua = lib.generators.toLua { };
 
   colors = {
     background = "#0d1117";
@@ -60,7 +59,7 @@ in
         toLua {
           automatically_reload_config = true;
           color_scheme = "default";
-          font = generators.mkLuaInline ''
+          font = lib.generators.mkLuaInline ''
             wezterm.font_with_fallback(${toLua font})
           '';
           font_size = font-size;

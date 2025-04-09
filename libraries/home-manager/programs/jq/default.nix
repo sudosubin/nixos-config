@@ -4,7 +4,6 @@
   lib,
   ...
 }:
-with lib;
 
 let
   cfg = config.programs.jq-patched;
@@ -24,9 +23,9 @@ let
 in
 {
   options.programs.jq-patched = {
-    enable = mkEnableOption "jq";
+    enable = lib.mkEnableOption "jq";
 
-    colors = mkOption {
+    colors = lib.mkOption {
       description = ''
         The colors used in colored JSON output.</para>
         <para>See <link xlink:href="https://stedolan.github.io/jq/manual/#Colors"/>.
@@ -43,22 +42,22 @@ in
         fields = "1;37";
       };
 
-      type = types.submodule {
+      type = lib.types.submodule {
         options = {
-          null = mkOption { type = types.str; };
-          false = mkOption { type = types.str; };
-          true = mkOption { type = types.str; };
-          numbers = mkOption { type = types.str; };
-          strings = mkOption { type = types.str; };
-          arrays = mkOption { type = types.str; };
-          objects = mkOption { type = types.str; };
-          fields = mkOption { type = types.str; };
+          null = lib.mkOption { type = lib.types.str; };
+          false = lib.mkOption { type = lib.types.str; };
+          true = lib.mkOption { type = lib.types.str; };
+          numbers = lib.mkOption { type = lib.types.str; };
+          strings = lib.mkOption { type = lib.types.str; };
+          arrays = lib.mkOption { type = lib.types.str; };
+          objects = lib.mkOption { type = lib.types.str; };
+          fields = lib.mkOption { type = lib.types.str; };
         };
       };
     };
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     home.packages = [ package ];
   };
 }

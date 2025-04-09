@@ -23,11 +23,11 @@ stdenvNoCC.mkDerivation rec {
     cp -R . "$out/Applications/${sourceRoot}"
   '';
 
-  meta = with lib; {
-    homepage = "https://cleanshot.com/";
+  meta = {
     description = "Screen capturing tool";
-    license = licenses.unfree;
-    platforms = platforms.darwin;
-    maintainers = [ maintainers.sudosubin ];
+    homepage = "https://cleanshot.com/";
+    license = lib.licenses.unfree;
+    maintainers = with lib.maintainers; [ sudosubin ];
+    platforms = lib.platforms.darwin;
   };
 }

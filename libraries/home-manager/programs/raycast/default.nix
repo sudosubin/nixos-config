@@ -4,7 +4,6 @@
   lib,
   ...
 }:
-with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
@@ -13,32 +12,32 @@ let
 in
 {
   options.services.raycast = {
-    enable = mkEnableOption "raycast";
+    enable = lib.mkEnableOption "raycast";
 
-    package = mkPackageOption pkgs "raycast" { };
+    package = lib.mkPackageOption pkgs "raycast" { };
 
     config = {
-      navigationCommandStyleIdentifierKey = mkOption {
-        type = types.str;
+      navigationCommandStyleIdentifierKey = lib.mkOption {
+        type = lib.types.str;
         default = "macos";
         description = "Navigation Bindings";
       };
 
-      raycastGlobalHotkey = mkOption {
-        type = types.str;
+      raycastGlobalHotkey = lib.mkOption {
+        type = lib.types.str;
         default = "Option-49";
         description = "Raycast Hotkey";
       };
 
-      raycastPreferredWindowMode = mkOption {
-        type = types.str;
+      raycastPreferredWindowMode = lib.mkOption {
+        type = lib.types.str;
         default = "default";
         description = "Window Mode";
       };
     };
   };
 
-  config = mkMerge [
+  config = lib.mkMerge [
     {
       assertions = [
         {
@@ -48,7 +47,7 @@ in
       ];
     }
 
-    (mkIf cfg.enable {
+    (lib.mkIf cfg.enable {
       home.packages = [ cfg.package ];
 
       darwin.defaults."com.raycast.macos" = cfg.config;

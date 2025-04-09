@@ -4,7 +4,6 @@
   lib,
   ...
 }:
-with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
@@ -23,7 +22,7 @@ let
 
   toCss =
     stylesheet:
-    strings.concatStrings (attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
+    lib.strings.concatStrings (lib.attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
     code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {

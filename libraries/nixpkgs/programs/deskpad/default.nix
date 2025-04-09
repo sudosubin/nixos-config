@@ -27,11 +27,11 @@ stdenvNoCC.mkDerivation rec {
     cp -R . "$out/Applications/${sourceRoot}"
   '';
 
-  meta = with lib; {
-    homepage = "https://github.com/Stengo/DeskPad";
+  meta = {
     description = "A virtual monitor for screen sharing";
-    license = licenses.mit;
-    platforms = platforms.darwin;
-    maintainers = [ maintainers.sudosubin ];
+    homepage = "https://github.com/Stengo/DeskPad";
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ sudosubin ];
+    platforms = lib.platforms.darwin;
   };
 }

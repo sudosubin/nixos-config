@@ -4,7 +4,6 @@
   lib,
   ...
 }:
-with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
@@ -13,56 +12,56 @@ let
 in
 {
   options.services.hammerspoon = {
-    enable = mkEnableOption "hammerspoon";
+    enable = lib.mkEnableOption "hammerspoon";
 
-    package = mkPackageOption pkgs "hammerspoon" { };
+    package = lib.mkPackageOption pkgs "hammerspoon" { };
 
     config = {
-      HSUploadCrashData = mkOption {
-        type = types.int;
+      HSUploadCrashData = lib.mkOption {
+        type = lib.types.int;
         default = 1;
         description = "Send crash data (required restart)";
       };
 
-      MJConfigFile = mkOption {
-        type = types.str;
+      MJConfigFile = lib.mkOption {
+        type = lib.types.str;
         default = "~/.hammerspoon/init.lua";
         description = "Config file";
       };
 
-      MJShowDockIconKey = mkOption {
-        type = types.int;
+      MJShowDockIconKey = lib.mkOption {
+        type = lib.types.int;
         default = 0;
         description = "Show dock icon";
       };
 
-      MJShowMenuIconKey = mkOption {
-        type = types.int;
+      MJShowMenuIconKey = lib.mkOption {
+        type = lib.types.int;
         default = 1;
         description = "Show menu icon";
       };
 
-      SUEnableAutomaticChecks = mkOption {
-        type = types.int;
+      SUEnableAutomaticChecks = lib.mkOption {
+        type = lib.types.int;
         default = 0;
         description = "Check for updates";
       };
 
-      SUHasLaunchedBefore = mkOption {
-        type = types.int;
+      SUHasLaunchedBefore = lib.mkOption {
+        type = lib.types.int;
         default = 1;
         description = "Has launched before";
       };
 
-      SUSendProfileInfo = mkOption {
-        type = types.int;
+      SUSendProfileInfo = lib.mkOption {
+        type = lib.types.int;
         default = 0;
         description = "Send profile info";
       };
     };
   };
 
-  config = mkMerge [
+  config = lib.mkMerge [
     {
       assertions = [
         {
@@ -72,7 +71,7 @@ in
       ];
     }
 
-    (mkIf cfg.enable {
+    (lib.mkIf cfg.enable {
       home.packages = [ cfg.package ];
 
       darwin.defaults."org.hammerspoon.Hammerspoon" = cfg.config;

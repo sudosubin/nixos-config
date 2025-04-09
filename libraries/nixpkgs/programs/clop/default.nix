@@ -23,11 +23,11 @@ stdenvNoCC.mkDerivation rec {
     cp -R . "$out/Applications/${sourceRoot}"
   '';
 
-  meta = with lib; {
-    homepage = "https://lowtechguys.com/clop/";
+  meta = {
     description = "Clipboard optimizer for macOS";
-    license = licenses.gpl3;
-    platforms = platforms.darwin;
-    maintainers = [ maintainers.sudosubin ];
+    homepage = "https://lowtechguys.com/clop/";
+    license = lib.licenses.gpl3;
+    maintainers = with lib.maintainers; [ sudosubin ];
+    platforms = lib.platforms.darwin;
   };
 }

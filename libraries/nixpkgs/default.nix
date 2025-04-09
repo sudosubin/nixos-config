@@ -37,19 +37,17 @@ in
     builtins.elem (lib.getName pkg) [
       "1password"
       "1password-cli"
+      "cleanshot"
       "cursor"
       "datagrip"
       "homerow"
       "ijhttp"
       "ngrok"
       "orbstack"
+      "pragmatapro"
       "raycast"
       "redisinsight"
-      "cleanshot"
       "slack"
-      "vscode-extension-github-copilot"
-      "vscode-extension-github-copilot-chat"
-      "vscode-extension-ms-vscode-remote-remote-ssh"
     ]
   );
 

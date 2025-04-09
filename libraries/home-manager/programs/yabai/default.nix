@@ -4,7 +4,6 @@
   lib,
   ...
 }:
-with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
@@ -13,19 +12,20 @@ let
   hasYabaiConfig = (cfg.config != { } || cfg.extraConfig != "");
 
   toYabaiConfig =
-    config: concatStringsSep "\n" (mapAttrsToList (p: v: "yabai -m config ${p} ${toString v}") config);
+    config:
+    lib.concatStringsSep "\n" (lib.mapAttrsToList (p: v: "yabai -m config ${p} ${toString v}") config);
 
 in
 {
   options.services.yabai = {
-    enable = mkEnableOption "yabai";
+    enable = lib.mkEnableOption "yabai";
 
-    package = mkPackageOption pkgs "yabai" { };
+    package = lib.mkPackageOption pkgs "yabai" { };
 
-    config = mkOption {
-      type = types.attrs;
+    config = lib.mkOption {
+      type = lib.types.attrs;
       default = { };
-      example = literalExpression ''
+      example = lib.literalExpression ''
         {
           layout = "bsp";
           window_placement = "first_child";
@@ -35,17 +35,17 @@ in
       description = "Yabai configuration attrs.";
     };
 
-    extraConfig = mkOption {
-      type = types.str;
+    extraConfig = lib.mkOption {
+      type = lib.types.str;
       default = "";
-      example = literalExpression ''
+      example = lib.literalExpression ''
         yabai -m rule --add app="^System Preferences$" manage=off
       '';
       description = "Extra yabai configurations.";
     };
   };
 
-  config = mkMerge [
+  config = lib.mkMerge [
     {
       assertions = [
         {
@@ -55,14 +55,14 @@ in
       ];
     }
 
-    (mkIf cfg.enable {
+    (lib.mkIf cfg.enable {
       home.packages = [ cfg.package ];
 
-      xdg.configFile = mkIf hasYabaiConfig {
+      xdg.configFile = lib.mkIf hasYabaiConfig {
         "yabai/yabairc" = {
           text =
             "${toYabaiConfig cfg.config}"
-            + optionalString (cfg.extraConfig != "") ("\n" + cfg.extraConfig + "\n");
+            + lib.optionalString (cfg.extraConfig != "") ("\n" + cfg.extraConfig + "\n");
           executable = true;
         };
       };
@@ -72,7 +72,7 @@ in
         config = {
           ProgramArguments =
             [ "${cfg.package}/bin/yabai" ]
-            ++ optionals (hasYabaiConfig) [
+            ++ lib.optionals (hasYabaiConfig) [
               "-c"
               "${config.xdg.configHome}/yabai/yabairc"
             ];

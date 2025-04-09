@@ -26,14 +26,14 @@ stdenvNoCC.mkDerivation rec {
       -exec nerd-font-patcher -s -q -c --no-progressbars -out "$out/share/fonts/opentype" {} \;
   '';
 
-  meta = with lib; {
-    homepage = "https://fsd.it/shop/fonts/pragmatapro/";
+  meta = {
     description = ''
       Condensed monospaced font optimized for screen, designed by Fabrizio
       Schiavi to be the ideal font for coding, math and engineering
     '';
-    licence = licences.unfree;
-    platforms = platforms.all;
-    maintainers = [ maintainers.sudosubin ];
+    homepage = "https://fsd.it/shop/fonts/pragmatapro/";
+    license = lib.licenses.unfree;
+    maintainers = with lib.maintainers; [ sudosubin ];
+    platforms = lib.platforms.all;
   };
 }

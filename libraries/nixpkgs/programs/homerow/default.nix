@@ -33,11 +33,11 @@ stdenvNoCC.mkDerivation rec {
     runHook postInstall
   '';
 
-  meta = with lib; {
-    homepage = "https://homerow.app";
+  meta = {
     description = "Keyboard shortcuts for every button in macOS";
-    license = licenses.unfree;
-    platforms = platforms.darwin;
-    maintainers = [ maintainers.sudosubin ];
+    homepage = "https://homerow.app";
+    license = lib.licenses.unfree;
+    maintainers = with lib.maintainers; [ sudosubin ];
+    platforms = lib.platforms.darwin;
   };
 }

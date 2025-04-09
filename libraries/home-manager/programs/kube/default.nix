@@ -4,7 +4,6 @@
   pkgs,
   ...
 }:
-with lib;
 
 let
   cfg = config.programs.kube;
@@ -13,7 +12,7 @@ let
     postInstall = ''
       ${attrs.postInstall or ""}
 
-      ${optionalString cfg.kAlias ''
+      ${lib.optionalString cfg.kAlias ''
         install -D $out/bin/kubectl $out/bin/k
 
         installShellCompletion --cmd k \
@@ -27,10 +26,10 @@ let
 in
 {
   options.programs.kube = {
-    enable = mkEnableOption "kube";
+    enable = lib.mkEnableOption "kube";
 
-    config = mkOption {
-      type = types.nullOr types.path;
+    config = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
       default = null;
       defaultText = "~/.kube/config";
       apply = toString;
@@ -39,16 +38,16 @@ in
       '';
     };
 
-    kAlias = mkOption {
-      type = types.bool;
+    kAlias = lib.mkOption {
+      type = lib.types.bool;
       default = false;
       description = ''
         Alias {command}`kube` to {command}`k`.
       '';
     };
 
-    plugins = mkOption {
-      type = types.listOf types.package;
+    plugins = lib.mkOption {
+      type = lib.types.listOf lib.types.package;
       default = [ ];
       description = ''
         A list of plugins to use.
@@ -56,14 +55,14 @@ in
     };
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     home.packages = [ package ] ++ cfg.plugins;
 
-    home.sessionVariables = mkIf (cfg.config != null) {
+    home.sessionVariables = lib.mkIf (cfg.config != null) {
       KUBECONFIG = cfg.config;
     };
 
-    home.shellAliases = mkIf cfg.kAlias {
+    home.shellAliases = lib.mkIf cfg.kAlias {
       k = "kubectl";
     };
   };

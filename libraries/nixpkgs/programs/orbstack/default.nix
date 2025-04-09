@@ -61,11 +61,11 @@ stdenvNoCC.mkDerivation rec {
     installShellCompletion --zsh  "$out/Applications/${sourceRoot}/Contents/Resources/completions/zsh/_docker"
   '';
 
-  meta = with lib; {
-    homepage = "https://orbstack.dev/";
+  meta = {
     description = "Fast, light, simple Docker containers & Linux machines for macOS";
-    license = licenses.unfree;
+    homepage = "https://orbstack.dev/";
+    license = lib.licenses.unfree;
+    maintainers = with lib.maintainers; [ sudosubin ];
     platforms = builtins.attrNames sources;
-    maintainers = [ maintainers.sudosubin ];
   };
 }

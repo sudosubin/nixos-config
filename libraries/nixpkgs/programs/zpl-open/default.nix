@@ -31,11 +31,12 @@ stdenvNoCC.mkDerivation rec {
     cp src/zpl-opener.desktop $out/share/applications/
   '';
 
-  meta = with lib; {
-    homepage = "https://github.com/sudosubin/zeplin-uri-opener";
+  meta = {
     description = "Open zeplin app uri in your default browser";
-    license = licenses.mit;
-    platforms = platforms.linux;
-    maintainers = [ maintainers.sudosubin ];
+    homepage = "https://github.com/sudosubin/zeplin-uri-opener";
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ sudosubin ];
+    platforms = lib.platforms.linux;
+    mainProgram = "zpl-open";
   };
 }
