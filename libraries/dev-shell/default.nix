@@ -1,31 +1,29 @@
 { inputs, ... }:
 with inputs;
 
-flake-utils.lib.eachDefaultSystem (
-  system:
-  let
-    pkgs = nixpkgs.legacyPackages.${system};
+let
+  inherit (nixpkgs.lib) genAttrs platforms;
+  forAllSystems = f: genAttrs platforms.all (system: f (import nixpkgs { inherit system; }));
 
-  in
-  {
-    apps = {
-      format = flake-utils.lib.mkApp { drv = pkgs.nixfmt-rfc-style; };
-    };
-    checks = {
-      lefthook-check = lefthook.lib.${system}.run {
-        src = ./.;
-        config = {
-          pre-commit.commands = {
-            nixfmt = {
-              run = "${pkgs.nixfmt-rfc-style}/bin/nixfmt {staged_files}";
-              glob = "*.nix";
-            };
+in
+{
+  checks = forAllSystems (pkgs: {
+    lefthook-check = lefthook.lib.${pkgs.system}.run {
+      src = ./.;
+      config = {
+        pre-commit.commands = {
+          nixfmt = {
+            run = "${pkgs.lib.getExe pkgs.nixfmt-rfc-style} {staged_files}";
+            glob = "*.nix";
           };
         };
       };
     };
-    devShell = nixpkgs.legacyPackages.${system}.mkShell {
-      inherit (self.checks.${system}.lefthook-check) shellHook;
+  });
+
+  devShells = forAllSystems (pkgs: {
+    default = pkgs.mkShell {
+      inherit (self.checks.${pkgs.system}.lefthook-check) shellHook;
     };
-  }
-)
+  });
+}
