@@ -18,7 +18,6 @@ in
       git-spr = final.callPackage ./programs/git-spr { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };
-      ijhttp = final.callPackage ./programs/ijhttp { };
       input-source-pro = final.callPackage ./programs/input-source-pro { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       orbstack = final.callPackage ./programs/orbstack { };
