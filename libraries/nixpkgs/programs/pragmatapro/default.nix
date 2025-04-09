@@ -1,4 +1,8 @@
-{ lib, stdenvNoCC, nerd-font-patcher }:
+{
+  lib,
+  stdenvNoCC,
+  nerd-font-patcher,
+}:
 
 stdenvNoCC.mkDerivation rec {
   pname = "pragmatapro";

@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   sway = config.wayland.windowManager.sway.package;
@@ -28,11 +33,41 @@ in
         followMouse = false;
       };
       colors = {
-        focused = { border = "#58a6ff80"; background = "#58a6ff80"; text = "#b1bac4"; indicator = "#58a6ff80"; childBorder = "#58a6ff80"; };
-        focusedInactive = { border = "#0d1117"; background = "#0d1117"; text = "#b1bac4"; indicator = "#0d1117"; childBorder = "#0d1117"; };
-        unfocused = { border = "#0d1117"; background = "#0d1117"; text = "#b1bac4"; indicator = "#0d1117"; childBorder = "#0d1117"; };
-        urgent = { border = "#0d1117"; background = "#ff7b72"; text = "#b1bac4"; indicator = "#ff7b72"; childBorder = "#ff7b72"; };
-        placeholder = { border = "#0d1117"; background = "#0d1117"; text = "#b1bac4"; indicator = "#0d1117"; childBorder = "#0d1117"; };
+        focused = {
+          border = "#58a6ff80";
+          background = "#58a6ff80";
+          text = "#b1bac4";
+          indicator = "#58a6ff80";
+          childBorder = "#58a6ff80";
+        };
+        focusedInactive = {
+          border = "#0d1117";
+          background = "#0d1117";
+          text = "#b1bac4";
+          indicator = "#0d1117";
+          childBorder = "#0d1117";
+        };
+        unfocused = {
+          border = "#0d1117";
+          background = "#0d1117";
+          text = "#b1bac4";
+          indicator = "#0d1117";
+          childBorder = "#0d1117";
+        };
+        urgent = {
+          border = "#0d1117";
+          background = "#ff7b72";
+          text = "#b1bac4";
+          indicator = "#ff7b72";
+          childBorder = "#ff7b72";
+        };
+        placeholder = {
+          border = "#0d1117";
+          background = "#0d1117";
+          text = "#b1bac4";
+          indicator = "#0d1117";
+          childBorder = "#0d1117";
+        };
         background = "#ffffff";
       };
       bars = [ ];

@@ -1,4 +1,12 @@
-{ lib, fetchurl, fetchFromGitHub, stdenvNoCC, docker, installShellFiles, _7zz }:
+{
+  lib,
+  fetchurl,
+  fetchFromGitHub,
+  stdenvNoCC,
+  docker,
+  installShellFiles,
+  _7zz,
+}:
 
 let
   version = "1.10.3_19083";
@@ -26,7 +34,10 @@ stdenvNoCC.mkDerivation rec {
 
   sourceRoot = "OrbStack.app";
 
-  nativeBuildInputs = [ installShellFiles _7zz ];
+  nativeBuildInputs = [
+    installShellFiles
+    _7zz
+  ];
 
   unpackPhase = ''
     7zz x -snld "$src"

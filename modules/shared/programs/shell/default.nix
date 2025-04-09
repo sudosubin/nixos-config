@@ -216,7 +216,10 @@
         format = "[$symbol$context( \\($namespace\\))]($style) ";
         style = "blue";
         contexts = [
-          { context_pattern = ".*/(?P<name>[\\w-]+)"; context_alias = "$name"; }
+          {
+            context_pattern = ".*/(?P<name>[\\w-]+)";
+            context_alias = "$name";
+          }
         ];
         disabled = false;
       };

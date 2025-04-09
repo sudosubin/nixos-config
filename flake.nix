@@ -54,14 +54,22 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, nix-darwin, home-manager, ... }@inputs:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      nix-darwin,
+      home-manager,
+      ...
+    }@inputs:
     let
       dev-shell = import ./libraries/dev-shell { inherit inputs; };
       home-manager-shared = ./libraries/home-manager;
       nixpkgs-shared = ./libraries/nixpkgs;
 
     in
-    dev-shell // {
+    dev-shell
+    // {
       darwinConfigurations.darwin = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";
         modules = [

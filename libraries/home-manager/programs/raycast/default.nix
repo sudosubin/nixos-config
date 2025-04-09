@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 
 let
@@ -51,7 +56,9 @@ in
       launchd.agents.raycast = {
         enable = true;
         config = {
-          ProgramArguments = [ "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Raycast" ];
+          ProgramArguments = [
+            "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Raycast"
+          ];
           KeepAlive = true;
           ProcessType = "Interactive";
           StandardOutPath = "${config.xdg.cacheHome}/raycast.log";

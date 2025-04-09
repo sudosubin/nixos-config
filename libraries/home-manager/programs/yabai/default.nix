@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 
 let
@@ -7,10 +12,8 @@ let
 
   hasYabaiConfig = (cfg.config != { } || cfg.extraConfig != "");
 
-  toYabaiConfig = config:
-    concatStringsSep "\n" (mapAttrsToList
-      (p: v: "yabai -m config ${p} ${toString v}")
-      config);
+  toYabaiConfig =
+    config: concatStringsSep "\n" (mapAttrsToList (p: v: "yabai -m config ${p} ${toString v}") config);
 
 in
 {
@@ -55,20 +58,24 @@ in
     (mkIf cfg.enable {
       home.packages = [ cfg.package ];
 
-      xdg.configFile = mkIf hasYabaiConfig
-        {
-          "yabai/yabairc" = {
-            text = "${toYabaiConfig cfg.config}"
-              + optionalString (cfg.extraConfig != "") ("\n" + cfg.extraConfig + "\n");
-            executable = true;
-          };
+      xdg.configFile = mkIf hasYabaiConfig {
+        "yabai/yabairc" = {
+          text =
+            "${toYabaiConfig cfg.config}"
+            + optionalString (cfg.extraConfig != "") ("\n" + cfg.extraConfig + "\n");
+          executable = true;
         };
+      };
 
       launchd.agents.yabai = {
         enable = true;
         config = {
-          ProgramArguments = [ "${cfg.package}/bin/yabai" ]
-            ++ optionals (hasYabaiConfig) [ "-c" "${config.xdg.configHome}/yabai/yabairc" ];
+          ProgramArguments =
+            [ "${cfg.package}/bin/yabai" ]
+            ++ optionals (hasYabaiConfig) [
+              "-c"
+              "${config.xdg.configHome}/yabai/yabairc"
+            ];
           KeepAlive = true;
           RunAtLoad = true;
           EnvironmentVariables = {

@@ -1,4 +1,9 @@
-{ lib, fetchurl, stdenvNoCC, unzip }:
+{
+  lib,
+  fetchurl,
+  stdenvNoCC,
+  unzip,
+}:
 
 stdenvNoCC.mkDerivation rec {
   pname = "hammerspoon";

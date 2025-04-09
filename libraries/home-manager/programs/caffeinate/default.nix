@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 
 let
@@ -37,7 +42,10 @@ in
       launchd.agents.caffeinate = {
         enable = true;
         config = {
-          ProgramArguments = [ cfg.path cfg.args ];
+          ProgramArguments = [
+            cfg.path
+            cfg.args
+          ];
           KeepAlive = true;
           RunAtLoad = true;
         };

@@ -1,4 +1,9 @@
-{ lib, fetchurl, stdenvNoCC, _7zz }:
+{
+  lib,
+  fetchurl,
+  stdenvNoCC,
+  _7zz,
+}:
 
 let
   sources = {

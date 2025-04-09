@@ -3,7 +3,12 @@
   * https://github.com/nix-community/home-manager/blob/master/modules/programs/lsd.nix
 */
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 
 let
@@ -38,8 +43,7 @@ in
   config = mkIf cfg.enablePatch {
     home.packages = [ package ];
 
-    programs.lsd =
-      mkIf (cfg.colors != { }) { settings.color.theme = "custom"; };
+    programs.lsd = mkIf (cfg.colors != { }) { settings.color.theme = "custom"; };
 
     xdg.configFile = {
       "lsd/colors.yaml" = mkIf (cfg.colors != { }) {

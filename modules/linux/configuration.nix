@@ -2,19 +2,26 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, inputs, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
-  imports = [
-    # Include the results of the hardware scan.
-    ./hardware-configuration.nix
-  ] ++ (with inputs.nixos-hardware.nixosModules; [
-    # Include nixos-hardware libraries.
-    common-cpu-amd
-    common-gpu-amd
-    common-pc
-    common-pc-ssd
-  ]);
+  imports =
+    [
+      # Include the results of the hardware scan.
+      ./hardware-configuration.nix
+    ]
+    ++ (with inputs.nixos-hardware.nixosModules; [
+      # Include nixos-hardware libraries.
+      common-cpu-amd
+      common-gpu-amd
+      common-pc
+      common-pc-ssd
+    ]);
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -26,7 +33,10 @@
   boot.kernel.sysctl = {
     "fs.inotify.max_user_watches" = 524288;
   };
-  boot.kernelParams = [ "quiet" "rd.udev.log_level=3" ];
+  boot.kernelParams = [
+    "quiet"
+    "rd.udev.log_level=3"
+  ];
   boot.consoleLogLevel = 0;
   boot.initrd.verbose = false;
   boot.plymouth.enable = true;
@@ -47,7 +57,10 @@
 
   # Network nameservers
   networking = {
-    nameservers = [ "1.1.1.1" "1.0.0.1" ];
+    nameservers = [
+      "1.1.1.1"
+      "1.0.0.1"
+    ];
   };
 
   # Configure network proxy if necessary

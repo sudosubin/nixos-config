@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 
 let
@@ -79,10 +84,18 @@ in
       github-nvim-theme
     ];
     extraConfigLuaPre = ''
-      require("github-theme").setup(${toLua {
-        options = { transparent = true; };
-        groups.github_dark_default = { CursorLine = { bg = "bg2"; }; };
-      }})
+      require("github-theme").setup(${
+        toLua {
+          options = {
+            transparent = true;
+          };
+          groups.github_dark_default = {
+            CursorLine = {
+              bg = "bg2";
+            };
+          };
+        }
+      })
     '';
   };
 }

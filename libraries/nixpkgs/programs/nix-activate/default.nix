@@ -1,4 +1,11 @@
-{ lib, rustPlatform, fetchFromGitHub, pkg-config, openssl, stdenvNoCC }:
+{
+  lib,
+  rustPlatform,
+  fetchFromGitHub,
+  pkg-config,
+  openssl,
+  stdenvNoCC,
+}:
 
 rustPlatform.buildRustPackage rec {
   pname = "nix-activate";

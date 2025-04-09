@@ -1,18 +1,19 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 
 let
   cfg = config.programs.act;
 
-  formatConfig = config:
-    attrsets.mapAttrs
-      (
-        name: value:
-          if lib.isAttrs value
-          then attrsets.mapAttrsToList (k: v: "${k}=${v}") value
-          else value
-      )
-      config;
+  formatConfig =
+    config:
+    attrsets.mapAttrs (
+      name: value: if lib.isAttrs value then attrsets.mapAttrsToList (k: v: "${k}=${v}") value else value
+    ) config;
 
   toConfigFile = generators.toKeyValue {
     mkKeyValue = key: value: "--${key} ${value}";

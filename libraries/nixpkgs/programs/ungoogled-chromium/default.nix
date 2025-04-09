@@ -1,4 +1,9 @@
-{ lib, stdenvNoCC, fetchurl, _7zz }:
+{
+  lib,
+  stdenvNoCC,
+  fetchurl,
+  _7zz,
+}:
 
 let
   version = "134.0.6998.165-1.1";

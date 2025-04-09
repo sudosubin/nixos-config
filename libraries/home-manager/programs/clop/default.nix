@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 
 let
@@ -29,7 +34,9 @@ in
       launchd.agents.clop = {
         enable = true;
         config = {
-          ProgramArguments = [ "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Clop" ];
+          ProgramArguments = [
+            "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Clop"
+          ];
           KeepAlive = true;
           ProcessType = "Interactive";
           StandardOutPath = "${config.xdg.cacheHome}/clop.log";

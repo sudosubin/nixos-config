@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 
 let
@@ -19,7 +24,10 @@ in
         description = "Automatic scroll deactivation";
       };
       auto-deactivate-scrolling-delay-s = mkOption {
-        type = types.oneOf [ types.int types.float ];
+        type = types.oneOf [
+          types.int
+          types.float
+        ];
         default = 1;
         description = "Deactivation delay";
       };
@@ -34,18 +42,28 @@ in
         description = "Check for updates automatically";
       };
       dash-speed-multiplier = mkOption {
-        type = types.oneOf [ types.int types.float ];
+        type = types.oneOf [
+          types.int
+          types.float
+        ];
         default = 1.5;
         description = "Dash speed";
       };
       disabled-bundle-paths = mkOption {
-        type = types.listOf (types.oneOf [ types.path types.str ]);
+        type = types.listOf (
+          types.oneOf [
+            types.path
+            types.str
+          ]
+        );
         default = [ ];
         description = "Ignored applications";
-        apply = value:
-          if !(isList value)
-          then value
-          else "(${(strings.concatStringsSep "," (map (val: "\"${val}\"") value))})";
+        apply =
+          value:
+          if !(isList value) then
+            value
+          else
+            "(${(strings.concatStringsSep "," (map (val: "\"${val}\"") value))})";
       };
       enable-hyper-key = mkOption {
         type = types.bool;
@@ -98,7 +116,10 @@ in
         description = "Scroll keys";
       };
       scroll-px-per-ms = mkOption {
-        type = types.oneOf [ types.int types.float ];
+        type = types.oneOf [
+          types.int
+          types.float
+        ];
         default = 1;
         description = "Scroll speed";
       };
@@ -155,7 +176,9 @@ in
       launchd.agents.homerow = {
         enable = true;
         config = {
-          ProgramArguments = [ "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Homerow" ];
+          ProgramArguments = [
+            "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Homerow"
+          ];
           KeepAlive = true;
           ProcessType = "Interactive";
           StandardOutPath = "${config.xdg.cacheHome}/homerow.log";

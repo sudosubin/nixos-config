@@ -1,4 +1,9 @@
-{ inputs, lib, pkgs, ... }:
+{
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
@@ -27,23 +32,26 @@ in
     })
   ];
 
-  nixpkgs.config.allowUnfreePredicate = (pkg: builtins.elem (lib.getName pkg) [
-    "1password"
-    "1password-cli"
-    "cursor"
-    "datagrip"
-    "homerow"
-    "ijhttp"
-    "ngrok"
-    "orbstack"
-    "raycast"
-    "redisinsight"
-    "cleanshot"
-    "slack"
-    "vscode-extension-github-copilot"
-    "vscode-extension-github-copilot-chat"
-    "vscode-extension-ms-vscode-remote-remote-ssh"
-  ]);
+  nixpkgs.config.allowUnfreePredicate = (
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "1password"
+      "1password-cli"
+      "cursor"
+      "datagrip"
+      "homerow"
+      "ijhttp"
+      "ngrok"
+      "orbstack"
+      "raycast"
+      "redisinsight"
+      "cleanshot"
+      "slack"
+      "vscode-extension-github-copilot"
+      "vscode-extension-github-copilot-chat"
+      "vscode-extension-ms-vscode-remote-remote-ssh"
+    ]
+  );
 
   nixpkgs.config.permittedInsecurePackages = [
     "figma-linux-0.10.0"

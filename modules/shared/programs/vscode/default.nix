@@ -1,20 +1,29 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
 
-  configDir = if isLinux then "${config.xdg.configHome}/Cursor" else "Library/Application Support/Cursor";
+  configDir =
+    if isLinux then "${config.xdg.configHome}/Cursor" else "Library/Application Support/Cursor";
   monospace = "'PragmataProMono Nerd Font Mono'";
 
   stylesheet = {
     ".mac, .windows, .linux" = "font-family: ${monospace}, monospace !important;";
     ".quick-input-widget" = "font-family: ${monospace} !important;";
     ".search-view .search-widgets-container" = "font-family: ${monospace} !important;";
-    ".monaco-tree-sticky-container, .monaco-list-rows, .monaco-findInput, .monaco-inputbox" = "font-family: ${monospace} !important;";
+    ".monaco-tree-sticky-container, .monaco-list-rows, .monaco-findInput, .monaco-inputbox" =
+      "font-family: ${monospace} !important;";
   };
 
-  toCss = stylesheet: strings.concatStrings (attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
+  toCss =
+    stylesheet:
+    strings.concatStrings (attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
     code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {
@@ -46,15 +55,17 @@ let
       '';
     });
 
-    pkief.material-icon-theme = pkgs.vscode-marketplace.pkief.material-icon-theme.overrideAttrs (attrs: {
-      nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
+    pkief.material-icon-theme =
+      pkgs.vscode-marketplace.pkief.material-icon-theme.overrideAttrs
+        (attrs: {
+          nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
-      preInstall = ''
-        ${attrs.preInstall or ""}
+          preInstall = ''
+            ${attrs.preInstall or ""}
 
-        node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
-      '';
-    });
+            node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
+          '';
+        });
   };
 
 in

@@ -1,8 +1,16 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   targets.darwin.defaults = {
-    NSGlobalDomain.AppleLanguages = [ "en-US" "ko-KR" ];
+    NSGlobalDomain.AppleLanguages = [
+      "en-US"
+      "ko-KR"
+    ];
     NSGlobalDomain.AppleLocale = "en_US";
 
     "com.apple.desktopservices" = {
@@ -12,6 +20,9 @@
   };
 
   targets.darwin.keybindings = {
-    "₩" = [ "insertText:" "`" ];
+    "₩" = [
+      "insertText:"
+      "`"
+    ];
   };
 }

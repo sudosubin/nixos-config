@@ -1,4 +1,12 @@
-{ lib, stdenvNoCC, fetchurl, curl, jq, runCommand, unzip }:
+{
+  lib,
+  stdenvNoCC,
+  fetchurl,
+  curl,
+  jq,
+  runCommand,
+  unzip,
+}:
 
 stdenvNoCC.mkDerivation rec {
   pname = "homerow";

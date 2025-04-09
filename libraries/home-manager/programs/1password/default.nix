@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 
 let
@@ -11,21 +16,20 @@ let
   '';
 
   package =
-    if cfg.enableFHSEnvironment
-    then
-      cfg.package.overrideAttrs
-        (attrs: {
-          nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+    if cfg.enableFHSEnvironment then
+      cfg.package.overrideAttrs (attrs: {
+        nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
 
-          postInstall = ''
-            ${attrs.postInstall or ""}
-            source ${makeWrapperFHSEnvironment}
-            wrapFHSEnvironment "$out/bin/op" "/usr/local/bin/op"
-          '';
+        postInstall = ''
+          ${attrs.postInstall or ""}
+          source ${makeWrapperFHSEnvironment}
+          wrapFHSEnvironment "$out/bin/op" "/usr/local/bin/op"
+        '';
 
-          doInstallCheck = false;
-        })
-    else cfg.package;
+        doInstallCheck = false;
+      })
+    else
+      cfg.package;
 
 in
 {
