@@ -83,6 +83,7 @@ in
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
       biomejs.biome
+      bradlc.vscode-tailwindcss
       bufbuild.vscode-buf
       casualjim.gotemplate
       charliermarsh.ruff
@@ -115,6 +116,7 @@ in
       rust-lang.rust-analyzer
       samuelcolvin.jinjahtml
       shardulm94.trailing-spaces
+      stivo.tailwind-fold
       styled-components.vscode-styled-components
       svelte.svelte-vscode
       tamasfe.even-better-toml
