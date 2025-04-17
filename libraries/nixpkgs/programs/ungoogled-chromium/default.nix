@@ -6,17 +6,17 @@
 }:
 
 let
-  version = "134.0.6998.165-1.1";
+  version = "135.0.7049.84-1.1";
   hdiutil = "/usr/bin/hdiutil";
 
   sources = {
     "aarch64-darwin" = {
       url = "https://github.com/ungoogled-software/ungoogled-chromium-macos/releases/download/${version}/ungoogled-chromium_${version}_arm64-macos.dmg";
-      sha256 = "13sfhn2n53wmaw5rimljh7049y24zi54prgis1shwg9b8hfvbds2";
+      sha256 = "0a5xzycizppavagzb05v4vhbgw5vzc404cbac9k4awnxpqmf6kqr";
     };
     "x86_64-darwin" = {
       url = "https://github.com/ungoogled-software/ungoogled-chromium-macos/releases/download/${version}/ungoogled-chromium_${version}_x86_64-macos.dmg";
-      sha256 = "0cds85rm4qr6pcsncs48alk8s0fdjyas96nn5hysgn764nis1mkv";
+      sha256 = "0wzaz5bxh1bqkr0bl4cswm34hszv975lkajs7xymagw38wal315a";
     };
   };
 
