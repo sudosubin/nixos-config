@@ -13,7 +13,7 @@
   home.packages = with pkgs; [
     nil
     nixfmt-rfc-style
-    nixVersions.nix_2_26
+    nixVersions.stable
     nix-activate
   ];
 }
