@@ -35,6 +35,7 @@ let
                 "${cfg.package}/Applications/${attrs.sourceRoot}/Contents/MacOS/Chromium" \
                 "$out/Applications/${attrs.sourceRoot}/Contents/MacOS/Chromium" \
                 --run 'export APP_DIR="$(dirname "$(dirname "$(dirname "$(realpath "''${BASH_SOURCE[0]}")")")")"' \
+                --add-flags ${lib.escapeShellArg (lib.concatStringsSep " " cfg.commandLineArgs)} \
                 --add-flags '--load-extension="${lib.concatStringsSep "," extensionPaths}"'
             ''
           ));
@@ -48,6 +49,15 @@ in
     enable = lib.mkEnableOption "chromium";
 
     package = lib.mkPackageOption pkgs "chromium" { };
+
+    commandLineArgs = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [
+        "--webrtc-ip-handling-policy=default_public_interface_only"
+      ];
+      description = "A list of command-line arguments.";
+    };
 
     extensions = lib.mkOption {
       type = lib.types.listOf lib.types.package;
