@@ -68,7 +68,6 @@
         ../shared/programs/ssh
         ../shared/programs/terraform
         ../shared/programs/tmux
-        ../shared/programs/vercel
         ../shared/programs/vim
         ../shared/programs/vscode
         ../shared/programs/wezterm
