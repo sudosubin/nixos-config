@@ -53,7 +53,13 @@ end
 lrhk:bind({"lCmd"}, "h", function() end, nil, function() end)
 
 -- Hammerspoon
-hs.hotkey.bind({"alt", "shift"}, "r", function() hs.reload() end)
+hs.hotkey.bind({"alt", "shift"}, "r", function()
+  local home = os.getenv("HOME")
+  local plist = home .. "/Library/LaunchAgents/org.nix-community.home.yabai.plist"
+  hs.execute("launchctl unload " .. plist)
+  hs.execute("launchctl load " .. plist)
+  hs.reload()
+end)
 
 -- Terminal
 hs.hotkey.bind({"alt"}, "Return", function() hs.execute("open -na WezTerm.app") end)
