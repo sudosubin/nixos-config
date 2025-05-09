@@ -16,6 +16,8 @@ let
     ".mac, .windows, .linux" = "font-family: ${monospace}, monospace !important;";
     ".quick-input-widget" = "font-family: ${monospace} !important;";
     ".search-view .search-widgets-container" = "font-family: ${monospace} !important;";
+    ".monaco-workbench .debug-pane .monaco-list-row .expression" =
+      "font-family: ${monospace} !important;";
     ".monaco-tree-sticky-container, .monaco-list-rows, .monaco-findInput, .monaco-inputbox" =
       "font-family: ${monospace} !important;";
   };
