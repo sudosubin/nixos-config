@@ -80,5 +80,7 @@
     };
   };
 
+  system.primaryUser = "elvin";
+
   system.stateVersion = 6;
 }

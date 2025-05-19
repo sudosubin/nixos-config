@@ -12,7 +12,7 @@ $ nixos-rebuild switch --flake '.#linux' --use-remote-sudo
 
 # Darwin
 $ nix --experimental-features 'nix-command flakes' build '.#darwinConfigurations.darwin.system'
-$ ./result/sw/bin/darwin-rebuild switch --flake '.#darwin'
+$ sudo ./result/sw/bin/darwin-rebuild switch --flake '.#darwin'
 ```
 
 ## Update (flake lock, custom packages)
