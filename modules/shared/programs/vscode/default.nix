@@ -124,6 +124,7 @@ in
       teticio.python-envy
       timonwong.shellcheck
       usernamehw.errorlens
+      vercel.turbo-vsc
       yoavbls.pretty-ts-errors
       yzhang.markdown-all-in-one
     ];
