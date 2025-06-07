@@ -106,7 +106,6 @@ in
       hashicorp.terraform
       jnoortheen.nix-ide
       kevinrose.vsc-python-indent
-      ms-kubernetes-tools.vscode-kubernetes-tools
       ms-pyright.pyright
       ms-python.debugpy
       ms-python.python

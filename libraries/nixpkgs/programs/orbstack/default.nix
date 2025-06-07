@@ -9,16 +9,16 @@
 }:
 
 let
-  version = "1.10.3_19083";
+  version = "1.11.2_19280";
 
   sources = {
     "aarch64-darwin" = {
       url = "https://cdn-updates.orbstack.dev/arm64/OrbStack_v${version}_arm64.dmg";
-      sha256 = "0rrcx0nk102zam22kfmrs5fm1ffkgxs4jga588sj77nzgrf23b8y";
+      sha256 = "04g9644bib2vkknz05b3w4banhibm7i5shz7x5mlh0fbdv46qn30";
     };
     "x86_64-darwin" = {
       url = "https://cdn-updates.orbstack.dev/amd64/OrbStack_v${version}_amd64.dmg";
-      sha256 = "1v6av74cfhy968jvw15zz2vdzma1zki2dhfqgvcla8wk0mk0kwjk";
+      sha256 = "07pvfi94bkk29vhhgzm9c8qb58rs4946n4nnlhv6im5hcm33izp0";
     };
   };
 
