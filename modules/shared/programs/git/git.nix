@@ -6,7 +6,7 @@
     userName = "sudosubin";
     userEmail = "sudosubin@gmail.com";
     signing = {
-      key = "4BB550D927AA2762F341A86068971E6A5D6DE3D6";
+      key = "68971E6A5D6DE3D6";
       signByDefault = true;
     };
     ignores = [
