@@ -1,5 +1,27 @@
 {
   "nodes": {
+    "firefox-addons": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "pkgs/firefox-addons",
+        "lastModified": 1750824237,
+        "narHash": "sha256-jrJs7RMjB2P/V4y0n8qtN6EU5vId9W+6/le2XcRPg+4=",
+        "owner": "rycee",
+        "repo": "nur-expressions",
+        "rev": "6d3d0527e3e273e9aaef9f5c433ef8046245fbb2",
+        "type": "gitlab"
+      },
+      "original": {
+        "dir": "pkgs/firefox-addons",
+        "owner": "rycee",
+        "repo": "nur-expressions",
+        "type": "gitlab"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
@@ -143,26 +165,6 @@
       "original": {
         "owner": "sudosubin",
         "repo": "lefthook.nix",
-        "type": "github"
-      }
-    },
-    "nix-chrome-extensions": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1749790343,
-        "narHash": "sha256-UtB2ssCa7yGxZlntOMygXlF+AbcUUzo8dC82LjxBKmk=",
-        "owner": "sudosubin",
-        "repo": "nix-chrome-extensions",
-        "rev": "2071ec5ca9ec6630ccf384beac0c3563ffa8c961",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sudosubin",
-        "repo": "nix-chrome-extensions",
         "type": "github"
       }
     },
@@ -326,11 +328,11 @@
     },
     "root": {
       "inputs": {
+        "firefox-addons": "firefox-addons",
         "flake-utils": "flake-utils",
         "home-manager": "home-manager",
         "home-manager-secrets": "home-manager-secrets",
         "lefthook": "lefthook",
-        "nix-chrome-extensions": "nix-chrome-extensions",
         "nix-darwin": "nix-darwin",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-config-private-daangn": "nixos-config-private-daangn",

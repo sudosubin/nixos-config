@@ -2,14 +2,12 @@
   description = "sudosubin/nixos-config";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
-    nixos-hardware.url = "github:nixos/nixos-hardware";
-    flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
-
-    nix-darwin = {
-      url = "github:nix-darwin/nix-darwin";
+    firefox-addons = {
+      url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    flake-utils.url = "github:numtide/flake-utils?rev=13faa43c34c0c943585532dacbb457007416d50b";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -27,13 +25,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixvim = {
-      url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nix-chrome-extensions = {
-      url = "github:sudosubin/nix-chrome-extensions";
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -42,6 +35,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
+
+    nixos-hardware.url = "github:nixos/nixos-hardware";
 
     nixos-config-private-daangn = {
       url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=daangn&shallow=1";
@@ -52,14 +47,21 @@
       url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=sudosubin&shallow=1";
       # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/sudosubin";
     };
+
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
+
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     {
       self,
-      nixpkgs,
-      nix-darwin,
       home-manager,
+      nix-darwin,
+      nixpkgs,
       ...
     }@inputs:
     let
