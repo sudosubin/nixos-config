@@ -75,6 +75,17 @@
           ublock-origin
         ];
         settings = with pkgs.firefox-addons; {
+          "${multi-account-containers.addonId}" = {
+            settings = {
+              "open_container_0" = "firefox-container-1";
+              "open_container_1" = "firefox-container-2";
+              "open_container_2" = "firefox-container-3";
+              "open_container_3" = "firefox-container-4";
+              "open_container_4" = "firefox-container-5";
+              "open_container_5" = "firefox-container-6";
+              "open_container_6" = "firefox-container-7";
+            };
+          };
           "${ublock-origin.addonId}" = {
             settings = {
               force = true;
