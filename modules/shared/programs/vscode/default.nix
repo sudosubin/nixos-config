@@ -87,7 +87,6 @@ in
       biomejs.biome
       bradlc.vscode-tailwindcss
       bufbuild.vscode-buf
-      casualjim.gotemplate
       charliermarsh.ruff
       davidanson.vscode-markdownlint
       dbaeumer.vscode-eslint
