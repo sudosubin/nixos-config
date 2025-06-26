@@ -122,6 +122,7 @@ in
       };
       search = {
         default = "google";
+        force = true;
         order = [ "google" ];
         engines = {
           bing.metaData.hidden = true;
