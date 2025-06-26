@@ -44,12 +44,18 @@ class Workload:
 
                         # hard-coded `url` fixer, `sha256` replacer
                         if arg == "url":
-                            module_args["url"] = module_args["url"].replace("${version}", module_args["version"])
-                            module_args["sha256"] = await self.calculate_sha256(module_args["url"])
+                            module_args["url"] = module_args["url"].replace(
+                                "${version}", module_args["version"]
+                            )
+                            module_args["sha256"] = await self.calculate_sha256(
+                                module_args["url"]
+                            )
 
             for arg in module["args"]["write"]:
                 if module_line.strip().startswith(arg):
-                    module_lines[index] = re.sub(r'".*"', rf'"{module_args[arg]}"', module_line)
+                    module_lines[index] = re.sub(
+                        r'".*"', rf'"{module_args[arg]}"', module_line
+                    )
 
         async with aiofiles.open(module_path, mode="w") as f:
             await f.writelines(module_lines)

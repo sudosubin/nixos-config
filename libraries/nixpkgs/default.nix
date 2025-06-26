@@ -20,6 +20,7 @@ in
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       deskpad = final.callPackage ./programs/deskpad { };
+      firefox-gnome-theme = final.callPackage ./programs/firefox-gnome-theme { };
       git-spr = final.callPackage ./programs/git-spr { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };

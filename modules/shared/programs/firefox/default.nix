@@ -5,6 +5,11 @@
   ...
 }:
 
+let
+  cfg = config.programs.firefox;
+  profile = "default";
+
+in
 {
   programs.firefox = {
     enable = true;
@@ -28,7 +33,7 @@
       SearchBar = "unified";
     };
 
-    profiles.default = {
+    profiles."${profile}" = {
       containersForce = true;
       containers = {
         "sudosubin@gmail.com" = {
@@ -70,6 +75,7 @@
       extensions = {
         force = true;
         packages = with pkgs.firefox-addons; [
+          adaptive-tab-bar-colour
           multi-account-containers
           onepassword-password-manager
           ublock-origin
@@ -85,13 +91,13 @@
         settings = with pkgs.firefox-addons; {
           "${multi-account-containers.addonId}" = {
             settings = {
-              "open_container_0" = "firefox-container-1";
-              "open_container_1" = "firefox-container-2";
-              "open_container_2" = "firefox-container-3";
-              "open_container_3" = "firefox-container-4";
-              "open_container_4" = "firefox-container-5";
-              "open_container_5" = "firefox-container-6";
-              "open_container_6" = "firefox-container-7";
+              open_container_0 = "firefox-container-1";
+              open_container_1 = "firefox-container-2";
+              open_container_2 = "firefox-container-3";
+              open_container_3 = "firefox-container-4";
+              open_container_4 = "firefox-container-5";
+              open_container_5 = "firefox-container-6";
+              open_container_6 = "firefox-container-7";
             };
           };
           "${ublock-origin.addonId}" = {
@@ -129,45 +135,48 @@
         "browser.uiCustomization.state" = builtins.toJSON {
           "placements" = {
             "widget-overflow-fixed-list" = [ ];
-            "unified-extensions-area" = [ ];
+            "unified-extensions-area" = [ "_testpilot-containers-browser-action" ];
             "nav-bar" = [
               "back-button"
               "forward-button"
-              "stop-reload-button"
               "vertical-spacer"
+              "stop-reload-button"
               "urlbar-container"
               "save-to-pocket-button"
-              "downloads-button"
               "fxa-toolbar-menu-button"
+              "downloads-button"
               "ublock0_raymondhill_net-browser-action"
               "_d634138d-c276-4fc8-924b-40a0ea21d284_-browser-action"
               "unified-extensions-button"
-              "_testpilot-containers-browser-action"
+              "alltabs-button"
             ];
             "TabsToolbar" = [
               "tabbrowser-tabs"
-              "new-tab-button"
               "alltabs-button"
-              "firefox-view-button"
             ];
             "vertical-tabs" = [ ];
             "PersonalToolbar" = [ ];
           };
           "seen" = [ ];
-          "dirtyAreaCache" = [
-            "nav-bar"
-            "vertical-tabs"
-            "PersonalToolbar"
-            "TabsToolbar"
-            "unified-extensions-area"
-          ];
+          "dirtyAreaCache" = [ ];
           "currentVersion" = 22;
-          "newElementCount" = 8;
         };
         "extensions.autoDisableScopes" = 0;
         "extensions.update.autoUpdateDefault" = false;
         "extensions.update.enabled" = false;
+        "gnomeTheme.activeTabContrast" = true;
+        "gnomeTheme.normalWidthTabs" = true;
+        "gnomeTheme.extensions.adaptiveTabBarColour" = true;
+        "svg.context-properties.content.enabled" = true;
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        "widget.gtk.rounded-bottom-corners.enabled" = true;
       };
+      userChrome = ''
+        @import "${pkgs.firefox-gnome-theme}/userChrome.css";
+      '';
+      userContent = ''
+        @import "${pkgs.firefox-gnome-theme}/userContent.css";
+      '';
     };
   };
 }
