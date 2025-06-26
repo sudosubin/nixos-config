@@ -75,7 +75,6 @@ in
       extensions = {
         force = true;
         packages = with pkgs.firefox-addons; [
-          adaptive-tab-bar-colour
           multi-account-containers
           onepassword-password-manager
           ublock-origin
@@ -166,7 +165,6 @@ in
         "extensions.update.enabled" = false;
         "gnomeTheme.activeTabContrast" = true;
         "gnomeTheme.normalWidthTabs" = true;
-        "gnomeTheme.extensions.adaptiveTabBarColour" = true;
         "svg.context-properties.content.enabled" = true;
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "widget.gtk.rounded-bottom-corners.enabled" = true;
