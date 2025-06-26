@@ -14,15 +14,10 @@ stdenvNoCC.mkDerivation rec {
 
   src = fetchurl {
     url = "https://builds.homerow.app/v${version}/Homerow.zip";
-    name = "Homerow.app";
     sha256 = "1cb1qc4kwb3w5x7s6ag0q4mygawcngmvy29viyn6sk3n28jng3wd";
   };
 
   nativeBuildInputs = [ unzip ];
-
-  unpackPhase = ''
-    unzip $src
-  '';
 
   sourceRoot = "Homerow.app";
 

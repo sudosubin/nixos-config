@@ -1,21 +1,22 @@
 {
   lib,
   buildGoModule,
-  fetchFromGitHub,
+  fetchurl,
+  unzip,
 }:
 
 buildGoModule rec {
   pname = "git-spr";
-  version = "0.14.9";
+  version = "0.15.1";
 
-  src = fetchFromGitHub {
-    owner = "ejoffe";
-    repo = "spr";
-    rev = "v${version}";
-    sha256 = "sha256-PNKX8XwSmjSevzIYLq13jeHQ1jCuGESKcfwmXVuFM1g=";
+  src = fetchurl {
+    url = "https://github.com/ejoffe/spr/archive/refs/tags/v${version}.zip";
+    sha256 = "0sfc4zjw9hazn7kikg42yns92kvkgplz0vzav90c0g0xlzg2l7cq";
   };
 
-  vendorHash = "sha256-nLMEnGqGN62B010NZoG2b0Stg408uz5MbGhiOKRvkIE=";
+  vendorHash = "sha256-vTmzhU/sJ0C8mYuLE8qQQELI4ZwQVv0dsM/ea1mlhFk=";
+
+  nativeBuildInputs = [ unzip ];
 
   postInstall = ''
     mv $out/bin/amend $out/bin/git-amend

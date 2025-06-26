@@ -18,10 +18,6 @@ stdenvNoCC.mkDerivation rec {
 
   nativeBuildInputs = [ unzip ];
 
-  unpackPhase = ''
-    unzip $src
-  '';
-
   installPhase = ''
     mkdir -p "$out/Applications/${sourceRoot}"
     cp -R . "$out/Applications/${sourceRoot}"

@@ -35,6 +35,15 @@ modules:
       get_version: |-
         curl -s "https://api.github.com/repos/rafaelmardojai/firefox-gnome-theme/releases/latest" | jq -r ".name" | sed "s/v//g"
 
+  - path: ./libraries/nixpkgs/programs/git-spr/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        curl -s "https://api.github.com/repos/ejoffe/spr/releases/latest" | jq -r ".name" | sed "s/v//g"
+
   - path: ./libraries/nixpkgs/programs/hammerspoon/default.nix
     args:
       read_from_file: ["url"]
