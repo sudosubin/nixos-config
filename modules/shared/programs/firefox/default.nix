@@ -33,7 +33,7 @@
       containers = {
         "sudosubin@gmail.com" = {
           id = 1;
-          color = "blue";
+          color = "toolbar";
           icon = "fingerprint";
         };
         "elvin@daangn.com" = {
@@ -73,6 +73,14 @@
           multi-account-containers
           onepassword-password-manager
           ublock-origin
+          (buildFirefoxXpiAddon {
+            pname = "always-in-container";
+            version = "1.0.7";
+            addonId = "{a1e9543e-5f73-4763-b376-04e53fd12cbd}";
+            url = "https://addons.mozilla.org/firefox/downloads/file/4032840/always_in_container-1.0.7.xpi";
+            sha256 = "sha256-bLxjL2P6Sd06q98MSHYRTNigtcjGwn/C2r4ANWCqKrw=";
+            meta = { };
+          })
         ];
         settings = with pkgs.firefox-addons; {
           "${multi-account-containers.addonId}" = {
