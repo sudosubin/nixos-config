@@ -11,7 +11,7 @@ let
 in
 {
   nixpkgs.overlays = [
-    inputs.nix-chrome-extensions.overlays.default
+    inputs.firefox-addons.overlays.default
     inputs.nix-vscode-extensions.overlays.default
     (import ./programs/python)
 
@@ -20,6 +20,7 @@ in
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       deskpad = final.callPackage ./programs/deskpad { };
+      firefox-gnome-theme = final.callPackage ./programs/firefox-gnome-theme { };
       git-spr = final.callPackage ./programs/git-spr { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };
@@ -27,7 +28,6 @@ in
       orbstack = final.callPackage ./programs/orbstack { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       redisinsight = final.callPackage ./programs/redisinsight { };
-      ungoogled-chromium = (lib.mkIf isDarwin (final.callPackage ./programs/ungoogled-chromium { }));
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
   ];
@@ -35,6 +35,7 @@ in
   nixpkgs.config.allowUnfreePredicate = (
     pkg:
     builtins.elem (lib.getName pkg) [
+      # pkgs
       "1password"
       "1password-cli"
       "cleanshot"
@@ -48,6 +49,8 @@ in
       "raycast"
       "redisinsight"
       "slack"
+      # pkgs.firefox-addons
+      "onepassword-password-manager"
     ]
   );
 

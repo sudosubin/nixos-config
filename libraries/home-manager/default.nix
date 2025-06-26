@@ -19,7 +19,6 @@ in
     ./programs/1password
     ./programs/act
     ./programs/caffeinate
-    ./programs/chromium
     ./programs/cleanshot
     ./programs/clop
     ./programs/defaults

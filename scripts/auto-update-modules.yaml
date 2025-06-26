@@ -26,6 +26,15 @@ modules:
       get_version: |-
         curl -s "https://api.github.com/repos/Stengo/DeskPad/releases/latest" | jq -r ".tag_name" | sed "s/v//g"
 
+  - path: ./libraries/nixpkgs/programs/firefox-gnome-theme/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        curl -s "https://api.github.com/repos/rafaelmardojai/firefox-gnome-theme/releases/latest" | jq -r ".name" | sed "s/v//g"
+
   - path: ./libraries/nixpkgs/programs/hammerspoon/default.nix
     args:
       read_from_file: ["url"]
@@ -66,12 +75,3 @@ modules:
     methods:
       get_version: |-
         curl -s "https://api.github.com/repos/RedisInsight/RedisInsight/releases/latest" | jq -r ".tag_name"
-
-  - path: ./libraries/nixpkgs/programs/ungoogled-chromium/default.nix
-    args:
-      read_from_file: ["url"]
-      read_from_method: ["version"]
-      write: ["version", "sha256"]
-    methods:
-      get_version: |-
-        curl -s "https://api.github.com/repos/ungoogled-software/ungoogled-chromium-macos/releases/latest" | jq -r ".tag_name"
