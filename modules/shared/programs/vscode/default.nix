@@ -30,7 +30,7 @@ let
     code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
-      resources = if isDarwin then "Cursor.app/Contents/Resources" else "resources";
+      resources = if isDarwin then "Contents/Resources" else "resources";
 
       preInstall = ''
         ${attrs.preInstall or ""}
