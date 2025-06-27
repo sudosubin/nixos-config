@@ -120,6 +120,7 @@ in
           };
         };
       };
+      preConfig = builtins.readFile "${pkgs.arkenfox-userjs}/user.js";
       search = {
         default = "google";
         force = true;
@@ -131,7 +132,6 @@ in
         };
       };
       settings = {
-        "browser.search.suggest.enabled" = false;
         "browser.uiCustomization.state" = builtins.toJSON {
           "placements" = {
             "widget-overflow-fixed-list" = [ ];

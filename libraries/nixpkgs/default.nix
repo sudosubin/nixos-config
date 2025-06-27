@@ -13,6 +13,7 @@ in
   nixpkgs.overlays = [
     inputs.firefox-addons.overlays.default
     inputs.nix-vscode-extensions.overlays.default
+    (import ./programs/code-cursor)
     (import ./programs/python)
 
     (final: prev: {
