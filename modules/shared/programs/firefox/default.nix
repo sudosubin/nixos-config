@@ -6,8 +6,14 @@
 }:
 
 let
-  cfg = config.programs.firefox;
-  profile = "default";
+  always-in-container = pkgs.firefox-addons.buildFirefoxXpiAddon {
+    pname = "always-in-container";
+    version = "1.0.7";
+    addonId = "{a1e9543e-5f73-4763-b376-04e53fd12cbd}";
+    url = "https://addons.mozilla.org/firefox/downloads/file/4032840/always_in_container-1.0.7.xpi";
+    sha256 = "sha256-bLxjL2P6Sd06q98MSHYRTNigtcjGwn/C2r4ANWCqKrw=";
+    meta = { };
+  };
 
 in
 {
@@ -33,7 +39,7 @@ in
       SearchBar = "unified";
     };
 
-    profiles."${profile}" = {
+    profiles.default = {
       containersForce = true;
       containers = {
         "sudosubin@gmail.com" = {
@@ -75,17 +81,11 @@ in
       extensions = {
         force = true;
         packages = with pkgs.firefox-addons; [
+          always-in-container
           multi-account-containers
           onepassword-password-manager
+          private-grammar-checker-harper
           ublock-origin
-          (buildFirefoxXpiAddon {
-            pname = "always-in-container";
-            version = "1.0.7";
-            addonId = "{a1e9543e-5f73-4763-b376-04e53fd12cbd}";
-            url = "https://addons.mozilla.org/firefox/downloads/file/4032840/always_in_container-1.0.7.xpi";
-            sha256 = "sha256-bLxjL2P6Sd06q98MSHYRTNigtcjGwn/C2r4ANWCqKrw=";
-            meta = { };
-          })
         ];
         settings = with pkgs.firefox-addons; {
           "${multi-account-containers.addonId}" = {
@@ -174,61 +174,7 @@ in
       };
       userChrome = ''
         @import "${pkgs.firefox-gnome-theme}/userChrome.css";
-
-        /* https://github.com/rafaelmardojai/firefox-gnome-theme/issues/464#issuecomment-1663126448 (patch: 4px -> 2px) */
-
-        /* Tabs containers */
-        #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tabbrowser-tab[usercontextid] > .tab-stack > .tab-background {
-          outline: none !important;
-        }
-
-        #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[usercontextid] > .tab-stack > .tab-background {
-          overflow: hidden;
-        }
-
-        #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[usercontextid] > .tab-stack > .tab-background > .tab-context-line {
-          display: flex !important;
-          width: 6px !important;
-        }
-
-        #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[usercontextid] .tab-label-container,
-        #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[usercontextid] .tab-label-container {
-          color: initial !important;
-          font-weight: initial !important;
-        }
-
-        #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[class*="identity-color-"] > .tab-stack > .tab-content {
-          background-image: radial-gradient(var(--identity-tab-color) 50%, var(--identity-tab-color) 50%) !important;
-          background-position: center bottom !important;
-          background-size: 100% 2px !important;
-          background-repeat: no-repeat;
-          border-radius: 5px;
-        }
-
-        #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[class*="identity-color-"]:not([pinned]) .tab-content::before {
-          bottom: 2px !important;
-        }
-
-        /* Needs attetion tab indicator */
-        #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[class*="identity-color-"] > .tab-stack > .tab-content[attention]:not([selected="true"]),
-        #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[class*="identity-color-"] > .tab-stack > .tab-content[pinned][titlechanged]:not([selected="true"]) {
-          background-image: radial-gradient(circle at 50% 100%, transparent 7px, transparent 7px, var(--identity-tab-color) 27px) !important;
-          background-position: center bottom !important;
-          background-size: 100% 2px !important;
-        }
-
-        #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[class*="identity-color-"] > .tab-stack > .tab-content[attention]:not([selected="true"])::after,
-        #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[class*="identity-color-"] > .tab-stack > .tab-content[pinned][titlechanged]:not([selected="true"])::after {
-          display: block;
-          position: absolute;
-          left: 0;
-          bottom: 0;
-          width: 100%;
-          height: 2px;
-          content: ' ';
-          background-image: radial-gradient(circle at 50% 100%, var(--gnome-tabbar-tab-needs-attetion) 7px, transparent 7px) !important;
-          background-position: center bottom !important;
-        }
+        ${builtins.readFile ./files/userChrome.css}
       '';
       userContent = ''
         @import "${pkgs.firefox-gnome-theme}/userContent.css";
