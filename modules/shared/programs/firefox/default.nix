@@ -120,7 +120,6 @@ in
           };
         };
       };
-      preConfig = builtins.readFile "${pkgs.arkenfox-userjs}/user.js";
       search = {
         default = "google";
         force = true;
@@ -132,6 +131,8 @@ in
         };
       };
       settings = {
+        "browser.toolbars.bookmarks.visibility" = "never";
+        "browser.search.suggest.enabled" = false;
         "browser.uiCustomization.state" = builtins.toJSON {
           "placements" = {
             "widget-overflow-fixed-list" = [ ];
@@ -166,6 +167,7 @@ in
         "extensions.update.enabled" = false;
         "gnomeTheme.activeTabContrast" = true;
         "gnomeTheme.normalWidthTabs" = true;
+        "layout.spellcheckDefault" = 0;
         "svg.context-properties.content.enabled" = true;
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "widget.gtk.rounded-bottom-corners.enabled" = true;
