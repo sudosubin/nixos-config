@@ -16,6 +16,7 @@
 
       home.packages = with pkgs; [
         # Development
+        claude-code
         curl
         hadolint
         ijhttp

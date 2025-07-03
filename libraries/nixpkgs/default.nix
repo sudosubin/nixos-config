@@ -39,6 +39,7 @@ in
       # pkgs
       "1password"
       "1password-cli"
+      "claude-code"
       "cleanshot"
       "cursor"
       "datagrip"
