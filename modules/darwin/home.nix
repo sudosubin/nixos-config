@@ -21,7 +21,7 @@
         hadolint
         ijhttp
         jetbrains.datagrip
-        jetbrains.idea-community
+        jetbrains.idea-ultimate
         ngrok
         procps
         shfmt

@@ -20,6 +20,7 @@
         hadolint
         ijhttp
         jetbrains.datagrip
+        jetbrains.idea-ultimate
         shfmt
         sqlfluff
 

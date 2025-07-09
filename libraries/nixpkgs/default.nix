@@ -44,6 +44,7 @@ in
       "cursor"
       "datagrip"
       "homerow"
+      "idea-ultimate"
       "ijhttp"
       "ngrok"
       "orbstack"
