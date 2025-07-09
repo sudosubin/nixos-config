@@ -48,6 +48,7 @@ in
       "ijhttp"
       "ngrok"
       "orbstack"
+      "postman"
       "pragmatapro"
       "raycast"
       "redisinsight"

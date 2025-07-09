@@ -23,6 +23,7 @@
         jetbrains.datagrip
         jetbrains.idea-ultimate
         ngrok
+        postman
         procps
         shfmt
         sqlfluff
