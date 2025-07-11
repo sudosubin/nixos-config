@@ -9,18 +9,18 @@ let
   sources = {
     "aarch64-darwin" = {
       url = "https://download.redisinsight.redis.com/latest/Redis-Insight-mac-arm64.dmg";
-      sha256 = "0hwfikljigcwpalanrrnralmmfpg8n78q32napmm2gcxs2nsv09a";
+      sha256 = "0wdmr1xfglxkjvci4fsfmmazkgq5bbvjjn6lqwgd7a24d4ax93ir";
     };
     "x86_64-darwin" = {
       url = "https://download.redisinsight.redis.com/latest/Redis-Insight-mac-x64.dmg";
-      sha256 = "1dnm0wfcrvyqb1mhw7yq9bjwxrbg81w9f1r5vpc1h184kzmmgnzc";
+      sha256 = "10bpwbf64nbmiv5rsn2jmi4cd1r1dq310lq5aans4sgfiifqnb1c";
     };
   };
 
 in
 stdenvNoCC.mkDerivation rec {
   pname = "redisinsight";
-  version = "2.70.0";
+  version = "2.70.1";
 
   src = fetchurl {
     inherit (sources.${stdenvNoCC.hostPlatform.system}) url sha256;
