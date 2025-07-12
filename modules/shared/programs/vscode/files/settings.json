@@ -109,6 +109,7 @@
   },
 
   // language (javascript)
+  "biome.suggestInstallingGlobally": false,
   "emmet.excludeLanguages": ["typescriptreact"],
   "svelte.enable-ts-plugin": true,
   "typescript.disableAutomaticTypeAcquisition": true,
