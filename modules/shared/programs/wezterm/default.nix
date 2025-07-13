@@ -69,9 +69,7 @@ in
             {
               key = "Enter";
               mods = "SHIFT";
-              action = lib.generators.mkLuaInline ''
-                wezterm.action.SendString '\n'
-              '';
+              action = lib.generators.mkLuaInline "wezterm.action.SendString '\\n'";
             }
           ];
           window_decorations = "RESIZE";
