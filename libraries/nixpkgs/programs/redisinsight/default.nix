@@ -9,11 +9,11 @@ let
   sources = {
     "aarch64-darwin" = {
       url = "https://download.redisinsight.redis.com/latest/Redis-Insight-mac-arm64.dmg";
-      sha256 = "0wdmr1xfglxkjvci4fsfmmazkgq5bbvjjn6lqwgd7a24d4ax93ir";
+      sha256 = "0d6bkwgnxyvvlx4lzs783v8crbxrmy98kdsa1l2jbiswbf24gy1f";
     };
     "x86_64-darwin" = {
       url = "https://download.redisinsight.redis.com/latest/Redis-Insight-mac-x64.dmg";
-      sha256 = "10bpwbf64nbmiv5rsn2jmi4cd1r1dq310lq5aans4sgfiifqnb1c";
+      sha256 = "1fnhbmlj0d1r3fhq9smq1ygwqzv4hiqd5xndcsxaxkw1mvifsgf3";
     };
   };
 
