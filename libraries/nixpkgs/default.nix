@@ -13,7 +13,6 @@ in
   nixpkgs.overlays = [
     inputs.firefox-addons.overlays.default
     inputs.nix-vscode-extensions.overlays.default
-    (import ./programs/code-cursor)
     (import ./programs/python)
 
     (final: prev: {
@@ -41,8 +40,8 @@ in
       "1password-cli"
       "claude-code"
       "cleanshot"
-      "cursor"
       "datagrip"
+      "vscode-extension-github-copilot"
       "homerow"
       "idea-ultimate"
       "ijhttp"

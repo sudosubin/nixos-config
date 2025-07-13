@@ -9,7 +9,7 @@ let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
 
   configDir =
-    if isLinux then "${config.xdg.configHome}/Cursor" else "Library/Application Support/Cursor";
+    if isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/VSCodium";
   monospace = "'PragmataProMono Nerd Font Mono'";
 
   stylesheet = {
@@ -27,7 +27,7 @@ let
     lib.strings.concatStrings (lib.attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
-    code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {
+    vscodium = pkgs.vscodium.overrideDerivation (attrs: {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
       resources = if isDarwin then "Contents/Resources" else "resources";
@@ -77,11 +77,12 @@ in
     "${configDir}/User/snippets".source = ./files/snippets;
   };
 
-  programs.vscode = {
+  programs.vscode = rec {
     enable = true;
-    package = overlays.code-cursor;
-    profiles.default.extensions = with pkgs.vscode-marketplace; [
+    package = overlays.vscodium;
+    profiles.default.extensions = with (pkgs.forVSCodeVersion package.version).vscode-marketplace; [
       adguard.adblock
+      anthropic.claude-code
       arcanis.vscode-zipfs
       bierner.markdown-preview-github-styles
       biomejs.biome
@@ -98,6 +99,7 @@ in
       exiasr.hadolint
       foxundermoon.shell-format
       fwcd.kotlin
+      github.copilot
       github.github-vscode-theme
       golang.go
       graphql.vscode-graphql
@@ -129,7 +131,6 @@ in
   };
 
   home.shellAliases = {
-    code = "/usr/bin/open -a Cursor.app";
-    cursor = "/usr/bin/open -a Cursor.app";
+    code = "codium";
   };
 }
