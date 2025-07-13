@@ -3,9 +3,9 @@
 {
   programs.tmux = {
     enable = true;
-    terminal = "screen-256color";
+    terminal = "tmux-256color";
     extraConfig = ''
-      set -ga terminal-overrides ',*-256color*:Tc'
+      set -ga terminal-overrides ',tmux-256color:Tc'
 
       # ctrl+b highlight
       set -g status-right '#{?client_prefix,#[reverse] ^B #[noreverse],} | %a %Y-%m-%d %H:%M'
@@ -15,6 +15,12 @@
       bind j select-pane -D
       bind k select-pane -U
       bind l select-pane -R
+
+      # pane resize binding
+      bind -r H resize-pane -L 5
+      bind -r J resize-pane -D 5
+      bind -r K resize-pane -U 5
+      bind -r L resize-pane -R 5
 
       # open new window/pane from current path
       bind '"' split-window -c "#{pane_current_path}"
