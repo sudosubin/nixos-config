@@ -65,6 +65,15 @@ in
           font_size = font-size;
           front_end = "WebGpu";
           hide_tab_bar_if_only_one_tab = true;
+          keys = [
+            {
+              key = "Enter";
+              mods = "SHIFT";
+              action = lib.generators.mkLuaInline ''
+                wezterm.action.SendString '\n'
+              '';
+            }
+          ];
           window_decorations = "RESIZE";
         }
       };
