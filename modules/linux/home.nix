@@ -50,6 +50,7 @@
         ../shared/programs/act
         ../shared/programs/aws
         ../shared/programs/bat
+        ../shared/programs/claude-code
         ../shared/programs/container
         ../shared/programs/direnv
         ../shared/programs/firefox

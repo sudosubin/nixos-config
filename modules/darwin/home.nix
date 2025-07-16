@@ -16,7 +16,6 @@
 
       home.packages = with pkgs; [
         # Development
-        claude-code
         curl
         hadolint
         ijhttp
@@ -52,6 +51,7 @@
         ../shared/programs/act
         ../shared/programs/aws
         ../shared/programs/bat
+        ../shared/programs/claude-code
         ../shared/programs/container
         ../shared/programs/direnv
         ../shared/programs/firefox
