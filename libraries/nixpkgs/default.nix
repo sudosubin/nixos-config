@@ -41,7 +41,6 @@ in
       "claude-code"
       "cleanshot"
       "datagrip"
-      "vscode-extension-github-copilot"
       "homerow"
       "idea-ultimate"
       "ijhttp"
@@ -52,6 +51,7 @@ in
       "raycast"
       "redisinsight"
       "slack"
+      "vscode-extension-github-copilot"
       # pkgs.firefox-addons
       "onepassword-password-manager"
     ]
