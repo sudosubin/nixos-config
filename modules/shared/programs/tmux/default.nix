@@ -3,9 +3,10 @@
 {
   programs.tmux = {
     enable = true;
-    terminal = "tmux-256color";
+    keyMode = "vi";
+    terminal = "screen-256color";
     extraConfig = ''
-      set -ga terminal-overrides ',tmux-256color:Tc'
+      set -ga terminal-overrides ',*-256color*:Tc'
 
       # ctrl+b highlight
       set -g status-right '#{?client_prefix,#[reverse] ^B #[noreverse],} | %a %Y-%m-%d %H:%M'
