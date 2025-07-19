@@ -33,6 +33,14 @@
     enable = true;
     historySize = 1000000;
     historyFileSize = 1000000;
+    initExtra = lib.mkOrder 0 ''
+      if [ -n "$CLAUDECODE" ]; then
+        if command -v direnv >/dev/null 2>&1; then
+          eval "$(direnv hook bash)"
+          eval "$(DIRENV_LOG_FORMAT= direnv export bash)"
+        fi
+      fi
+    '';
   };
 
   programs.starship = {
