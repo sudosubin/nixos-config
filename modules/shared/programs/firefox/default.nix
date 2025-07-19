@@ -22,7 +22,6 @@ in
     package = pkgs.firefox;
 
     policies = {
-      DisableFirefoxAccounts = true;
       DisableFirefoxScreenshots = true;
       DisableFirefoxStudies = true;
       DisableTelemetry = true;
