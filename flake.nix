@@ -53,6 +53,13 @@
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nuschtosSearch.follows = "nuschtos-search";
+    };
+
+    nuschtos-search = {
+      url = "github:NuschtOS/search";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
