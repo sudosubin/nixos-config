@@ -74,7 +74,6 @@ in
   home.file = {
     "${configDir}/product.json".source = ./files/product.json;
     "${configDir}/User/settings.json".source = ./files/settings.json;
-    "${configDir}/User/snippets".source = ./files/snippets;
   };
 
   programs.vscode = rec {
