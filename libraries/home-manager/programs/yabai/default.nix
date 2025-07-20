@@ -70,12 +70,13 @@ in
       launchd.agents.yabai = {
         enable = true;
         config = {
-          ProgramArguments =
-            [ "${cfg.package}/bin/yabai" ]
-            ++ lib.optionals (hasYabaiConfig) [
-              "-c"
-              "${config.xdg.configHome}/yabai/yabairc"
-            ];
+          ProgramArguments = [
+            "${cfg.package}/bin/yabai"
+          ]
+          ++ lib.optionals (hasYabaiConfig) [
+            "-c"
+            "${config.xdg.configHome}/yabai/yabairc"
+          ];
           KeepAlive = true;
           RunAtLoad = true;
           EnvironmentVariables = {

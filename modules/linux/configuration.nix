@@ -10,18 +10,17 @@
 }:
 
 {
-  imports =
-    [
-      # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ]
-    ++ (with inputs.nixos-hardware.nixosModules; [
-      # Include nixos-hardware libraries.
-      common-cpu-amd
-      common-gpu-amd
-      common-pc
-      common-pc-ssd
-    ]);
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ]
+  ++ (with inputs.nixos-hardware.nixosModules; [
+    # Include nixos-hardware libraries.
+    common-cpu-amd
+    common-gpu-amd
+    common-pc
+    common-pc-ssd
+  ]);
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
