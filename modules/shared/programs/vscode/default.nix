@@ -9,7 +9,7 @@ let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
 
   configDir =
-    if isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/VSCodium";
+    if isLinux then "${config.xdg.configHome}/Cursor" else "Library/Application Support/Cursor";
   monospace = "'PragmataProMono Nerd Font Mono'";
 
   stylesheet = {
@@ -27,7 +27,7 @@ let
     lib.strings.concatStrings (lib.attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
-    vscodium = pkgs.vscodium.overrideDerivation (attrs: {
+    code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
       resources = if isDarwin then "Contents/Resources" else "resources";
@@ -78,58 +78,61 @@ in
 
   programs.vscode = rec {
     enable = true;
-    package = overlays.vscodium;
-    profiles.default.extensions = with (pkgs.forVSCodeVersion package.version).vscode-marketplace; [
-      adguard.adblock
-      anthropic.claude-code
-      arcanis.vscode-zipfs
-      bierner.markdown-preview-github-styles
-      biomejs.biome
-      bradlc.vscode-tailwindcss
-      bufbuild.vscode-buf
-      charliermarsh.ruff
-      davidanson.vscode-markdownlint
-      dbaeumer.vscode-eslint
-      denoland.vscode-deno
-      dorzey.vscode-sqlfluff
-      eamodio.gitlens
-      editorconfig.editorconfig
-      esbenp.prettier-vscode
-      exiasr.hadolint
-      foxundermoon.shell-format
-      fwcd.kotlin
-      github.copilot
-      github.github-vscode-theme
-      golang.go
-      graphql.vscode-graphql
-      graphql.vscode-graphql-syntax
-      hashicorp.terraform
-      jnoortheen.nix-ide
-      kevinrose.vsc-python-indent
-      ms-pyright.pyright
-      ms-python.debugpy
-      ms-python.python
-      overlays.pkief.material-icon-theme # TODO
-      pkief.material-product-icons
-      prisma.prisma
-      redhat.java
-      redhat.vscode-yaml
-      rust-lang.rust-analyzer
-      samuelcolvin.jinjahtml
-      shardulm94.trailing-spaces
-      styled-components.vscode-styled-components
-      svelte.svelte-vscode
-      tamasfe.even-better-toml
-      teticio.python-envy
-      timonwong.shellcheck
-      usernamehw.errorlens
-      vercel.turbo-vsc
-      yoavbls.pretty-ts-errors
-      yzhang.markdown-all-in-one
-    ];
+    package = overlays.code-cursor;
+    profiles.default.extensions =
+      (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
+        adguard.adblock
+        anthropic.claude-code
+        anysphere.pyright
+        arcanis.vscode-zipfs
+        bierner.markdown-preview-github-styles
+        biomejs.biome
+        bradlc.vscode-tailwindcss
+        charliermarsh.ruff
+        davidanson.vscode-markdownlint
+        dbaeumer.vscode-eslint
+        denoland.vscode-deno
+        dorzey.vscode-sqlfluff
+        esbenp.prettier-vscode
+        exiasr.hadolint
+        foxundermoon.shell-format
+        fwcd.kotlin
+        github.github-vscode-theme
+        golang.go
+        graphql.vscode-graphql
+        graphql.vscode-graphql-syntax
+        hashicorp.terraform
+        jnoortheen.nix-ide
+        kevinrose.vsc-python-indent
+        ms-python.debugpy
+        ms-python.python
+        overlays.pkief.material-icon-theme # TODO
+        pkief.material-product-icons
+        prisma.prisma
+        redhat.java
+        redhat.vscode-yaml
+        rust-lang.rust-analyzer
+        samuelcolvin.jinjahtml
+        shardulm94.trailing-spaces
+        styled-components.vscode-styled-components
+        svelte.svelte-vscode
+        tamasfe.even-better-toml
+        teticio.python-envy
+        timonwong.shellcheck
+        usernamehw.errorlens
+        vercel.turbo-vsc
+        yoavbls.pretty-ts-errors
+        yzhang.markdown-all-in-one
+      ])
+      ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx-release; [
+        eamodio.gitlens
+      ])
+      ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).vscode-marketplace; [
+        bufbuild.vscode-buf
+      ]);
   };
 
   home.shellAliases = {
-    code = "codium";
+    code = "cursor";
   };
 }

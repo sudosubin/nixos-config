@@ -40,6 +40,7 @@ in
       "1password-cli"
       "claude-code"
       "cleanshot"
+      "cursor"
       "datagrip"
       "homerow"
       "idea-ultimate"
@@ -51,7 +52,6 @@ in
       "raycast"
       "redisinsight"
       "slack"
-      "vscode-extension-github-copilot"
       # pkgs.firefox-addons
       "onepassword-password-manager"
     ]
