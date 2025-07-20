@@ -7,13 +7,14 @@ in
 {
   home.packages = with pkgs; [ gh ];
 
-  xdg.configFile = {
-    "gh/config.yml".source = yamlFormat.generate "gh-config.yml" ({
+  programs.gh = {
+    enable = true;
+    settings = {
       aliases = { };
       editor = "";
       git_protocol = "https";
       prompt = "enabled";
-      version = "1";
-    });
+    };
+    gitCredentialHelper.enable = false;
   };
 }
