@@ -68,7 +68,6 @@
         ../shared/programs/shell
         ../shared/programs/ssh
         ../shared/programs/terraform
-        ../shared/programs/tmux
         ../shared/programs/vscode
         ../shared/programs/wezterm
         ../shared/programs/xdg
