@@ -17,6 +17,7 @@
       home.packages = with pkgs; [
         # Development
         curl
+        google-cloud-sdk
         hadolint
         ijhttp
         jetbrains.datagrip
