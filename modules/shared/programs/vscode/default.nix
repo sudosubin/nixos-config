@@ -89,6 +89,7 @@ in
         biomejs.biome
         bradlc.vscode-tailwindcss
         charliermarsh.ruff
+        coderabbit.coderabbit-vscode
         davidanson.vscode-markdownlint
         dbaeumer.vscode-eslint
         denoland.vscode-deno
