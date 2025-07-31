@@ -22,7 +22,6 @@
         jetbrains.datagrip
         jetbrains.idea-ultimate
         shfmt
-        sqlfluff
 
         # Utility
         figma-linux

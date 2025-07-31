@@ -26,7 +26,6 @@
         postman
         procps
         shfmt
-        sqlfluff
 
         # Utility
         cleanshot

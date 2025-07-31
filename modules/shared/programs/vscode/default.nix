@@ -93,7 +93,6 @@ in
         davidanson.vscode-markdownlint
         dbaeumer.vscode-eslint
         denoland.vscode-deno
-        dorzey.vscode-sqlfluff
         esbenp.prettier-vscode
         exiasr.hadolint
         foxundermoon.shell-format
