@@ -44,8 +44,12 @@ class Workload:
 
                         # hard-coded `url` fixer, `sha256` replacer
                         if arg == "url":
-                            module_args["url"] = module_args["url"].replace(
-                                "${version}", module_args["version"]
+                            module_args["url"] = (
+                                module_args["url"]
+                                .replace("${version}", module_args["version"])
+                                .replace(
+                                    "${finalAttrs.version}", module_args["version"]
+                                )
                             )
                             module_args["sha256"] = await self.calculate_sha256(
                                 module_args["url"]

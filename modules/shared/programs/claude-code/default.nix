@@ -18,5 +18,6 @@
 
   home.packages = with pkgs; [
     claude-code
+    o3-search-mcp
   ];
 }
