@@ -102,6 +102,7 @@ in
             settings = {
               force = true;
               selectedFilterLists = [
+                "user-filters"
                 "ublock-filters"
                 "ublock-badware"
                 "ublock-privacy"
@@ -114,6 +115,9 @@ in
                 "adguard-cookies"
                 "ublock-cookies-adguard"
                 "KOR-1"
+              ];
+              user-filters = lib.strings.concatLines [
+                "||accounts.google.com/gsi/*$xhr,script,3p"
               ];
             };
           };
