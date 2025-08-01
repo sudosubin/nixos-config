@@ -62,6 +62,8 @@
   "editor.cursorSmoothCaretAnimation": "on",
 
   // git
+  "git.autofetch": false,
+  "git.openRepositoryInParentFolders": "always",
   "gitlens.currentLine.format": "${author} • ${date}, ${message}",
   "gitlens.currentLine.dateFormat": "YYYY-MM-DD",
   "gitlens.codeLens.enabled": false,
