@@ -5,12 +5,12 @@
   unzip,
 }:
 
-buildGoModule rec {
+buildGoModule (finalAttrs: {
   pname = "git-spr";
   version = "0.15.1";
 
   src = fetchurl {
-    url = "https://github.com/ejoffe/spr/archive/refs/tags/v${version}.zip";
+    url = "https://github.com/ejoffe/spr/archive/refs/tags/v${finalAttrs.version}.zip";
     sha256 = "0sfc4zjw9hazn7kikg42yns92kvkgplz0vzav90c0g0xlzg2l7cq";
   };
 
@@ -31,4 +31,4 @@ buildGoModule rec {
     maintainers = with maintainers; [ sudosubin ];
     platforms = platforms.unix;
   };
-}
+})

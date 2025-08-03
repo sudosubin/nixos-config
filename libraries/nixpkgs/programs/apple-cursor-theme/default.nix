@@ -4,12 +4,12 @@
   fetchzip,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "apple-cursor-theme";
   version = "1.2.3";
 
   src = fetchzip {
-    url = "https://github.com/ful1e5/apple_cursor/releases/download/v${version}/macOSBigSur.tar.gz";
+    url = "https://github.com/ful1e5/apple_cursor/releases/download/v${finalAttrs.version}/macOSBigSur.tar.gz";
     sha256 = "sha256-EvIoUq5g6+NynSPEylTj8tDUFEitGjxDw7CrhEgOlV8=";
   };
 
@@ -25,4 +25,4 @@ stdenvNoCC.mkDerivation rec {
     maintainers = with lib.maintainers; [ sudosubin ];
     platforms = lib.platforms.linux;
   };
-}
+})

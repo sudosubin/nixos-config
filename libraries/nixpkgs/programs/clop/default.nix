@@ -5,12 +5,12 @@
   _7zz,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "clop";
   version = "2.10.1";
 
   src = fetchurl {
-    url = "https://github.com/FuzzyIdeas/Clop/releases/download/v${version}/Clop-${version}.dmg";
+    url = "https://github.com/FuzzyIdeas/Clop/releases/download/v${finalAttrs.version}/Clop-${finalAttrs.version}.dmg";
     sha256 = "182mxh278xfy62f5gfm3v67abyjid6zdnshbcfpx6455g4a9ngyd";
   };
 
@@ -19,8 +19,8 @@ stdenvNoCC.mkDerivation rec {
   nativeBuildInputs = [ _7zz ];
 
   installPhase = ''
-    mkdir -p "$out/Applications/${sourceRoot}"
-    cp -R . "$out/Applications/${sourceRoot}"
+    mkdir -p "$out/Applications/${finalAttrs.sourceRoot}"
+    cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
   '';
 
   meta = {
@@ -30,4 +30,4 @@ stdenvNoCC.mkDerivation rec {
     maintainers = with lib.maintainers; [ sudosubin ];
     platforms = lib.platforms.darwin;
   };
-}
+})

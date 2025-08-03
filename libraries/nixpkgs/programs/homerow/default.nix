@@ -8,12 +8,12 @@
   unzip,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "homerow";
   version = "1.4.0";
 
   src = fetchurl {
-    url = "https://builds.homerow.app/v${version}/Homerow.zip";
+    url = "https://builds.homerow.app/v${finalAttrs.version}/Homerow.zip";
     sha256 = "1cb1qc4kwb3w5x7s6ag0q4mygawcngmvy29viyn6sk3n28jng3wd";
   };
 
@@ -23,8 +23,8 @@ stdenvNoCC.mkDerivation rec {
 
   installPhase = ''
     runHook preInstall
-    mkdir -p "$out/Applications/${sourceRoot}"
-    cp -R . "$out/Applications/${sourceRoot}"
+    mkdir -p "$out/Applications/${finalAttrs.sourceRoot}"
+    cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
     runHook postInstall
   '';
 
@@ -35,4 +35,4 @@ stdenvNoCC.mkDerivation rec {
     maintainers = with lib.maintainers; [ sudosubin ];
     platforms = lib.platforms.darwin;
   };
-}
+})

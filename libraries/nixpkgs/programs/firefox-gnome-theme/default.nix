@@ -5,12 +5,12 @@
   unzip,
 }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "firefox-gnome-theme";
   version = "140";
 
   src = fetchurl {
-    url = "https://github.com/rafaelmardojai/firefox-gnome-theme/archive/refs/tags/v${version}.zip";
+    url = "https://github.com/rafaelmardojai/firefox-gnome-theme/archive/refs/tags/v${finalAttrs.version}.zip";
     sha256 = "13ml3sxbwq8n197sh47azkpl1n4jidp6aybqrpnx9l5bb051b9c5";
   };
 
@@ -32,4 +32,4 @@ stdenv.mkDerivation rec {
     maintainers = with lib.maintainers; [ sudosubin ];
     platforms = lib.platforms.all;
   };
-}
+})

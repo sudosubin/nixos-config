@@ -7,13 +7,13 @@
   stdenvNoCC,
 }:
 
-rustPlatform.buildRustPackage rec {
+rustPlatform.buildRustPackage (finalAttrs: {
   pname = "nix-activate";
   version = "0.1.0";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
-    repo = pname;
+    repo = finalAttrs.pname;
     rev = "5debfbe";
     sha256 = "sha256-mSj0xgsYK6QBRA3MAd1L9a91xEkt82EHKs4mQtE+lw0=";
   };
@@ -31,4 +31,4 @@ rustPlatform.buildRustPackage rec {
     platforms = lib.platforms.unix;
     mainProgram = "nix-activate";
   };
-}
+})

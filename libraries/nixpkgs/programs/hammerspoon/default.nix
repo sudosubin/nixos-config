@@ -5,12 +5,12 @@
   unzip,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "hammerspoon";
   version = "1.0.0";
 
   src = fetchurl {
-    url = "https://github.com/Hammerspoon/hammerspoon/releases/download/${version}/Hammerspoon-${version}.zip";
+    url = "https://github.com/Hammerspoon/hammerspoon/releases/download/${finalAttrs.version}/Hammerspoon-${finalAttrs.version}.zip";
     sha256 = "0zkagvnzf2ia68l998nzblqvvgl5xy8qv57mx03c6zd4bnsh5dsx";
   };
 
@@ -19,8 +19,8 @@ stdenvNoCC.mkDerivation rec {
   nativeBuildInputs = [ unzip ];
 
   installPhase = ''
-    mkdir -p "$out/Applications/${sourceRoot}"
-    cp -R . "$out/Applications/${sourceRoot}"
+    mkdir -p "$out/Applications/${finalAttrs.sourceRoot}"
+    cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
   '';
 
   meta = {
@@ -30,4 +30,4 @@ stdenvNoCC.mkDerivation rec {
     maintainers = with lib.maintainers; [ sudosubin ];
     platforms = lib.platforms.darwin;
   };
-}
+})

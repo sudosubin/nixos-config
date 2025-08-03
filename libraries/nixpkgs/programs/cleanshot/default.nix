@@ -5,12 +5,12 @@
   _7zz,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "cleanshot";
   version = "4.6.2";
 
   src = fetchurl {
-    url = "https://updates.getcleanshot.com/v3/CleanShot-X-${version}.dmg";
+    url = "https://updates.getcleanshot.com/v3/CleanShot-X-${finalAttrs.version}.dmg";
     sha256 = "04qf45v7x54729i5zpbq1f60811db6jvy15rax6184zpsdd13fxv";
   };
 
@@ -19,8 +19,8 @@ stdenvNoCC.mkDerivation rec {
   nativeBuildInputs = [ _7zz ];
 
   installPhase = ''
-    mkdir -p "$out/Applications/${sourceRoot}"
-    cp -R . "$out/Applications/${sourceRoot}"
+    mkdir -p "$out/Applications/${finalAttrs.sourceRoot}"
+    cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
   '';
 
   meta = {
@@ -30,4 +30,4 @@ stdenvNoCC.mkDerivation rec {
     maintainers = with lib.maintainers; [ sudosubin ];
     platforms = lib.platforms.darwin;
   };
-}
+})

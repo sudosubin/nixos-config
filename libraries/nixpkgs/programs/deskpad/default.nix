@@ -5,12 +5,12 @@
   unzip,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "deskpad";
   version = "1.3.2";
 
   src = fetchurl {
-    url = "https://github.com/Stengo/DeskPad/releases/download/v${version}/DeskPad.app.zip";
+    url = "https://github.com/Stengo/DeskPad/releases/download/v${finalAttrs.version}/DeskPad.app.zip";
     sha256 = "1q2sp22qbibrwhaiqjbdbmq9mbj2g5mfsbzbdxx1g4s16q9f5amp";
   };
 
@@ -19,8 +19,8 @@ stdenvNoCC.mkDerivation rec {
   nativeBuildInputs = [ unzip ];
 
   installPhase = ''
-    mkdir -p "$out/Applications/${sourceRoot}"
-    cp -R . "$out/Applications/${sourceRoot}"
+    mkdir -p "$out/Applications/${finalAttrs.sourceRoot}"
+    cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
   '';
 
   meta = {
@@ -30,4 +30,4 @@ stdenvNoCC.mkDerivation rec {
     maintainers = with lib.maintainers; [ sudosubin ];
     platforms = lib.platforms.darwin;
   };
-}
+})

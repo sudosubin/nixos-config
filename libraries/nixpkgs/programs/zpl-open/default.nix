@@ -4,14 +4,14 @@
   fetchFromGitHub,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "zpl-open";
   version = "1.1.0";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "zeplin-uri-opener";
-    rev = "v${version}";
+    rev = "v${finalAttrs.version}";
     sha256 = "sha256-f6r2vnIGl41C52d1LT6mQpkOXLVLzvkpMivXlwfhMQg=";
   };
 
@@ -39,4 +39,4 @@ stdenvNoCC.mkDerivation rec {
     platforms = lib.platforms.linux;
     mainProgram = "zpl-open";
   };
-}
+})

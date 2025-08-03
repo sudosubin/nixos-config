@@ -4,7 +4,7 @@
   nerd-font-patcher,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pragmatapro";
   version = "0.829";
 
@@ -36,4 +36,4 @@ stdenvNoCC.mkDerivation rec {
     maintainers = with lib.maintainers; [ sudosubin ];
     platforms = lib.platforms.all;
   };
-}
+})
