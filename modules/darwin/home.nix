@@ -17,6 +17,7 @@
       home.packages = with pkgs; [
         # Development
         curl
+        cursor-agent
         google-cloud-sdk
         hadolint
         ijhttp

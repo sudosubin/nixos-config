@@ -17,6 +17,15 @@ modules:
       get_version: |-
         curl -s "https://api.github.com/repos/FuzzyIdeas/Clop/releases/latest" | jq -r ".tag_name" | sed "s/v//g"
 
+  - path: ./libraries/nixpkgs/programs/cursor-agent/default.nix
+    args:
+      read_from_file: ["url"]
+      read_from_method: ["version"]
+      write: ["version", "sha256"]
+    methods:
+      get_version: |-
+        curl -s https://cursor.com/install | grep -oP 'lab/\K[^/]+'
+
   - path: ./libraries/nixpkgs/programs/deskpad/default.nix
     args:
       read_from_file: ["url"]
@@ -73,17 +82,6 @@ modules:
     methods:
       get_version: |-
         curl -s "https://api.github.com/repos/nacyot/o3-search-mcp/commits?per_page=1" | jq -r '.[0].sha[:7]'
-
-  - path: ./libraries/nixpkgs/programs/orbstack/default.nix
-    args:
-      read_from_file: ["url"]
-      read_from_method: ["version"]
-      write: ["version", "sha256"]
-    methods:
-      get_version: |-
-        curl -v "https://orbstack.dev/download/stable/latest/arm64" 2>&1 \
-          | grep -i location: \
-          | sed -r "s|.*_v(.+)_arm64.dmg|\1|g"
 
   - path: ./libraries/nixpkgs/programs/redisinsight/default.nix
     args:
