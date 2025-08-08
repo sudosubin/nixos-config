@@ -27,7 +27,6 @@ in
       homerow = final.callPackage ./programs/homerow { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       o3-search-mcp = final.callPackage ./programs/o3-search-mcp { };
-      orbstack = final.callPackage ./programs/orbstack { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       redisinsight = final.callPackage ./programs/redisinsight { };
       zpl-open = final.callPackage ./programs/zpl-open { };
@@ -49,7 +48,6 @@ in
       "idea-ultimate"
       "ijhttp"
       "ngrok"
-      "orbstack"
       "postman"
       "pragmatapro"
       "raycast"
