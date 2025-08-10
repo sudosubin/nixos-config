@@ -82,7 +82,6 @@ in
     profiles.default.extensions =
       (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
         adguard.adblock
-        anthropic.claude-code
         anysphere.pyright
         arcanis.vscode-zipfs
         bierner.markdown-preview-github-styles
@@ -128,6 +127,7 @@ in
         eamodio.gitlens
       ])
       ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).vscode-marketplace; [
+        anthropic.claude-code # TODO
         bufbuild.vscode-buf
       ]);
   };

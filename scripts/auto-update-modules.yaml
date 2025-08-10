@@ -17,7 +17,7 @@ modules:
       get_version: |-
         curl -s "https://api.github.com/repos/FuzzyIdeas/Clop/releases/latest" | jq -r ".tag_name" | sed "s/v//g"
 
-  - path: ./libraries/nixpkgs/programs/cursor-agent/default.nix
+  - path: ./libraries/nixpkgs/programs/cursor-cli/default.nix
     args:
       read_from_file: ["url"]
       read_from_method: ["version"]

@@ -17,7 +17,8 @@
       home.packages = with pkgs; [
         # Development
         curl
-        cursor-agent
+        cursor-cli
+        gemini-cli
         google-cloud-sdk
         hadolint
         ijhttp
