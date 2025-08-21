@@ -76,6 +76,11 @@ in
           color = "red";
           icon = "gift";
         };
+        "awskrug.event@gmail.com" = {
+          id = 8;
+          color = "turquoise";
+          icon = "food";
+        };
       };
       extensions = {
         force = true;
