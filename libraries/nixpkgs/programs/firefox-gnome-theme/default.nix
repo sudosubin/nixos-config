@@ -7,11 +7,11 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "firefox-gnome-theme";
-  version = "141";
+  version = "142";
 
   src = fetchurl {
     url = "https://github.com/rafaelmardojai/firefox-gnome-theme/archive/refs/tags/v${finalAttrs.version}.zip";
-    sha256 = "1y13cl1fqp4lssbad2pykkqw1g6h5c2zcr4arpvinr15rnljg9nx";
+    sha256 = "0x77pscl2im409kpkswgah2vqd7n1w0zmff4aa92lv5nnscyk1nf";
   };
 
   nativeBuildInputs = [ unzip ];

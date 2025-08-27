@@ -1,9 +1,9 @@
 final: prev:
 
 {
-  python310 = prev.python310.override {
+  python313 = prev.python313.override {
     packageOverrides = self: super: {
-      cherrypy = (import ./cherrypy.nix self super);
+      lsprotocol = (import ./lsprotocol.nix self super);
     };
   };
 }

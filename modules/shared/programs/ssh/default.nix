@@ -3,9 +3,11 @@
 {
   programs.ssh = {
     enable = true;
-    extraConfig = ''
-      AddressFamily inet
-      StrictHostKeyChecking no
-    '';
+    enableDefaultConfig = false;
+    matchBlocks."*" = {
+      addressFamily = "inet";
+      userKnownHostsFile = "~/.ssh/known_hosts";
+      extraOptions.StrictHostKeyChecking = "no";
+    };
   };
 }

@@ -45,7 +45,7 @@
       };
 
       imports = [
-        inputs.nixvim.homeManagerModules.nixvim
+        inputs.nixvim.homeModules.nixvim
         inputs.nixos-config-private-daangn.homeManagerModules.daangn
         inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
 
