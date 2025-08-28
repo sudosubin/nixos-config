@@ -19,7 +19,6 @@ in
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
-      cursor-cli = final.callPackage ./programs/cursor-cli { };
       deskpad = final.callPackage ./programs/deskpad { };
       firefox-gnome-theme = final.callPackage ./programs/firefox-gnome-theme { };
       git-spr = final.callPackage ./programs/git-spr { };
