@@ -18,7 +18,6 @@
         # Development
         curl
         cursor-cli
-        gemini-cli
         google-cloud-sdk
         hadolint
         ijhttp
