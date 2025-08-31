@@ -15,6 +15,15 @@ let
     meta = { };
   };
 
+  trancyfordesktop = pkgs.firefox-addons.buildFirefoxXpiAddon {
+    pname = "trancyfordesktop";
+    version = "7.4.0";
+    addonId = "{29f42579-9618-4dc7-8647-eaad7cd3343e}";
+    url = "https://addons.mozilla.org/firefox/downloads/file/4565802/trancyfordesktop-7.4.0.xpi";
+    sha256 = "sha256-u1OyfFovbUNhAOSPBr3C3Zq8QK8I4jyl9zopFiPtFt0=";
+    meta = { };
+  };
+
 in
 {
   programs.firefox = {
@@ -89,6 +98,7 @@ in
           multi-account-containers
           onepassword-password-manager
           private-grammar-checker-harper
+          trancyfordesktop
           ublock-origin
         ];
         settings = with pkgs.firefox-addons; {
