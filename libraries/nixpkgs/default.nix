@@ -52,6 +52,7 @@ in
       "raycast"
       "redisinsight"
       "slack"
+      "vscode-extension-claude-code"
       # pkgs.firefox-addons
       "onepassword-password-manager"
     ]

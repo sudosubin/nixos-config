@@ -80,7 +80,10 @@ in
     enable = true;
     package = overlays.code-cursor;
     profiles.default.extensions =
-      (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
+      (with pkgs.vscode-extensions; [
+        anthropic.claude-code
+      ])
+      ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
         adguard.adblock
         anysphere.pyright
         arcanis.vscode-zipfs
@@ -125,10 +128,6 @@ in
       ])
       ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx-release; [
         eamodio.gitlens
-      ])
-      ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).vscode-marketplace; [
-        anthropic.claude-code # TODO
-        bufbuild.vscode-buf
       ]);
   };
 
