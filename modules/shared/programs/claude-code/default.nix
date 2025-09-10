@@ -6,8 +6,10 @@
 }:
 
 {
-  home.file = {
-    ".claude/settings.json".text = builtins.toJSON {
+  programs.claude-code = {
+    enable = true;
+
+    settings = {
       includeCoAuthoredBy = false;
       env = {
         CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL = "1";
@@ -15,9 +17,4 @@
       };
     };
   };
-
-  home.packages = with pkgs; [
-    claude-code
-    o3-search-mcp
-  ];
 }
