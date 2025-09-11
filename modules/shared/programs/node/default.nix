@@ -6,6 +6,12 @@
 }:
 
 {
+  home.file = {
+    ".yarnrc".text = ''
+      disable-self-update-check true
+    '';
+  };
+
   home.sessionVariables = {
     NEXT_TELEMETRY_DISABLED = "1";
     npm_config_cache = "${config.xdg.cacheHome}/npm";
