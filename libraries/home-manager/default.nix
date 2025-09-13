@@ -27,7 +27,6 @@ in
     ./programs/jq
     ./programs/kube
     ./programs/lsd
-    ./programs/raycast
     ./programs/yabai
 
     # os systems

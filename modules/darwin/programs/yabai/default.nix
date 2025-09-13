@@ -29,7 +29,6 @@
 
       # Third-party
       yabai -m rule --add app="^Homerow$" manage="off"
-      yabai -m rule --add app="^Raycast$" manage="off"
     '';
   };
 }

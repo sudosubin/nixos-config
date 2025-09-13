@@ -48,7 +48,6 @@ in
       "ngrok"
       "postman"
       "pragmatapro"
-      "raycast"
       "redisinsight"
       "slack"
       "vscode-extension-claude-code"
