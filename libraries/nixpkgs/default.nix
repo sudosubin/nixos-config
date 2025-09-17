@@ -50,7 +50,7 @@ in
       "pragmatapro"
       "redisinsight"
       "slack"
-      "vscode-extension-claude-code"
+      "vscode-extension-anthropic-claude-code"
       # pkgs.firefox-addons
       "onepassword-password-manager"
     ]
