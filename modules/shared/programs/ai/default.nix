@@ -16,6 +16,14 @@
         CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
       };
     };
+
+    mcpServers = {
+      gemini-cli = {
+        type = "stdio";
+        command = pkgs.lib.getExe pkgs.gemini-mcp-tool;
+        args = [ ];
+      };
+    };
   };
 
   programs.gemini-cli = {
