@@ -18,6 +18,7 @@
         # Development
         curl
         cursor-cli
+        gemini-cli
         google-cloud-sdk
         hadolint
         ijhttp
@@ -50,9 +51,9 @@
 
         # ../shared/programs/1password
         ../shared/programs/act
+        ../shared/programs/ai
         ../shared/programs/aws
         ../shared/programs/bat
-        ../shared/programs/claude-code
         ../shared/programs/container
         ../shared/programs/direnv
         ../shared/programs/firefox

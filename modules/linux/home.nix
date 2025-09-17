@@ -47,9 +47,9 @@
 
         ../shared/programs/1password
         ../shared/programs/act
+        ../shared/programs/ai
         ../shared/programs/aws
         ../shared/programs/bat
-        ../shared/programs/claude-code
         ../shared/programs/container
         ../shared/programs/direnv
         ../shared/programs/firefox
