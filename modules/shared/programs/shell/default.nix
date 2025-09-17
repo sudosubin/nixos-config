@@ -296,10 +296,4 @@
       zig.disabled = true;
     };
   };
-
-  programs.zoxide = {
-    enable = true;
-    enableBashIntegration = true;
-    enableZshIntegration = false;
-  };
 }
