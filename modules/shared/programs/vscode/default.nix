@@ -85,7 +85,6 @@ in
       ])
       ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
         adguard.adblock
-        anysphere.pyright
         arcanis.vscode-zipfs
         bierner.markdown-preview-github-styles
         biomejs.biome
@@ -106,6 +105,7 @@ in
         hashicorp.terraform
         jnoortheen.nix-ide
         kevinrose.vsc-python-indent
+        ms-pyright.pyright
         ms-python.debugpy
         ms-python.python
         overlays.pkief.material-icon-theme # TODO
