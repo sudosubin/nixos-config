@@ -15,7 +15,7 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        curl -s "https://api.github.com/repos/FuzzyIdeas/Clop/releases/latest" | jq -r ".tag_name" | sed "s/v//g"
+        gh api /repos/FuzzyIdeas/Clop/releases/latest -q ".tag_name" | sed "s/v//g"
 
   - path: ./libraries/nixpkgs/programs/deskpad/default.nix
     args:
@@ -24,7 +24,7 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        curl -s "https://api.github.com/repos/Stengo/DeskPad/releases/latest" | jq -r ".tag_name" | sed "s/v//g"
+        gh api /repos/Stengo/DeskPad/releases/latest -q ".tag_name" | sed "s/v//g"
 
   - path: ./libraries/nixpkgs/programs/firefox-gnome-theme/default.nix
     args:
@@ -33,7 +33,7 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        curl -s "https://api.github.com/repos/rafaelmardojai/firefox-gnome-theme/releases/latest" | jq -r ".name" | sed "s/v//g"
+        gh api /repos/rafaelmardojai/firefox-gnome-theme/releases/latest -q ".name" | sed "s/v//g"
 
   - path: ./libraries/nixpkgs/programs/git-spr/default.nix
     args:
@@ -42,7 +42,7 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        curl -s "https://api.github.com/repos/ejoffe/spr/releases/latest" | jq -r ".name" | sed "s/v//g"
+        gh api /repos/ejoffe/spr/releases/latest -q ".name" | sed "s/v//g"
 
   - path: ./libraries/nixpkgs/programs/hammerspoon/default.nix
     args:
@@ -51,7 +51,7 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        curl -s "https://api.github.com/repos/Hammerspoon/hammerspoon/releases/latest" | jq -r ".name"
+        gh api /repos/Hammerspoon/hammerspoon/releases/latest -q ".name"
 
   - path: ./libraries/nixpkgs/programs/homerow/default.nix
     args:
@@ -72,4 +72,4 @@ modules:
       write: ["version", "sha256"]
     methods:
       get_version: |-
-        curl -s "https://api.github.com/repos/redis/RedisInsight/releases/latest" | jq -r ".tag_name"
+        gh api /repos/redis/RedisInsight/releases/latest -q ".tag_name"
