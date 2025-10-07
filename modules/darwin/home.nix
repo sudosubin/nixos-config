@@ -39,7 +39,7 @@
       ];
 
       secrets = {
-        mount = "/tmp/user/$UID/secrets";
+        mount = "${config.xdg.cacheHome}/home-manager-secrets";
         identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
         enableForceReload = true;
       };
