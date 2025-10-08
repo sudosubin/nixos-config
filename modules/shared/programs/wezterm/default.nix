@@ -54,6 +54,29 @@ in
   programs.wezterm = {
     enable = true;
 
+    extraConfig = ''
+      return ${
+        toLua {
+          automatically_reload_config = true;
+          color_scheme = "default";
+          font = lib.generators.mkLuaInline ''
+            wezterm.font_with_fallback(${toLua font})
+          '';
+          font_size = font-size;
+          front_end = "WebGpu";
+          hide_tab_bar_if_only_one_tab = true;
+          keys = [
+            {
+              key = "Enter";
+              mods = "SHIFT";
+              action = lib.generators.mkLuaInline "wezterm.action.SendString '\\n'";
+            }
+          ];
+          window_decorations = "RESIZE";
+        }
+      };
+    '';
+
     colorSchemes = {
       default = {
         foreground = colors.ansi.white;
@@ -96,9 +119,5 @@ in
 
     enableBashIntegration = true;
     enableZshIntegration = false;
-  };
-
-  xdg.configFile = {
-    "wezterm/wezterm.lua".source = ./files/wezterm.lua;
   };
 }
