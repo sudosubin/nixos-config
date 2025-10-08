@@ -66,10 +66,11 @@
         ../shared/programs/rust
         ../shared/programs/shell
         ../shared/programs/ssh
+        ../shared/programs/terminal
         ../shared/programs/terraform
         ../shared/programs/tmux
+        ../shared/programs/vim
         ../shared/programs/vscode
-        ../shared/programs/wezterm
         ../shared/programs/xdg
 
         ../linux/programs/input-method

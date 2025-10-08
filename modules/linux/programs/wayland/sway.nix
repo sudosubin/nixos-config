@@ -23,7 +23,7 @@ in
     wrapperFeatures.gtk = true;
     config = rec {
       modifier = "Mod4";
-      terminal = "${pkgs.wezterm}/bin/wezterm";
+      terminal = "${pkgs.alacritty}/bin/alacritty";
       fonts = {
         names = [ "PragmataProMono Nerd Font Mono" ];
         style = "";

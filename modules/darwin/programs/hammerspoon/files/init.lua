@@ -22,18 +22,6 @@ end
 
 function stroke(modifiers, character)
   local app = hs.application.frontmostApplication()
-
-  -- Fix for WezTerm
-  if app and app:name() == "WezTerm" and modifiers and #modifiers == 1 and modifiers[1] == "lAlt" then
-    if character == "left" then
-      hs.eventtap.keyStrokes("\x1bb")
-      return
-    elseif character == "right" then
-      hs.eventtap.keyStrokes("\x1bf")
-      return
-    end
-  end
-
   hs.eventtap.event.newKeyEvent(modifiers, character, true):post()
   hs.eventtap.event.newKeyEvent(modifiers, character, false):post()
 end
@@ -75,7 +63,7 @@ hs.hotkey.bind({"alt", "shift"}, "r", function()
 end)
 
 -- Terminal
-hs.hotkey.bind({"alt"}, "Return", function() hs.execute("open -na WezTerm.app") end)
+hs.hotkey.bind({"alt"}, "Return", function() hs.execute("open -na Alacritty.app") end)
 
 -- Yabai
 function yabai(args)
