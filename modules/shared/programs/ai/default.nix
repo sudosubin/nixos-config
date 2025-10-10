@@ -28,6 +28,7 @@
 
   programs.gemini-cli = {
     enable = true;
+    package = pkgs.gemini-cli-bin;
 
     # https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/configuration.md
     settings = {
