@@ -86,6 +86,7 @@ in
       ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
         adguard.adblock
         arcanis.vscode-zipfs
+        astral-sh.ty
         bierner.markdown-preview-github-styles
         biomejs.biome
         bradlc.vscode-tailwindcss
