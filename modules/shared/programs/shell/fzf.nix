@@ -1,12 +1,9 @@
 { pkgs, lib, ... }:
-let
-  fd = lib.getExe' pkgs.fd "fd";
 
-in
 {
   programs.fzf = rec {
     enable = true;
-    defaultCommand = "${fd} --strip-cwd-prefix --exclude .git";
+    defaultCommand = "${lib.getExe pkgs.fd} --strip-cwd-prefix --exclude .git";
     defaultOptions = [
       "--color=dark"
       "--color=fg:-1,bg:-1,hl:#98c379"

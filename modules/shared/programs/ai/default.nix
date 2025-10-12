@@ -20,7 +20,7 @@
     mcpServers = {
       gemini-cli = {
         type = "stdio";
-        command = pkgs.lib.getExe pkgs.gemini-mcp-tool;
+        command = lib.getExe pkgs.gemini-mcp-tool;
         args = [ ];
       };
     };

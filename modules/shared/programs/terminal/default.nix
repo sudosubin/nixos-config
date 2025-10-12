@@ -6,10 +6,12 @@
 }:
 
 let
-  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
+  toLua = lib.generators.toLua { };
 
   colors = {
     background = "#0d1117";
+    gray = "#6e7681";
     ansi = {
       black = "#484f58";
       white = "#b1bac4";
@@ -32,80 +34,90 @@ let
     };
   };
 
+  font =
+    if isLinux then
+      [
+        { family = "PragmataProMono Nerd Font Mono"; }
+      ]
+    else
+      [
+        { family = "PragmataProMono Nerd Font Mono"; }
+        {
+          family = "Apple Color Emoji";
+          assume_emoji_presentation = true;
+        }
+      ];
   font-size = if isDarwin then 13 else 10;
-  font-family = "PragmataProMono Nerd Font Mono";
 
 in
 {
-  home.sessionVariables = {
-    COLORFGBG = "1;15";
-  };
-
-  programs.alacritty = {
+  programs.wezterm = {
     enable = true;
-    settings = {
-      colors = {
-        primary.background = colors.background;
-        primary.foreground = colors.ansi.white;
-        normal.black = colors.ansi.black;
-        normal.red = colors.ansi.red;
-        normal.green = colors.ansi.green;
-        normal.yellow = colors.ansi.yellow;
-        normal.blue = colors.ansi.blue;
-        normal.magenta = colors.ansi.magenta;
-        normal.cyan = colors.ansi.cyan;
-        normal.white = colors.ansi.white;
-        bright.black = colors.brights.black;
-        bright.red = colors.brights.red;
-        bright.green = colors.brights.green;
-        bright.yellow = colors.brights.yellow;
-        bright.blue = colors.brights.blue;
-        bright.magenta = colors.brights.magenta;
-        bright.cyan = colors.brights.cyan;
-        bright.white = colors.brights.white;
-      };
 
-      env = {
-        TERM = "screen-256color";
-      };
-
-      font = {
-        size = font-size;
-        normal.family = font-family;
-        bold.family = font-family;
-        italic.family = font-family;
-        bold_italic.family = font-family;
-      };
-
-      general.live_config_reload = false;
-
-      keyboard.bindings = [
-        {
-          key = "Return";
-          mods = "Shift";
-          chars = "\n";
+    extraConfig = ''
+      return ${
+        toLua {
+          automatically_reload_config = true;
+          color_scheme = "default";
+          font = lib.generators.mkLuaInline ''
+            wezterm.font_with_fallback(${toLua font})
+          '';
+          font_size = font-size;
+          front_end = "WebGpu";
+          hide_tab_bar_if_only_one_tab = true;
+          keys = [
+            {
+              key = "Enter";
+              mods = "SHIFT";
+              action = lib.generators.mkLuaInline "wezterm.action.SendString '\\n'";
+            }
+          ];
+          window_decorations = "RESIZE";
         }
-      ];
-
-      scrolling = {
-        history = 10000;
-        multiplier = 1;
       };
+    '';
 
-      window = {
-        dimensions = {
-          columns = 96;
-          lines = 24;
-        };
-        padding = {
-          x = 8;
-          y = 6;
-        };
-        dynamic_padding = true;
-        title = "Terminal";
-        dynamic_title = true;
-        decorations = if isDarwin then "buttonless" else "full";
+    colorSchemes = {
+      default = {
+        foreground = colors.ansi.white;
+        background = colors.background;
+
+        cursor_bg = colors.ansi.white;
+        cursor_fg = colors.ansi.black;
+        cursor_border = colors.ansi.white;
+
+        selection_fg = "none";
+        selection_bg = "rgba(255, 255, 255, 5%)";
+
+        # scrollbar_thumb = "";
+
+        # split = "";
+
+        ansi = [
+          colors.ansi.black
+          colors.ansi.red
+          colors.ansi.green
+          colors.ansi.yellow
+          colors.ansi.blue
+          colors.ansi.magenta
+          colors.ansi.cyan
+          colors.ansi.white
+        ];
+        brights = [
+          colors.brights.black
+          colors.brights.red
+          colors.brights.green
+          colors.brights.yellow
+          colors.brights.blue
+          colors.brights.magenta
+          colors.brights.cyan
+          colors.brights.white
+        ];
+        compose_cursor = colors.ansi.green;
       };
     };
+
+    enableBashIntegration = true;
+    enableZshIntegration = false;
   };
 }
