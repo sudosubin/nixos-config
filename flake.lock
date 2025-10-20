@@ -191,19 +191,19 @@
         "type": "github"
       }
     },
-    "nixos-config-private-daangn": {
+    "nixos-config-private-karrot": {
       "locked": {
-        "dir": "daangn",
-        "lastModified": 1757480666,
-        "narHash": "sha256-3/avbdKE9MwAuHE5s0W6YQA1lSG1bTGnSE2Il7UygBU=",
+        "dir": "karrot",
+        "lastModified": 1760936731,
+        "narHash": "sha256-/B4miojX72plKM1owTqB3hkFeMNstIPuSAGPZmd4vZo=",
         "ref": "main",
-        "rev": "d891f8dfedcb7fa21aa49daa52af6d0618b442d6",
+        "rev": "8fa5cfe7348bacf81a9ad5cb0b915d64e8b2aabb",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private"
       },
       "original": {
-        "dir": "daangn",
+        "dir": "karrot",
         "ref": "main",
         "shallow": true,
         "type": "git",
@@ -213,10 +213,10 @@
     "nixos-config-private-sudosubin": {
       "locked": {
         "dir": "sudosubin",
-        "lastModified": 1757480666,
-        "narHash": "sha256-3/avbdKE9MwAuHE5s0W6YQA1lSG1bTGnSE2Il7UygBU=",
+        "lastModified": 1760936731,
+        "narHash": "sha256-/B4miojX72plKM1owTqB3hkFeMNstIPuSAGPZmd4vZo=",
         "ref": "main",
-        "rev": "d891f8dfedcb7fa21aa49daa52af6d0618b442d6",
+        "rev": "8fa5cfe7348bacf81a9ad5cb0b915d64e8b2aabb",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private"
@@ -318,7 +318,7 @@
         "lefthook": "lefthook",
         "nix-darwin": "nix-darwin",
         "nix-vscode-extensions": "nix-vscode-extensions",
-        "nixos-config-private-daangn": "nixos-config-private-daangn",
+        "nixos-config-private-karrot": "nixos-config-private-karrot",
         "nixos-config-private-sudosubin": "nixos-config-private-sudosubin",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",

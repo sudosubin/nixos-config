@@ -42,7 +42,7 @@
 
       imports = [
         inputs.nixvim.homeModules.nixvim
-        inputs.nixos-config-private-daangn.homeManagerModules.daangn
+        inputs.nixos-config-private-karrot.homeManagerModules.karrot
         inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
 
         ../shared/programs/1password

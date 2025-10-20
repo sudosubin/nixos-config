@@ -38,9 +38,9 @@
 
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
-    nixos-config-private-daangn = {
-      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=daangn&shallow=1";
-      # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/daangn";
+    nixos-config-private-karrot = {
+      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=karrot&shallow=1";
+      # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/karrot";
     };
 
     nixos-config-private-sudosubin = {
