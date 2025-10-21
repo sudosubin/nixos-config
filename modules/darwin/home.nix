@@ -18,6 +18,7 @@
         # Development
         curl
         cursor-cli
+        devbox
         google-cloud-sdk
         hadolint
         ijhttp
