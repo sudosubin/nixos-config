@@ -13,8 +13,6 @@ in
   nixpkgs.overlays = [
     inputs.firefox-addons.overlays.default
     inputs.nix-vscode-extensions.overlays.default
-    (import ./programs/python)
-
     (final: prev: {
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       cleanshot = final.callPackage ./programs/cleanshot { };
