@@ -17,7 +17,7 @@ let
 
   trancyfordesktop = pkgs.firefox-addons.buildFirefoxXpiAddon rec {
     pname = "trancyfordesktop";
-    version = "7.4.3";
+    version = "7.6.0";
     addonId = "{29f42579-9618-4dc7-8647-eaad7cd3343e}";
     url = "https://addons.mozilla.org/firefox/downloads/file/4565802/trancyfordesktop-${version}.xpi";
     sha256 = "sha256-u1OyfFovbUNhAOSPBr3C3Zq8QK8I4jyl9zopFiPtFt0=";

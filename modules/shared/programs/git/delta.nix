@@ -1,8 +1,9 @@
 { config, pkgs, ... }:
 
 {
-  programs.git.delta = {
+  programs.delta = {
     enable = true;
+    enableGitIntegration = true;
     options = {
       syntax-theme = "base16";
       file-style = "yellow ul";

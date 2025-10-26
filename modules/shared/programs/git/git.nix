@@ -3,8 +3,6 @@
 {
   programs.git = {
     enable = true;
-    userName = "sudosubin";
-    userEmail = "sudosubin@gmail.com";
     signing = {
       key = "68971E6A5D6DE3D6";
       signByDefault = true;
@@ -16,16 +14,23 @@
       ".spr.yml"
       "*.pem"
     ];
-    extraConfig = {
+    settings = {
       branch.sort = "-committerdate";
       credential.helper = "";
       credential."https://github.com".helper = "!gh auth git-credential";
+      fetch = {
+        all = true;
+        prune = true;
+        pruneTags = true;
+      };
       init.defaultBranch = "main";
-      fetch.all = true;
-      fetch.prune = true;
-      fetch.pruneTags = true;
       push.autoSetupRemote = true;
       tag.sort = "version:refname";
+      user = {
+        name = "sudosubin";
+        email = "sudosubin@gmail.com";
+      };
+
     };
   };
 }
