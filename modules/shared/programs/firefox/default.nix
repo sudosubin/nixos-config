@@ -15,6 +15,15 @@ let
     meta = { };
   };
 
+  slack-app-in-tab-reborn = pkgs.firefox-addons.buildFirefoxXpiAddon rec {
+    pname = "slack-app-in-tab-reborn";
+    version = "2025.6.20";
+    addonId = "{ea2fdc31-184c-4533-aaf3-61fc2e70411b}";
+    url = "https://addons.mozilla.org/firefox/downloads/file/4517365/slack_app_in_tab_reborn-${version}.xpi";
+    sha256 = "sha256-PQVqg0HAM4YkKSOKtP45t714rzyGz9od06R6xDprh3I=";
+    meta = { };
+  };
+
   trancyfordesktop = pkgs.firefox-addons.buildFirefoxXpiAddon rec {
     pname = "trancyfordesktop";
     version = "7.6.0";
@@ -103,6 +112,7 @@ in
           multi-account-containers
           onepassword-password-manager
           private-grammar-checker-harper
+          slack-app-in-tab-reborn
           trancyfordesktop
           ublock-origin
         ];
