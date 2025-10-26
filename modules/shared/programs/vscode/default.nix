@@ -90,6 +90,7 @@ in
         bierner.markdown-preview-github-styles
         biomejs.biome
         bradlc.vscode-tailwindcss
+        bufbuild.vscode-buf
         charliermarsh.ruff
         coderabbit.coderabbit-vscode
         davidanson.vscode-markdownlint
