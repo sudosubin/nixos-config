@@ -47,7 +47,7 @@
       # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/sudosubin";
     };
 
-    nixpkgs.url = "github:nixos/nixpkgs/master";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
 
     nixvim = {
       url = "github:nix-community/nixvim";
