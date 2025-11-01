@@ -9,7 +9,7 @@ let
 in
 {
   checks = forAllSystems (pkgs: {
-    lefthook-check = lefthook.lib.${pkgs.system}.run {
+    lefthook-check = lefthook.lib.${pkgs.stdenv.hostPlatform.system}.run {
       src = ./.;
       config = {
         pre-commit.commands = {
@@ -24,7 +24,7 @@ in
 
   devShells = forAllSystems (pkgs: {
     default = pkgs.mkShell {
-      inherit (self.checks.${pkgs.system}.lefthook-check) shellHook;
+      inherit (self.checks.${pkgs.stdenv.hostPlatform.system}.lefthook-check) shellHook;
     };
   });
 
