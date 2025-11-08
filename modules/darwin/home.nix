@@ -32,6 +32,7 @@
         # Utility
         cleanshot
         deskpad
+        grandperspective
         nodePackages.localtunnel
         redisinsight
         ripgrep
