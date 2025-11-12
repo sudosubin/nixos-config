@@ -36,6 +36,7 @@ in
       # pkgs
       "1password"
       "1password-cli"
+      "amp-cli"
       "claude-code"
       "cleanshot"
       "cursor"

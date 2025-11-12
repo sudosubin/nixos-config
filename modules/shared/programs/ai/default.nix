@@ -6,6 +6,10 @@
 }:
 
 {
+  home.packages = [
+    pkgs.amp-cli
+  ];
+
   programs.claude-code = {
     enable = true;
 
