@@ -112,6 +112,7 @@ in
           multi-account-containers
           onepassword-password-manager
           private-grammar-checker-harper
+          react-devtools
           slack-app-in-tab-reborn
           trancyfordesktop
           ublock-origin
