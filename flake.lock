@@ -144,10 +144,10 @@
     "nixos-config-private-karrot": {
       "locked": {
         "dir": "karrot",
-        "lastModified": 1760936731,
-        "narHash": "sha256-/B4miojX72plKM1owTqB3hkFeMNstIPuSAGPZmd4vZo=",
+        "lastModified": 1763023711,
+        "narHash": "sha256-B8q8quwovS5Pp5YO1wsrQ2GG6sUGqyineQS/+ph79Vc=",
         "ref": "main",
-        "rev": "8fa5cfe7348bacf81a9ad5cb0b915d64e8b2aabb",
+        "rev": "3ab15846eae75bef28aa1b7b0fc2a573015d81da",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private"
@@ -163,10 +163,10 @@
     "nixos-config-private-sudosubin": {
       "locked": {
         "dir": "sudosubin",
-        "lastModified": 1760936731,
-        "narHash": "sha256-/B4miojX72plKM1owTqB3hkFeMNstIPuSAGPZmd4vZo=",
+        "lastModified": 1763023711,
+        "narHash": "sha256-B8q8quwovS5Pp5YO1wsrQ2GG6sUGqyineQS/+ph79Vc=",
         "ref": "main",
-        "rev": "8fa5cfe7348bacf81a9ad5cb0b915d64e8b2aabb",
+        "rev": "3ab15846eae75bef28aa1b7b0fc2a573015d81da",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private"
