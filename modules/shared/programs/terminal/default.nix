@@ -8,31 +8,7 @@
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
   toLua = lib.generators.toLua { };
-
-  colors = {
-    background = "#0d1117";
-    gray = "#6e7681";
-    ansi = {
-      black = "#484f58";
-      white = "#b1bac4";
-      red = "#ff7b72";
-      green = "#3fb950";
-      yellow = "#d29922";
-      blue = "#58a6ff";
-      magenta = "#bc8cff";
-      cyan = "#39c5cf";
-    };
-    brights = {
-      black = "#6e7681";
-      white = "#ffffff";
-      red = "#ffa198";
-      green = "#56d364";
-      yellow = "#e3b341";
-      blue = "#79c0ff";
-      magenta = "#d2a8ff";
-      cyan = "#56d4dd";
-    };
-  };
+  colors = import ../../colors.nix;
 
   font =
     if isLinux then

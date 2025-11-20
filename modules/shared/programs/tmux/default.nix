@@ -1,5 +1,9 @@
 { config, pkgs, ... }:
 
+let
+  colors = import ../../colors.nix;
+
+in
 {
   programs.tmux = {
     enable = true;
@@ -29,8 +33,8 @@
       bind c new-window -c "#{pane_current_path}"
 
       # bottom status bar color
-      set -g status-bg green
-      set -g status-fg black
+      set -g status-bg "${colors.brights.green}"
+      set -g status-fg "${colors.ansi.black}"
     '';
   };
 }
