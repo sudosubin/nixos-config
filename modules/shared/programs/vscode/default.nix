@@ -129,7 +129,7 @@ in
         yzhang.markdown-all-in-one
       ])
       ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx-release; [
-        # eamodio.gitlens
+        eamodio.gitlens
       ]);
   };
 
