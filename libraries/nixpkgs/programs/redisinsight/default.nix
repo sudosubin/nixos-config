@@ -21,7 +21,7 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "redisinsight";
-  version = "2.70.1";
+  version = "3.0.0";
 
   src = sources.${hostPlatform.system};
 

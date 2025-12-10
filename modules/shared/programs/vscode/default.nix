@@ -80,11 +80,9 @@ in
     enable = true;
     package = overlays.code-cursor;
     profiles.default.extensions =
-      (with pkgs.vscode-extensions; [
-        anthropic.claude-code
-      ])
-      ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
+      (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
         adguard.adblock
+        anthropic.claude-code
         arcanis.vscode-zipfs
         astral-sh.ty
         bierner.markdown-preview-github-styles
