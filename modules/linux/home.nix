@@ -20,7 +20,7 @@
         hadolint
         ijhttp
         jetbrains.datagrip
-        jetbrains.idea-ultimate
+        jetbrains.idea
         shfmt
 
         # Utility

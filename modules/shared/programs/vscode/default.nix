@@ -56,17 +56,15 @@ let
       '';
     });
 
-    pkief.material-icon-theme =
-      pkgs.vscode-marketplace.pkief.material-icon-theme.overrideAttrs
-        (attrs: {
-          nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
+    pkief.material-icon-theme = pkgs.open-vsx.pkief.material-icon-theme.overrideAttrs (attrs: {
+      nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
-          preInstall = ''
-            ${attrs.preInstall or ""}
+      preInstall = ''
+        ${attrs.preInstall or ""}
 
-            node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
-          '';
-        });
+        node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
+      '';
+    });
   };
 
 in
@@ -108,7 +106,6 @@ in
         ms-pyright.pyright
         ms-python.debugpy
         ms-python.python
-        overlays.pkief.material-icon-theme # TODO
         pkief.material-product-icons
         prisma.prisma
         redhat.java
@@ -128,7 +125,10 @@ in
       ])
       ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx-release; [
         eamodio.gitlens
-      ]);
+      ])
+      ++ [
+        overlays.pkief.material-icon-theme
+      ];
   };
 
   home.shellAliases = {

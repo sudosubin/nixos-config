@@ -23,7 +23,7 @@
         hadolint
         ijhttp
         jetbrains.datagrip
-        jetbrains.idea-ultimate
+        jetbrains.idea
         ngrok
         postman
         procps
