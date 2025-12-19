@@ -71,6 +71,7 @@
         ../shared/programs/tmux
         ../shared/programs/vscode
         ../shared/programs/xdg
+        ../shared/programs/zed-editor
 
         ../linux/programs/input-method
         ../linux/programs/theme

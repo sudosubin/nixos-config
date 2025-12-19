@@ -76,6 +76,7 @@
         ../shared/programs/tmux
         ../shared/programs/vscode
         ../shared/programs/xdg
+        ../shared/programs/zed-editor
 
         ../darwin/programs/caffeinate
         ../darwin/programs/cleanshot
