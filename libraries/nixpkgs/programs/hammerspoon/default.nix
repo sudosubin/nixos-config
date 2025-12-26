@@ -7,11 +7,11 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "hammerspoon";
-  version = "1.0.0";
+  version = "1.1.0";
 
   src = fetchurl {
     url = "https://github.com/Hammerspoon/hammerspoon/releases/download/${finalAttrs.version}/Hammerspoon-${finalAttrs.version}.zip";
-    sha256 = "0zkagvnzf2ia68l998nzblqvvgl5xy8qv57mx03c6zd4bnsh5dsx";
+    sha256 = "1dbk3vacrbfpylgnm94ankk8pb5bf8vywnwdfwwcvxl4g5xr1vrr";
   };
 
   sourceRoot = "Hammerspoon.app";

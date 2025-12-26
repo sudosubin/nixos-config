@@ -7,21 +7,22 @@
 
 let
   inherit (stdenvNoCC) hostPlatform;
+  version = "3.0.0";
   sources = {
     aarch64-darwin = fetchurl {
-      url = "https://download.redisinsight.redis.com/latest/Redis-Insight-mac-arm64.dmg";
-      sha256 = "0d6bkwgnxyvvlx4lzs783v8crbxrmy98kdsa1l2jbiswbf24gy1f";
+      url = "https://s3.amazonaws.com/redisinsight.download/public/releases/${version}/Redis-Insight-mac-arm64.dmg";
+      sha256 = "1ygabd48w2jnkbvsmymy6cljvp76d6pmpj0zsjv4k92yawvghf2q";
     };
     x86_64-darwin = fetchurl {
-      url = "https://download.redisinsight.redis.com/latest/Redis-Insight-mac-x64.dmg";
-      sha256 = "1fnhbmlj0d1r3fhq9smq1ygwqzv4hiqd5xndcsxaxkw1mvifsgf3";
+      url = "https://s3.amazonaws.com/redisinsight.download/public/releases/${version}/Redis-Insight-mac-x64.dmg";
+      sha256 = "12xpbddkp6jlxzijszkg2rcdq3q99zrfy3qxhzw5kjwcslfnw821";
     };
   };
 
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
+  inherit version;
   pname = "redisinsight";
-  version = "3.0.0";
 
   src = sources.${hostPlatform.system};
 
