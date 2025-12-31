@@ -11,28 +11,6 @@ let
 in
 {
   nixpkgs.overlays = [
-    # Workaround for nix-vscode-extensions build failures
-    # See: https://github.com/nix-community/nix-vscode-extensions/pull/161
-    (final: prev: {
-      fetchurl =
-        args:
-        let
-          url = args.url or "";
-          name = args.name or "";
-          isVSCodeExtension =
-            lib.any (pattern: builtins.match pattern url != null) [
-              ".*gallery\\.vsassets\\.io/.*/extension/.*"
-              ".*open-vsx\\.org/.*/file/.*"
-            ]
-            && lib.hasSuffix ".zip" name;
-          patchedArgs =
-            if isVSCodeExtension then
-              args // { name = builtins.replaceStrings [ ".zip" ] [ ".vsix" ] name; }
-            else
-              args;
-        in
-        prev.fetchurl patchedArgs;
-    })
     inputs.firefox-addons.overlays.default
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
