@@ -56,7 +56,6 @@
         ../shared/programs/git
         ../shared/programs/go
         ../shared/programs/gpg
-        ../shared/programs/helix
         ../shared/programs/jq
         ../shared/programs/kubernetes
         ../shared/programs/lsd
