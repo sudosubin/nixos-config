@@ -2,6 +2,7 @@
   lib,
   buildNpmPackage,
   fetchFromGitHub,
+  nix-update-script,
 }:
 
 buildNpmPackage rec {
@@ -12,10 +13,12 @@ buildNpmPackage rec {
     owner = "jamubc";
     repo = "gemini-mcp-tool";
     rev = "v${version}";
-    sha256 = "sha256-HAOS62pHF5QS6mErsS/hC4+raGYBtVI5p+WA4Zl1p/E=";
+    hash = "sha256-HAOS62pHF5QS6mErsS/hC4+raGYBtVI5p+WA4Zl1p/E=";
   };
 
   npmDepsHash = "sha256-jqVKCwGu7PxW1l/+yt4ZytsQVuylAuKixMKfXJLBO8M=";
+
+  passthru.updateScript = nix-update-script { };
 
   meta = with lib; {
     description = "MCP server for Gemini CLI integration";

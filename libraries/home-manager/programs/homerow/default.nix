@@ -176,7 +176,7 @@ in
         enable = true;
         config = {
           ProgramArguments = [
-            "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Homerow"
+            "${config.home.homeDirectory}/Applications/Home Manager Apps/Homerow.app/Contents/MacOS/Homerow"
           ];
           KeepAlive = true;
           ProcessType = "Interactive";

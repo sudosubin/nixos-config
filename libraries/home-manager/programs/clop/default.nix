@@ -34,7 +34,7 @@ in
         enable = true;
         config = {
           ProgramArguments = [
-            "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Clop"
+            "${config.home.homeDirectory}/Applications/Home Manager Apps/Clop.app/Contents/MacOS/Clop"
           ];
           KeepAlive = true;
           ProcessType = "Interactive";

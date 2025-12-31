@@ -21,8 +21,9 @@ $ sudo ./result/sw/bin/darwin-rebuild switch --flake '.#darwin'
 $ nix flake update --flake .
 fetching ...
 
-$ ./scripts/auto-update-modules.py
-fetching ...
+$ ./scripts/auto-update-modules.sh
+Going to be running update for following packages:
+...
 ```
 
 ## Additional steps

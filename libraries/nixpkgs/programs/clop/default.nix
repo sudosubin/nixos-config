@@ -3,6 +3,7 @@
   fetchurl,
   stdenvNoCC,
   _7zz,
+  nix-update-script,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
@@ -11,7 +12,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   src = fetchurl {
     url = "https://github.com/FuzzyIdeas/Clop/releases/download/v${finalAttrs.version}/Clop-${finalAttrs.version}.dmg";
-    sha256 = "0sa1255b8yzrrzc1r2djaidldc6kgvqh5hfhwysm5gbb36i4k39b";
+    hash = "sha256-K41JohlrvVK159DBAvF+07BGW1SyiRzYz/l7tEoRQWk=";
   };
 
   sourceRoot = "Clop.app";
@@ -22,6 +23,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     mkdir -p "$out/Applications/${finalAttrs.sourceRoot}"
     cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
   '';
+
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "Clipboard optimizer for macOS";

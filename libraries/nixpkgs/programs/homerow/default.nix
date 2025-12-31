@@ -1,32 +1,29 @@
 {
   lib,
   stdenvNoCC,
-  fetchurl,
+  fetchzip,
   curl,
   jq,
   runCommand,
-  unzip,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "homerow";
   version = "1.4.1";
 
-  src = fetchurl {
+  src = fetchzip {
     url = "https://builds.homerow.app/v${finalAttrs.version}/Homerow.zip";
-    sha256 = "01m0ilcgdw7i3l2kjaviaz1x16k57zvqpay2ai2x5snpz1xh4ssl";
+    hash = "sha256-/Zp62UOvjnj+sN8VTpGC9EZ5cLsjOe/A5ZZkJAx/5Xc=";
   };
-
-  nativeBuildInputs = [ unzip ];
-
-  sourceRoot = "Homerow.app";
 
   installPhase = ''
     runHook preInstall
-    mkdir -p "$out/Applications/${finalAttrs.sourceRoot}"
-    cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
+    mkdir -p "$out/Applications/Homerow.app"
+    cp -R . "$out/Applications/Homerow.app"
     runHook postInstall
   '';
+
+  passthru.updateScript = ./update.sh;
 
   meta = {
     description = "Keyboard shortcuts for every button in macOS";

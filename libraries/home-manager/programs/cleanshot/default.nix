@@ -34,7 +34,7 @@ in
         enable = true;
         config = {
           ProgramArguments = [
-            "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/CleanShot X"
+            "${config.home.homeDirectory}/Applications/Home Manager Apps/CleanShot X.app/Contents/MacOS/CleanShot X"
           ];
           KeepAlive = true;
           ProcessType = "Interactive";

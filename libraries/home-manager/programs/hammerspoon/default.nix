@@ -80,7 +80,7 @@ in
         enable = true;
         config = {
           ProgramArguments = [
-            "${config.home.homeDirectory}/Applications/Home Manager Apps/${cfg.package.sourceRoot}/Contents/MacOS/Hammerspoon"
+            "${config.home.homeDirectory}/Applications/Home Manager Apps/Hammerspoon.app/Contents/MacOS/Hammerspoon"
           ];
           KeepAlive = true;
           ProcessType = "Interactive";

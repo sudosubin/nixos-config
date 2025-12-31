@@ -11,7 +11,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   src = fetchurl {
     url = "https://updates.getcleanshot.com/v3/CleanShot-X-${finalAttrs.version}.dmg";
-    sha256 = "04qf45v7x54729i5zpbq1f60811db6jvy15rax6184zpsdd13fxv";
+    hash = "sha256-u7sRWtP3ExRMV7kEv6VZLQQEjAt43V9iEoeUfnYhDhM=";
   };
 
   sourceRoot = "CleanShot X.app";

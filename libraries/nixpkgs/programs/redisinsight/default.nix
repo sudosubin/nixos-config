@@ -5,26 +5,11 @@
   _7zz,
 }:
 
-let
-  inherit (stdenvNoCC) hostPlatform;
-  version = "3.0.0";
-  sources = {
-    aarch64-darwin = fetchurl {
-      url = "https://s3.amazonaws.com/redisinsight.download/public/releases/${version}/Redis-Insight-mac-arm64.dmg";
-      sha256 = "1ygabd48w2jnkbvsmymy6cljvp76d6pmpj0zsjv4k92yawvghf2q";
-    };
-    x86_64-darwin = fetchurl {
-      url = "https://s3.amazonaws.com/redisinsight.download/public/releases/${version}/Redis-Insight-mac-x64.dmg";
-      sha256 = "12xpbddkp6jlxzijszkg2rcdq3q99zrfy3qxhzw5kjwcslfnw821";
-    };
-  };
-
-in
 stdenvNoCC.mkDerivation (finalAttrs: {
-  inherit version;
   pname = "redisinsight";
+  version = "3.0.0";
 
-  src = sources.${hostPlatform.system};
+  src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
   sourceRoot = "Redis Insight.app";
 
@@ -35,11 +20,25 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
   '';
 
+  passthru = {
+    sources = {
+      aarch64-darwin = fetchurl {
+        url = "https://s3.amazonaws.com/redisinsight.download/public/releases/${finalAttrs.version}/Redis-Insight-mac-arm64.dmg";
+        hash = "sha256-WDj4NldepEm21B/IW69p5twtKTO++qr3mlYKjkhb6vk=";
+      };
+      x86_64-darwin = fetchurl {
+        url = "https://s3.amazonaws.com/redisinsight.download/public/releases/${finalAttrs.version}/Redis-Insight-mac-x64.dmg";
+        hash = "sha256-QSBuHdWMy1n4hx0P7/JPCQ/cWBZvfi3j71SaO1tbt4s=";
+      };
+    };
+    updateScript = ./update.sh;
+  };
+
   meta = {
     description = "GUI for streamlined Redis application development";
     homepage = "https://redis.com/redis-enterprise/redis-insight/";
     license = lib.licenses.unfree;
     maintainers = with lib.maintainers; [ sudosubin ];
-    platforms = builtins.attrNames sources;
+    platforms = builtins.attrNames finalAttrs.passthru.sources;
   };
 })

@@ -1,27 +1,25 @@
 {
   lib,
-  fetchurl,
+  fetchzip,
   stdenvNoCC,
-  unzip,
+  nix-update-script,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "deskpad";
   version = "1.3.2";
 
-  src = fetchurl {
+  src = fetchzip {
     url = "https://github.com/Stengo/DeskPad/releases/download/v${finalAttrs.version}/DeskPad.app.zip";
-    sha256 = "1q2sp22qbibrwhaiqjbdbmq9mbj2g5mfsbzbdxx1g4s16q9f5amp";
+    hash = "sha256-MY7N7Bw35Ox/y+EX/reSkMeui+PxoR+Djb7trDcbEnc=";
   };
 
-  sourceRoot = "DeskPad.app";
-
-  nativeBuildInputs = [ unzip ];
-
   installPhase = ''
-    mkdir -p "$out/Applications/${finalAttrs.sourceRoot}"
-    cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
+    mkdir -p "$out/Applications/DeskPad.app"
+    cp -R . "$out/Applications/DeskPad.app"
   '';
+
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "A virtual monitor for screen sharing";

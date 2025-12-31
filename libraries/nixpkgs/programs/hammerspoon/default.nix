@@ -1,27 +1,25 @@
 {
   lib,
-  fetchurl,
+  fetchzip,
   stdenvNoCC,
-  unzip,
+  nix-update-script,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "hammerspoon";
   version = "1.1.0";
 
-  src = fetchurl {
+  src = fetchzip {
     url = "https://github.com/Hammerspoon/hammerspoon/releases/download/${finalAttrs.version}/Hammerspoon-${finalAttrs.version}.zip";
-    sha256 = "1dbk3vacrbfpylgnm94ankk8pb5bf8vywnwdfwwcvxl4g5xr1vrr";
+    hash = "sha256-rfgG1xQk+uSrRPiOgMpJ9F6unmlhg6cfrTCHCal1NlE=";
   };
 
-  sourceRoot = "Hammerspoon.app";
-
-  nativeBuildInputs = [ unzip ];
-
   installPhase = ''
-    mkdir -p "$out/Applications/${finalAttrs.sourceRoot}"
-    cp -R . "$out/Applications/${finalAttrs.sourceRoot}"
+    mkdir -p "$out/Applications/Hammerspoon.app"
+    cp -R . "$out/Applications/Hammerspoon.app"
   '';
+
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "Staggeringly powerful macOS desktop automation with Lua";

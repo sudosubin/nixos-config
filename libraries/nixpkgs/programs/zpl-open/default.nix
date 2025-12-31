@@ -2,6 +2,7 @@
   lib,
   stdenvNoCC,
   fetchFromGitHub,
+  nix-update-script,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
@@ -12,7 +13,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     owner = "sudosubin";
     repo = "zeplin-uri-opener";
     rev = "v${finalAttrs.version}";
-    sha256 = "sha256-f6r2vnIGl41C52d1LT6mQpkOXLVLzvkpMivXlwfhMQg=";
+    hash = "sha256-f6r2vnIGl41C52d1LT6mQpkOXLVLzvkpMivXlwfhMQg=";
   };
 
   postPatch = ''
@@ -30,6 +31,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     cp src/zpl-open $out/bin/
     cp src/zpl-opener.desktop $out/share/applications/
   '';
+
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "Open zeplin app uri in your default browser";

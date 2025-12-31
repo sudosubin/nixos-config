@@ -28,8 +28,8 @@ jobs:
       - name: Update dependencies
         run: |
           # programs
-          ./scripts/auto-update-modules.py
-          git add --all && git diff-index --quiet HEAD || git commit -m "chore: Update vscode extensions" -m "VSCode extensions file updates"
+          ./scripts/auto-update-modules.sh
+          git add --all && git diff-index --quiet HEAD || git commit -m "chore: Update dependencies" -m "Dependencies file updates"
 
           # nix flake lock (root)
           nix flake update --commit-lock-file --commit-lockfile-summary "chore(root): Update flake lock"

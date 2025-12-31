@@ -1,28 +1,30 @@
 {
   lib,
   buildGoModule,
-  fetchurl,
-  unzip,
+  fetchFromGitHub,
+  nix-update-script,
 }:
 
 buildGoModule (finalAttrs: {
   pname = "git-spr";
   version = "0.15.1";
 
-  src = fetchurl {
-    url = "https://github.com/ejoffe/spr/archive/refs/tags/v${finalAttrs.version}.zip";
-    sha256 = "0sfc4zjw9hazn7kikg42yns92kvkgplz0vzav90c0g0xlzg2l7cq";
+  src = fetchFromGitHub {
+    owner = "ejoffe";
+    repo = "spr";
+    rev = "v${finalAttrs.version}";
+    hash = "sha256-477ERmc7hQzbja5qWLI/2zz8gheIEpmMLQSp2EOjjMY=";
   };
 
   vendorHash = "sha256-vTmzhU/sJ0C8mYuLE8qQQELI4ZwQVv0dsM/ea1mlhFk=";
-
-  nativeBuildInputs = [ unzip ];
 
   postInstall = ''
     mv $out/bin/amend $out/bin/git-amend
     mv $out/bin/reword $out/bin/spr_reword_helper
     mv $out/bin/spr $out/bin/git-spr
   '';
+
+  passthru.updateScript = nix-update-script { };
 
   meta = with lib; {
     description = "Stacked Pull Requests on GitHub";
