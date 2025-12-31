@@ -41,6 +41,7 @@
       };
 
       imports = [
+        inputs.nixvim.homeModules.nixvim
         inputs.nixos-config-private-karrot.homeManagerModules.karrot
         inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
 
@@ -68,6 +69,7 @@
         ../shared/programs/terminal
         ../shared/programs/terraform
         ../shared/programs/tmux
+        ../shared/programs/vim
         ../shared/programs/vscode
         ../shared/programs/xdg
         ../shared/programs/zed-editor
