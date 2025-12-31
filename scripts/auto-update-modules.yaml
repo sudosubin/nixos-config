@@ -26,15 +26,6 @@ modules:
       get_version: |-
         gh api /repos/Stengo/DeskPad/releases/latest -q ".tag_name" | sed "s/v//g"
 
-  - path: ./libraries/nixpkgs/programs/firefox-gnome-theme/default.nix
-    args:
-      read_from_file: ["url"]
-      read_from_method: ["version"]
-      write: ["version", "sha256"]
-    methods:
-      get_version: |-
-        gh api /repos/rafaelmardojai/firefox-gnome-theme/releases/latest -q ".name" | sed "s/v//g"
-
   - path: ./libraries/nixpkgs/programs/git-spr/default.nix
     args:
       read_from_file: ["url"]
