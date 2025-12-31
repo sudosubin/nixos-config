@@ -5,14 +5,14 @@
   nix-update-script,
 }:
 
-buildNpmPackage rec {
+buildNpmPackage (finalAttrs: {
   pname = "gemini-mcp-tool";
   version = "1.1.2";
 
   src = fetchFromGitHub {
     owner = "jamubc";
     repo = "gemini-mcp-tool";
-    rev = "v${version}";
+    rev = "v${finalAttrs.version}";
     hash = "sha256-HAOS62pHF5QS6mErsS/hC4+raGYBtVI5p+WA4Zl1p/E=";
   };
 
@@ -27,4 +27,4 @@ buildNpmPackage rec {
     maintainers = with maintainers; [ sudosubin ];
     mainProgram = "gemini-mcp";
   };
-}
+})
