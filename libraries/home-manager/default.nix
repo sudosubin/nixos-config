@@ -19,7 +19,7 @@ in
     ./programs/1password
     ./programs/act
     ./programs/caffeinate
-    ./programs/claude-code-api
+    ./programs/ccproxy
     ./programs/cleanshot
     ./programs/clop
     ./programs/defaults

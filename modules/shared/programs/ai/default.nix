@@ -59,17 +59,14 @@ in
     };
   };
 
-  services.claude-code-api = {
+  services.ccproxy = {
     enable = true;
+    package = pkgs.ccproxy.overridePythonAttrs (old: {
+      dependencies = (old.dependencies or [ ]) ++ old.optional-dependencies.plugins-claude;
+    });
     config = {
       server.port = 23701;
-      process_pool = {
-        size = 5;
-        min_idle = 1;
-        max_idle = 5;
-        idle_timeout_secs = 300;
-        default_model = "claude-sonnet-4-5";
-      };
+      plugins.codex.enabled = false;
     };
   };
 }
