@@ -15,6 +15,7 @@ in
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
+      ccproxy-api = final.callPackage ./programs/ccproxy-api { };
       claude-code-api = final.callPackage ./programs/claude-code-api { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
