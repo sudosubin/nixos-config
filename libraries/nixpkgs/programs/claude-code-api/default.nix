@@ -6,6 +6,8 @@
   openssl,
   stdenvNoCC,
   nix-update-script,
+  claude-code,
+  makeWrapper,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {
@@ -23,8 +25,15 @@ rustPlatform.buildRustPackage (finalAttrs: {
     lockFile = ./Cargo.lock;
   };
 
+  nativeBuildInputs = [ makeWrapper ];
+
   postPatch = ''
     ln -s ${./Cargo.lock} Cargo.lock
+  '';
+
+  postInstall = ''
+    wrapProgram $out/bin/claude-code-api \
+      --suffix PATH : ${lib.makeBinPath [ claude-code ]}
   '';
 
   passthru.updateScript = nix-update-script { };
