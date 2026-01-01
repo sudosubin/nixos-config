@@ -195,11 +195,11 @@ in
         "widget.gtk.rounded-bottom-corners.enabled" = true;
       };
       userChrome = ''
-        @import "${pkgs.firefox-gnome-theme}/userChrome.css";
+        @import "${pkgs.firefox-gnome-theme}/share/firefox-gnome-theme/userChrome.css";
         ${builtins.readFile ./files/userChrome.css}
       '';
       userContent = ''
-        @import "${pkgs.firefox-gnome-theme}/userContent.css";
+        @import "${pkgs.firefox-gnome-theme}/share/firefox-gnome-theme/userContent.css";
       '';
     };
   };
