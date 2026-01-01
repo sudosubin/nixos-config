@@ -36,4 +36,4 @@ nix-shell "$nixpkgs/maintainers/scripts/update.nix" \
     let prefix = \"$PACKAGES_DIR/\"; prefixLen = builtins.stringLength prefix;
     in (_: p: (builtins.substring 0 prefixLen (p.meta.position or \"\")) == prefix)
   )" \
-  --argstr skip-prompt false
+  --argstr skip-prompt true
