@@ -5,9 +5,13 @@
   ...
 }:
 
+let
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
+
+in
 {
-  home.packages = [
-    pkgs.amp-cli
+  home.packages = with pkgs; [
+    amp-cli
   ];
 
   programs.claude-code = {
@@ -51,6 +55,18 @@
         hideBanner = true;
         hideTips = true;
         theme = "GitHub";
+      };
+    };
+  };
+
+  services.claude-code-api = {
+    enable = true;
+    config = {
+      server.port = 23701;
+      process_pool = {
+        size = 5;
+        min_idle = 1;
+        max_idle = 5;
       };
     };
   };
