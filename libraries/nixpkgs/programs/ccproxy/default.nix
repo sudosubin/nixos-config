@@ -3,6 +3,15 @@
   fetchFromGitHub,
   nix-update-script,
   python3Packages,
+  makeWrapper,
+  claude-code,
+  codex,
+  withPluginsClaude ? false,
+  withPluginsCodex ? false,
+  withPluginsStorage ? false,
+  withPluginsMcp ? false,
+  withPluginsTui ? false,
+  withPluginsMetrics ? false,
 }:
 
 python3Packages.buildPythonApplication rec {
@@ -15,6 +24,22 @@ python3Packages.buildPythonApplication rec {
     rev = "v${version}";
     hash = "sha256-VjZ1QULvJ7Q5GGf5i3orv7XA8KbDeaSIodoDFOKBF6U=";
   };
+
+  nativeBuildInputs = lib.optionals (withPluginsClaude || withPluginsCodex) [ makeWrapper ];
+
+  postInstall =
+    lib.optionalString withPluginsClaude ''
+      for bin in $out/bin/*; do
+        wrapProgram $bin \
+          --prefix PATH : ${lib.makeBinPath [ claude-code ]}
+      done
+    ''
+    + lib.optionalString withPluginsCodex ''
+      for bin in $out/bin/*; do
+        wrapProgram $bin \
+          --prefix PATH : ${lib.makeBinPath [ codex ]}
+      done
+    '';
 
   pyproject = true;
 
@@ -44,6 +69,12 @@ python3Packages.buildPythonApplication rec {
       ]
       ++ fastapi.optional-dependencies.standard
       ++ httpx.optional-dependencies.http2
+      ++ lib.optionals withPluginsClaude optional-dependencies.plugins-claude
+      ++ lib.optionals withPluginsCodex optional-dependencies.plugins-codex
+      ++ lib.optionals withPluginsStorage optional-dependencies.plugins-storage
+      ++ lib.optionals withPluginsMcp optional-dependencies.plugins-mcp
+      ++ lib.optionals withPluginsTui optional-dependencies.plugins-tui
+      ++ lib.optionals withPluginsMetrics optional-dependencies.plugins-metrics
     );
 
   optional-dependencies = {

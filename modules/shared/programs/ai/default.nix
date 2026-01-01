@@ -61,12 +61,11 @@ in
 
   services.ccproxy = {
     enable = true;
-    package = pkgs.ccproxy.overridePythonAttrs (old: {
-      dependencies = (old.dependencies or [ ]) ++ old.optional-dependencies.plugins-claude;
-    });
     config = {
       server.port = 23701;
+      plugins.claude_sdk.enabled = false;
       plugins.codex.enabled = false;
+      plugins.copilot.enabled = false;
     };
   };
 }
