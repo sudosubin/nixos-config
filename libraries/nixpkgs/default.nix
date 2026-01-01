@@ -14,6 +14,24 @@ in
     inputs.firefox-addons.overlays.default
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
+      python3Packages = prev.python3Packages.overrideScope (
+        pyFinal: pyPrev: {
+          mcp = pyPrev.mcp.overridePythonAttrs (old: {
+            postPatch = lib.optionalString pkgs.stdenvNoCC.buildPlatform.isDarwin ''
+              substituteInPlace \
+                "tests/client/test_stdio.py" \
+                "tests/issues/test_552_windows_hang.py" \
+                --replace-fail "time.sleep(0.1)" "time.sleep(1)"
+              substituteInPlace \
+                "tests/shared/test_sse.py" \
+                "tests/shared/test_ws.py" \
+                --replace-fail "time.sleep(0.5)" "time.sleep(1)"
+            '';
+          });
+        }
+      );
+    })
+    (final: prev: {
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       ccproxy-api = final.callPackage ./programs/ccproxy-api { };
       claude-code-api = final.callPackage ./programs/claude-code-api { };
