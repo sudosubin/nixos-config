@@ -12,8 +12,8 @@ cat > "$ROOT_DIR/default.nix" <<EOF
 {}: import <nixpkgs> {
   overlays = [
     (final: prev: {
-      $(cd "$PACKAGES_DIR" && for dir in */; do
-        pkg="${dir%/}"
+      $(cd "$PACKAGES_DIR" && for dir in */default.nix; do
+        pkg="${dir%/default.nix}"
         echo "$pkg = final.callPackage $PACKAGES_DIR/$pkg { };"
       done)
     })
@@ -36,4 +36,4 @@ nix-shell "$nixpkgs/maintainers/scripts/update.nix" \
     let prefix = \"$PACKAGES_DIR/\"; prefixLen = builtins.stringLength prefix;
     in (_: p: (builtins.substring 0 prefixLen (p.meta.position or \"\")) == prefix)
   )" \
-  --argstr skip-prompt true
+  --argstr skip-prompt false
