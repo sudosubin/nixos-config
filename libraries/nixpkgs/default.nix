@@ -28,6 +28,7 @@ in
                 --replace-fail "time.sleep(0.5)" "time.sleep(1)"
             '';
           });
+          claude-agent-sdk = pyFinal.callPackage ./programs/python/claude-agent-sdk { };
         }
       );
     })
