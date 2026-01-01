@@ -25,6 +25,8 @@ rustPlatform.buildRustPackage (finalAttrs: {
     lockFile = ./Cargo.lock;
   };
 
+  patches = [ ./claude-code-api.diff ];
+
   nativeBuildInputs = [ makeWrapper ];
 
   postPatch = ''

@@ -72,6 +72,8 @@ in
             size = 5;
             min_idle = 2;
             max_idle = 5;
+            idle_timeout_secs = 300;
+            default_model = "claude-sonnet-4-20250514";
           };
         }
       '';
