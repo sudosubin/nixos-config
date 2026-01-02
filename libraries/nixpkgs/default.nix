@@ -61,6 +61,8 @@ in
       "cursor"
       "cursor-cli"
       "datagrip"
+      "firefox-bin"
+      "firefox-bin-unwrapped"
       "homerow"
       "idea"
       "ijhttp"
