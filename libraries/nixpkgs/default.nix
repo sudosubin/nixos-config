@@ -51,6 +51,7 @@ in
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
+      pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       redisinsight = final.callPackage ./programs/redisinsight { };
       ruby-lsp-rails = final.callPackage ./programs/ruby-lsp-rails { };
       zpl-open = final.callPackage ./programs/zpl-open { };
