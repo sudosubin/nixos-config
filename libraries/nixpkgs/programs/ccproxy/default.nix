@@ -16,13 +16,13 @@
 
 python3Packages.buildPythonApplication rec {
   pname = "ccproxy";
-  version = "0.2.0a2";
+  version = "0.2.0a3";
 
   src = fetchFromGitHub {
     owner = "CaddyGlow";
     repo = "ccproxy-api";
     rev = "v${version}";
-    hash = "sha256-VjZ1QULvJ7Q5GGf5i3orv7XA8KbDeaSIodoDFOKBF6U=";
+    hash = "sha256-ykDMf2gzJlZNswybUehscaUaWczF2lpPGZFjb6Kx2ww=";
   };
 
   nativeBuildInputs = lib.optionals (withPluginsClaude || withPluginsCodex) [ makeWrapper ];
