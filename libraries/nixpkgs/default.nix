@@ -16,6 +16,7 @@ in
     (final: prev: {
       python3Packages = prev.python3Packages.overrideScope (
         f: p: {
+          claude-agent-sdk = f.callPackage ./programs/python/claude-agent-sdk { };
           mcp = p.mcp.overridePythonAttrs (old: {
             postPatch = lib.optionalString pkgs.stdenvNoCC.buildPlatform.isDarwin ''
               substituteInPlace \
@@ -28,7 +29,7 @@ in
                 --replace-fail "time.sleep(0.5)" "time.sleep(1)"
             '';
           });
-          claude-agent-sdk = f.callPackage ./programs/python/claude-agent-sdk { };
+          toml-fmt-common = f.callPackage ./programs/python/toml-fmt-common { };
         }
       );
       vimPlugins = prev.vimPlugins.extend (
