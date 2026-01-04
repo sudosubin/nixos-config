@@ -6,7 +6,7 @@
 }:
 
 {
-  programs.jq-patched = {
+  programs.jq = {
     enable = true;
 
     colors = {
@@ -17,7 +17,7 @@
       strings = "0;32";
       arrays = "0;37";
       objects = "0;37";
-      fields = "0;31";
+      objectKeys = "0;31";
     };
   };
 }
