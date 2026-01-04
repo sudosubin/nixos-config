@@ -15,8 +15,8 @@ in
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
       python3Packages = prev.python3Packages.overrideScope (
-        pyFinal: pyPrev: {
-          mcp = pyPrev.mcp.overridePythonAttrs (old: {
+        f: p: {
+          mcp = p.mcp.overridePythonAttrs (old: {
             postPatch = lib.optionalString pkgs.stdenvNoCC.buildPlatform.isDarwin ''
               substituteInPlace \
                 "tests/client/test_stdio.py" \
@@ -28,7 +28,12 @@ in
                 --replace-fail "time.sleep(0.5)" "time.sleep(1)"
             '';
           });
-          claude-agent-sdk = pyFinal.callPackage ./programs/python/claude-agent-sdk { };
+          claude-agent-sdk = f.callPackage ./programs/python/claude-agent-sdk { };
+        }
+      );
+      vimPlugins = prev.vimPlugins.extend (
+        f: p: {
+          spring-boot-nvim = final.callPackage ./programs/vim/spring-boot-nvim { };
         }
       );
     })
