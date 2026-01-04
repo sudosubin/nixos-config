@@ -136,6 +136,7 @@ in
               ];
               user-filters = lib.strings.concatLines [
                 "||accounts.google.com/gsi/*$xhr,script,3p"
+                "github.com##.copilotPreview__container"
               ];
             };
           };
