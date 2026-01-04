@@ -42,6 +42,7 @@ in
       git-spr = final.callPackage ./programs/git-spr { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };
+      kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       redisinsight = final.callPackage ./programs/redisinsight { };
