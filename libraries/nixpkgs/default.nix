@@ -45,6 +45,7 @@ in
       nix-activate = final.callPackage ./programs/nix-activate { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       redisinsight = final.callPackage ./programs/redisinsight { };
+      ruby-lsp-rails = final.callPackage ./programs/ruby-lsp-rails { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
   ];
