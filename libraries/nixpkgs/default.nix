@@ -16,19 +16,6 @@ in
     (final: prev: {
       python3Packages = prev.python3Packages.overrideScope (
         f: p: {
-          claude-agent-sdk = f.callPackage ./programs/python/claude-agent-sdk { };
-          mcp = p.mcp.overridePythonAttrs (old: {
-            postPatch = lib.optionalString pkgs.stdenvNoCC.buildPlatform.isDarwin ''
-              substituteInPlace \
-                "tests/client/test_stdio.py" \
-                "tests/issues/test_552_windows_hang.py" \
-                --replace-fail "time.sleep(0.1)" "time.sleep(1)"
-              substituteInPlace \
-                "tests/shared/test_sse.py" \
-                "tests/shared/test_ws.py" \
-                --replace-fail "time.sleep(0.5)" "time.sleep(1)"
-            '';
-          });
           toml-fmt-common = f.callPackage ./programs/python/toml-fmt-common { };
         }
       );
@@ -40,7 +27,7 @@ in
     })
     (final: prev: {
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
-      ccproxy = final.callPackage ./programs/ccproxy { };
+      claude-code-api = final.callPackage ./programs/claude-code-api { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       deskpad = final.callPackage ./programs/deskpad { };
