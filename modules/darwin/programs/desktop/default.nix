@@ -6,6 +6,9 @@
 }:
 
 {
+  targets.darwin.copyApps.enable = true;
+  targets.darwin.linkApps.enable = false;
+
   targets.darwin.defaults = {
     NSGlobalDomain.AppleLanguages = [
       "en-US"
