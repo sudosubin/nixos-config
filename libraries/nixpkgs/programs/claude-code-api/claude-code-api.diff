@@ -1,3 +1,30 @@
+diff --git a/claude-code-api/src/core/claude_manager.rs b/claude-code-api/src/core/claude_manager.rs
+index 01c12d5..d552349 100644
+--- a/claude-code-api/src/core/claude_manager.rs
++++ b/claude-code-api/src/core/claude_manager.rs
+@@ -147,7 +147,12 @@ impl ClaudeManager {
+         }
+ 
+         // 默认跳过权限检查以提高性能
+-        cmd.arg("--dangerously-skip-permissions");
++        cmd.arg("--dangerously-skip-permissions")
++            .arg("--disable-slash-commands")
++            .arg("--no-chrome")
++            .arg("--no-session-persistence")
++            .arg("--system-prompt").arg("-")
++            .arg("--tools").arg("");
+ 
+         if self.mcp_config.enabled {
+             if let Some(ref config_file) = self.mcp_config.config_file {
+@@ -178,7 +183,7 @@ impl ClaudeManager {
+         let stdin = child.stdin.take().ok_or_else(|| anyhow!("Failed to get stdin"))?;
+         let stdout = child.stdout.take().ok_or_else(|| anyhow!("Failed to get stdout"))?;
+         let stderr = child.stderr.take().ok_or_else(|| anyhow!("Failed to get stderr"))?;
+-        
++
+         // 将消息写入 stdin
+         use tokio::io::AsyncWriteExt;
+         let message_bytes = message.as_bytes().to_vec();
 diff --git a/claude-code-api/src/core/config.rs b/claude-code-api/src/core/config.rs
 index 38d74ee..e6aac33 100644
 --- a/claude-code-api/src/core/config.rs

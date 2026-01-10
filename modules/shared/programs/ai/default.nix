@@ -64,6 +64,10 @@ in
     enable = true;
     config = {
       server.port = 23701;
+      mcp = {
+        enabled = true;
+        strict = true;
+      };
       process_pool = {
         size = 5;
         min_idle = 1;
