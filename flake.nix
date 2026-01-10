@@ -68,10 +68,26 @@
       home-manager-shared = ./libraries/home-manager;
       nixpkgs-shared = ./libraries/nixpkgs;
 
+      # Fixes https://github.com/nix-community/nix-vscode-extensions/pull/158
+      # Create a flake-like structure from patched source
+      mkPatchedNixVSCodeExtensions =
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          source = pkgs.applyPatches {
+            name = "nix-vscode-extensions-patched";
+            src = inputs.nix-vscode-extensions;
+            patches = [ ./libraries/nixpkgs/patches/nix-vscode-extensions-fix-semver.patch ];
+          };
+        in
+        {
+          overlays.default = import "${source}/nix/overlay.nix";
+        };
+
     in
     dev-shell
     // {
-      darwinConfigurations.darwin = nix-darwin.lib.darwinSystem {
+      darwinConfigurations.darwin = nix-darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         modules = [
           home-manager-shared
@@ -81,10 +97,14 @@
           ./modules/darwin/configuration.nix
           ./modules/darwin/home.nix
         ];
-        specialArgs = { inherit inputs; };
+        specialArgs = {
+          inputs = inputs // {
+            nix-vscode-extensions = mkPatchedNixVSCodeExtensions system;
+          };
+        };
       };
 
-      nixosConfigurations.linux = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.linux = nixpkgs.lib.nixosSystem rec {
         system = "x86_64-linux";
         modules = [
           home-manager-shared
@@ -94,7 +114,11 @@
           ./modules/linux/configuration.nix
           ./modules/linux/home.nix
         ];
-        specialArgs = { inherit inputs; };
+        specialArgs = {
+          inputs = inputs // {
+            nix-vscode-extensions = mkPatchedNixVSCodeExtensions system;
+          };
+        };
       };
     };
 }

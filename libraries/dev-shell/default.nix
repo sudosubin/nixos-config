@@ -1,8 +1,7 @@
-{ inputs, ... }:
+{ inputs }:
 with inputs;
 
 let
-
   inherit (nixpkgs.lib) genAttrs platforms;
   forAllSystems = f: genAttrs platforms.all (system: f (import nixpkgs { inherit system; }));
 
@@ -14,7 +13,7 @@ in
       config = {
         pre-commit.commands = {
           nixfmt = {
-            run = "${pkgs.lib.getExe pkgs.nixfmt-rfc-style} {staged_files}";
+            run = "${pkgs.lib.getExe pkgs.nixfmt} {staged_files}";
             glob = "*.nix";
           };
         };
@@ -28,5 +27,5 @@ in
     };
   });
 
-  formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
+  formatter = forAllSystems (pkgs: pkgs.nixfmt);
 }

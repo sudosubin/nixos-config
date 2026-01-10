@@ -7,7 +7,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "redisinsight";
-  version = "3.0.0";
+  version = "3.0.2";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -24,11 +24,11 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     sources = {
       aarch64-darwin = fetchurl {
         url = "https://s3.amazonaws.com/redisinsight.download/public/releases/${finalAttrs.version}/Redis-Insight-mac-arm64.dmg";
-        hash = "sha256-WDj4NldepEm21B/IW69p5twtKTO++qr3mlYKjkhb6vk=";
+        hash = "sha256-f9wQEkwqX5ylvZrzi81765m02y4tzcDTxYVahFd8T+k=";
       };
       x86_64-darwin = fetchurl {
         url = "https://s3.amazonaws.com/redisinsight.download/public/releases/${finalAttrs.version}/Redis-Insight-mac-x64.dmg";
-        hash = "sha256-QSBuHdWMy1n4hx0P7/JPCQ/cWBZvfi3j71SaO1tbt4s=";
+        hash = "sha256-GDQXIiUavdBsUslKGBkyh3PNkFzs7YDuBqy71ZlXHNo=";
       };
     };
     updateScript = ./update.sh;

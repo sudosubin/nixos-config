@@ -16,14 +16,14 @@
 
 buildPythonPackage rec {
   pname = "toml-fmt-common";
-  version = "1.0.1";
+  version = "1.1.0";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt-common";
     rev = version;
-    hash = "sha256-fV+2tOGD220kHQC6aU1sVqxmaL0cVLBjwLLkZ865BHg=";
+    hash = "sha256-qRKSmfYRv9AwnZ5aJoXlwql3+E94UAJBx5hK9r6rtEo=";
   };
 
   build-system = [
