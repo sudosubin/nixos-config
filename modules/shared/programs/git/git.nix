@@ -11,6 +11,7 @@
       ".DS_Store"
       ".direnv"
       ".envrc"
+      ".linear.toml"
       ".spr.yml"
       "*.pem"
     ];
