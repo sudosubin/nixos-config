@@ -77,7 +77,7 @@
           source = pkgs.applyPatches {
             name = "nix-vscode-extensions-patched";
             src = inputs.nix-vscode-extensions;
-            patches = [ ./libraries/nixpkgs/patches/nix-vscode-extensions-fix-semver.patch ];
+            patches = [ ./libraries/nix-vscode-extensions/patches/nix-vscode-extensions-fix-semver.patch ];
           };
         in
         {
