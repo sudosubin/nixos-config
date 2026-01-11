@@ -42,7 +42,7 @@
       };
 
       imports = [
-        inputs.nixvim.homeModules.nixvim
+        inputs.lazyvim.homeManagerModules.default
         inputs.nixos-config-private-karrot.homeManagerModules.karrot
         inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
 

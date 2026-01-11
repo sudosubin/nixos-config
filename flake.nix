@@ -20,6 +20,12 @@
       inputs.lefthook.follows = "lefthook";
     };
 
+    lazyvim = {
+      url = "github:pfassina/lazyvim-nix/v15.13.0";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     lefthook = {
       url = "github:sudosubin/lefthook.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -48,11 +54,6 @@
     };
 
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
-
-    nixvim = {
-      url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
