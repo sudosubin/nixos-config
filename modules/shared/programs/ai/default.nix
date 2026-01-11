@@ -12,7 +12,6 @@ in
 {
   home.packages = with pkgs; [
     amp-cli
-    pi-coding-agent
   ];
 
   programs.claude-code = {
