@@ -26,6 +26,7 @@
         # Utility
         figma-linux
         gnome.nautilus
+        linear-cli
         ngrok
         pavucontrol
         pulseaudio

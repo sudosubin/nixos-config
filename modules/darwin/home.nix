@@ -33,6 +33,7 @@
         cleanshot
         deskpad
         grandperspective
+        linear-cli
         nodePackages.localtunnel
         redisinsight
         ripgrep

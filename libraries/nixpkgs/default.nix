@@ -36,6 +36,7 @@ in
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
+      linear-cli = final.callPackage ./programs/linear-cli { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
