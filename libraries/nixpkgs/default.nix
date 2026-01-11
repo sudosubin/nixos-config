@@ -38,6 +38,7 @@ in
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       linear-cli = final.callPackage ./programs/linear-cli { };
       nix-activate = final.callPackage ./programs/nix-activate { };
+      pi-coding-agent = final.callPackage ./programs/pi-coding-agent { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       redisinsight = final.callPackage ./programs/redisinsight { };
