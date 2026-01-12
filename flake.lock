@@ -8,11 +8,11 @@
       },
       "locked": {
         "dir": "pkgs/firefox-addons",
-        "lastModified": 1768104216,
-        "narHash": "sha256-LSgAmBS9JKqQG3GitIScLxoLuA9egTrZMd3+LNz895E=",
+        "lastModified": 1768150501,
+        "narHash": "sha256-601j0FWA9UzEaDF3xj+12n94bkuVF/zkpLIOt6EfRK0=",
         "owner": "rycee",
         "repo": "nur-expressions",
-        "rev": "44506353be518d73a3eaa37e354e97637edb5f66",
+        "rev": "1b848102f204ce846360009d193ea6d0280c814a",
         "type": "gitlab"
       },
       "original": {
@@ -152,11 +152,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768098596,
-        "narHash": "sha256-JhWzhdyTsklpfC1JLO1PQpNxkDOtokJfWlcZ19M9sYQ=",
+        "lastModified": 1768123067,
+        "narHash": "sha256-71CGuJL3sfJImTxYW/JvdV9ZlFM2TOBlm1K5KmS0vIY=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "7a428cfb1382518591c31bb6cf39796e04160aac",
+        "rev": "fbbb703a4b0f54feb18364274f947e45bf1b6292",
         "type": "github"
       },
       "original": {
@@ -168,10 +168,10 @@
     "nixos-config-private-karrot": {
       "locked": {
         "dir": "karrot",
-        "lastModified": 1768104610,
-        "narHash": "sha256-eXAVoYX6nilrrdaHrfCI7v3OZsBHD6Z7HCBkhebSv2w=",
+        "lastModified": 1768151153,
+        "narHash": "sha256-VuIQQ62YRpcAwKybjy/X/hBPPO4eT+E+bgO2bwkGRyo=",
         "ref": "main",
-        "rev": "03d337dd4fcf8019e35d7c8caeb2bd7aa98e9b22",
+        "rev": "f7b76119cad5e0f946924a0cfb631ba2b48c8544",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private"
@@ -187,10 +187,10 @@
     "nixos-config-private-sudosubin": {
       "locked": {
         "dir": "sudosubin",
-        "lastModified": 1768104610,
-        "narHash": "sha256-eXAVoYX6nilrrdaHrfCI7v3OZsBHD6Z7HCBkhebSv2w=",
+        "lastModified": 1768151153,
+        "narHash": "sha256-VuIQQ62YRpcAwKybjy/X/hBPPO4eT+E+bgO2bwkGRyo=",
         "ref": "main",
-        "rev": "03d337dd4fcf8019e35d7c8caeb2bd7aa98e9b22",
+        "rev": "f7b76119cad5e0f946924a0cfb631ba2b48c8544",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private"
@@ -220,11 +220,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1768085948,
-        "narHash": "sha256-fk6z1snwSX5egKVYh6lJSUVYelxqMajd5lO6px/Xiqo=",
+        "lastModified": 1768129890,
+        "narHash": "sha256-izB67Et12Th6/dwE7FaOuRbk1Rw/aOTYbACw1CANkkY=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "716ce36d516db80162b8936f61aefa0d9925b81c",
+        "rev": "b4262d9cfe384fd40a13954fda8b0a371601b85e",
         "type": "github"
       },
       "original": {
