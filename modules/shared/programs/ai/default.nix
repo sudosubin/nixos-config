@@ -18,8 +18,11 @@ in
     enable = true;
 
     settings = {
+      alwaysThinkingEnabled = true;
       includeCoAuthoredBy = false;
+      model = "opusplan";
       env = {
+        ANTHROPIC_DEFAULT_SONNET_MODEL = "claude-sonnet-4-5-20250929[1m]";
         CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL = "true";
         CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
         ENABLE_TOOL_SEARCH = "true";
