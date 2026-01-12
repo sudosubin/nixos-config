@@ -59,22 +59,4 @@ in
       };
     };
   };
-
-  services.claude-code-api = {
-    enable = true;
-    config = {
-      server.port = 23701;
-      mcp = {
-        enabled = true;
-        strict = true;
-      };
-      process_pool = {
-        size = 5;
-        min_idle = 1;
-        max_idle = 5;
-        idle_timeout_secs = 300;
-        default_model = "claude-sonnet-4-5";
-      };
-    };
-  };
 }

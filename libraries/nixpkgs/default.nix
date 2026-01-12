@@ -27,7 +27,6 @@ in
     })
     (final: prev: {
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
-      claude-code-api = final.callPackage ./programs/claude-code-api { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       deskpad = final.callPackage ./programs/deskpad { };
