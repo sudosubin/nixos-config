@@ -26,7 +26,7 @@ in
       );
     })
     (final: prev: {
-      amazon-ember = final.callPackage ./programs/amazon-ember { };
+      amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
@@ -37,7 +37,7 @@ in
       homerow = final.callPackage ./programs/homerow { };
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       linear-cli = final.callPackage ./programs/linear-cli { };
-      nanum-square-round = final.callPackage ./programs/nanum-square-round { };
+      nanum-square-round = final.callPackage ./programs/fonts/nanum-square-round { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
