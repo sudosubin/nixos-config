@@ -106,6 +106,7 @@ let
 in
 {
   home.packages = with pkgs; [
+    nanum-square-round
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji

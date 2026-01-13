@@ -36,6 +36,7 @@ in
       homerow = final.callPackage ./programs/homerow { };
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       linear-cli = final.callPackage ./programs/linear-cli { };
+      nanum-square-round = final.callPackage ./programs/nanum-square-round { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
