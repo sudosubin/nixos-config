@@ -106,6 +106,7 @@ let
 in
 {
   home.packages = with pkgs; [
+    amazon-ember
     nanum-square-round
     noto-fonts
     noto-fonts-cjk-sans

@@ -26,6 +26,7 @@ in
       );
     })
     (final: prev: {
+      amazon-ember = final.callPackage ./programs/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
