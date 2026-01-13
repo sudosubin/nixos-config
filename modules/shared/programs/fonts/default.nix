@@ -113,6 +113,7 @@ in
     noto-fonts-color-emoji
     pragmatapro
     pretendard
+    s-core-dream
   ];
 
   fonts.fontconfig = {

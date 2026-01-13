@@ -43,6 +43,7 @@ in
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       redisinsight = final.callPackage ./programs/redisinsight { };
       ruby-lsp-rails = final.callPackage ./programs/ruby-lsp-rails { };
+      s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
   ];
