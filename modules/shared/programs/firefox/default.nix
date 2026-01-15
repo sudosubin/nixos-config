@@ -184,7 +184,6 @@ in
           "dirtyAreaCache" = [ ];
           "currentVersion" = 22;
         };
-        "browser.urlbar.decodeURLsOnCopy" = true;
         "extensions.autoDisableScopes" = 0;
         "extensions.update.autoUpdateDefault" = false;
         "extensions.update.enabled" = false;
