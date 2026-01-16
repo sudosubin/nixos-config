@@ -7,16 +7,16 @@
 
 buildGoModule (finalAttrs: {
   pname = "git-spr";
-  version = "0.15.1";
+  version = "0.16.0";
 
   src = fetchFromGitHub {
     owner = "ejoffe";
     repo = "spr";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-477ERmc7hQzbja5qWLI/2zz8gheIEpmMLQSp2EOjjMY=";
+    hash = "sha256-caEBsxajmjV7yr86WskkRBYBFzdV29wqu44fwMDowGw=";
   };
 
-  vendorHash = "sha256-vTmzhU/sJ0C8mYuLE8qQQELI4ZwQVv0dsM/ea1mlhFk=";
+  vendorHash = "sha256-byl+MF0vlfa4V/3uPrv5Qlcvh5jIozEyUkKSSwlRWhs=";
 
   postInstall = ''
     mv $out/bin/amend $out/bin/git-amend
