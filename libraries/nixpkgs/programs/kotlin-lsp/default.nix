@@ -13,6 +13,11 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
+  postPatch = ''
+    substituteInPlace kotlin-lsp.sh \
+      --replace-fail 'chmod +x "$LOCAL_JRE_PATH/bin/java"' '# chmod removed for nixpkgs'
+  '';
+
   installPhase = ''
     runHook preInstall
 
