@@ -46,6 +46,7 @@ in
     (final: prev: {
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
+      claude-code-bin = final.callPackage ./programs/claude-code-bin { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       deskpad = final.callPackage ./programs/deskpad { };
@@ -74,6 +75,7 @@ in
       "1password-cli"
       "amp-cli"
       "claude-code"
+      "claude-code-bin"
       "cleanshot"
       "cursor"
       "cursor-cli"

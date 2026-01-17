@@ -16,16 +16,27 @@ in
 
   programs.claude-code = {
     enable = true;
+    package = pkgs.claude-code-bin;
 
     settings = {
       alwaysThinkingEnabled = true;
-      includeCoAuthoredBy = false;
-      model = "opusplan";
+      attribution = {
+        commit = "";
+        pr = "";
+      };
       env = {
         ANTHROPIC_DEFAULT_SONNET_MODEL = "claude-sonnet-4-5-20250929[1m]";
+        CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR = "1";
         CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL = "true";
         CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
+        DISABLE_INSTALLATION_CHECKS = "1";
+        DISABLE_TELEMETRY = "1";
         ENABLE_TOOL_SEARCH = "true";
+      };
+      includeCoAuthoredBy = false;
+      model = "opusplan";
+      permissions = {
+        defaultMode = "bypassPermissions";
       };
     };
 
