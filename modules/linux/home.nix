@@ -42,7 +42,6 @@
       };
 
       imports = [
-        inputs.lazyvim.homeManagerModules.default
         inputs.nixos-config-private-karrot.homeManagerModules.karrot
         inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
 
@@ -58,6 +57,7 @@
         ../shared/programs/git
         ../shared/programs/go
         ../shared/programs/gpg
+        ../shared/programs/helix
         ../shared/programs/jq
         ../shared/programs/kubernetes
         ../shared/programs/lsd
@@ -70,7 +70,6 @@
         ../shared/programs/terminal
         ../shared/programs/terraform
         ../shared/programs/tmux
-        ../shared/programs/vim
         ../shared/programs/vscode
         ../shared/programs/xdg
 

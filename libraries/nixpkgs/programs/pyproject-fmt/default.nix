@@ -31,7 +31,6 @@ python3Packages.buildPythonPackage rec {
       pname
       version
       src
-      cargoRoot
       ;
     hash = "sha256-11OB0A8T6bbfsik5ivbZKtU8QISYi1hQTS0civ0ryi4=";
   };

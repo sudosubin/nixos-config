@@ -19,11 +19,29 @@ in
           toml-fmt-common = f.callPackage ./programs/python/toml-fmt-common { };
         }
       );
-      vimPlugins = prev.vimPlugins.extend (
-        f: p: {
-          spring-boot-nvim = final.callPackage ./programs/vim/spring-boot-nvim { };
-        }
-      );
+    })
+    (final: prev: {
+      bash-language-server = prev.bash-language-server.overrideAttrs (attrs: {
+        installPhase = ''
+          runHook preInstall
+
+          mkdir -p $out/{bin,lib/bash-language-server}
+          cp -r {node_modules,server} $out/lib/bash-language-server/
+
+          # Create the executable, based upon what happens in npmHooks.npmInstallHook
+          makeWrapper ${lib.getExe prev.nodejs} $out/bin/bash-language-server \
+            --suffix PATH : ${
+              lib.makeBinPath [
+                prev.shellcheck
+                prev.shfmt
+              ]
+            } \
+            --inherit-argv0 \
+            --add-flags $out/lib/bash-language-server/server/out/cli.js
+
+          runHook postInstall
+        '';
+      });
     })
     (final: prev: {
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
