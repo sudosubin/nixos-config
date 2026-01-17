@@ -42,8 +42,7 @@
     languages = {
       language-server = {
         kotlin-lsp = {
-          command = "kotlin-lsp";
-          args = [ "--stdio" ];
+          command = "kotlin-lsp-wrapper";
         };
         nginx-language-server = {
           command = "nginx-language-server";
@@ -363,7 +362,7 @@
       graphql-language-service-cli # graphql
       helm-ls # helm
       jdt-language-server # java
-      kotlin-lsp # kotlin
+      kotlin-lsp-wrapper # kotlin
       ktlint # kotlin
       lua-language-server # lua
       marksman # markdown
