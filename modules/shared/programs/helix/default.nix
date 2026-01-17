@@ -65,7 +65,7 @@
           args = [ "--stdio" ];
           config = {
             hostInfo = "helix";
-            typescript.tsserver.pluginPaths = [ "./node_modules" ];
+            "typescript.tsserver.pluginPaths" = [ "./node_modules" ];
           };
         };
       };
@@ -86,6 +86,8 @@
             command = "biome";
             args = [
               "format"
+              "--indent-style"
+              "space"
               "--stdin-file-path"
               "file.css"
             ];
@@ -106,6 +108,8 @@
             command = "biome";
             args = [
               "format"
+              "--indent-style"
+              "space"
               "--stdin-file-path"
               "file.graphql"
             ];
@@ -134,6 +138,8 @@
             command = "biome";
             args = [
               "format"
+              "--indent-style"
+              "space"
               "--stdin-file-path"
               "file.html"
             ];
@@ -158,6 +164,8 @@
             command = "biome";
             args = [
               "format"
+              "--indent-style"
+              "space"
               "--stdin-file-path"
               "file.js"
             ];
@@ -174,6 +182,8 @@
             command = "biome";
             args = [
               "format"
+              "--indent-style"
+              "space"
               "--stdin-file-path"
               "file.jsx"
             ];
@@ -186,6 +196,8 @@
             command = "biome";
             args = [
               "format"
+              "--indent-style"
+              "space"
               "--stdin-file-path"
               "file.json"
             ];
@@ -307,6 +319,8 @@
             command = "biome";
             args = [
               "format"
+              "--indent-style"
+              "space"
               "--stdin-file-path"
               "file.ts"
             ];
@@ -323,6 +337,8 @@
             command = "biome";
             args = [
               "format"
+              "--indent-style"
+              "space"
               "--stdin-file-path"
               "file.tsx"
             ];
