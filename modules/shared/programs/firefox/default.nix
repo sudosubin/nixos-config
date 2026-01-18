@@ -37,6 +37,7 @@ in
       DisplayBookmarksToolbar = "newtab";
       DisplayMenuBar = "never";
       DisablePocket = true;
+      DontCheckDefaultBrowser = true;
       EnableTrackingProtection = {
         Value = true;
         Locked = true;
@@ -44,7 +45,14 @@ in
         Fingerprinting = true;
         EmailTracking = true;
       };
+      FirefoxHome = {
+        SponsoredStories = false;
+        SponsoredTopSites = false;
+        Stories = false;
+      };
+      GenerativeAI.Enabled = false;
       SearchBar = "unified";
+      SearchEngines.Remove = [ "Perplexity" ];
     };
 
     profiles.default = rec {
