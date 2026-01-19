@@ -51,6 +51,13 @@
           command = "pyright-langserver";
           args = [ "--stdio" ];
         };
+        ruby-lsp = {
+          command = "ruby-lsp";
+          config = {
+            diagnostics = true;
+            formatting = true;
+          };
+        };
         sqruff = {
           command = "sqruff";
           args = [ "lsp" ];
@@ -286,6 +293,7 @@
         {
           name = "ruby";
           auto-format = true;
+          language-servers = [ "ruby-lsp" ];
         }
         {
           name = "rust";
