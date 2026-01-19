@@ -17,11 +17,13 @@
       home.packages = with pkgs; [
         # Development
         curl
+        fd
         hadolint
         ijhttp
         jetbrains.datagrip
         jetbrains.idea
         shfmt
+        tree
 
         # Utility
         figma-linux

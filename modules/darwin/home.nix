@@ -19,6 +19,7 @@
         curl
         cursor-cli
         devbox
+        fd
         google-cloud-sdk
         hadolint
         ijhttp
@@ -28,6 +29,7 @@
         postman
         procps
         shfmt
+        tree
 
         # Utility
         cleanshot
