@@ -5,17 +5,23 @@
   ...
 }:
 
+let
+  inherit (pkgs.stdenvNoCC) isLinux;
+
+in
 {
-  programs.kube = {
-    enable = true;
-
-    config = "${config.xdg.configHome}/kube/config.yaml";
-    kAlias = true;
-
-    plugins = with pkgs; [
-      (kubectl-node-shell.overrideAttrs (attrs: {
-        meta.platforms = lib.platforms.all;
-      }))
-    ];
+  home.sessionVariables = {
+    KUBECONFIG = "${config.xdg.configHome}/kube/config.yaml";
   };
+
+  home.shellAliases = {
+    k = "kubectl";
+  };
+
+  home.packages =
+    with pkgs;
+    [
+      kubectl-node-shell
+    ]
+    ++ lib.optionals isLinux [ kubectl ];
 }

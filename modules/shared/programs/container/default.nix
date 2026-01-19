@@ -11,16 +11,20 @@ let
 in
 {
   home.packages =
-    with pkgs;
-    [
-      docker
-      docker-buildx
-      docker-compose
-      docker-credential-helpers
-    ]
-    ++ lib.optionals isDarwin [ colima ];
-
-  home.sessionVariables = {
-    DOCKER_DEFAULT_PLATFORM = "linux/amd64";
-  };
+    [ ]
+    ++ lib.optionals isLinux (
+      with pkgs;
+      [
+        docker
+        docker-buildx
+        docker-compose
+        docker-credential-helpers
+      ]
+    )
+    ++ lib.optionals isDarwin (
+      with pkgs;
+      [
+        orbstack
+      ]
+    );
 }

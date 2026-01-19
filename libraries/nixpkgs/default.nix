@@ -86,6 +86,7 @@ in
       "idea"
       "ijhttp"
       "ngrok"
+      "orbstack"
       "postman"
       "pragmatapro"
       "redisinsight"
