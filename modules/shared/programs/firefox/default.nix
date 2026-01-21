@@ -110,7 +110,6 @@ in
           always-in-container
           multi-account-containers
           onepassword-password-manager
-          private-grammar-checker-harper
           react-devtools
           trancyfordesktop
           ublock-origin
