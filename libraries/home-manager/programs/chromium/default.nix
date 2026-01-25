@@ -12,29 +12,41 @@
 
 let
   supportedBrowsers = {
-    chromium = {
+    chromium = rec {
       bundleId = "org.chromium.Chromium";
-      initialPrefsFile = "Chromium/Chromium Initial Preferences";
+      darwinDir = "Chromium";
+      extensionsDir = "${darwinDir}/Home Manager Extensions";
+      initialPrefsFile = "${darwinDir}/Chromium Initial Preferences";
     };
-    google-chrome = {
+    google-chrome = rec {
       bundleId = "com.google.Chrome";
-      initialPrefsFile = "Google/Chrome/Google Chrome Initial Preferences";
+      darwinDir = "Google/Chrome";
+      extensionsDir = "${darwinDir}/Home Manager Extensions";
+      initialPrefsFile = "${darwinDir}/Google Chrome Initial Preferences";
     };
-    google-chrome-beta = {
+    google-chrome-beta = rec {
       bundleId = "com.google.Chrome.beta";
-      initialPrefsFile = "Google/Chrome Beta/Google Chrome Beta Initial Preferences";
+      darwinDir = "Google/Chrome Beta";
+      extensionsDir = "${darwinDir}/Home Manager Extensions";
+      initialPrefsFile = "${darwinDir}/Google Chrome Beta Initial Preferences";
     };
-    google-chrome-dev = {
+    google-chrome-dev = rec {
       bundleId = "com.google.Chrome.dev";
-      initialPrefsFile = "Google/Chrome Dev/Google Chrome Dev Initial Preferences";
+      darwinDir = "Google/Chrome Dev";
+      extensionsDir = "${darwinDir}/Home Manager Extensions";
+      initialPrefsFile = "${darwinDir}/Google Chrome Dev Initial Preferences";
     };
-    brave = {
+    brave = rec {
       bundleId = "com.brave.Browser";
-      initialPrefsFile = "BraveSoftware/Brave-Browser/Brave-Browser Initial Preferences";
+      darwinDir = "BraveSoftware/Brave-Browser";
+      extensionsDir = "${darwinDir}/Home Manager Extensions";
+      initialPrefsFile = "${darwinDir}/Brave-Browser Initial Preferences";
     };
-    vivaldi = {
+    vivaldi = rec {
       bundleId = "com.vivaldi.Vivaldi";
-      initialPrefsFile = "Vivaldi/Vivaldi Initial Preferences";
+      darwinDir = "Vivaldi";
+      extensionsDir = "${darwinDir}/Home Manager Extensions";
+      initialPrefsFile = "${darwinDir}/Vivaldi Initial Preferences";
     };
   };
 
@@ -63,10 +75,40 @@ let
         <https://www.chromium.org/administrators/configuring-other-preferences/>
       '';
     };
+
+    package' = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = null;
+      visible = pkgs.stdenv.isDarwin;
+      readOnly = pkgs.stdenv.isLinux;
+      description = ''
+        Base package to wrap with extensions.
+      '';
+    };
+
+    extensions' = lib.mkOption {
+      type = lib.types.listOf lib.types.package;
+      default = [ ];
+      visible = pkgs.stdenv.isDarwin;
+      readOnly = pkgs.stdenv.isLinux;
+      description = ''
+        Extension packages to copy and load via --load-extension flag.
+        Extensions will be copied to ~/Library/Application Support/<browser>/Home Manager Extensions
+        and only updated when version changes.
+      '';
+    };
   };
 
   browserConfig =
     browser: cfg:
+    let
+      hasExtensions = cfg.package' != null && cfg.extensions' != [ ];
+      extensionsDir = supportedBrowsers.${browser}.extensionsDir;
+      extensionPaths = map (
+        ext: "${config.home.homeDirectory}/Library/Application Support/${extensionsDir}/${ext.id}"
+      ) cfg.extensions';
+
+    in
     lib.mkIf (cfg.enable && pkgs.stdenv.isDarwin) {
       home.file = lib.mkIf (cfg.initialPrefs != { }) {
         "Library/Application Support/${supportedBrowsers.${browser}.initialPrefsFile}".text =
@@ -75,6 +117,49 @@ let
 
       targets.darwin.defaults = lib.mkIf (cfg.defaultOpts != { }) {
         "${supportedBrowsers.${browser}.bundleId}" = cfg.defaultOpts;
+      };
+
+      programs.${browser}.package = lib.mkIf hasExtensions (
+        cfg.package'.overrideAttrs (attrs: {
+          nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+          postInstall = (attrs.postInstall or "") + ''
+            makeWrapper \
+              "${cfg.package'}/Applications/${attrs.sourceRoot}/Contents/MacOS/${lib.strings.removeSuffix ".app" attrs.sourceRoot}" \
+              "$out/Applications/${attrs.sourceRoot}/Contents/MacOS/${lib.strings.removeSuffix ".app" attrs.sourceRoot}" \
+              --add-flags '--load-extension="${lib.concatStringsSep "," extensionPaths}"'
+          '';
+        })
+      );
+
+      home.activation = lib.mkIf hasExtensions {
+        "${browser}Extensions" = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          extensionsDir="${config.home.homeDirectory}/Library/Application Support/${extensionsDir}"
+          mkdir -p "$extensionsDir"
+
+          needsSync() {
+            local src="$1" dst="$2"
+            [ ! -f "$dst/manifest.json" ] || \
+            [ "$(${lib.getExe pkgs.jq} -r '.version' "$src/manifest.json")" != "$(${lib.getExe pkgs.jq} -r '.version' "$dst/manifest.json")" ]
+          }
+
+          declaredExtensions=(${lib.concatMapStringsSep " " (ext: ''"${ext.id}"'') cfg.extensions'})
+
+          for extension in "$extensionsDir"/*/; do
+            [ -d "$extension" ] || continue
+            extId=$(basename "$extension")
+            if [[ ! " ''${declaredExtensions[*]} " =~ " $extId " ]]; then
+              echo "Removing extension: $extId"
+              run rm -rf "$extension"
+            fi
+          done
+
+          ${lib.concatMapStrings (ext: ''
+            if needsSync "${ext}" "$extensionsDir/${ext.id}"; then
+              echo "Syncing extension: ${ext.id}"
+              run ${lib.getExe pkgs.rsync} --checksum --archive --delete --chmod=+w --no-group --no-owner "${ext}/" "$extensionsDir/${ext.id}/"
+            fi
+          '') cfg.extensions'}
+        '';
       };
     };
 

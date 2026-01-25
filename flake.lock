@@ -101,6 +101,26 @@
         "type": "github"
       }
     },
+    "nix-chrome-extensions": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1769323605,
+        "narHash": "sha256-0IQlxub6dsDp+Itq9QYcFii51sh+Jx1BVFn97zy/Z/E=",
+        "owner": "sudosubin",
+        "repo": "nix-chrome-extensions",
+        "rev": "a116e81de637deee318b7dcc6b54e459100e8e92",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sudosubin",
+        "repo": "nix-chrome-extensions",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -217,6 +237,7 @@
         "home-manager": "home-manager",
         "home-manager-secrets": "home-manager-secrets",
         "lefthook": "lefthook",
+        "nix-chrome-extensions": "nix-chrome-extensions",
         "nix-darwin": "nix-darwin",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-config-private-karrot": "nixos-config-private-karrot",

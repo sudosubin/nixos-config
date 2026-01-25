@@ -12,7 +12,16 @@ in
 {
   programs.chromium = {
     enable = true;
-    package = pkgs.ungoogled-chromium;
+    package' = pkgs.ungoogled-chromium;
+
+    extensions' = [
+      pkgs.chrome-web-store._1password
+      pkgs.chrome-web-store.claude
+      pkgs.chrome-web-store.neutral-face-emoji-tools
+      pkgs.chrome-web-store.react-developer-tools
+      pkgs.chrome-web-store.trancy
+      pkgs.chrome-web-store.ublock-origin-lite
+    ];
 
     defaultOpts = lib.mkIf isDarwin {
       AutofillAddressEnabled = false;
@@ -46,6 +55,5 @@ in
         webprefs.fonts.standard.Zyyy = "Pretendard";
       };
     };
-
   };
 }
