@@ -43,6 +43,12 @@ in
         '';
       });
     })
+    (
+      final: prev:
+      (lib.mkIf isDarwin {
+        ungoogled-chromium = final.callPackage ./programs/ungoogled-chromium { };
+      })
+    )
     (final: prev: {
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
@@ -63,6 +69,7 @@ in
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       redisinsight = final.callPackage ./programs/redisinsight { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
+      ungoogled-chromium = final.callPackage ./programs/ungoogled-chromium { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
   ];

@@ -57,6 +57,7 @@
         ../shared/programs/ai
         ../shared/programs/aws
         ../shared/programs/bat
+        ../shared/programs/chromium
         ../shared/programs/container
         ../shared/programs/direnv
         ../shared/programs/firefox
