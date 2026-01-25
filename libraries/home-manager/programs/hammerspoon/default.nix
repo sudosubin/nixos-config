@@ -74,7 +74,7 @@ in
     (lib.mkIf cfg.enable {
       home.packages = [ cfg.package ];
 
-      darwin.defaults."org.hammerspoon.Hammerspoon" = cfg.config;
+      targets.darwin.defaults."org.hammerspoon.Hammerspoon" = cfg.config;
 
       launchd.agents.hammerspoon = {
         enable = true;

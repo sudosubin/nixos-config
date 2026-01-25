@@ -22,7 +22,6 @@ in
     ./programs/chromium
     ./programs/cleanshot
     ./programs/clop
-    ./programs/defaults
     ./programs/hammerspoon
     ./programs/homerow
     ./programs/lsd

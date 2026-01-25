@@ -168,7 +168,7 @@ in
     (lib.mkIf cfg.enable {
       home.packages = [ cfg.package ];
 
-      darwin.defaults."com.superultra.Homerow" = cfg.config // {
+      targets.darwin.defaults."com.superultra.Homerow" = cfg.config // {
         "NSStatusItem Visible Item-0" = cfg.config.show-menubar-icon;
       };
 
