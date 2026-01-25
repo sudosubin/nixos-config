@@ -373,7 +373,6 @@
       kotlin-lsp-wrapper # kotlin
       ktlint # kotlin
       lua-language-server # lua
-      marksman # markdown
       nginx-config-formatter # nginx
       nginx-language-server # nginx
       nixd # nix
@@ -382,6 +381,7 @@
       pyproject-fmt # pyproject
       pyright # python
       ruby-lsp # ruby
+      rumdl # markdown
       ruff # python
       rust-analyzer # rust
       sqruff # sql
