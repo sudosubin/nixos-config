@@ -47,6 +47,7 @@ in
         show_on_all_tabs = false;
         show_tab_groups = false;
       };
+      browser.enable_spellchecking = false;
       distribution.browser.confirm_to_quit = true;
       webkit = {
         webprefs.fonts.fixed.Zyyy = "PragmataProMono Nerd Font Mono";
