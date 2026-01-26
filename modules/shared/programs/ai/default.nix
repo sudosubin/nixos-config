@@ -24,6 +24,7 @@ in
         commit = "";
         pr = "";
       };
+      cleanupPeriodDays = 99999;
       env = {
         ANTHROPIC_DEFAULT_SONNET_MODEL = "claude-sonnet-4-5-20250929[1m]";
         CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR = "1";
