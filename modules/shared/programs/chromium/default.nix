@@ -48,6 +48,20 @@ in
       };
       browser.enable_spellchecking = false;
       distribution.browser.confirm_to_quit = true;
+      extensions = {
+        commands = {
+          "mac:Alt+Shift+D" = {
+            command_name = "fulltext-translate";
+            extension = pkgs.chrome-web-store.trancy.id;
+            global = false;
+          };
+          "mac:Command+Shift+X" = {
+            command_name = "_execute_action";
+            extension = pkgs.chrome-web-store._1password.id;
+            global = false;
+          };
+        };
+      };
       webkit = {
         webprefs.fonts.fixed.Zyyy = "PragmataProMono Nerd Font Mono";
         webprefs.fonts.sansserif.Zyyy = "Pretendard";
