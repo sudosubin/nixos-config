@@ -1,8 +1,8 @@
 {
-  lib,
-  python3Packages,
   fetchFromGitHub,
+  lib,
   nix-update-script,
+  python3Packages,
   rustPlatform,
 }:
 

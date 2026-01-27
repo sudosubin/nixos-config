@@ -5,8 +5,8 @@
 
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }:
 

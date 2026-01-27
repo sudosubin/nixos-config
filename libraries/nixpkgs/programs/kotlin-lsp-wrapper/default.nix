@@ -1,10 +1,10 @@
 {
-  lib,
-  rustPlatform,
   fetchFromGitHub,
-  makeWrapper,
   kotlin-lsp,
+  lib,
+  makeWrapper,
   nix-update-script,
+  rustPlatform,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {

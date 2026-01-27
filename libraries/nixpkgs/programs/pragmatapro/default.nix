@@ -1,7 +1,7 @@
 {
   lib,
-  stdenvNoCC,
   nerd-font-patcher,
+  stdenvNoCC,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {

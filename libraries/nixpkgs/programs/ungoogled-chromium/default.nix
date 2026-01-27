@@ -1,7 +1,7 @@
 {
+  fetchurl,
   lib,
   stdenvNoCC,
-  fetchurl,
   undmg,
 }:
 

@@ -1,6 +1,6 @@
 {
-  lib,
   fetchurl,
+  lib,
   stdenvNoCC,
   _7zz,
 }:

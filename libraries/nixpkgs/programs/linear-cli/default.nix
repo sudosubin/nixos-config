@@ -1,10 +1,10 @@
 {
-  lib,
-  fetchzip,
-  versionCheckHook,
-  stdenvNoCC,
-  installShellFiles,
   autoPatchelfHook,
+  fetchzip,
+  installShellFiles,
+  lib,
+  stdenvNoCC,
+  versionCheckHook,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {

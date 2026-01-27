@@ -1,9 +1,9 @@
 {
-  lib,
   fetchurl,
+  lib,
+  nix-update-script,
   stdenvNoCC,
   _7zz,
-  nix-update-script,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {

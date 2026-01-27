@@ -1,12 +1,12 @@
 {
-  lib,
-  stdenvNoCC,
-  fetchurl,
-  makeWrapper,
   autoPatchelfHook,
-  zlib,
-  writableTmpDirAsHomeHook,
+  fetchurl,
+  lib,
+  makeWrapper,
+  stdenvNoCC,
   versionCheckHook,
+  writableTmpDirAsHomeHook,
+  zlib,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {

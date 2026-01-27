@@ -1,14 +1,14 @@
 {
-  lib,
   buildPythonPackage,
   fetchFromGitHub,
-  hatchling,
   hatch-vcs,
-  tomli,
+  hatchling,
+  lib,
   pytest-cov,
   pytest-mock,
-  pythonOlder,
   pytestCheckHook,
+  pythonOlder,
+  tomli,
 }:
 
 buildPythonPackage rec {

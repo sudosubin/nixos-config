@@ -1,7 +1,7 @@
 {
+  fetchzip,
   lib,
   stdenvNoCC,
-  fetchzip,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {

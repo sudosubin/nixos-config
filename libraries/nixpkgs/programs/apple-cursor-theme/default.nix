@@ -1,8 +1,8 @@
 {
-  lib,
-  stdenvNoCC,
   fetchzip,
+  lib,
   nix-update-script,
+  stdenvNoCC,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {

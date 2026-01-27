@@ -1,9 +1,9 @@
 {
-  lib,
-  rustPlatform,
   fetchFromGitHub,
-  pkg-config,
+  lib,
   openssl,
+  pkg-config,
+  rustPlatform,
   stdenvNoCC,
 }:
 
