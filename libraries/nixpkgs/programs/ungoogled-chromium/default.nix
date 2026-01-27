@@ -3,7 +3,6 @@
   stdenvNoCC,
   fetchurl,
   undmg,
-  makeWrapper,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
@@ -16,7 +15,6 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   nativeBuildInputs = [
     undmg
-    makeWrapper
   ];
 
   installPhase = ''

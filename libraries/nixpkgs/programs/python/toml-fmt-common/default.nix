@@ -1,16 +1,13 @@
 {
   lib,
-  python,
   buildPythonPackage,
   fetchFromGitHub,
   hatchling,
   hatch-vcs,
   tomli,
-  pytest,
   pytest-cov,
   pytest-mock,
   pythonOlder,
-  nix-update-script,
   pytestCheckHook,
 }:
 
