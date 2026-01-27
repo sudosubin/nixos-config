@@ -11,7 +11,6 @@ let
 in
 {
   nixpkgs.overlays = [
-    inputs.firefox-addons.overlays.default
     inputs.nix-chrome-extensions.overlays.default
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
@@ -88,8 +87,6 @@ in
       "cursor"
       "cursor-cli"
       "datagrip"
-      "firefox-bin"
-      "firefox-bin-unwrapped"
       "homerow"
       "idea"
       "ijhttp"
@@ -100,7 +97,6 @@ in
       "redisinsight"
       "slack"
       "vscode-extension-anthropic-claude-code"
-      # pkgs.firefox-addons
       "onepassword-password-manager"
     ]
   );
