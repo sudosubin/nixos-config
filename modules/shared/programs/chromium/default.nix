@@ -25,6 +25,8 @@ in
     enable = true;
     package' = pkgs.ungoogled-chromium;
 
+    enableWidevineCdm = true;
+
     extensions' = map disableOnInstalled [
       pkgs.chrome-web-store._1password
       pkgs.chrome-web-store.claude

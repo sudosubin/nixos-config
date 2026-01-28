@@ -64,6 +64,17 @@ let
       '';
     };
 
+    enableWidevineCdm = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      visible = pkgs.stdenv.isDarwin;
+      readOnly = pkgs.stdenv.isLinux;
+      description = ''
+        Whether to enable Widevine CDM support for DRM-protected content.
+        This copies WidevineCdm from google-chrome package to chromium.
+      '';
+    };
+
     initialPrefs = lib.mkOption {
       type = lib.types.attrs;
       default = { };
@@ -103,6 +114,7 @@ let
     browser: cfg:
     let
       hasExtensions = cfg.package' != null && cfg.extensions' != [ ];
+      hasWidevineCdm = cfg.enableWidevineCdm;
       extensionsDir = supportedBrowsers.${browser}.extensionsDir;
       extensionPaths = map (
         ext: "${config.home.homeDirectory}/Library/Application Support/${extensionsDir}/${ext.id}"
@@ -119,15 +131,22 @@ let
         "${supportedBrowsers.${browser}.bundleId}" = cfg.defaultOpts;
       };
 
-      programs.${browser}.package = lib.mkIf hasExtensions (
+      programs.${browser}.package = lib.mkIf (hasExtensions || hasWidevineCdm) (
         cfg.package'.overrideAttrs (attrs: {
           nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
-          postInstall = (attrs.postInstall or "") + ''
-            makeWrapper \
-              "${cfg.package'}/Applications/${attrs.sourceRoot}/Contents/MacOS/${lib.strings.removeSuffix ".app" attrs.sourceRoot}" \
-              "$out/Applications/${attrs.sourceRoot}/Contents/MacOS/${lib.strings.removeSuffix ".app" attrs.sourceRoot}" \
-              --add-flags '--load-extension="${lib.concatStringsSep "," extensionPaths}"'
-          '';
+          postInstall =
+            (attrs.postInstall or "")
+            + (lib.optionalString hasExtensions ''
+              makeWrapper \
+                "${cfg.package'}/Applications/${attrs.sourceRoot}/Contents/MacOS/${lib.strings.removeSuffix ".app" attrs.sourceRoot}" \
+                "$out/Applications/${attrs.sourceRoot}/Contents/MacOS/${lib.strings.removeSuffix ".app" attrs.sourceRoot}" \
+                --add-flags '--load-extension="${lib.concatStringsSep "," extensionPaths}"'
+            '')
+            + (lib.optionalString hasWidevineCdm ''
+              cp -R \
+                "${pkgs.google-chrome}/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Libraries/WidevineCdm" \
+                "$out/Applications/${attrs.sourceRoot}/Contents/Frameworks/${lib.strings.removeSuffix ".app" attrs.sourceRoot} Framework.framework/Libraries/WidevineCdm"
+            '');
         })
       );
 

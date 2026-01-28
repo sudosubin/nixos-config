@@ -88,6 +88,7 @@ in
       "cursor"
       "cursor-cli"
       "datagrip"
+      "google-chrome"
       "homerow"
       "idea"
       "ijhttp"
