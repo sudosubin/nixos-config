@@ -105,8 +105,7 @@ let
       hasExtensions = cfg.package' != null && cfg.extensions' != [ ];
       extensionsDir = supportedBrowsers.${browser}.extensionsDir;
       extensionPaths = map (
-        ext:
-        "${config.home.homeDirectory}/Library/Application Support/${extensionsDir}/${ext.id}/${ext.version}"
+        ext: "${config.home.homeDirectory}/Library/Application Support/${extensionsDir}/${ext.id}"
       ) cfg.extensions';
 
     in
@@ -137,26 +136,27 @@ let
           extensionsDir="${config.home.homeDirectory}/Library/Application Support/${extensionsDir}"
           mkdir -p "$extensionsDir"
 
-          declaredExtensions=(${
-            lib.concatMapStringsSep " " (ext: ''"${ext.id}/${ext.version}"'') cfg.extensions'
-          })
+          needsSync() {
+            local src="$1" dst="$2"
+            [ ! -f "$dst/manifest.json" ] || \
+            [ "$(${lib.getExe pkgs.jq} -r '.version' "$src/manifest.json")" != "$(${lib.getExe pkgs.jq} -r '.version' "$dst/manifest.json")" ]
+          }
 
-          for extension in "$extensionsDir"/*/*/; do
+          declaredExtensions=(${lib.concatMapStringsSep " " (ext: ''"${ext.id}"'') cfg.extensions'})
+
+          for extension in "$extensionsDir"/*/; do
             [ -d "$extension" ] || continue
-            extPath="$(basename "$(dirname "$extension")")/$(basename "$extension")"
-            if [[ ! " ''${declaredExtensions[*]} " =~ " $extPath " ]]; then
-              echo "Removing extension: $extPath"
+            extId=$(basename "$extension")
+            if [[ ! " ''${declaredExtensions[*]} " =~ " $extId " ]]; then
+              echo "Removing extension: $extId"
               run rm -rf "$extension"
             fi
           done
 
-          find "$extensionsDir" -mindepth 1 -maxdepth 1 -type d -empty -delete 2>/dev/null || true
-
           ${lib.concatMapStrings (ext: ''
-            if [ ! -d "$extensionsDir/${ext.id}/${ext.version}" ]; then
-              echo "Syncing extension: ${ext.id}/${ext.version}"
-              run mkdir -p "$extensionsDir/${ext.id}/${ext.version}"
-              run ${lib.getExe pkgs.rsync} --checksum --archive --delete --chmod=+w --no-group --no-owner "${ext}/" "$extensionsDir/${ext.id}/${ext.version}"
+            if needsSync "${ext}" "$extensionsDir/${ext.id}"; then
+              echo "Syncing extension: ${ext.id}"
+              run ${lib.getExe pkgs.rsync} --checksum --archive --delete --chmod=+w --no-group --no-owner "${ext}/" "$extensionsDir/${ext.id}/"
             fi
           '') cfg.extensions'}
         '';
