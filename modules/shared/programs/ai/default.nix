@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -11,7 +12,12 @@ in
 {
   home.packages = with pkgs; [
     amp-cli
+    pi-coding-agent
   ];
+
+  home.sessionVariables = {
+    PI_CODING_AGENT_DIR = "${config.xdg.configHome}/pi/agent";
+  };
 
   programs.claude-code = {
     enable = true;
