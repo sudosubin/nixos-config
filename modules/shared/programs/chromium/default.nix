@@ -7,13 +7,25 @@
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
 
+  disableOnInstalled =
+    ext:
+    ext.overrideAttrs (attrs: {
+      postPatch = ''
+        ${attrs.postPatch or ""}
+        for file in $(find . -name '*.js' -type f); do
+          substituteInPlace "$file" \
+            --replace-quiet '.runtime.onInstalled.addListener(' '.runtime.onInstalled?._?.('
+        done
+      '';
+    });
+
 in
 {
   programs.chromium = {
     enable = true;
     package' = pkgs.ungoogled-chromium;
 
-    extensions' = [
+    extensions' = map disableOnInstalled [
       pkgs.chrome-web-store._1password
       pkgs.chrome-web-store.claude
       pkgs.chrome-web-store.neutral-face-emoji-tools
