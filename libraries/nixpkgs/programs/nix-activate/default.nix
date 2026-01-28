@@ -4,7 +4,6 @@
   openssl,
   pkg-config,
   rustPlatform,
-  stdenvNoCC,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {

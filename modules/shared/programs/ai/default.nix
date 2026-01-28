@@ -5,10 +5,6 @@
   ...
 }:
 
-let
-  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
-
-in
 {
   home.packages = with pkgs; [
     amp-cli
