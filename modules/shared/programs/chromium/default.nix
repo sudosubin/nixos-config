@@ -38,7 +38,7 @@ in
         }
       ];
       PasswordManagerEnabled = false;
-      WebRtcIPHandling = "disable_non_proxied_udp";
+      WebRtcIPHandling = "default_public_interface_only";
     };
 
     initialPrefs = lib.mkIf isDarwin {
