@@ -118,7 +118,7 @@ in
         tamasfe.even-better-toml
         teticio.python-envy
         timonwong.shellcheck
-        usernamehw.errorlens
+        # usernamehw.errorlens
         vercel.turbo-vsc
         yoavbls.pretty-ts-errors
         yzhang.markdown-all-in-one
