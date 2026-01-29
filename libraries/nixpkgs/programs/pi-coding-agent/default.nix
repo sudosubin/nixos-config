@@ -12,13 +12,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "pi-coding-agent";
-  version = "0.50.1";
+  version = "0.50.2";
 
   src = fetchFromGitHub {
     owner = "badlogic";
     repo = "pi-mono";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-c+Utd/0CY+iXFr8ICgvEtLmrXb3HVXzscWOitbOFipY=";
+    hash = "sha256-eLDKtIysA+7fJLZaNT4EWeAn8dAidDMu5EckniVXj9E=";
   };
 
   node_modules = stdenv.mkDerivation {
@@ -28,35 +28,35 @@ stdenv.mkDerivation (finalAttrs: {
     nativeBuildInputs = [ bun ];
 
     buildPhase = ''
-      bun install --ignore-scripts --no-progress
+      bun install --ignore-scripts --no-cache --no-progress
     '';
 
     installPhase = ''
       mkdir -p $out
-      cp -R ./node_modules $out/
+      rm -rf ./node_modules/.cache
+      cp -R ./node_modules ./packages $out/
     '';
 
-    outputHash = "sha256-ghaZAuP1vcUqsbFWj7tJScQYoIMyIeO/2A7HsiJ0Cd0=";
+    dontPatchShebangs = true;
+
+    outputHash = "sha256-TKvNVganIq9hjd8sUUW+vScMXWWghzIzeh7fSKkJkYo=";
     outputHashMode = "recursive";
   };
 
   nativeBuildInputs = [
     bun
-    nodejs-slim
     makeWrapper
   ];
 
   configurePhase = ''
-    cp -R ${finalAttrs.node_modules}/node_modules .
-    chmod -R +w node_modules
-  '';
-
-  patchPhase = ''
-    substituteInPlace packages/ai/package.json \
-      --replace-fail "npm run generate-models && " ""
+    cp -R ${finalAttrs.node_modules}/{node_modules,packages} .
+    chmod -R +w node_modules packages
   '';
 
   buildPhase = ''
+    substituteInPlace packages/ai/package.json \
+      --replace-fail "npm run generate-models && " ""
+
     bun run build
     (cd packages/coding-agent && bun run build:binary)
   '';
