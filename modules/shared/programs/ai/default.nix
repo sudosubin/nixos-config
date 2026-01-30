@@ -8,7 +8,7 @@
 {
   home.packages = with pkgs; [
     amp-cli
-    pi-coding-agent
+    pi
   ];
 
   home.sessionVariables = {

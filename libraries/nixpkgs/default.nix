@@ -65,7 +65,7 @@ in
       linear-cli = final.callPackage ./programs/linear-cli { };
       nanum-square-round = final.callPackage ./programs/fonts/nanum-square-round { };
       nix-activate = final.callPackage ./programs/nix-activate { };
-      pi-coding-agent = final.callPackage ./programs/pi-coding-agent { };
+      pi = final.callPackage ./programs/pi { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       redisinsight = final.callPackage ./programs/redisinsight { };

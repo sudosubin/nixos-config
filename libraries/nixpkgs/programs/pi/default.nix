@@ -11,7 +11,7 @@
 }:
 
 stdenv.mkDerivation (finalAttrs: {
-  pname = "pi-coding-agent";
+  pname = "pi";
   version = "0.50.4";
 
   src = fetchFromGitHub {
@@ -62,17 +62,17 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   installPhase = ''
-    mkdir -p $out/lib/pi-coding-agent $out/bin
-    cp -r packages/coding-agent/dist/* $out/lib/pi-coding-agent
+    mkdir -p $out/lib/pi $out/bin
+    cp -r packages/coding-agent/dist/* $out/lib/pi
 
-    wrapProgram $out/lib/pi-coding-agent/pi --suffix PATH : ${
+    wrapProgram $out/lib/pi/pi --suffix PATH : ${
       lib.makeBinPath [
         fd
         ripgrep
       ]
     }
 
-    ln -s $out/lib/pi-coding-agent/pi $out/bin/pi
+    ln -s $out/lib/pi/pi $out/bin/pi
   '';
 
   passthru.updateScript = nix-update-script {
