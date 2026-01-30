@@ -8,13 +8,7 @@
 {
   home.packages = with pkgs; [
     amp-cli
-    pi
   ];
-
-  home.sessionVariables = {
-    PI_CODING_AGENT_DIR = "${config.xdg.configHome}/pi/agent";
-    PI_SKIP_VERSION_CHECK = "1";
-  };
 
   programs.claude-code = {
     enable = true;
@@ -74,6 +68,14 @@
         hideTips = true;
         theme = "GitHub";
       };
+    };
+  };
+
+  programs.pi = {
+    enable = true;
+    environment = {
+      PI_CODING_AGENT_DIR = "${config.xdg.configHome}/pi/agent";
+      PI_SKIP_VERSION_CHECK = "1";
     };
   };
 }

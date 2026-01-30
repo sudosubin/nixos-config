@@ -24,6 +24,7 @@ in
     ./programs/hammerspoon
     ./programs/homerow
     ./programs/lsd
+    ./programs/pi
     ./programs/yabai
 
     # os systems
