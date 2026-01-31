@@ -8,6 +8,13 @@
 {
   home.packages = with pkgs; [
     amp-cli
+    ccusage
+    (ccusage-pi.overrideAttrs (finalAttrs: {
+      installPhase = finalAttrs.installPhase + ''
+        wrapProgram $out/bin/ccusage-pi \
+          --set PI_AGENT_DIR "${config.xdg.configHome}/pi/agent"
+      '';
+    }))
   ];
 
   programs.claude-code = {

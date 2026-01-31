@@ -52,6 +52,8 @@ in
     (final: prev: {
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
+      ccusage = final.callPackage ./programs/ccusage { };
+      ccusage-pi = final.callPackage ./programs/ccusage-pi { };
       claude-code-bin = final.callPackage ./programs/claude-code-bin { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
