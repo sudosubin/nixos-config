@@ -84,5 +84,8 @@
       PI_CODING_AGENT_DIR = "${config.xdg.configHome}/pi/agent";
       PI_SKIP_VERSION_CHECK = "1";
     };
+    extensions = with pkgs.pi-extensions; [
+      pi-cursor-provider
+    ];
   };
 }

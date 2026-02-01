@@ -68,6 +68,7 @@ in
       nanum-square-round = final.callPackage ./programs/fonts/nanum-square-round { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       pi = final.callPackage ./programs/pi { };
+      pi-extensions = final.callPackage ./programs/pi-extensions { };
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       redisinsight = final.callPackage ./programs/redisinsight { };
