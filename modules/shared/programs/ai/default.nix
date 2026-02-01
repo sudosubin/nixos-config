@@ -86,6 +86,10 @@
     };
     extensions = with pkgs.pi-extensions; [
       pi-cursor-provider
+      pi-cwd-history
+      pi-interactive-shell
+      pi-loop
+      pi-review
     ];
   };
 }

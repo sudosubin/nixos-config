@@ -18,6 +18,8 @@ buildNpmPackage (finalAttrs: {
 
   npmDepsHash = "sha256-ULSGsD4cBPDk9PErDc069RYrWLUFs1WdGgBIuolPscM=";
 
+  patches = [ ./respect-pi-coding-agent-dir.patch ];
+
   dontNpmBuild = true;
 
   installPhase = ''

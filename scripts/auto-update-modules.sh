@@ -12,9 +12,11 @@ cat > "$ROOT_DIR/default.nix" <<EOF
 {}: import <nixpkgs> {
   overlays = [
     (final: prev: {
-      $(cd "$PACKAGES_DIR" && for dir in */default.nix; do
+      $(cd "$PACKAGES_DIR" && for dir in */default.nix pi-extensions/*/default.nix; do
+        [ -f "$dir" ] || continue
         pkg="${dir%/default.nix}"
-        echo "$pkg = final.callPackage $PACKAGES_DIR/$pkg { };"
+        attr="${pkg//\//-}"
+        echo "$attr = final.callPackage $PACKAGES_DIR/$pkg { };"
       done)
     })
   ];

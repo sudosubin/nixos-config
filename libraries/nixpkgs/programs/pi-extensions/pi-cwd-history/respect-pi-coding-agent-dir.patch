@@ -1,0 +1,14 @@
+diff --git a/pi-extensions/cwd-history.ts b/pi-extensions/cwd-history.ts
+index 31b0cb3..93e1344 100644
+--- a/pi-extensions/cwd-history.ts
++++ b/pi-extensions/cwd-history.ts
+@@ -69,7 +69,8 @@ function collectUserPromptsFromEntries(entries: Array<any>): PromptEntry[] {
+ 
+ function getSessionDirForCwd(cwd: string): string {
+ 	const safePath = `--${cwd.replace(/^[/\\]/, "").replace(/[/\\:]/g, "-")}--`;
+-	return path.join(os.homedir(), ".pi", "agent", "sessions", safePath);
++	const agentDir = process.env.PI_CODING_AGENT_DIR ?? path.join(os.homedir(), ".pi", "agent");
++	return path.join(agentDir, "sessions", safePath);
+ }
+ 
+ async function readTail(filePath: string, maxBytes = 256 * 1024): Promise<string> {
