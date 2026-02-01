@@ -1,24 +1,29 @@
 {
   fetchFromGitHub,
   lib,
+  nix-update-script,
   python3Packages,
   rustPlatform,
 }:
 
 python3Packages.buildPythonPackage rec {
   pname = "pyproject-fmt";
-  version = "2.11.1";
+  version = "2.12.1";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt";
     rev = "pyproject-fmt/${version}";
-    sha256 = "sha256-e6fiFJst510SdqYfY7WiEusiud7xtKiXAfTwmW4+LA0=";
+    sha256 = "sha256-aEkLdIkX1L0jzhdyhSCSKHjk0Ojap1w9alSg7ENkTUk=";
   };
 
   sourceRoot = "${src.name}/pyproject-fmt";
   cargoRoot = "..";
+
+  postUnpack = ''
+    (cd source && python tasks/generate_readme.py pyproject-fmt)
+  '';
 
   postPatch = ''
     substituteInPlace tests/test_pyproject_toml_fmt.py \
@@ -31,7 +36,7 @@ python3Packages.buildPythonPackage rec {
       version
       src
       ;
-    hash = "sha256-11OB0A8T6bbfsik5ivbZKtU8QISYi1hQTS0civ0ryi4=";
+    hash = "sha256-/kKFt9FAkAfGodPpbtWFkYWHlCsPwTEgHV2+L5iytQ8=";
   };
 
   dependencies = with python3Packages; [
@@ -55,7 +60,7 @@ python3Packages.buildPythonPackage rec {
     pytestCheckHook
   ];
 
-  passthru.updateScript = ./update.sh;
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "Format your pyproject.toml file";
