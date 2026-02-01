@@ -60,7 +60,11 @@ python3Packages.buildPythonPackage rec {
     pytestCheckHook
   ];
 
-  passthru.updateScript = nix-update-script { };
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--version-regex=pyproject-fmt/(.+)"
+    ];
+  };
 
   meta = {
     description = "Format your pyproject.toml file";
