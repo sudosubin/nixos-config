@@ -119,6 +119,26 @@
         "type": "github"
       }
     },
+    "nix-skills": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770174737,
+        "narHash": "sha256-E9kQiMEqo4iR81pAQHp1nd1WSU4iDsLiI05qa5QRAUY=",
+        "owner": "sudosubin",
+        "repo": "nix-skills",
+        "rev": "5d4f311af8a2a94f3e6c89e0801349d6dd698840",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sudosubin",
+        "repo": "nix-skills",
+        "type": "github"
+      }
+    },
     "nix-vscode-extensions": {
       "inputs": {
         "nixpkgs": [
@@ -216,6 +236,7 @@
         "lefthook": "lefthook",
         "nix-chrome-extensions": "nix-chrome-extensions",
         "nix-darwin": "nix-darwin",
+        "nix-skills": "nix-skills",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-config-private-karrot": "nixos-config-private-karrot",
         "nixos-config-private-sudosubin": "nixos-config-private-sudosubin",

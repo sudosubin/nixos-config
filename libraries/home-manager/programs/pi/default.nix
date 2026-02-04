@@ -49,6 +49,25 @@ in
         Each package's pname is used as the extension name in the extensions directory.
       '';
     };
+
+    skills = lib.mkOption {
+      type = lib.types.listOf lib.types.package;
+      default = [ ];
+      example = lib.literalExpression ''
+        [
+          pkgs.skills.some-skill
+
+          # Wrap a local skill directory (must contain SKILL.md)
+          (pkgs.runCommand "my-skill" {} '''
+            cp -r ''${./my-skill} $out
+          ''')
+        ]
+      '';
+      description = ''
+        Pi skill packages to install.
+        Each package's pname is used as the skill name in the skills directory.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable (
@@ -67,30 +86,48 @@ in
             '';
           });
 
-      extensionsDir =
+      relativeAgentDir =
         if lib.hasPrefix "${config.home.homeDirectory}/" agentDir then
-          lib.removePrefix "${config.home.homeDirectory}/" agentDir + "/extensions"
+          lib.removePrefix "${config.home.homeDirectory}/" agentDir
         else
           throw "programs.pi: PI_CODING_AGENT_DIR must be under home directory";
+
+      extensionsDir = "${relativeAgentDir}/extensions";
+      skillsDir = "${relativeAgentDir}/skills";
     in
     {
       assertions =
         let
-          pnames = map (ext: ext.pname) cfg.extensions;
-          duplicates = lib.filter (p: lib.count (x: x == p) pnames > 1) (lib.unique pnames);
+          extensionPnames = map (ext: ext.pname) cfg.extensions;
+          extensionDuplicates = lib.filter (p: lib.count (x: x == p) extensionPnames > 1) (
+            lib.unique extensionPnames
+          );
+          skillPnames = map (skill: skill.pname) cfg.skills;
+          skillDuplicates = lib.filter (p: lib.count (x: x == p) skillPnames > 1) (lib.unique skillPnames);
         in
         [
           {
-            assertion = duplicates == [ ];
-            message = "programs.pi.extensions: duplicate pnames found: ${lib.concatStringsSep ", " duplicates}";
+            assertion = extensionDuplicates == [ ];
+            message = "programs.pi.extensions: duplicate pnames found: ${lib.concatStringsSep ", " extensionDuplicates}";
+          }
+          {
+            assertion = skillDuplicates == [ ];
+            message = "programs.pi.skills: duplicate pnames found: ${lib.concatStringsSep ", " skillDuplicates}";
           }
         ];
 
       home.packages = [ finalPackage ];
 
-      home.file = lib.listToAttrs (
-        map (ext: lib.nameValuePair "${extensionsDir}/${ext.pname}" { source = ext; }) cfg.extensions
-      );
+      home.file =
+        let
+          extensionFiles = map (
+            ext: lib.nameValuePair "${extensionsDir}/${ext.pname}" { source = ext; }
+          ) cfg.extensions;
+          skillFiles = map (
+            skill: lib.nameValuePair "${skillsDir}/${skill.pname}" { source = skill; }
+          ) cfg.skills;
+        in
+        lib.listToAttrs (extensionFiles ++ skillFiles);
     }
   );
 }
