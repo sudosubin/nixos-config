@@ -12,13 +12,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "pi";
-  version = "0.51.0";
+  version = "0.51.6";
 
   src = fetchFromGitHub {
     owner = "badlogic";
     repo = "pi-mono";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-j8MJuC1bqkkCai52nVlINnhJdAQ4u6zHp9IkJXZsA2c=";
+    hash = "sha256-P9IXfHr3brqCP8eQVLn1Sl6yJ9Bx7weqxyk6iHKWZpo=";
   };
 
   node_modules = stdenv.mkDerivation {
@@ -39,7 +39,7 @@ stdenv.mkDerivation (finalAttrs: {
 
     dontPatchShebangs = true;
 
-    outputHash = "sha256-krcO/3Irpdk2DiCmxk5KEKUhbatX+N3TRovedTkbeYk=";
+    outputHash = "sha256-1E73X2LXnTk+XH+8SrFflROunUX88tX39ErTxnjwCFk=";
     outputHashMode = "recursive";
   };
 

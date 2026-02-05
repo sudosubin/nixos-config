@@ -11,7 +11,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "claude-code-bin";
-  version = "2.1.29";
+  version = "2.1.31";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -57,19 +57,19 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     sources = {
       x86_64-linux = fetchurl {
         url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${finalAttrs.version}/linux-x64/claude";
-        hash = "sha256-Q2OjrNjDnGRadGD/uhOdBiyjjd9ANiUI6gviAVnEOYw=";
+        hash = "sha256-6g2meshVShG98dqWWa4qKbSX8+Sja6PndsaLemX1L+o=";
       };
       aarch64-linux = fetchurl {
         url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${finalAttrs.version}/linux-arm64/claude";
-        hash = "sha256-iVJehoA4CP0gIy7ngcpxJULpldoyZ00BARxjYooGfLE=";
+        hash = "sha256-CZmwSrVjNDxWrBuMM1knrqs+o0AtW9heBh5uDLMibCY=";
       };
       x86_64-darwin = fetchurl {
         url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${finalAttrs.version}/darwin-x64/claude";
-        hash = "sha256-/m0iuv9H6cf9ntAHc9dg5TKMPqX/xden4dIILnmVhps=";
+        hash = "sha256-CF5Wr9dchhs33FJpu0xyd7qoNs9sBhfI1AXNVw3Bidc=";
       };
       aarch64-darwin = fetchurl {
         url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${finalAttrs.version}/darwin-arm64/claude";
-        hash = "sha256-KD6F3lqqvHB7Nm7ytS5USkFIAhCwSyvJcGvIx/52I7o=";
+        hash = "sha256-iuVyz1JbLuwtoXqRADVUE8TVmkPBJHM+XPE1bcUKV2o=";
       };
     };
     updateScript = ./update.sh;

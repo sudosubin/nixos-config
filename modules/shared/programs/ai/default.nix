@@ -92,7 +92,7 @@
       pi-review
     ];
     skills = with pkgs.skills; [
-      affaan-m.everything-claude-code.golang-patterns
+      # affaan-m.everything-claude-code.golang-patterns
     ];
   };
 }

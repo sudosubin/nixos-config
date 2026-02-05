@@ -22,19 +22,6 @@ in
       );
     })
     (final: prev: {
-      ssm-session-manager-plugin = prev.ssm-session-manager-plugin.override {
-        buildGoModule =
-          args:
-          prev.buildGoModule (
-            args
-            // {
-              proxyVendor = true;
-              vendorHash = "sha256-8gRlIoS1BJR+5Nfq0TCyyqu901u5VX4nUf42wA8RtCc=";
-            }
-          );
-      };
-    })
-    (final: prev: {
       bash-language-server = prev.bash-language-server.overrideAttrs (attrs: {
         installPhase = ''
           runHook preInstall
@@ -122,5 +109,6 @@ in
 
   nixpkgs.config.permittedInsecurePackages = [
     "figma-linux-0.10.0"
+    "google-chrome-144.0.7559.97"
   ];
 }
