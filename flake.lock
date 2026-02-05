@@ -126,11 +126,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770244994,
-        "narHash": "sha256-/ivSU6gxsbmxoMQcPmfymuBS2trJGGtmNoptuq+Pyd4=",
+        "lastModified": 1770305123,
+        "narHash": "sha256-1r0b/ZibvgF+OOPwG/rtf7M4U4Yax7FMa/rDniH3/4U=",
         "owner": "sudosubin",
         "repo": "nix-skills",
-        "rev": "d0f02cc31aab1b398622164d3088368c1269b698",
+        "rev": "116a4f3c0a3b62552bee59453ba8df50ae071088",
         "type": "github"
       },
       "original": {
