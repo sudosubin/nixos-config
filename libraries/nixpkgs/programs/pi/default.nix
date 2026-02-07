@@ -12,13 +12,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "pi";
-  version = "0.52.7";
+  version = "0.52.8";
 
   src = fetchFromGitHub {
     owner = "badlogic";
     repo = "pi-mono";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-+bx0N1gOlc3di0g7NcLTTTb3o0EE7MwKE3tfrCgCgNY=";
+    hash = "sha256-HygE4ch4u8EQ19qL0a5YqUfVNKzleinYjK0uRRqmwBc=";
   };
 
   node_modules = stdenv.mkDerivation {
@@ -39,12 +39,13 @@ stdenv.mkDerivation (finalAttrs: {
 
     dontPatchShebangs = true;
 
-    outputHash = "sha256-dUFppqiqXHkKTtllQYhHIfkoaEuL087HHiHHrqlTZ7Y=";
+    outputHash = "sha256-bkTj7V3C1xVXDQt4FTOPRXp5xyHvdDyj7uk3/YL2D/M=";
     outputHashMode = "recursive";
   };
 
   nativeBuildInputs = [
     bun
+    nodejs-slim
     makeWrapper
   ];
 
