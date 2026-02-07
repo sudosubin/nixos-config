@@ -50,6 +50,17 @@ in
         ungoogled-chromium = final.callPackage ./programs/ungoogled-chromium { };
       })
     )
+    # Fix: jetbrains.idea includes musl in buildInputs, but musl is Linux-only
+    (
+      final: prev:
+      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
+        jetbrains = prev.jetbrains // {
+          idea = prev.jetbrains.idea.overrideAttrs (oldAttrs: {
+            buildInputs = lib.filter (p: (p.pname or "") != "musl") (oldAttrs.buildInputs or [ ]);
+          });
+        };
+      }
+    )
     (final: prev: {
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
