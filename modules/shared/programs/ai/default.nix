@@ -52,6 +52,7 @@
       PI_SKIP_VERSION_CHECK = "1";
     };
     extensions = with pkgs.pi-extensions; [
+      pi-cline-free-models
       pi-cursor-agent
       pi-cwd-history
       pi-interactive-shell
