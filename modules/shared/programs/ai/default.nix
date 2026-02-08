@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }:
@@ -42,6 +41,10 @@
       model = "opusplan";
       permissions = {
         defaultMode = "bypassPermissions";
+      };
+      spinnerVerbs = {
+        mode = "replace";
+        verbs = [ "Working" ];
       };
     };
   };
