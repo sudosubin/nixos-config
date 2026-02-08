@@ -7,7 +7,6 @@
 
 {
   home.packages = with pkgs; [
-    amp-cli
     ccusage
     (ccusage-pi.overrideAttrs (finalAttrs: {
       installPhase = finalAttrs.installPhase + ''
