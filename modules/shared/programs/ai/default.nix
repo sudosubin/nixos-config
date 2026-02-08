@@ -7,6 +7,7 @@
 
 {
   home.packages = with pkgs; [
+    agent-browser
     ccusage
     (ccusage-pi.overrideAttrs (finalAttrs: {
       installPhase = finalAttrs.installPhase + ''
@@ -61,6 +62,7 @@
     skills = with pkgs.skills; [
       affaan-m.everything-claude-code.golang-patterns
       anthropics.skills.skill-creator
+      vercel-labs.agent-browser.agent-browser
     ];
   };
 }
