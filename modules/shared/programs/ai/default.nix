@@ -65,6 +65,13 @@
       anthropics.skills.skill-creator
       sudosubin.grep-app-cli.grep-app-cli
       vercel-labs.agent-browser.agent-browser
+      (vercel-labs.agent-skills.react-best-practices.overrideAttrs (oldAttrs: {
+        postPatch = ''
+          ${oldAttrs.postPatch or ""}
+          substituteInPlace SKILL.md \
+            --replace-fail "name: vercel-react-best-practices" "name: react-best-practices"
+        '';
+      }))
     ];
   };
 }
