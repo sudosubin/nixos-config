@@ -34,6 +34,7 @@ in
         toLua {
           automatically_reload_config = true;
           color_scheme = "default";
+          enable_scroll_bar = true;
           font = lib.generators.mkLuaInline ''
             wezterm.font_with_fallback(${toLua font})
           '';
@@ -47,6 +48,7 @@ in
               action = lib.generators.mkLuaInline "wezterm.action.SendString '\\n'";
             }
           ];
+          scrollback_lines = 100000;
           window_decorations = "RESIZE";
         }
       };
