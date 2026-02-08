@@ -16,6 +16,10 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     hash = "sha256-yhCV0umPH5+5r/DajjkCHuMUpmutaLRsDJE7udJ6+LQ=";
   };
 
+  postPatch = ''
+    sed -i '/ctx\.ui\.notify.*Cline extension updated/d' index.ts
+  '';
+
   dontBuild = true;
 
   installPhase = ''
