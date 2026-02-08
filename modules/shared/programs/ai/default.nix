@@ -15,6 +15,7 @@
           --set PI_AGENT_DIR "${config.xdg.configHome}/pi/agent"
       '';
     }))
+    grep-app-cli
   ];
 
   programs.claude-code = {
@@ -62,6 +63,7 @@
     skills = with pkgs.skills; [
       affaan-m.everything-claude-code.golang-patterns
       anthropics.skills.skill-creator
+      sudosubin.grep-app-cli.grep-app-cli
       vercel-labs.agent-browser.agent-browser
     ];
   };

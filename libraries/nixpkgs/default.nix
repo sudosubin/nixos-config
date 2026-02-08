@@ -72,6 +72,7 @@ in
       clop = final.callPackage ./programs/clop { };
       deskpad = final.callPackage ./programs/deskpad { };
       git-spr = final.callPackage ./programs/git-spr { };
+      grep-app-cli = final.callPackage ./programs/grep-app-cli { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
       homerow = final.callPackage ./programs/homerow { };
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
