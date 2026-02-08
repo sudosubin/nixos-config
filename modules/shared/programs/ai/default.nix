@@ -61,6 +61,7 @@
     ];
     skills = with pkgs.skills; [
       affaan-m.everything-claude-code.golang-patterns
+      anthropics.skills.skill-creator
     ];
   };
 }
