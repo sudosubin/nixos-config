@@ -4,18 +4,19 @@
   nix-update-script,
   python3Packages,
   rustPlatform,
+  tombi,
 }:
 
 python3Packages.buildPythonPackage rec {
   pname = "pyproject-fmt";
-  version = "2.12.1";
+  version = "2.14.2";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt";
-    rev = "pyproject-fmt/${version}";
-    sha256 = "sha256-aEkLdIkX1L0jzhdyhSCSKHjk0Ojap1w9alSg7ENkTUk=";
+    rev = "${pname}/${version}";
+    sha256 = "sha256-jVJSmeK/iel7+dLaf5F67Pr9CuGjlYiA+rNP3NVoyFg=";
   };
 
   sourceRoot = "${src.name}/pyproject-fmt";
@@ -23,6 +24,9 @@ python3Packages.buildPythonPackage rec {
 
   postUnpack = ''
     (cd source && python tasks/generate_readme.py pyproject-fmt)
+
+    cp -r ${tombi.src}/www.schemastore.org "$NIX_BUILD_TOP/"
+    cp -r ${tombi.src}/www.schemastore.tombi "$NIX_BUILD_TOP/"
   '';
 
   postPatch = ''
@@ -36,7 +40,7 @@ python3Packages.buildPythonPackage rec {
       version
       src
       ;
-    hash = "sha256-/kKFt9FAkAfGodPpbtWFkYWHlCsPwTEgHV2+L5iytQ8=";
+    hash = "sha256-DWvUFdO+INJwOM310fj1lnNjFGIU/wLzYU7LGVTf9Bw=";
   };
 
   dependencies = with python3Packages; [
