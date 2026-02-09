@@ -60,7 +60,6 @@
       pi-cursor-agent
       pi-cwd-history
       pi-interactive-shell
-      pi-loop
       pi-review
     ];
     skills = with pkgs.skills; [
