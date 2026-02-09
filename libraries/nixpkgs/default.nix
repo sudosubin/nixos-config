@@ -64,7 +64,6 @@ in
     (final: prev: {
       agent-browser = final.callPackage ./programs/agent-browser { };
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
-      gitbutler = final.callPackage ./programs/gitbutler { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       ccusage = final.callPackage ./programs/ccusage { };
       ccusage-pi = final.callPackage ./programs/ccusage-pi { };
@@ -105,7 +104,6 @@ in
       "cursor"
       "cursor-cli"
       "datagrip"
-      "gitbutler"
       "google-chrome"
       "homerow"
       "idea"
