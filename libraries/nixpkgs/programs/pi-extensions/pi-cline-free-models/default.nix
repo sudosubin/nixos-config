@@ -16,9 +16,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     hash = "sha256-8MFu0+iDWUytF1N6KRg68itTy7U8cNWUs7MKhet/jM4=";
   };
 
-  postPatch = ''
-    sed -i '/ctx\.ui\.notify.*"info"/d' index.ts
-  '';
+  patches = [ ./pi-cline-free-models.patch ];
 
   dontBuild = true;
 
