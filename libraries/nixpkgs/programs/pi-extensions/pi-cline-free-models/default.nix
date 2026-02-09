@@ -7,17 +7,17 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi-cline-free-models";
-  version = "0.1.7";
+  version = "0.2.1";
 
   src = fetchFromGitHub {
     owner = "ditfetzt";
     repo = "pi-cline-free-models";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-yhCV0umPH5+5r/DajjkCHuMUpmutaLRsDJE7udJ6+LQ=";
+    hash = "sha256-8MFu0+iDWUytF1N6KRg68itTy7U8cNWUs7MKhet/jM4=";
   };
 
   postPatch = ''
-    sed -i '/ctx\.ui\.notify.*Cline extension updated/d' index.ts
+    sed -i '/ctx\.ui\.notify.*"info"/d' index.ts
   '';
 
   dontBuild = true;
