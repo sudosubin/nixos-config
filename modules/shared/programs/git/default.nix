@@ -8,6 +8,7 @@
   ];
 
   home.packages = with pkgs; [
+    gitbutler
     git-spr
     git-who
   ];
