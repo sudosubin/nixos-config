@@ -33,6 +33,14 @@ EOF
 nixpkgs="$(nix-instantiate --eval --expr "<nixpkgs>")"
 nix-shell "$nixpkgs/maintainers/scripts/update.nix" \
   --arg include-overlays "(import $ROOT_DIR/default.nix { }).overlays" \
+  --arg get-script "(
+    let prefix = \"$PACKAGES_DIR/\"; prefixLen = builtins.stringLength prefix;
+    in (p:
+      if (builtins.substring 0 prefixLen (p.meta.position or \"\")) == prefix then
+        p.updateScript or null
+      else
+        null)
+  )" \
   --argstr keep-going true \
   --arg predicate "(
     let prefix = \"$PACKAGES_DIR/\"; prefixLen = builtins.stringLength prefix;
