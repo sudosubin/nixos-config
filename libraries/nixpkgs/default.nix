@@ -78,6 +78,7 @@ in
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       kotlin-lsp-wrapper = final.callPackage ./programs/kotlin-lsp-wrapper { };
       linear-cli = final.callPackage ./programs/linear-cli { };
+      music-decoy = final.callPackage ./programs/music-decoy { };
       nanum-square-round = final.callPackage ./programs/fonts/nanum-square-round { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       pi = final.callPackage ./programs/pi { };

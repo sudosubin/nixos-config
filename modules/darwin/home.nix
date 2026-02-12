@@ -85,6 +85,7 @@
         ../darwin/programs/desktop
         ../darwin/programs/hammerspoon
         ../darwin/programs/homerow
+        ../darwin/programs/music-decoy
         ../darwin/programs/yabai
       ];
 
