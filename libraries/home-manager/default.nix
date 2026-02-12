@@ -17,6 +17,7 @@ in
     # local programs (local)
     ./programs/1password
     ./programs/act
+    ./programs/agent-browser
     ./programs/caffeinate
     ./programs/chromium
     ./programs/cleanshot

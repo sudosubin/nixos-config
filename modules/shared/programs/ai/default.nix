@@ -6,7 +6,6 @@
 
 {
   home.packages = with pkgs; [
-    agent-browser
     ccusage
     (ccusage-pi.overrideAttrs (finalAttrs: {
       installPhase = finalAttrs.installPhase + ''
@@ -16,6 +15,11 @@
     }))
     grep-app-cli
   ];
+
+  programs.agent-browser = {
+    enable = true;
+    enableXdgRuntimeDir = true;
+  };
 
   programs.claude-code = {
     enable = true;
