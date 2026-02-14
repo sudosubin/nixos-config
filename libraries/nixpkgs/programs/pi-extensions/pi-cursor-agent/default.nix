@@ -7,16 +7,16 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "pi-cursor-agent";
-  version = "0.1.2";
+  version = "0.1.3";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "pi-cursor-agent";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-8I+CAZgMopQpo9adt+/TQdhiLsQokLv22gzvuBMDPqo=";
+    hash = "sha256-fgusAx4g4pEZ8ukA7w54oVrozXdRQmh4HKUkGMC+76E=";
   };
 
-  npmDepsHash = "sha256-8Ys8gMIMbE9LtUGnLD3YufMj9rIuPi6xxc3gvDNdKjk=";
+  npmDepsHash = "sha256-DD1s5llQ56J/k6IdGz0WRzTPfanPlWs3F6L/gbJqlJE=";
 
   dontNpmBuild = true;
 
