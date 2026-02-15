@@ -5,6 +5,7 @@
     IPYTHONDIR = "${config.xdg.configHome}/ipython";
     PYTHONDONTWRITEBYTECODE = "1";
     PYTHONSTARTUP = "${config.xdg.configHome}/python/startup.py";
+    PYTHON_HISTORY = "${config.xdg.cacheHome}/.python_history";
     RYE_HOME = "${config.xdg.configHome}/rye";
   };
 

@@ -1,20 +1,22 @@
 import os
 import sys
 
-if not sys.flags.no_site and not sys.flags.isolated:
+if sys.version_info < (3, 13) and not sys.flags.no_site and not sys.flags.isolated:
+
     def register_readline():
         import atexit
+
         try:
             import readline
             import rlcompleter
         except ImportError:
             return
 
-        readline_doc = getattr(readline, '__doc__', '')
-        if readline_doc is not None and 'libedit' in readline_doc:
-            readline.parse_and_bind('bind ^I rl_complete')
+        readline_doc = getattr(readline, "__doc__", "")
+        if readline_doc is not None and "libedit" in readline_doc:
+            readline.parse_and_bind("bind ^I rl_complete")
         else:
-            readline.parse_and_bind('tab: complete')
+            readline.parse_and_bind("tab: complete")
 
         try:
             readline.read_init_file()
@@ -22,9 +24,7 @@ if not sys.flags.no_site and not sys.flags.isolated:
             pass
 
         if readline.get_current_history_length() == 0:
-            history = os.path.join(
-                os.path.expandvars("$XDG_CACHE_HOME/.python_history"),
-            )
+            history = os.path.expanduser(os.path.expandvars("$PYTHON_HISTORY"))
             try:
                 readline.read_history_file(history)
             except OSError:
