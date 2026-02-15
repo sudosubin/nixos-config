@@ -5,14 +5,14 @@
     enable = true;
 
     colors = {
-      null = "0;33";
-      false = "0;33";
-      true = "0;33";
-      numbers = "0;33";
-      strings = "0;32";
+      null = "0;34";
+      false = "0;34";
+      true = "0;34";
+      numbers = "0;34";
+      strings = "0;94";
       arrays = "0;37";
       objects = "0;37";
-      objectKeys = "0;31";
+      objectKeys = "0;92";
     };
   };
 }
