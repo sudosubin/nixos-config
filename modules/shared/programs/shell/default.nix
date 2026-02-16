@@ -7,6 +7,7 @@
 {
   imports = [
     ./atuin.nix
+    ./eza.nix
     ./fzf.nix
   ];
 
@@ -21,11 +22,6 @@
     # Etc
     LESSHISTFILE = "${config.xdg.cacheHome}/lesshst";
     MYSQL_HISTFILE = "${config.xdg.cacheHome}/mysql_history";
-  };
-
-  home.shellAliases = {
-    l = "lsd -l";
-    ls = "lsd -al";
   };
 
   programs.bash = {

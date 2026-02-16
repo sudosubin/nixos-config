@@ -5,10 +5,6 @@
   ...
 }:
 
-let
-  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
-
-in
 {
   nixpkgs.overlays = [
     inputs.nix-chrome-extensions.overlays.default
@@ -44,11 +40,19 @@ in
         '';
       });
     })
+    # Fix: https://github.com/eza-community/eza/issues/1224
     (
       final: prev:
-      (lib.mkIf isDarwin {
-        ungoogled-chromium = final.callPackage ./programs/ungoogled-chromium { };
-      })
+      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
+        eza = prev.eza.overrideAttrs (oldAttrs: {
+          nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
+          postInstall = ''
+            ${oldAttrs.postInstall or ""}
+            wrapProgram $out/bin/eza \
+              --run 'export EZA_CONFIG_DIR="''${EZA_CONFIG_DIR:-''${XDG_CONFIG_HOME:-$HOME/.config}/eza}"'
+          '';
+        });
+      }
     )
     # Fix: jetbrains.idea includes musl in buildInputs, but musl is Linux-only
     (
@@ -59,6 +63,12 @@ in
             buildInputs = lib.filter (p: (p.pname or "") != "musl") (oldAttrs.buildInputs or [ ]);
           });
         };
+      }
+    )
+    (
+      final: prev:
+      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
+        ungoogled-chromium = final.callPackage ./programs/ungoogled-chromium { };
       }
     )
     (final: prev: {

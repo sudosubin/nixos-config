@@ -66,7 +66,6 @@
         ../shared/programs/helix
         ../shared/programs/jq
         ../shared/programs/kubernetes
-        ../shared/programs/lsd
         ../shared/programs/nix
         ../shared/programs/node
         ../shared/programs/python

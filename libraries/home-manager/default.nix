@@ -25,7 +25,6 @@ in
     ./programs/hammerspoon
     ./programs/homerow
     ./programs/music-decoy
-    ./programs/lsd
     ./programs/pi
     ./programs/yabai
 
