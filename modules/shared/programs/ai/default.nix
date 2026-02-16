@@ -56,9 +56,9 @@
   programs.pi = {
     enable = true;
     environment = {
-      PI_CODING_AGENT_DIR = "${config.xdg.configHome}/pi/agent";
       PI_SKIP_VERSION_CHECK = "1";
     };
+    configDir = ".config/pi/agent";
     extensions = with pkgs.pi-extensions; [
       pi-cline-free-models
       pi-cursor-agent
@@ -79,5 +79,12 @@
         '';
       }))
     ];
+    themes = {
+      # toolSuccessBg = #0d1117 + #0ac74033
+      # toolErrorBg = #0d1117 + #ff808033
+      # customMessageBg = #0d1117 + #5cacff33
+      # thinkingXxx = #484f58 + (#bc8cff00, #bc8cff33, #bc8cff66, #bc8cff99, #bc8cffcc, #bc8cffff)
+      github-dark.src = ./files/pi-github-dark.json;
+    };
   };
 }

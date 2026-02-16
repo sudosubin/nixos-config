@@ -7,7 +7,25 @@
 
 let
   cfg = config.programs.pi;
-  agentDir = cfg.environment.PI_CODING_AGENT_DIR or "${config.home.homeDirectory}/.pi/agent";
+  defaultConfigDir = ".pi/agent";
+
+  mkEntries =
+    items: nameOf: sourceOf:
+    map (item: lib.nameValuePair "${cfg.configDir}/${nameOf item}" { source = (sourceOf item); }) items;
+
+  mkNoDuplicateAssertion =
+    values: entityKind:
+    let
+      duplicates = lib.filter (value: lib.count (x: x == value) values > 1) (lib.unique values);
+      mkMsg = value: "  - ${entityKind} `${toString value}`";
+    in
+    {
+      assertion = duplicates == [ ];
+      message = ''
+        Must not have duplicate ${entityKind}s:
+      ''
+      + lib.concatStringsSep "\n" (map mkMsg duplicates);
+    };
 
 in
 {
@@ -16,12 +34,21 @@ in
 
     package = lib.mkPackageOption pkgs "pi" { };
 
+    configDir = lib.mkOption {
+      type = lib.types.str;
+      default = defaultConfigDir;
+      example = ".config/pi/agent";
+      description = ''
+        The directory where pi agent files (extensions, skills, themes) are stored.
+        This will be symlinked under `${config.home.homeDirectory}/<configDir>`.
+      '';
+    };
+
     environment = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = { };
       example = lib.literalExpression ''
         {
-          PI_CODING_AGENT_DIR = "''${config.xdg.configHome}/pi/agent";
           PI_SKIP_VERSION_CHECK = "1";
         }
       '';
@@ -68,66 +95,55 @@ in
         Each package's pname is used as the skill name in the skills directory.
       '';
     };
+
+    themes = lib.mkOption {
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          options = {
+            src = lib.mkOption {
+              type = lib.types.path;
+              description = "Path to the theme JSON file.";
+            };
+          };
+        }
+      );
+      default = { };
+      example = lib.literalExpression ''
+        {
+          dark.src = fetchurl {
+            url = "https://github.com/badlogic/pi-mono/blob/v0.52.12/packages/coding-agent/src/modes/interactive/theme/dark.json";
+            sha256 = "0lyh1r09fksr1rrhg4wwjlxfb8j9w5d9448d9bv5wzaqk6cjgksz";
+          };
+        }
+      '';
+      description = ''
+        Custom themes to provide.
+      '';
+    };
   };
 
-  config = lib.mkIf cfg.enable (
-    let
-      finalPackage =
-        if cfg.environment == { } then
-          cfg.package
-        else
-          cfg.package.overrideAttrs (oldAttrs: {
-            postFixup = ''
-              ${oldAttrs.postFixup or ""}
-              wrapProgram $out/lib/pi/pi \
-                ${lib.concatStringsSep " " (
-                  lib.mapAttrsToList (name: value: "--set '${name}' '${toString value}'") cfg.environment
-                )}
-            '';
-          });
-
-      relativeAgentDir =
-        if lib.hasPrefix "${config.home.homeDirectory}/" agentDir then
-          lib.removePrefix "${config.home.homeDirectory}/" agentDir
-        else
-          throw "programs.pi: PI_CODING_AGENT_DIR must be under home directory";
-
-      extensionsDir = "${relativeAgentDir}/extensions";
-      skillsDir = "${relativeAgentDir}/skills";
-    in
-    {
-      assertions =
-        let
-          extensionPnames = map (ext: ext.pname) cfg.extensions;
-          extensionDuplicates = lib.filter (p: lib.count (x: x == p) extensionPnames > 1) (
-            lib.unique extensionPnames
-          );
-          skillPnames = map (skill: skill.pname) cfg.skills;
-          skillDuplicates = lib.filter (p: lib.count (x: x == p) skillPnames > 1) (lib.unique skillPnames);
-        in
-        [
-          {
-            assertion = extensionDuplicates == [ ];
-            message = "programs.pi.extensions: duplicate pnames found: ${lib.concatStringsSep ", " extensionDuplicates}";
-          }
-          {
-            assertion = skillDuplicates == [ ];
-            message = "programs.pi.skills: duplicate pnames found: ${lib.concatStringsSep ", " skillDuplicates}";
-          }
-        ];
-
-      home.packages = [ finalPackage ];
-
-      home.file =
-        let
-          extensionFiles = map (
-            ext: lib.nameValuePair "${extensionsDir}/${ext.pname}" { source = ext; }
-          ) cfg.extensions;
-          skillFiles = map (
-            skill: lib.nameValuePair "${skillsDir}/${skill.pname}" { source = skill; }
-          ) cfg.skills;
-        in
-        lib.listToAttrs (extensionFiles ++ skillFiles);
-    }
-  );
+  config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = !(cfg.environment ? PI_CODING_AGENT_DIR);
+        message = ''
+          programs.pi.environment.PI_CODING_AGENT_DIR is managed by programs.pi.configDir.
+          Please set programs.pi.configDir instead of PI_CODING_AGENT_DIR.
+        '';
+      }
+      (mkNoDuplicateAssertion (map (p: p.pname) cfg.extensions) "extension")
+      (mkNoDuplicateAssertion (map (s: s.pname) cfg.skills) "skill")
+    ];
+    home.file = lib.listToAttrs (
+      (mkEntries cfg.extensions (ext: "extensions/${ext.pname}") (x: x))
+      ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
+      ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
+    );
+    home.packages = [ cfg.package ];
+    home.sessionVariables =
+      cfg.environment
+      // lib.optionalAttrs (cfg.configDir != defaultConfigDir) {
+        PI_CODING_AGENT_DIR = "${config.home.homeDirectory}/${cfg.configDir}";
+      };
+  };
 }
