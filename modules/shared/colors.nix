@@ -28,4 +28,9 @@
     cyan = "#b3f0ff";
     white = "#ffffff";
   };
+
+  # Scale colors
+  scale = {
+    gray-7 = "#21262d";
+  };
 }
