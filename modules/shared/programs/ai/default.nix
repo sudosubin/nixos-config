@@ -60,7 +60,6 @@
     };
     configDir = ".config/pi/agent";
     extensions = with pkgs.pi-extensions; [
-      pi-cline-free-models
       pi-cursor-agent
       pi-cwd-history
       pi-interactive-shell
