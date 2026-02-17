@@ -40,255 +40,227 @@
 
   programs.starship = {
     enable = true;
-    settings = {
-      add_newline = true;
-      format = lib.strings.concatStrings [
-        "$username"
-        "$hostname"
-        "$localip"
-        "$shlvl"
-        "$singularity"
-        "$directory"
-        "$vcsh"
-        "$fossil_branch"
-        "$git_branch"
-        "$git_commit"
-        "$git_state"
-        "$git_metrics"
-        "$git_status"
-        "$hg_branch"
-        "$pijul_channel"
-        "$docker_context"
-        "$package"
-        "$c"
-        "$cmake"
-        "$cobol"
-        "$daml"
-        "$dart"
-        "$deno"
-        "$dotnet"
-        "$elixir"
-        "$elm"
-        "$erlang"
-        "$fennel"
-        "$golang"
-        "$guix_shell"
-        "$haskell"
-        "$haxe"
-        "$helm"
-        "$java"
-        "$julia"
-        "$kotlin"
-        "$kubernetes"
-        "$gradle"
-        "$lua"
-        "$nim"
-        "$nodejs"
-        "$ocaml"
-        "$opa"
-        "$perl"
-        "$php"
-        "$pulumi"
-        "$purescript"
-        "$python"
-        "$raku"
-        "$rlang"
-        "$red"
-        "$ruby"
-        "$rust"
-        "$scala"
-        "$solidity"
-        "$swift"
-        "$terraform"
-        "$vlang"
-        "$vagrant"
-        "$zig"
-        "$buf"
-        "$nix_shell"
-        "$conda"
-        "$meson"
-        "$spack"
-        "$memory_usage"
-        "$aws"
-        "$gcloud"
-        "$openstack"
-        "$azure"
-        "$env_var"
-        "$crystal"
-        "$custom"
-        "$sudo"
-        "$cmd_duration"
-        "$line_break"
-        "$jobs"
-        "$battery"
-        "$time"
-        "$status"
-        "$os"
-        "$container"
-        "$shell"
-        "$character"
-      ];
-      aws = {
-        format = "[$symbol($profile )]($style) ";
-        symbol = " ";
-        style = "yellow";
-      };
-      azure.style = "blue";
-      battery.disabled = true;
-      buf.style = "blue";
-      bun.disabled = true;
-      c.disabled = true;
-      character = {
-        success_symbol = "[](green)";
-        error_symbol = "[](red)";
-        vimcmd_symbol = "[](green)";
-        vimcmd_replace_one_symbol = "[](purple)";
-        vimcmd_replace_symbol = "[](purple)";
-        vimcmd_visual_symbol = "[](yellow)";
-      };
-      cmake.disabled = true;
-      cobol.disabled = true;
-      cmd_duration = {
-        format = "[ $duration]($style) ";
-        style = "yellow";
-      };
-      conda.disabled = true;
-      container.style = "red dimmed";
-      crystal.disabled = true;
-      daml.disabled = true;
-      dart.disabled = true;
-      deno.disabled = true;
-      directory = {
-        style = "cyan";
-        read_only = " ";
-        read_only_style = "red";
-      };
-      docker_context.disabled = true;
-      dotnet.disabled = true;
-      elixir.disabled = true;
-      elm.disabled = true;
-      erlang.disabled = true;
-      fennel.disabled = true;
-      fill.disabled = true;
-      gcloud.disabled = true;
-      git_branch = {
-        format = "[$symbol$branch(:$remote_branch)]($style) ";
-        style = "purple";
-      };
-      git_commit = {
-        format = "[($tag ) $hash]($style) ";
-        style = "purple";
-        tag_disabled = false;
-        tag_symbol = "󰓹 ";
-      };
-      git_state = {
-        style = "red";
-      };
-      git_status = {
-        format = "([$all_status$ahead_behind]($style) )";
-        conflicted = "~$count";
-        ahead = "󰁝$count";
-        behind = "󰁅$count";
-        diverged = "󰁝$ahead_count󰁅$behind_count";
-        untracked = "?$count";
-        stashed = "*$count";
-        modified = "!$count";
-        staged = "+$count";
-        renamed = "󰁔$count";
-        deleted = "-$count";
-        style = "red";
-      };
-      golang = {
-        format = "[$symbol($version )]($style)";
-        symbol = " ";
-        style = "cyan";
-        not_capable_style = "red";
-      };
-      guix_shell.disabled = true;
-      gradle.disabled = true;
-      haskell.disabled = true;
-      haxe.disabled = true;
-      helm = {
-        format = "[$symbol($version )]($style)";
-        style = "white";
-      };
-      hostname.disabled = true;
-      java.disabled = true;
-      jobs = {
-        number_threshold = 1;
-        symbol = "";
-        style = "blue";
-      };
-      julia.disabled = true;
-      kotlin.disabled = true;
-      kubernetes = {
-        format = "[$symbol$context( \\($namespace\\))]($style) ";
-        style = "blue";
-        contexts = [
-          {
-            context_pattern = ".*/(?P<name>[\\w-]+)";
-            context_alias = "$name";
-          }
+    settings =
+      let
+        isEnabled = m: !(m.disabled or false);
+        hasConfig = m: (m.config or { }) != { };
+
+        mkModule = name: attrs: { inherit name; } // attrs;
+
+        mkModuleSettings =
+          m:
+          lib.nameValuePair m.name (
+            (m.config or { })
+            // lib.optionalAttrs (!isEnabled m) {
+              disabled = true;
+            }
+          );
+
+        modules = [
+          (mkModule "username" { })
+          (mkModule "hostname" { disabled = true; })
+          (mkModule "localip" { disabled = true; })
+          (mkModule "directory" {
+            config = {
+              style = "cyan";
+              read_only = " ";
+              read_only_style = "red";
+            };
+          })
+          (mkModule "git_branch" {
+            config = {
+              format = "[$symbol$branch(:$remote_branch)]($style) ";
+              style = "purple";
+              ignore_bare_repo = false;
+            };
+          })
+          (mkModule "git_commit" {
+            config = {
+              format = "[($tag ) $hash]($style) ";
+              style = "purple";
+              tag_disabled = false;
+              tag_symbol = "󰓹 ";
+            };
+          })
+          (mkModule "git_state" {
+            config.style = "red";
+          })
+          (mkModule "git_metrics" { })
+          (mkModule "git_status" {
+            config = {
+              format = "([$all_status$ahead_behind]($style) )";
+              conflicted = "~$count";
+              ahead = "󰁝$count";
+              behind = "󰁅$count";
+              diverged = "󰁝$ahead_count󰁅$behind_count";
+              untracked = "?$count";
+              stashed = "*$count";
+              modified = "!$count";
+              staged = "+$count";
+              renamed = "󰁔$count";
+              deleted = "-$count";
+              style = "red";
+            };
+          })
+          (mkModule "docker_context" { disabled = true; })
+          (mkModule "package" { disabled = true; })
+          (mkModule "c" { disabled = true; })
+          (mkModule "cpp" { disabled = true; })
+          (mkModule "cmake" { disabled = true; })
+          (mkModule "xmake" { disabled = true; })
+          (mkModule "dart" { disabled = true; })
+          (mkModule "deno" { disabled = true; })
+          (mkModule "dotnet" { disabled = true; })
+          (mkModule "elixir" { disabled = true; })
+          (mkModule "elm" { disabled = true; })
+          (mkModule "erlang" { disabled = true; })
+          (mkModule "fennel" { disabled = true; })
+          (mkModule "gleam" { disabled = true; })
+          (mkModule "golang" {
+            config = {
+              format = "[$symbol($version )]($style)";
+              symbol = " ";
+              style = "cyan";
+              not_capable_style = "red";
+            };
+          })
+          (mkModule "haskell" { disabled = true; })
+          (mkModule "helm" {
+            config = {
+              format = "[$symbol($version )]($style)";
+              style = "white";
+            };
+          })
+          (mkModule "java" { disabled = true; })
+          (mkModule "julia" { disabled = true; })
+          (mkModule "kotlin" { disabled = true; })
+          (mkModule "kubernetes" {
+            config = {
+              format = "[$symbol$context( \\($namespace\\))]($style) ";
+              style = "blue";
+              contexts = [
+                {
+                  context_pattern = ".*/(?P<name>[\\w-]+)";
+                  context_alias = "$name";
+                }
+              ];
+            };
+          })
+          (mkModule "gradle" { disabled = true; })
+          (mkModule "lua" { disabled = true; })
+          (mkModule "mojo" { disabled = true; })
+          (mkModule "nim" {
+            config = {
+              format = "[$symbol($version )]($style)";
+              symbol = " ";
+              style = "yellow";
+            };
+          })
+          (mkModule "nodejs" { disabled = true; })
+          (mkModule "ocaml" { disabled = true; })
+          (mkModule "perl" { disabled = true; })
+          (mkModule "php" { disabled = true; })
+          (mkModule "pulumi" { disabled = true; })
+          (mkModule "purescript" { disabled = true; })
+          (mkModule "python" {
+            config = {
+              format = "[$symbol(\\($virtualenv\\) )]($style)";
+              symbol = " ";
+              style = "blue";
+              detect_extensions = [ ];
+              detect_files = [ ];
+            };
+          })
+          (mkModule "raku" { disabled = true; })
+          (mkModule "rlang" { disabled = true; })
+          (mkModule "ruby" { disabled = true; })
+          (mkModule "rust" {
+            config = {
+              format = "[$symbol($version )]($style)";
+              symbol = " ";
+              style = "yellow";
+            };
+          })
+          (mkModule "scala" { disabled = true; })
+          (mkModule "solidity" { disabled = true; })
+          (mkModule "swift" { disabled = true; })
+          (mkModule "terraform" {
+            config = {
+              format = "[$symbol$version]($style) ";
+              symbol = "󱁢 ";
+              style = "purple";
+            };
+          })
+          (mkModule "vlang" { disabled = true; })
+          (mkModule "vagrant" { disabled = true; })
+          (mkModule "zig" { disabled = true; })
+          (mkModule "buf" {
+            config.style = "blue";
+          })
+          (mkModule "bun" { disabled = true; })
+          (mkModule "nix_shell" {
+            config = {
+              format = "[$symbol$state]($style) ";
+              symbol = " ";
+              style = "cyan";
+            };
+          })
+          (mkModule "conda" { disabled = true; })
+          (mkModule "aws" {
+            config = {
+              format = "[$symbol($profile )(\\[$duration\\] )]($style) ";
+              symbol = " ";
+              style = "yellow";
+            };
+          })
+          (mkModule "gcloud" { disabled = true; })
+          (mkModule "openstack" { disabled = true; })
+          (mkModule "azure" {
+            config.style = "blue";
+          })
+          (mkModule "crystal" { disabled = true; })
+          (mkModule "sudo" {
+            config = {
+              format = "[$symbol]($style)";
+              symbol = "su ";
+              style = "red";
+            };
+          })
+          (mkModule "cmd_duration" {
+            config = {
+              format = "[ $duration]($style) ";
+              style = "yellow";
+            };
+          })
+          (mkModule "line_break" { })
+          (mkModule "jobs" {
+            config = {
+              number_threshold = 1;
+              symbol = "";
+              style = "blue";
+            };
+          })
+          (mkModule "status" { })
+          (mkModule "container" {
+            config.style = "red dimmed";
+          })
+          (mkModule "character" {
+            config = {
+              success_symbol = "[](green)";
+              error_symbol = "[](red)";
+              vimcmd_symbol = "[](green)";
+              vimcmd_replace_one_symbol = "[](purple)";
+              vimcmd_replace_symbol = "[](purple)";
+              vimcmd_visual_symbol = "[](yellow)";
+            };
+          })
         ];
-        disabled = false;
-      };
-      lua.disabled = true;
-      meson.disabled = true;
-      nim = {
-        format = "[$symbol($version )]($style)";
-        symbol = " ";
-        style = "yellow";
-      };
-      nix_shell = {
-        format = "[$symbol$state]($style) ";
-        symbol = " ";
-        style = "cyan";
-      };
-      nodejs.disabled = true;
-      ocaml.disabled = true;
-      opa.disabled = true;
-      openstack.disabled = true;
-      package.disabled = true;
-      perl.disabled = true;
-      php.disabled = true;
-      pulumi.disabled = true;
-      purescript.disabled = true;
-      python = {
-        format = "[$symbol(\\($virtualenv\\) )]($style)";
-        symbol = " ";
-        style = "blue";
-        detect_extensions = [ ];
-        detect_files = [ ];
-      };
-      rlang.disabled = true;
-      raku.disabled = true;
-      red.disabled = true;
-      ruby.disabled = true;
-      rust = {
-        format = "[$symbol($version )]($style)";
-        symbol = " ";
-        style = "yellow";
-      };
-      scala.disabled = true;
-      singularity.disabled = true;
-      solidity.disabled = true;
-      spack.disabled = true;
-      sudo = {
-        format = "[$symbol]($style)";
-        symbol = "su ";
-        style = "red";
-        disabled = false;
-      };
-      swift.disabled = true;
-      terraform = {
-        format = "[$symbol$version]($style) ";
-        symbol = "󱁢 ";
-        style = "purple";
-      };
-      vagrant.disabled = true;
-      vlang.disabled = true;
-      vcsh.disabled = true;
-      zig.disabled = true;
-    };
+      in
+      assert lib.length modules == lib.length (lib.unique (map (m: m.name) modules));
+      {
+        add_newline = true;
+        format = lib.concatMapStrings (m: "\$${m.name}") (lib.filter isEnabled modules);
+      }
+      // lib.listToAttrs (map mkModuleSettings (lib.filter (m: hasConfig m || !isEnabled m) modules));
   };
 }
