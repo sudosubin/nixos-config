@@ -26,11 +26,13 @@
     blue = "#a5d6ff";
     magenta = "#d2a8ff";
     cyan = "#b3f0ff";
-    white = "#ffffff";
+    white = "#f0f6fc";
   };
 
   # Scale colors
   scale = {
+    gray-6 = "#30363d";
     gray-7 = "#21262d";
+    gray-8 = "#161b22";
   };
 }
