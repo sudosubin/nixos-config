@@ -14,7 +14,7 @@ in
 {
   home.shellAliases = {
     l = "eza --all --color=auto --group-directories-first --icons=auto";
-    ls = "eza --all --color=auto --color-scale --git --group --group-directories-first --icons=auto --long --time-style=\"+%Y-%m-%d %H:%M\"";
+    ls = "eza --all --color=auto --color-scale --group --group-directories-first --icons=auto --long --time-style=\"+%Y-%m-%d %H:%M\"";
   };
 
   programs.eza = {
