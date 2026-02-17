@@ -17,6 +17,7 @@
     ];
     settings = {
       branch.sort = "-committerdate";
+      core.untrackedCache = true;
       credential.helper = "";
       credential."https://github.com".helper = "!gh auth git-credential";
       fetch = {

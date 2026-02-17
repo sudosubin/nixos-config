@@ -100,6 +100,7 @@
               renamed = "󰁔$count";
               deleted = "-$count";
               style = "red";
+              use_git_executable = true;
             };
           })
           (mkModule "docker_context" { disabled = true; })
