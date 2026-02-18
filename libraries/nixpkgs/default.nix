@@ -65,6 +65,11 @@
         };
       }
     )
+    (final: prev: {
+      sqlit-tui = prev.sqlit-tui.overridePythonAttrs (attrs: {
+        dependencies = (attrs.dependencies or [ ]) ++ [ final.python3Packages.pymysql ];
+      });
+    })
     (
       final: prev:
       lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {

@@ -26,6 +26,7 @@ in
     ./programs/homerow
     ./programs/music-decoy
     ./programs/pi
+    ./programs/sqlit
     ./programs/yabai
 
     # os systems

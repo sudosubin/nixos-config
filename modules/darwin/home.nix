@@ -71,6 +71,7 @@
         ../shared/programs/python
         ../shared/programs/rust
         ../shared/programs/shell
+        ../shared/programs/sqlit
         ../shared/programs/ssh
         ../shared/programs/terminal
         ../shared/programs/terraform
