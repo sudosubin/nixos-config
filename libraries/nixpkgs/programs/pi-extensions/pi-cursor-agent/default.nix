@@ -7,16 +7,18 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "pi-cursor-agent";
-  version = "0.1.3";
+  version = "0.4.0";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
-    repo = "pi-cursor-agent";
-    tag = "v${finalAttrs.version}";
-    hash = "sha256-fgusAx4g4pEZ8ukA7w54oVrozXdRQmh4HKUkGMC+76E=";
+    repo = "pi-frontier";
+    rev = "${finalAttrs.pname}@${finalAttrs.version}";
+    hash = "sha256-vUMBpHIRz5raMfcXvM7SrDnA4FEhS3Oy/YIvuCd66p4=";
   };
 
-  npmDepsHash = "sha256-DD1s5llQ56J/k6IdGz0WRzTPfanPlWs3F6L/gbJqlJE=";
+  sourceRoot = "${finalAttrs.src.name}/pi-cursor-agent";
+
+  npmDepsHash = "sha256-sL4ZUEp1l6CPr7Rx6eMU7kgrk0ybs0vhxmYPF28UckQ=";
 
   dontNpmBuild = true;
 
@@ -27,11 +29,15 @@ buildNpmPackage (finalAttrs: {
     runHook postInstall
   '';
 
-  passthru.updateScript = nix-update-script { };
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--version-regex=pi-cursor-agent@(.+)"
+    ];
+  };
 
   meta = {
     description = "Cursor Agent provider extension for pi";
-    homepage = "https://github.com/sudosubin/pi-cursor-agent";
+    homepage = "https://github.com/sudosubin/pi-frontier/tree/main/pi-cursor-agent";
     license = lib.licenses.mit;
     maintainers = with lib.maintainers; [ sudosubin ];
   };
