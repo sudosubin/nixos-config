@@ -21,6 +21,8 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-j8h8KKt/1m47Y6/KA8g213gooq0n2fAqBVkKhHsBCGw=";
   };
 
+  patches = [ ./prevent-empty-pi.patch ];
+
   node_modules = stdenv.mkDerivation {
     inherit (finalAttrs) version src;
     pname = "${finalAttrs.pname}-node_modules";
@@ -50,8 +52,8 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   configurePhase = ''
-    cp -R ${finalAttrs.node_modules}/{node_modules,packages} .
-    chmod -R +w node_modules packages
+    cp -R ${finalAttrs.node_modules}/node_modules .
+    chmod -R +w node_modules
   '';
 
   buildPhase = ''
