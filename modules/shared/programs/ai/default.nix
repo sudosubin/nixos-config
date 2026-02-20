@@ -33,7 +33,6 @@
       };
       cleanupPeriodDays = 99999;
       env = {
-        ANTHROPIC_DEFAULT_SONNET_MODEL = "claude-sonnet-4-5-20250929[1m]";
         CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR = "1";
         CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL = "true";
         CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
