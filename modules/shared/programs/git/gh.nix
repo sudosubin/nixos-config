@@ -1,7 +1,22 @@
 { pkgs, ... }:
 
+let
+  yamlFormat = pkgs.formats.yaml { };
+
+  mkGhAttachBrowser = browser: profile: { inherit browser profile; };
+
+in
 {
   home.packages = with pkgs; [ gh ];
+
+  xdg.configFile = {
+    "gh/attach.yml".source = yamlFormat.generate "gh-attach.yml" {
+      browsers = [
+        (mkGhAttachBrowser "chromium" "Default")
+        (mkGhAttachBrowser "chromium" "Profile 1")
+      ];
+    };
+  };
 
   programs.gh = {
     enable = true;
