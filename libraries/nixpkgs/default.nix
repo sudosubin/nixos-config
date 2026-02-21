@@ -86,6 +86,7 @@
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       deskpad = final.callPackage ./programs/deskpad { };
+      gh-attach = final.callPackage ./programs/gh-attach { };
       git-spr = final.callPackage ./programs/git-spr { };
       grep-app-cli = final.callPackage ./programs/grep-app-cli { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };
