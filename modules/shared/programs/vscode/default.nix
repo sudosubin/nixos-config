@@ -114,7 +114,6 @@ in
         samuelcolvin.jinjahtml
         shardulm94.trailing-spaces
         styled-components.vscode-styled-components
-        svelte.svelte-vscode
         tamasfe.even-better-toml
         teticio.python-envy
         timonwong.shellcheck
