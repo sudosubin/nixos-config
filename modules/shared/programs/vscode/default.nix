@@ -9,7 +9,7 @@ let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
 
   configDir =
-    if isLinux then "${config.xdg.configHome}/VSCodium" else "Library/Application Support/VSCodium";
+    if isLinux then "${config.xdg.configHome}/Cursor" else "Library/Application Support/Cursor";
   monospace = "'PragmataProMono Nerd Font Mono'";
 
   stylesheet = {
@@ -27,7 +27,7 @@ let
     lib.strings.concatStrings (lib.attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
-    vscodium = pkgs.vscodium.overrideDerivation (attrs: {
+    code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
       resources = if isDarwin then "Contents/Resources" else "resources";
@@ -76,7 +76,7 @@ in
 
   programs.vscode = rec {
     enable = true;
-    package = overlays.vscodium;
+    package = overlays.code-cursor;
     profiles.default.extensions =
       (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
         adguard.adblock
@@ -117,7 +117,7 @@ in
         tamasfe.even-better-toml
         teticio.python-envy
         timonwong.shellcheck
-        usernamehw.errorlens
+        # usernamehw.errorlens
         vercel.turbo-vsc
         yoavbls.pretty-ts-errors
         yzhang.markdown-all-in-one
@@ -125,15 +125,12 @@ in
       ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx-release; [
         eamodio.gitlens
       ])
-      ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).vscode-marketplace; [
-        sweepai.sweep-nes
-      ])
       ++ [
         overlays.pkief.material-icon-theme
       ];
   };
 
   home.shellAliases = {
-    code = "codium";
+    code = "cursor";
   };
 }

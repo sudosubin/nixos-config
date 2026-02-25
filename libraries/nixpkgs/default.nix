@@ -17,29 +17,6 @@
         }
       );
     })
-    (
-      final: prev:
-      let
-        sweep-autocomplete = final.callPackage ./programs/sweep-autocomplete { };
-        sweep-nes = final.callPackage ./programs/vscode-extensions/sweep-nes {
-          inherit sweep-autocomplete;
-        };
-        patchVSCodeMarketplace =
-          attrs:
-          attrs
-          // {
-            vscode-marketplace = (attrs.vscode-marketplace or { }) // {
-              sweepai = (attrs.vscode-marketplace.sweepai or { }) // {
-                inherit sweep-nes;
-              };
-            };
-          };
-      in
-      {
-        forVSCodeVersion = vscodeVersion: patchVSCodeMarketplace (prev.forVSCodeVersion vscodeVersion);
-        vscode-marketplace = (patchVSCodeMarketplace prev).vscode-marketplace;
-      }
-    )
     (final: prev: {
       bash-language-server = prev.bash-language-server.overrideAttrs (attrs: {
         installPhase = ''

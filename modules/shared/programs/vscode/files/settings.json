@@ -93,9 +93,6 @@
     "checkForMinikubeUpgrade": false
   },
 
-  // sweep
-  "sweep.localPort": 23701,
-
   // language (python)
   "[python]": {
     "editor.rulers": [80, 120],
