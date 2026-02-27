@@ -13,13 +13,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "agent-browser";
-  version = "0.14.0";
+  version = "0.15.1";
 
   src = fetchFromGitHub {
     owner = "vercel-labs";
     repo = "agent-browser";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-oDgnxQ09e1IUd1kfgr75TNiYOf5VpMXG9DjfGG4OGwA=";
+    hash = "sha256-gaxP65SC9Hsi7mohwl8f4+mhIP5Tci8hGCk1w2NZ708=";
   };
 
   dontUnpack = true;
@@ -46,7 +46,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
       sourceRoot = "${finalAttrs.src.name}/cli";
 
-      cargoHash = "sha256-94w9V+NZiWeQ3WbQnsKxVxlvsCaOJR0Wm6XVc85Lo88=";
+      cargoHash = "sha256-BzJtMJUbmfiwGLmo7/0cam6yX181LcFQQktD3CWHCIY=";
 
       meta = {
         mainProgram = "agent-browser";
@@ -67,7 +67,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       pnpmDeps = fetchPnpmDeps {
         inherit (finalAttrs) pname version src;
         fetcherVersion = 2;
-        hash = "sha256-hBX/ao4QKildvKxTDFSYAhvxrupyltKCJUzvKnHukpc=";
+        hash = "sha256-C1fnSNVNmcFQ6Yv8WdH+QrcJzz5X37OEVODdRw8V1ys=";
       };
 
       postPatch = ''

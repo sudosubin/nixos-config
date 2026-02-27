@@ -10,7 +10,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi";
-  version = "0.54.2";
+  version = "0.55.1";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -40,19 +40,19 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     sources = {
       aarch64-darwin = fetchurl {
         url = "https://github.com/badlogic/pi-mono/releases/download/v${finalAttrs.version}/pi-darwin-arm64.tar.gz";
-        hash = "sha256-L0p+Dw5MrgkERPPWEk72wYdo7Qjw1Zh+7NZjUvFSImg=";
+        hash = "sha256-+7kNSop0fmNBy2wt8uYHFlv7h0RwCLqlofUmY0XJYcw=";
       };
       x86_64-darwin = fetchurl {
         url = "https://github.com/badlogic/pi-mono/releases/download/v${finalAttrs.version}/pi-darwin-x64.tar.gz";
-        hash = "sha256-vyrLJI3qmq6HZYr4T76vrh6ObACBIEerPa+p1kmkhSc=";
+        hash = "sha256-0nkwiQHndTx77/Q7bJXuhaSVnwO3aXy0WBkCehJBpak=";
       };
       aarch64-linux = fetchurl {
         url = "https://github.com/badlogic/pi-mono/releases/download/v${finalAttrs.version}/pi-linux-arm64.tar.gz";
-        hash = "sha256-HNMHX08JDaaBY1wI8RXSp0TzzAzxoybxs6Tp6uYFsps=";
+        hash = "sha256-PNKW6Lvmt4yp8Syt0TcqglDA0NnvcujxfqiXD3pQ37M=";
       };
       x86_64-linux = fetchurl {
         url = "https://github.com/badlogic/pi-mono/releases/download/v${finalAttrs.version}/pi-linux-x64.tar.gz";
-        hash = "sha256-mGgvutymFbYKTulR4uBUREnN9BEdRgZhlciYKRnz+eU=";
+        hash = "sha256-fFXmoLokKV8QxwT9QL0GDDgrYAPV+MeTFAb6wrsDSYM=";
       };
     };
   };
