@@ -27,6 +27,7 @@
         # Utility
         figma-linux
         gnome.nautilus
+        keepassxc
         linear-cli
         ngrok
         pavucontrol

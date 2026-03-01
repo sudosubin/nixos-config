@@ -34,6 +34,7 @@
         cleanshot
         deskpad
         grandperspective
+        keepassxc
         linear-cli
         nodePackages.localtunnel
         redisinsight
