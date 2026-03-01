@@ -106,6 +106,7 @@ in
         ms-pyright.pyright
         ms-python.debugpy
         ms-python.python
+        oxc.oxc-vscode
         pkief.material-product-icons
         prisma.prisma
         redhat.java
