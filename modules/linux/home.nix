@@ -23,6 +23,7 @@
         jetbrains.idea
         shfmt
         tree
+        wtp
 
         # Utility
         figma-linux

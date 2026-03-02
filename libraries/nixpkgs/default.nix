@@ -105,6 +105,7 @@
       redisinsight = final.callPackage ./programs/redisinsight { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
       ungoogled-chromium = final.callPackage ./programs/ungoogled-chromium { };
+      wtp = final.callPackage ./programs/wtp { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
   ];

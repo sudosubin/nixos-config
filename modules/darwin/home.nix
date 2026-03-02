@@ -29,6 +29,7 @@
         procps
         shfmt
         tree
+        wtp
 
         # Utility
         cleanshot
