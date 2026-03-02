@@ -13,6 +13,7 @@
           --set PI_AGENT_DIR "${config.xdg.configHome}/pi/agent"
       '';
     }))
+    deepwiki-cli
     grep-app-cli
   ];
 
@@ -70,13 +71,7 @@
       anthropics.skills.skill-creator
       sudosubin.grep-app-cli.grep-app-cli
       vercel-labs.agent-browser.agent-browser
-      (vercel-labs.agent-skills.react-best-practices.overrideAttrs (oldAttrs: {
-        postPatch = ''
-          ${oldAttrs.postPatch or ""}
-          substituteInPlace SKILL.md \
-            --replace-fail "name: vercel-react-best-practices" "name: react-best-practices"
-        '';
-      }))
+      vercel-labs.agent-skills.react-best-practices
     ];
     themes = {
       # toolSuccessBg = #0d1117 + #0ac74033

@@ -85,6 +85,7 @@
       claude-code-bin = final.callPackage ./programs/claude-code-bin { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
+      deepwiki-cli = final.callPackage ./programs/deepwiki-cli { };
       deskpad = final.callPackage ./programs/deskpad { };
       gh-attach = final.callPackage ./programs/gh-attach { };
       git-spr = final.callPackage ./programs/git-spr { };
