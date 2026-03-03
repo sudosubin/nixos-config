@@ -54,17 +54,6 @@
         });
       }
     )
-    # Fix: jetbrains.idea includes musl in buildInputs, but musl is Linux-only
-    (
-      final: prev:
-      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
-        jetbrains = prev.jetbrains // {
-          idea = prev.jetbrains.idea.overrideAttrs (oldAttrs: {
-            buildInputs = lib.filter (p: (p.pname or "") != "musl") (oldAttrs.buildInputs or [ ]);
-          });
-        };
-      }
-    )
     (final: prev: {
       sqlit-tui = prev.sqlit-tui.overridePythonAttrs (attrs: {
         dependencies = (attrs.dependencies or [ ]) ++ [ final.python3Packages.pymysql ];
