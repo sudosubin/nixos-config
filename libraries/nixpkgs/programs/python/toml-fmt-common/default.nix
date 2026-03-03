@@ -1,40 +1,39 @@
 {
   buildPythonPackage,
   fetchFromGitHub,
-  hatch-vcs,
-  hatchling,
   lib,
   pytest-cov,
   pytest-mock,
   pytestCheckHook,
   pythonOlder,
   tomli,
+  uv-build,
 }:
 
 buildPythonPackage rec {
   pname = "toml-fmt-common";
-  version = "1.2.0";
+  version = "1.3.1";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
-    repo = "toml-fmt-common";
-    rev = version;
-    hash = "sha256-d0a9+4Mb5NHuQWWJd8McL3eNeReMWpqIRdo4lFSusfc=";
+    repo = "toml-fmt";
+    rev = "b7a4e8e0772f2a4cf82be1b624af7543363a0661";
+    hash = "sha256-3hVw0m7v9c/+GPdXgvAUOa60oS1dh5PG3ItPCsfAZls=";
   };
 
-  build-system = [
-    hatch-vcs
-    hatchling
-  ];
+  sourceRoot = "${src.name}/toml-fmt-common";
 
-  dependencies = lib.optionals (pythonOlder "3.11") [
-    tomli
-  ];
+  postPatch = ''
+    substituteInPlace pyproject.toml \
+      --replace-fail "uv-build<0.8,>=0.7.22" uv-build
+  '';
 
-  pythonImportsCheck = [
-    "toml_fmt_common"
-  ];
+  build-system = [ uv-build ];
+
+  dependencies = lib.optionals (pythonOlder "3.11") [ tomli ];
+
+  pythonImportsCheck = [ "toml_fmt_common" ];
 
   nativeCheckInputs = [
     pytest-cov

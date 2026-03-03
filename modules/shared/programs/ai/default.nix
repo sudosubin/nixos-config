@@ -69,6 +69,7 @@
     skills = with pkgs.skills; [
       affaan-m.everything-claude-code.golang-patterns
       anthropics.skills.skill-creator
+      hamsurang.kit.deepwiki-cli
       sudosubin.grep-app-cli.grep-app-cli
       vercel-labs.agent-browser.agent-browser
       vercel-labs.agent-skills.react-best-practices

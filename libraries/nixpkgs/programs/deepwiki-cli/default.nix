@@ -7,16 +7,16 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "deepwiki-cli";
-  version = "0.1.1";
+  version = "0.2.0";
 
   src = fetchFromGitHub {
     owner = "hamsurang";
     repo = "deepwiki-cli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-6fY6gNJMDV6VeuauT4HGUupWGnZKl44ZT12TqAuTO/k=";
+    hash = "sha256-dUJ/cEefleHtGIAL363gNs9l/UIr7P6frPfp+aWVRRA=";
   };
 
-  cargoHash = "sha256-/979PeZAs2cDLAK+YCnT3iTbFnL3PDwU2BqyikWXRDA=";
+  cargoHash = "sha256-LKOQjbevshaVI6a37nXTd/g6dnXDwtrfocZ9GRgRu1E=";
 
   passthru.updateScript = nix-update-script { };
 

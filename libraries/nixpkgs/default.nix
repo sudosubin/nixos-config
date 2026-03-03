@@ -70,12 +70,21 @@
         dependencies = (attrs.dependencies or [ ]) ++ [ final.python3Packages.pymysql ];
       });
     })
-    (
-      final: prev:
-      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
-        ungoogled-chromium = final.callPackage ./programs/ungoogled-chromium { };
-      }
-    )
+    (final: prev: {
+      tombi = prev.tombi.overrideAttrs (oldAttrs: rec {
+        version = "0.8.0";
+        src = prev.fetchFromGitHub {
+          owner = "tombi-toml";
+          repo = "tombi";
+          tag = "v${version}";
+          hash = "sha256-rVXLfE6J2WI8mD2apKzDuDblQxaccSWggsUgcpom+2U=";
+        };
+        cargoDeps = prev.rustPlatform.fetchCargoVendor {
+          inherit src;
+          hash = "sha256-5EZNL5aBdS+1TI4Gx2AQw6Di+5rYQBR3ukexSnFFIcs=";
+        };
+      });
+    })
     (final: prev: {
       agent-browser = final.callPackage ./programs/agent-browser { };
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
@@ -105,7 +114,9 @@
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       redisinsight = final.callPackage ./programs/redisinsight { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
-      ungoogled-chromium = final.callPackage ./programs/ungoogled-chromium { };
+      ungoogled-chromium = lib.optionals prev.stdenvNoCC.hostPlatform.isDarwin (
+        final.callPackage ./programs/ungoogled-chromium { }
+      );
       wtp = final.callPackage ./programs/wtp { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })

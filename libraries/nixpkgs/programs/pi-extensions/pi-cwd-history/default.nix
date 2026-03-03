@@ -7,13 +7,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi-cwd-history.ts";
-  version = "1.2.0";
+  version = "1.3.0";
 
   src = fetchFromGitHub {
     owner = "mitsuhiko";
     repo = "agent-stuff";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-0amfYCRdvpm1ufJaEwgFTu1MPUIAdd0wM0xm22/V2H0=";
+    hash = "sha256-DoCpmgKJE8UUo0I4ueIyH3LM4RM6enF8KQ6r2y0qGH0=";
   };
 
   patches = [ ./respect-pi-coding-agent-dir.patch ];
