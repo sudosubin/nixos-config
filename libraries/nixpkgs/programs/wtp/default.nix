@@ -8,16 +8,16 @@
 
 buildGoModule (finalAttrs: {
   pname = "wtp";
-  version = "2.9.0";
+  version = "2.10.1";
 
   src = fetchFromGitHub {
     owner = "satococoa";
     repo = "wtp";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-IWDuTYwwYrtvUYDxFnN+LuK4T6rd2vd5N0AYy8+YDMk=";
+    hash = "sha256-9oZJndDv+R6okyc87dlnB98pHPw6ZrJah6WOkEs1LK0=";
   };
 
-  vendorHash = "sha256-wX6TeALJojynP4ocOR45WkayVVwvTr2LUbfAxuns9SM=";
+  vendorHash = "sha256-zsSNo1MQgpvH3ZSd3kmvdIpOCVJgSu1/pYLltx/9dZg=";
 
   subPackages = [ "cmd/wtp" ];
 

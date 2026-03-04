@@ -19,6 +19,7 @@
 
   programs.agent-browser = {
     enable = true;
+    enableNativeMode = true;
     enableXdgRuntimeDir = true;
   };
 

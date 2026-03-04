@@ -13,13 +13,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "agent-browser";
-  version = "0.15.2";
+  version = "0.16.3";
 
   src = fetchFromGitHub {
     owner = "vercel-labs";
     repo = "agent-browser";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-3KTZpAa1qNrOG2fswRT2JKysENKoUHgSeCUgGOvUNiY=";
+    hash = "sha256-JGPKL9dtsO+kukBxuVJRQAggJVstmAPWEHUWIpRRFrM=";
   };
 
   dontUnpack = true;
@@ -46,7 +46,13 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
       sourceRoot = "${finalAttrs.src.name}/cli";
 
-      cargoHash = "sha256-EKY/7I7FPpPd1JXRwBy5wDcxlSSczFFtYDf3TFP7VNk=";
+      cargoHash = "sha256-WbvfAhSwFPR/pHrlPQIWVw2kx+YgbIicVhvWugv9mxc=";
+
+      # tests write under $HOME/.agent-browser/auth.
+      preCheck = ''
+        export HOME="$TMPDIR/home"
+        mkdir -p "$HOME"
+      '';
 
       meta = {
         mainProgram = "agent-browser";

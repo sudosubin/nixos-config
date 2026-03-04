@@ -17,17 +17,20 @@ let
     else
       null;
 
+  shouldWrapXdgRuntimeDir = cfg.enableXdgRuntimeDir && xdgRuntimeDirCommand != null;
+
   package =
-    if cfg.enableXdgRuntimeDir then
+    if shouldWrapXdgRuntimeDir || cfg.enableNativeMode then
       pkgs.agent-browser.overrideAttrs (oldAttrs: {
         nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
 
         postInstall = ''
           ${oldAttrs.postInstall or ""}
-          ${lib.optionalString (xdgRuntimeDirCommand != null) ''
-            wrapProgram $out/bin/agent-browser \
-              --run '${xdgRuntimeDirCommand}'
-          ''}
+          wrapProgram $out/bin/agent-browser \
+            ${lib.concatStringsSep " \\\n  " (
+              (lib.optional cfg.enableNativeMode "--set AGENT_BROWSER_NATIVE 1")
+              ++ (lib.optional shouldWrapXdgRuntimeDir "--run '${xdgRuntimeDirCommand}'")
+            )}
         '';
       })
     else
@@ -37,6 +40,14 @@ in
 {
   options.programs.agent-browser = {
     enable = lib.mkEnableOption "agent-browser";
+
+    enableNativeMode = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Set AGENT_BROWSER_NATIVE=1 at runtime when launching agent-browser.
+      '';
+    };
 
     enableXdgRuntimeDir = lib.mkOption {
       type = lib.types.bool;

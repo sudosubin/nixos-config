@@ -9,14 +9,14 @@
 
 python3Packages.buildPythonPackage rec {
   pname = "pyproject-fmt";
-  version = "2.17.0";
+  version = "2.18.1";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt";
     rev = "${pname}/${version}";
-    sha256 = "sha256-3u0LUTZetMheBVFba7G1J51JOwGk0HR1sxSv8K/+QnE=";
+    sha256 = "sha256-M1soq1WU2GAF6Ns86eG3QGex5eiX9k++PiN0xJntWXs=";
   };
 
   sourceRoot = "${src.name}/pyproject-fmt";
@@ -40,7 +40,7 @@ python3Packages.buildPythonPackage rec {
       version
       src
       ;
-    hash = "sha256-/jmVehmTEElvpNeFWU5fPz6vAfLBRTX7xU36iIvOUGQ=";
+    hash = "sha256-26+2fVUXHSUIQlnPTwtw8o8FUKNBnxcprRl+yioLPZk=";
   };
 
   dependencies = with python3Packages; [
