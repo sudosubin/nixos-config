@@ -7,7 +7,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi-interactive-shell.ts";
-  version = "0.55.4";
+  version = "0.56.2";
 
   src = fetchFromGitHub {
     owner = "badlogic";

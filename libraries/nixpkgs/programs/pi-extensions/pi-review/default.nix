@@ -7,13 +7,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi-review.ts";
-  version = "1.3.0";
+  version = "1.4.0";
 
   src = fetchFromGitHub {
     owner = "mitsuhiko";
     repo = "agent-stuff";
-    rev = "v${finalAttrs.version}";
-    hash = "sha256-DoCpmgKJE8UUo0I4ueIyH3LM4RM6enF8KQ6r2y0qGH0=";
+    rev = "${finalAttrs.version}";
+    hash = "sha256-jbFrl9ufHt0QLSu3reaRN4DQZvBO0Ng+FI4Hvnp1SSw=";
   };
 
   dontBuild = true;
