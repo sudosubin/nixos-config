@@ -61,7 +61,6 @@
     };
     configDir = ".config/pi/agent";
     extensions = with pkgs.pi-extensions; [
-      claude-agent-sdk-pi
       pi-cursor-agent
       pi-cwd-history
       pi-interactive-shell
