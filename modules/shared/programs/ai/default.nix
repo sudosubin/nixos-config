@@ -70,6 +70,7 @@
       affaan-m.everything-claude-code.golang-patterns
       anthropics.skills.skill-creator
       hamsurang.kit.deepwiki-cli
+      nextlevelbuilder.ui-ux-pro-max-skill.ui-ux-pro-max
       sudosubin.grep-app-cli.grep-app-cli
       vercel-labs.agent-browser.agent-browser
       vercel-labs.agent-skills.react-best-practices
