@@ -10,13 +10,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "ccusage";
-  version = "18.0.8";
+  version = "18.0.10";
 
   src = fetchFromGitHub {
     owner = "ryoppippi";
     repo = "ccusage";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-YxT2RVa0RaCepod+ZRLk3qoF5YguZLbjozDmJ4Om2tk=";
+    hash = "sha256-6KmSj2wgnkwJNnKaTmscbY+7fy2l6JHci3x3m/CV/Qg=";
   };
 
   nativeBuildInputs = [

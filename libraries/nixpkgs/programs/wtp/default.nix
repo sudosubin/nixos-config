@@ -8,13 +8,13 @@
 
 buildGoModule (finalAttrs: {
   pname = "wtp";
-  version = "2.10.1";
+  version = "2.10.3";
 
   src = fetchFromGitHub {
     owner = "satococoa";
     repo = "wtp";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-9oZJndDv+R6okyc87dlnB98pHPw6ZrJah6WOkEs1LK0=";
+    hash = "sha256-KgayKjH4iHi7LgWwk2Laba33bMVZdbiMQgSmqBSTfZ0=";
   };
 
   vendorHash = "sha256-zsSNo1MQgpvH3ZSd3kmvdIpOCVJgSu1/pYLltx/9dZg=";
