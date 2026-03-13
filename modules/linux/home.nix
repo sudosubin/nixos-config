@@ -21,6 +21,7 @@
         ijhttp
         jetbrains.datagrip
         jetbrains.idea
+        sentry
         shfmt
         tree
         wtp

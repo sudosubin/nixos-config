@@ -27,6 +27,7 @@
         ngrok
         postman
         procps
+        sentry
         shfmt
         tree
         wtp

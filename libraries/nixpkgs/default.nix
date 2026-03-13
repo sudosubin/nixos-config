@@ -102,6 +102,7 @@
       pragmatapro = final.callPackage ./programs/pragmatapro { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       redisinsight = final.callPackage ./programs/redisinsight { };
+      sentry = final.callPackage ./programs/sentry { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
       ungoogled-chromium = lib.optionals prev.stdenvNoCC.hostPlatform.isDarwin (
         final.callPackage ./programs/ungoogled-chromium { }
@@ -133,6 +134,7 @@
       "postman"
       "pragmatapro"
       "redisinsight"
+      "sentry"
       "slack"
       "vscode-extension-anthropic-claude-code"
       "onepassword-password-manager"
