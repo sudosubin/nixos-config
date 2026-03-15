@@ -62,7 +62,6 @@
     configDir = ".config/pi/agent";
     extensions = with pkgs.pi-extensions; [
       pi-cursor-agent
-      pi-cwd-history
       pi-interactive-shell
       pi-review
     ];

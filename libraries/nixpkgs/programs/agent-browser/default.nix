@@ -1,110 +1,32 @@
 {
   fetchFromGitHub,
-  fetchPnpmDeps,
   lib,
-  makeBinaryWrapper,
   nix-update-script,
-  nodejs_24,
-  pnpm_10,
-  pnpmConfigHook,
   rustPlatform,
-  stdenvNoCC,
 }:
 
-stdenvNoCC.mkDerivation (finalAttrs: {
+rustPlatform.buildRustPackage (finalAttrs: {
   pname = "agent-browser";
-  version = "0.17.1";
+  version = "0.20.6";
 
   src = fetchFromGitHub {
     owner = "vercel-labs";
     repo = "agent-browser";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-hTtBm2iSDcPkiEwvJ5nBYXIjThi6JdYFrajkYZcsOkg=";
+    hash = "sha256-AKmRtgqPCd9elv4zM8OWNu1i94IpIFraM16jJgzDIpA=";
   };
 
-  dontUnpack = true;
+  sourceRoot = "${finalAttrs.src.name}/cli";
 
-  nativeBuildInputs = [ makeBinaryWrapper ];
+  cargoHash = "sha256-PUB1WuK1ikAH301qa20aCWCvtZUQEhfRMyiH8ZAVTz4=";
 
-  installPhase = ''
-    runHook preInstall
-
-    mkdir -p $out/{bin,lib/agent-browser}
-    ln -s ${finalAttrs.passthru.daemon}/{dist,node_modules,package.json} $out/lib/agent-browser/
-
-    makeBinaryWrapper ${lib.getExe finalAttrs.passthru.cli} $out/bin/agent-browser \
-      --set AGENT_BROWSER_HOME $out/lib/agent-browser \
-      --prefix PATH : ${lib.makeBinPath [ nodejs_24 ]}
-
-    runHook postInstall
+  # tests write under $HOME/.agent-browser/auth.
+  preCheck = ''
+    export HOME="$TMPDIR/home"
+    mkdir -p "$HOME"
   '';
 
-  passthru = {
-    cli = rustPlatform.buildRustPackage {
-      pname = "${finalAttrs.pname}-cli";
-      inherit (finalAttrs) version src;
-
-      sourceRoot = "${finalAttrs.src.name}/cli";
-
-      cargoHash = "sha256-kEvU+YIyiAwFCWzz3QvM/8ncqaCUDKCDGxzNBrvMhN4=";
-
-      # tests write under $HOME/.agent-browser/auth.
-      preCheck = ''
-        export HOME="$TMPDIR/home"
-        mkdir -p "$HOME"
-      '';
-
-      meta = {
-        mainProgram = "agent-browser";
-        platforms = lib.platforms.unix;
-      };
-    };
-
-    daemon = stdenvNoCC.mkDerivation {
-      pname = "${finalAttrs.pname}-daemon";
-      inherit (finalAttrs) version src;
-
-      nativeBuildInputs = [
-        nodejs_24
-        pnpm_10
-        pnpmConfigHook
-      ];
-
-      pnpmDeps = fetchPnpmDeps {
-        inherit (finalAttrs) pname version src;
-        fetcherVersion = 2;
-        hash = "sha256-C1fnSNVNmcFQ6Yv8WdH+QrcJzz5X37OEVODdRw8V1ys=";
-      };
-
-      postPatch = ''
-        substituteInPlace package.json \
-          --replace-fail '"postinstall": "node scripts/postinstall.js",' "" \
-          --replace-fail '"prepare": "husky",' ""
-      '';
-
-      buildPhase = ''
-        runHook preBuild
-        pnpm run build
-        runHook postBuild
-      '';
-
-      installPhase = ''
-        runHook preInstall
-        mkdir -p $out
-        cp -r dist node_modules package.json $out/
-        runHook postInstall
-      '';
-    };
-
-    updateScript = nix-update-script {
-      extraArgs = [
-        "--subpackage"
-        "cli"
-        "--subpackage"
-        "daemon"
-      ];
-    };
-  };
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "Headless browser automation CLI for AI agents";

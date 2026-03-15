@@ -6,7 +6,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "kotlin-lsp";
-  version = "261.13587.0";
+  version = "262.1817.0";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -39,22 +39,22 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       x86_64-linux = fetchzip {
         url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-lsp-${finalAttrs.version}-linux-x64.zip";
         stripRoot = false;
-        hash = "sha256-EweSqy30NJuxvlJup78O+e+JOkzvUdb6DshqAy1j9jE=";
+        hash = "sha256-BsjmllnZsB5i9NJBf8mb47aw6PoeZZbtp0OX8VV0VOA=";
       };
       aarch64-linux = fetchzip {
         url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-lsp-${finalAttrs.version}-linux-aarch64.zip";
         stripRoot = false;
-        hash = "sha256-MhHEYHBctaDH9JVkN/guDCG1if9Bip1aP3n+JkvHCvA=";
+        hash = "sha256-4JxkCX2GHz8Ld6ilVuNlPMl/YvwCBH0JivR/lukcb88=";
       };
       x86_64-darwin = fetchzip {
         url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-lsp-${finalAttrs.version}-mac-x64.zip";
         stripRoot = false;
-        hash = "sha256-zMuUcahT1IiCT1NTrMCIzUNM0U6U3zaBkJtbGrzF7I8=";
+        hash = "sha256-M/bNUdL9Ctq1ZC1bczKQPD3Pyv6Tpiy1QBsjuX1rSXA=";
       };
       aarch64-darwin = fetchzip {
         url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-lsp-${finalAttrs.version}-mac-aarch64.zip";
         stripRoot = false;
-        hash = "sha256-zwlzVt3KYN0OXKr6sI9XSijXSbTImomSTGRGa+3zCK8=";
+        hash = "sha256-OFPQ7MfGjq6rB1y13aIF09Ij296AMg1PCCZn1pwjoQA=";
       };
     };
     updateScript = ./update.sh;
