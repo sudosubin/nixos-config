@@ -62,6 +62,7 @@
         ../shared/programs/chromium
         ../shared/programs/container
         ../shared/programs/direnv
+        ../shared/programs/firefox
         ../shared/programs/fonts
         ../shared/programs/git
         ../shared/programs/go

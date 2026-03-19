@@ -7,6 +7,7 @@
 
 {
   nixpkgs.overlays = [
+    inputs.firefox-addons.overlays.default
     inputs.nix-chrome-extensions.overlays.default
     inputs.nix-skills.overlays.default
     inputs.nix-vscode-extensions.overlays.default
@@ -125,6 +126,8 @@
       "cursor"
       "cursor-cli"
       "datagrip"
+      "firefox-bin"
+      "firefox-bin-unwrapped"
       "google-chrome"
       "homerow"
       "idea"
@@ -137,6 +140,7 @@
       "sentry"
       "slack"
       "vscode-extension-anthropic-claude-code"
+      # pkgs.firefox-addons
       "onepassword-password-manager"
     ]
   );
