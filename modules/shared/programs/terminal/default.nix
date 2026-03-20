@@ -32,6 +32,7 @@ in
     extraConfig = ''
       return ${
         toLua {
+          animation_fps = 60;
           automatically_reload_config = true;
           color_scheme = "default";
           font = lib.generators.mkLuaInline ''
