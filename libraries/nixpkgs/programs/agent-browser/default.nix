@@ -26,6 +26,13 @@ rustPlatform.buildRustPackage (finalAttrs: {
     mkdir -p "$HOME"
   '';
 
+  # Skip tests that auto-launch host Chrome, which makes checks non-hermetic
+  # and flaky/slow in Nix builds.
+  checkFlags = [
+    "--skip native::parity_tests::test_all_documented_actions_are_handled"
+    "--skip native::parity_tests::test_har_start_stop_without_browser"
+  ];
+
   passthru.updateScript = nix-update-script { };
 
   meta = {
