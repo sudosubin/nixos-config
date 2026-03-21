@@ -10,13 +10,50 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sentry";
-  version = "0.15.0";
+  version = "0.18.1";
 
   src = fetchFromGitHub {
     owner = "getsentry";
     repo = "cli";
     tag = finalAttrs.version;
-    hash = "sha256-O3il8j6rMERXmAkPtL57wEKAsExItnPrJ6tyv+TPI6s=";
+    hash = "sha256-lfI954kuAq2gWZepifRbCMfbXGwUXwesVEGWaNUXlJU=";
+  };
+
+  api_schema = stdenvNoCC.mkDerivation {
+    pname = "${finalAttrs.pname}-api-schema";
+    inherit (finalAttrs) version src;
+
+    impureEnvVars = lib.fetchers.proxyImpureEnvVars ++ [
+      "GIT_PROXY_COMMAND"
+      "SOCKS_SERVER"
+    ];
+
+    nativeBuildInputs = [
+      bun
+      writableTmpDirAsHomeHook
+    ];
+
+    dontConfigure = true;
+
+    buildPhase = ''
+      runHook preBuild
+      cp -r ${finalAttrs.node_modules}/node_modules .
+      bun run script/generate-api-schema.ts
+      runHook postBuild
+    '';
+
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out
+      cp src/generated/api-schema.json $out/
+      runHook postInstall
+    '';
+
+    dontFixup = true;
+
+    outputHash = "sha256-IBTpQoMUf5f+r7DFYpX3cR6ABI/vfUk+xsR0YXthDnw=";
+    outputHashAlgo = "sha256";
+    outputHashMode = "recursive";
   };
 
   node_modules = stdenvNoCC.mkDerivation {
@@ -51,7 +88,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     dontFixup = true;
 
-    outputHash = "sha256-13CgbsPltGhGDOq9AupI+1lGgmAFJl1+nPlw22r/p4k=";
+    outputHash = "sha256-m2g/3ACXiptnCFA8J9gkw1Om5tAr94nljxctwwHffI4=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };
@@ -65,6 +102,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     runHook preBuild
 
     cp -r ${finalAttrs.node_modules}/node_modules .
+    mkdir -p src/generated
+    cp ${finalAttrs.api_schema}/api-schema.json src/generated/
 
     bun build src/bin.ts \
       --outfile dist/bin.js \
@@ -91,6 +130,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   passthru.updateScript = nix-update-script {
     extraArgs = [
+      "--subpackage"
+      "api_schema"
       "--subpackage"
       "node_modules"
     ];

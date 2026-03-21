@@ -9,14 +9,14 @@
 
 python3Packages.buildPythonPackage rec {
   pname = "pyproject-fmt";
-  version = "2.18.1";
+  version = "2.20.0";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt";
     rev = "${pname}/${version}";
-    sha256 = "sha256-M1soq1WU2GAF6Ns86eG3QGex5eiX9k++PiN0xJntWXs=";
+    sha256 = "sha256-djlvf6GypeuIVB6R57VEcYKA51PQ4Srqr0nPptcHL8Q=";
   };
 
   sourceRoot = "${src.name}/pyproject-fmt";
@@ -24,12 +24,12 @@ python3Packages.buildPythonPackage rec {
 
   postUnpack = ''
     (cd source && python tasks/generate_readme.py pyproject-fmt)
-
-    cp -r ${tombi.src}/www.schemastore.org "$NIX_BUILD_TOP/"
-    cp -r ${tombi.src}/www.schemastore.tombi "$NIX_BUILD_TOP/"
   '';
 
   postPatch = ''
+    cp -r ${tombi.src}/www.schemastore.org "$cargoDepsCopy/"
+    cp -r ${tombi.src}/www.schemastore.tombi "$cargoDepsCopy/"
+
     substituteInPlace tests/test_pyproject_toml_fmt.py \
       --replace-fail "Path(sys.executable).parent" "Path(\"$out/bin\")"
   '';
@@ -40,7 +40,7 @@ python3Packages.buildPythonPackage rec {
       version
       src
       ;
-    hash = "sha256-26+2fVUXHSUIQlnPTwtw8o8FUKNBnxcprRl+yioLPZk=";
+    hash = "sha256-BadxnmCaohlCT56vOqaCZhzLuKW1TEOpy8TOY3lz/u8=";
   };
 
   dependencies = with python3Packages; [
