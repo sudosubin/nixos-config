@@ -10,13 +10,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sentry";
-  version = "0.18.1";
+  version = "0.19.0";
 
   src = fetchFromGitHub {
     owner = "getsentry";
     repo = "cli";
     tag = finalAttrs.version;
-    hash = "sha256-lfI954kuAq2gWZepifRbCMfbXGwUXwesVEGWaNUXlJU=";
+    hash = "sha256-pW5Cpt/8NsvV+BxVx0KAhnMPx0aIJtxQULXx4xIlk60=";
   };
 
   api_schema = stdenvNoCC.mkDerivation {
@@ -88,7 +88,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     dontFixup = true;
 
-    outputHash = "sha256-m2g/3ACXiptnCFA8J9gkw1Om5tAr94nljxctwwHffI4=";
+    outputHash = "sha256-iAxMGw1Vii4D7kCYTYNgs0sd9mbLLarF1uDMdZJjqzs=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };
@@ -128,14 +128,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     runHook postInstall
   '';
 
-  passthru.updateScript = nix-update-script {
-    extraArgs = [
-      "--subpackage"
-      "api_schema"
-      "--subpackage"
-      "node_modules"
-    ];
-  };
+  passthru.updateScript = ./update.sh;
 
   meta = {
     description = "Sentry CLI";
