@@ -71,6 +71,8 @@
       nextlevelbuilder.ui-ux-pro-max-skill.ui-ux-pro-max
       getsentry.cli.sentry-cli
       sudosubin.grep-app-cli.grep-app-cli
+      toss.es-toolkit.guide
+      toss.es-toolkit.recommend
       vercel-labs.agent-browser.agent-browser
       vercel-labs.agent-skills.react-best-practices
     ];
