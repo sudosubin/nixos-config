@@ -1,7 +1,6 @@
 {
   inputs,
   lib,
-  pkgs,
   ...
 }:
 
@@ -41,6 +40,18 @@
         '';
       });
     })
+    (
+      final: prev:
+      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
+        direnv = prev.direnv.overrideAttrs (_: {
+          # nixpkgs disables cgo for direnv, but upstream's Darwin makefile still adds
+          # `-linkmode=external`, which requires cgo. Override the final go build flags.
+          buildPhase = ''
+            make GO_BUILD_FLAGS="-ldflags '-X main.bashPath=$BASH_PATH'" BASH_PATH=$BASH_PATH
+          '';
+        });
+      }
+    )
     # Fix: https://github.com/eza-community/eza/issues/1224
     (
       final: prev:
