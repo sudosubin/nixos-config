@@ -67,35 +67,35 @@ in
           color = "orange";
           icon = "briefcase";
         };
-        "elvin@daangn.com (secondary)" = {
-          id = 3;
-          color = "red";
-          icon = "briefcase";
-        };
-        "sudosubin@python.or.kr" = {
-          id = 4;
-          color = "blue";
-          icon = "chill";
-        };
         "ausg.awskrug@gmail.com" = {
-          id = 5;
+          id = 3;
           color = "purple";
           icon = "food";
         };
-        "sipe.team@gmail.com" = {
-          id = 6;
-          color = "green";
-          icon = "tree";
+        "awskrug.event@gmail.com" = {
+          id = 4;
+          color = "turquoise";
+          icon = "food";
+        };
+        "sudosubin@python.or.kr" = {
+          id = 5;
+          color = "blue";
+          icon = "chill";
         };
         "gdg.campuskorea@gmail.com" = {
-          id = 7;
+          id = 6;
           color = "red";
           icon = "gift";
         };
-        "awskrug.event@gmail.com" = {
+        "gdgkoreacampus@gmail.com" = {
+          id = 7;
+          color = "red";
+          icon = "tree";
+        };
+        "dev@yapp.co.kr" = {
           id = 8;
-          color = "turquoise";
-          icon = "food";
+          color = "pink";
+          icon = "tree";
         };
         "support@yapp.co.kr" = {
           id = 9;
