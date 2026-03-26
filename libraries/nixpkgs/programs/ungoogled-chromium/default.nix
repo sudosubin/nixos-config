@@ -7,7 +7,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "ungoogled-chromium";
-  version = "146.0.7680.80";
+  version = "146.0.7680.153";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -27,12 +27,12 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   passthru = {
     sources = {
       x86_64-darwin = fetchurl {
-        url = "https://github.com/ungoogled-software/ungoogled-chromium-macos/releases/download/146.0.7680.80-1.1/ungoogled-chromium_146.0.7680.80-1.1_x86_64-macos.dmg";
-        hash = "sha256-HUenIYrrXw4xYZHSiDyvGZ+j/8sQj0XKg/Emqu7cAn4=";
+        url = "https://github.com/ungoogled-software/ungoogled-chromium-macos/releases/download/146.0.7680.153-1.1/ungoogled-chromium_146.0.7680.153-1.1_x86_64-macos.dmg";
+        hash = "sha256-9Vm7hcBr8YFwUOW8DSgoc9gMK5YxB0VjT0fbP5FzYC0=";
       };
       aarch64-darwin = fetchurl {
-        url = "https://github.com/ungoogled-software/ungoogled-chromium-macos/releases/download/146.0.7680.80-1.1/ungoogled-chromium_146.0.7680.80-1.1_arm64-macos.dmg";
-        hash = "sha256-PilelprHe05AFxa78Hw80JG9jKRG/YJHxQVvGUyiR7g=";
+        url = "https://github.com/ungoogled-software/ungoogled-chromium-macos/releases/download/146.0.7680.153-1.1/ungoogled-chromium_146.0.7680.153-1.1_arm64-macos.dmg";
+        hash = "sha256-NBM4PkMQjcgFOyKdy8+V4quJGg5wZdmIKHGSj3USHnI=";
       };
     };
     updateScript = ./update.sh;
