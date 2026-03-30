@@ -12,8 +12,7 @@ in
   xdg.configFile = {
     "gh/attach.yml".source = yamlFormat.generate "gh-attach.yml" {
       browsers = [
-        (mkGhAttachBrowser "chromium" "Default")
-        (mkGhAttachBrowser "chromium" "Profile 1")
+        (mkGhAttachBrowser "firefox" "default")
       ];
     };
   };
