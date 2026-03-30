@@ -7,7 +7,6 @@
 {
   nixpkgs.overlays = [
     inputs.firefox-addons.overlays.default
-    inputs.nix-chrome-extensions.overlays.default
     inputs.nix-skills.overlays.default
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
@@ -116,9 +115,6 @@
       redisinsight = final.callPackage ./programs/redisinsight { };
       sentry = final.callPackage ./programs/sentry { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
-      ungoogled-chromium = lib.optionals prev.stdenvNoCC.hostPlatform.isDarwin (
-        final.callPackage ./programs/ungoogled-chromium { }
-      );
       wtp = final.callPackage ./programs/wtp { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
@@ -139,7 +135,6 @@
       "datagrip"
       "firefox-bin"
       "firefox-bin-unwrapped"
-      "google-chrome"
       "homerow"
       "idea"
       "ijhttp"
@@ -158,6 +153,5 @@
 
   nixpkgs.config.permittedInsecurePackages = [
     "figma-linux-0.10.0"
-    "google-chrome-144.0.7559.97"
   ];
 }

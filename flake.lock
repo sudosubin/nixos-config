@@ -101,26 +101,6 @@
         "type": "github"
       }
     },
-    "nix-chrome-extensions": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1774691868,
-        "narHash": "sha256-M2wrxeeZonlubp/K5Di71/88jYT39wKVxUuOKCQQCAM=",
-        "owner": "sudosubin",
-        "repo": "nix-chrome-extensions",
-        "rev": "3396c1145aa358c0e41f50e54d338e47b7e791e0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sudosubin",
-        "repo": "nix-chrome-extensions",
-        "type": "github"
-      }
-    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -257,7 +237,6 @@
         "home-manager": "home-manager",
         "home-manager-secrets": "home-manager-secrets",
         "lefthook": "lefthook",
-        "nix-chrome-extensions": "nix-chrome-extensions",
         "nix-darwin": "nix-darwin",
         "nix-skills": "nix-skills",
         "nix-vscode-extensions": "nix-vscode-extensions",

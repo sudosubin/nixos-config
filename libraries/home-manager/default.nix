@@ -19,7 +19,6 @@ in
     ./programs/act
     ./programs/agent-browser
     ./programs/caffeinate
-    ./programs/chromium
     ./programs/cleanshot
     ./programs/clop
     ./programs/hammerspoon
