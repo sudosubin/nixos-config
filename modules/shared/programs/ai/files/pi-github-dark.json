@@ -42,8 +42,8 @@
     "customMessageText": "",
     "customMessageLabel": "scale.blue.3",
     "toolPendingBg": "scale.gray.8",
-    "toolSuccessBg": "#0c351f",
-    "toolErrorBg": "#3d272c",
+    "toolSuccessBg": "#0d251d",
+    "toolErrorBg": "#29171a",
     "toolTitle": "",
     "toolOutput": "scale.gray.3",
 
