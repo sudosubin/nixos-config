@@ -71,8 +71,9 @@
       nextlevelbuilder.ui-ux-pro-max-skill.ui-ux-pro-max
       getsentry.cli.sentry-cli
       sudosubin.grep-app-cli.grep-app-cli
-      toss.es-toolkit.guide
-      toss.es-toolkit.recommend
+      (toss.es-toolkit.guide.override { name = "es-toolkit-guide"; })
+      (toss.es-toolkit.recommend.override { name = "es-toolkit-recommend"; })
+      (vercel.ai.adr-skill.override { name = "adr"; })
       vercel-labs.agent-browser.agent-browser
       vercel-labs.agent-skills.react-best-practices
     ];
