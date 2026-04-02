@@ -6,17 +6,18 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "homerow";
-  version = "1.4.1";
+  version = "1.5.3";
 
   src = fetchzip {
     url = "https://builds.homerow.app/v${finalAttrs.version}/Homerow.zip";
-    hash = "sha256-/Zp62UOvjnj+sN8VTpGC9EZ5cLsjOe/A5ZZkJAx/5Xc=";
+    hash = "sha256-zqa1QYq7UF80z0cvMZJMgTQFo3vqGdwzuLVMwgyuMME=";
+    stripRoot = false;
   };
 
   installPhase = ''
     runHook preInstall
-    mkdir -p "$out/Applications/Homerow.app"
-    cp -R . "$out/Applications/Homerow.app"
+    mkdir -p "$out/Applications"
+    cp -R Homerow.app "$out/Applications/"
     runHook postInstall
   '';
 

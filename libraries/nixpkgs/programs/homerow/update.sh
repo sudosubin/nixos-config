@@ -3,7 +3,7 @@
 set -eu -o pipefail
 
 latestVersion=$(
-  curl -s https://www.homerow.app/appcast.xml \
+  curl -s https://builds.homerow.app/appcast.xml \
     | grep -m2 "title" \
     | tail -n1 \
     | sed -r "s|.*>([0-9.]+)<.*|\1|g"

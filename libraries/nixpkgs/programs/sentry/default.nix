@@ -10,13 +10,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sentry";
-  version = "0.22.0";
+  version = "0.23.0";
 
   src = fetchFromGitHub {
     owner = "getsentry";
     repo = "cli";
     tag = finalAttrs.version;
-    hash = "sha256-Y+RVj+rfZMKS+BMTS2ua9GYPsGd5QbxKmnX47NWoMsY=";
+    hash = "sha256-7ENn/J5F63NBGa2vjo6sdfLZdljYIxTUCJino7yOEtc=";
   };
 
   api_schema = stdenvNoCC.mkDerivation {
@@ -104,6 +104,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     cp -r ${finalAttrs.node_modules}/node_modules .
     mkdir -p src/generated
     cp ${finalAttrs.api_schema}/api-schema.json src/generated/
+
+    bun run script/generate-skill.ts
+    bun run script/generate-sdk.ts
 
     bun build src/bin.ts \
       --outfile dist/bin.js \
