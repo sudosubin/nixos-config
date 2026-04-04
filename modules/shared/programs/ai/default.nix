@@ -62,6 +62,7 @@
     configDir = ".config/pi/agent";
     extensions = with pkgs.pi-extensions; [
       pi-interactive-shell
+      pi-loop
       pi-review
     ];
     skills = with pkgs.skills; [

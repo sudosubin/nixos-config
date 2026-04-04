@@ -6,7 +6,7 @@
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
-  pname = "pi-review.ts";
+  pname = "pi-loop.ts";
   version = "1.5.0-unstable-2026-03-30";
 
   src = fetchFromGitHub {
@@ -20,7 +20,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   installPhase = ''
     runHook preInstall
-    install -Dm644 pi-extensions/review.ts $out
+    install -Dm644 pi-extensions/loop.ts $out
     runHook postInstall
   '';
 
@@ -29,7 +29,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   };
 
   meta = {
-    description = "Code Review Extension (inspired by Codex's review feature)";
+    description = "Loop extension for pi with breakout conditions";
     homepage = "https://github.com/mitsuhiko/agent-stuff";
     license = lib.licenses.asl20;
     maintainers = with lib.maintainers; [ sudosubin ];
