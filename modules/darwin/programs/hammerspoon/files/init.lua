@@ -26,10 +26,10 @@ function stroke(modifiers, character)
   -- Fix for WezTerm
   if app and app:name() == "WezTerm" and modifiers and #modifiers == 1 and modifiers[1] == "lAlt" then
     if character == "left" then
-      hs.eventtap.keyStrokes("\x1bb")
+      hs.eventtap.keyStrokes("\x1b[1;3D")
       return
     elseif character == "right" then
-      hs.eventtap.keyStrokes("\x1bf")
+      hs.eventtap.keyStrokes("\x1b[1;3C")
       return
     end
   end
