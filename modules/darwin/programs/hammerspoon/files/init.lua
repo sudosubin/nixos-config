@@ -4,6 +4,18 @@ local down = "j";
 local up = "k";
 local right = "l";
 
+-- Device modifier flags
+local deviceFlags = {
+  lShift = 0x00000002, -- NX_DEVICELSHIFTKEYMASK
+  rShift = 0x00000004, -- NX_DEVICERSHIFTKEYMASK
+  lCmd   = 0x00000008, -- NX_DEVICELCMDKEYMASK
+  rCmd   = 0x00000010, -- NX_DEVICERCMDKEYMASK
+  lAlt   = 0x00000020, -- NX_DEVICELALTKEYMASK
+  rAlt   = 0x00000040, -- NX_DEVICERALTKEYMASK
+  lCtrl  = 0x00000001, -- NX_DEVICELCTLKEYMASK
+  rCtrl  = 0x00002000, -- NX_DEVICERCTLKEYMASK
+}
+
 -- Utils
 function merge(a, b)
   local merged = {}
@@ -21,21 +33,22 @@ function strip(string)
 end
 
 function stroke(modifiers, character)
-  local app = hs.application.frontmostApplication()
+  local down = hs.eventtap.event.newKeyEvent(modifiers, character, true)
+  local up = hs.eventtap.event.newKeyEvent(modifiers, character, false)
 
-  -- Fix for WezTerm
-  if app and app:name() == "WezTerm" and modifiers and #modifiers == 1 and modifiers[1] == "lAlt" then
-    if character == "left" then
-      hs.eventtap.keyStrokes("\x1b[1;3D")
-      return
-    elseif character == "right" then
-      hs.eventtap.keyStrokes("\x1b[1;3C")
-      return
+  if modifiers then
+    local extra = 0
+    for _, mod in ipairs(modifiers) do
+      extra = extra | (deviceFlags[mod] or 0)
+    end
+    if extra ~= 0 then
+      down:rawFlags(down:rawFlags() | extra)
+      up:rawFlags(up:rawFlags() | extra)
     end
   end
 
-  hs.eventtap.event.newKeyEvent(modifiers, character, true):post()
-  hs.eventtap.event.newKeyEvent(modifiers, character, false):post()
+  down:post()
+  up:post()
 end
 
 -- Prepare
