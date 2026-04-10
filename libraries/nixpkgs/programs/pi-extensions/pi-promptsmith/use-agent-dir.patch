@@ -1,0 +1,19 @@
+diff --git a/src/state.ts b/src/state.ts
+--- a/src/state.ts
++++ b/src/state.ts
+@@ -1,5 +1,5 @@
+ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+-import { homedir } from "node:os";
++import { getAgentDir } from "@mariozechner/pi-coding-agent";
+ import { dirname, join } from "node:path";
+ import {
+   DEFAULT_ENHANCEMENT_TIMEOUT_MS,
+@@ -94,7 +94,7 @@ export class PromptsmithRuntimeState {
+ }
+ 
+ function getGlobalSettingsPath(): string {
+-  return join(homedir(), ".pi", "agent", "promptsmith-settings.json");
++  return join(getAgentDir(), "promptsmith-settings.json");
+ }
+ 
+ function restoreSettingsFromDisk(path: string): PromptsmithSettings | undefined {

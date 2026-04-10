@@ -63,6 +63,7 @@
     extensions = with pkgs.pi-extensions; [
       pi-interactive-shell
       pi-loop
+      pi-promptsmith
       pi-review
     ];
     skills = with pkgs.skills; [
