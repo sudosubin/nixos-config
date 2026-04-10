@@ -1,24 +1,52 @@
 {
   fetchFromGitHub,
+  fetchPnpmDeps,
   lib,
   nix-update-script,
+  nodejs_24,
+  pnpm,
+  pnpmConfigHook,
   rustPlatform,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "agent-browser";
-  version = "0.23.4";
+  version = "0.25.3";
 
   src = fetchFromGitHub {
     owner = "vercel-labs";
     repo = "agent-browser";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-CaFNAtDJqCXu/EwP1YqlrQIK1yu+CDyIdTndrTHhCM0=";
+    hash = "sha256-9wunuGSsxKqy9h3MMahW3hzZ+5iJrz/SotPRRGDu+kg=";
   };
 
-  sourceRoot = "${finalAttrs.src.name}/cli";
+  cargoRoot = "cli";
+  buildAndTestSubdir = finalAttrs.cargoRoot;
+  cargoHash = "sha256-vCxv2vKSWj5kIWhzWlbWNfEHrxnSg1i0nUBq6hWoQlM=";
 
-  cargoHash = "sha256-8EO0wHg/RLyFzCgkmqsCpLiJYP2mYtoMehLOoOSvkXc=";
+  nativeBuildInputs = [
+    nodejs_24
+    pnpm
+    pnpmConfigHook
+  ];
+
+  pnpmWorkspaces = [ "dashboard" ];
+
+  pnpmDeps = fetchPnpmDeps {
+    inherit (finalAttrs)
+      pname
+      version
+      src
+      pnpmWorkspaces
+      ;
+    fetcherVersion = 2;
+    hash = "sha256-M29MITaUUYPvg7h8A0oGrrT9oerBE97RFd6apiwOlBM=";
+  };
+
+  preBuild = ''
+    export NEXT_TELEMETRY_DISABLED=1
+    pnpm --dir packages/dashboard build
+  '';
 
   # tests write under $HOME/.agent-browser/auth.
   preCheck = ''
