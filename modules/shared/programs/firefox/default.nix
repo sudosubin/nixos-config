@@ -102,6 +102,11 @@ in
           color = "pink";
           icon = "pet";
         };
+        "mashup.node@gmail.com" = {
+          id = 10;
+          color = "orange";
+          icon = "tree";
+        };
       };
       extensions = {
         force = true;
