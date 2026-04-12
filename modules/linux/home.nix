@@ -21,6 +21,7 @@
         ijhttp
         jetbrains.datagrip
         jetbrains.idea
+        superset
         sentry
         shfmt
         tree

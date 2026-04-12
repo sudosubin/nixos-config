@@ -117,6 +117,7 @@
       redisinsight = final.callPackage ./programs/redisinsight { };
       sentry = final.callPackage ./programs/sentry { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
+      superset = final.callPackage ./programs/superset { };
       wtp = final.callPackage ./programs/wtp { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
@@ -147,6 +148,7 @@
       "redisinsight"
       "sentry"
       "slack"
+      "superset"
       "vscode-extension-anthropic-claude-code"
       # pkgs.firefox-addons
       "onepassword-password-manager"
