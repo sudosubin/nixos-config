@@ -35,6 +35,7 @@ in
           animation_fps = 60;
           automatically_reload_config = true;
           color_scheme = "default";
+          enable_kitty_keyboard = true;
           font = lib.generators.mkLuaInline ''
             wezterm.font_with_fallback(${toLua font})
           '';
