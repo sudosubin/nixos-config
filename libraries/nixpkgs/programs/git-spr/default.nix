@@ -7,13 +7,13 @@
 
 buildGoModule (finalAttrs: {
   pname = "git-spr";
-  version = "0.17.3";
+  version = "0.17.4";
 
   src = fetchFromGitHub {
     owner = "ejoffe";
     repo = "spr";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-c3Z2n939XDR9v5z8nxSevhXbEOpE3Tb7QkLhX5oP+lQ=";
+    hash = "sha256-xgA/C8kl404TiRZuJsH10bu4TZuzWOgdix1ESb9KY9M=";
   };
 
   vendorHash = "sha256-VB7OJ8UkZ0WhEM5l2wR3xA1yxZcr+G+FLt3MxNY83Tg=";

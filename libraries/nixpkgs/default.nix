@@ -65,6 +65,41 @@
         });
       }
     )
+    # Fix: https://github.com/NixOS/nixpkgs/pull/509438
+    (
+      final: prev:
+      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
+        duckdb = prev.duckdb.overrideAttrs (oldAttrs: {
+          installCheckPhase =
+            let
+              extraExcludes = lib.concatStringsSep " " (
+                map (pattern: "exclude:'${pattern}'") [
+                  "test/sql/join/iejoin/iejoin_issue_6314.test_slow"
+                  "test/sql/join/iejoin/test_iejoin_sort_tasks.test_slow"
+                  "test/sql/join/asof/test_asof_join_inequalities.test"
+                  "test/sql/join/asof/test_asof_join_missing.test_slow"
+                  "test/sql/join/test_complex_range_join.test"
+                ]
+              );
+            in
+            lib.replaceStrings [ "./test/unittest" ] [ "./test/unittest ${extraExcludes}" ] oldAttrs.installCheckPhase;
+        });
+      }
+    )
+    # Fix: https://github.com/NixOS/nixpkgs/pull/507400
+    (
+      final: prev:
+      let
+        buildVscode = prev.callPackage (prev.path + "/pkgs/applications/editors/vscode/generic.nix") {
+          glibc = if prev.stdenv.hostPlatform.isLinux then prev.glibc else { bin = null; };
+        };
+      in
+      {
+        code-cursor = prev.callPackage (prev.path + "/pkgs/by-name/co/code-cursor/package.nix") {
+          inherit buildVscode;
+        };
+      }
+    )
     (final: prev: {
       sqlit-tui = prev.sqlit-tui.overridePythonAttrs (attrs: {
         dependencies = (attrs.dependencies or [ ]) ++ [ final.python3Packages.pymysql ];

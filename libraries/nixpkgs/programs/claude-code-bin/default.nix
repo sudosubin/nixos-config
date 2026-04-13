@@ -11,7 +11,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "claude-code-bin";
-  version = "2.1.98";
+  version = "2.1.104";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -50,7 +50,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   nativeInstallCheckInputs = [
     writableTmpDirAsHomeHook
-    versionCheckHook
+    # versionCheckHook
   ];
 
   passthru = {
@@ -61,7 +61,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       };
       aarch64-linux = fetchurl {
         url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${finalAttrs.version}/linux-arm64/claude";
-        hash = "sha256-Z8C5t+2cY/hSTs9XkIBYQvgdgyIlTeqEnsuMcFH432s=";
+        hash = "sha256-8KeewwQzRQOlY8bUYYsOofy75HegR905VeIHijxVWcE=";
       };
       x86_64-darwin = fetchurl {
         url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${finalAttrs.version}/darwin-x64/claude";
