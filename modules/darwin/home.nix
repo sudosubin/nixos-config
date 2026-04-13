@@ -28,7 +28,6 @@
         postman
         procps
         sentry
-        superset
         shfmt
         tree
         wtp
