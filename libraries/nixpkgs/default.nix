@@ -135,6 +135,7 @@
       deepwiki-cli = final.callPackage ./programs/deepwiki-cli { };
       deskpad = final.callPackage ./programs/deskpad { };
       gh-attach = final.callPackage ./programs/gh-attach { };
+      gh-stack = final.callPackage ./programs/gh-stack { };
       git-spr = final.callPackage ./programs/git-spr { };
       grep-app-cli = final.callPackage ./programs/grep-app-cli { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };

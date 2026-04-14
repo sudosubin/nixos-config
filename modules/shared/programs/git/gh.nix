@@ -19,7 +19,10 @@ in
 
   programs.gh = {
     enable = true;
-    extensions = with pkgs; [ gh-attach ];
+    extensions = with pkgs; [
+      gh-attach
+      gh-stack
+    ];
     settings = {
       aliases = { };
       editor = "";
