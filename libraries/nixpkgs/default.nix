@@ -39,18 +39,6 @@
         '';
       });
     })
-    (
-      final: prev:
-      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
-        direnv = prev.direnv.overrideAttrs (_: {
-          # nixpkgs disables cgo for direnv, but upstream's Darwin makefile still adds
-          # `-linkmode=external`, which requires cgo. Override the final go build flags.
-          buildPhase = ''
-            make GO_BUILD_FLAGS="-ldflags '-X main.bashPath=$BASH_PATH'" BASH_PATH=$BASH_PATH
-          '';
-        });
-      }
-    )
     # Fix: https://github.com/eza-community/eza/issues/1224
     (
       final: prev:
@@ -62,28 +50,6 @@
             wrapProgram $out/bin/eza \
               --run 'export EZA_CONFIG_DIR="''${EZA_CONFIG_DIR:-''${XDG_CONFIG_HOME:-$HOME/.config}/eza}"'
           '';
-        });
-      }
-    )
-    # Fix: https://github.com/NixOS/nixpkgs/pull/509438
-    (
-      final: prev:
-      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
-        duckdb = prev.duckdb.overrideAttrs (oldAttrs: {
-          installCheckPhase =
-            let
-              extraExcludes = lib.concatStringsSep " " (
-                map (pattern: "exclude:'${pattern}'") [
-                  "test/sql/join/iejoin/iejoin_issue_6314.test_slow"
-                  "test/sql/join/iejoin/test_iejoin_sort_tasks.test_slow"
-                  "test/sql/join/asof/test_asof_join_inequalities.test"
-                  "test/sql/join/asof/test_asof_join_missing.test_slow"
-                  "test/sql/join/test_complex_range_join.test"
-                ]
-              );
-            in
-            lib.replaceStrings [ "./test/unittest" ] [ "./test/unittest ${extraExcludes}" ]
-              oldAttrs.installCheckPhase;
         });
       }
     )
@@ -109,27 +75,11 @@
       });
     })
     (final: prev: {
-      tombi = prev.tombi.overrideAttrs (oldAttrs: rec {
-        version = "0.8.0";
-        src = prev.fetchFromGitHub {
-          owner = "tombi-toml";
-          repo = "tombi";
-          tag = "v${version}";
-          hash = "sha256-rVXLfE6J2WI8mD2apKzDuDblQxaccSWggsUgcpom+2U=";
-        };
-        cargoDeps = prev.rustPlatform.fetchCargoVendor {
-          inherit src;
-          hash = "sha256-5EZNL5aBdS+1TI4Gx2AQw6Di+5rYQBR3ukexSnFFIcs=";
-        };
-      });
-    })
-    (final: prev: {
       agent-browser = final.callPackage ./programs/agent-browser { };
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       ccusage = final.callPackage ./programs/ccusage { };
       ccusage-pi = final.callPackage ./programs/ccusage-pi { };
-      claude-code-bin = final.callPackage ./programs/claude-code-bin { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       deepwiki-cli = final.callPackage ./programs/deepwiki-cli { };
