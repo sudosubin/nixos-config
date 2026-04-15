@@ -70,6 +70,12 @@
       "tui.input.newLine" = [ "enter" ];
       "tui.input.submit" = [ "super+enter" ];
     };
+    settings = {
+      collapseChangelog = true;
+      quietStartup = true;
+      defaultThinkingLevel = "xhigh";
+      theme = "github-dark";
+    };
     skills = with pkgs.skills; [
       affaan-m.everything-claude-code.golang-patterns
       anthropics.skills.skill-creator

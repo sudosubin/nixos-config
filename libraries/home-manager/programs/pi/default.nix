@@ -94,6 +94,23 @@ in
       '';
     };
 
+    settings = lib.mkOption {
+      type = jsonFormat.type;
+      default = { };
+      example = lib.literalExpression ''
+        {
+          collapseChangelog = true;
+          theme = "github-dark";
+        }
+      '';
+      description = ''
+        Key-value settings to enforce in pi's `settings.json`.
+
+        During activation, declared keys are merged onto the existing
+        `settings.json` so runtime-modified keys not declared here are preserved.
+      '';
+    };
+
     skills = lib.mkOption {
       type = lib.types.listOf lib.types.package;
       default = [ ];
@@ -155,6 +172,7 @@ in
       (mkNoDuplicateAssertion (map (p: p.pname) cfg.extensions) "extension")
       (mkNoDuplicateAssertion (map (s: s.pname) cfg.skills) "skill")
     ];
+
     home.file = lib.listToAttrs (
       (mkEntries cfg.extensions (ext: "extensions/${ext.pname}") (x: x))
       ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
@@ -165,7 +183,29 @@ in
         }
       )
     );
+
     home.packages = [ cfg.package ];
+
+    home.activation = lib.mkIf (cfg.settings != { }) {
+      piSettingsActivation =
+        let
+          configPath = "${config.home.homeDirectory}/${cfg.configDir}/settings.json";
+          newConfig = jsonFormat.generate "pi-settings.json" cfg.settings;
+          jq = lib.getExe pkgs.jq;
+        in
+        lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+          mkdir -p "$(dirname ${lib.escapeShellArg configPath})"
+          touch ${lib.escapeShellArg configPath}
+          if ! ${jq} -e . ${lib.escapeShellArg configPath} >/dev/null 2>&1; then
+            printf '%s\n' '{}' > ${lib.escapeShellArg configPath}
+          fi
+
+          config="$(${jq} -s '.[0] * .[1]' ${lib.escapeShellArg configPath} ${lib.escapeShellArg newConfig})"
+          printf '%s\n' "$config" > ${lib.escapeShellArg configPath}
+          unset config
+        '';
+    };
+
     home.sessionVariables =
       cfg.environment
       // lib.optionalAttrs (cfg.configDir != defaultConfigDir) {
