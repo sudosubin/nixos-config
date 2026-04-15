@@ -8,6 +8,7 @@
 let
   cfg = config.programs.pi;
   defaultConfigDir = ".pi/agent";
+  jsonFormat = pkgs.formats.json { };
 
   mkEntries =
     items: nameOf: sourceOf:
@@ -77,6 +78,22 @@ in
       '';
     };
 
+    keybindings = lib.mkOption {
+      type = with lib.types; nullOr (attrsOf (either str (listOf str)));
+      default = null;
+      example = lib.literalExpression ''
+        {
+          "tui.input.newLine" = [ "shift+enter" "ctrl+j" ];
+          "app.model.select" = "ctrl+m";
+          "app.tools.expand" = "ctrl+e";
+        }
+      '';
+      description = ''
+        Declarative contents of pi's `keybindings.json`.
+        Values must be either a single key string or a list of key strings.
+      '';
+    };
+
     skills = lib.mkOption {
       type = lib.types.listOf lib.types.package;
       default = [ ];
@@ -125,6 +142,10 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [
       {
+        assertion = !(lib.hasPrefix "/" cfg.configDir);
+        message = "programs.pi.configDir must be a path relative to HOME (e.g. .config/pi/agent).";
+      }
+      {
         assertion = !(cfg.environment ? PI_CODING_AGENT_DIR);
         message = ''
           programs.pi.environment.PI_CODING_AGENT_DIR is managed by programs.pi.configDir.
@@ -138,6 +159,11 @@ in
       (mkEntries cfg.extensions (ext: "extensions/${ext.pname}") (x: x))
       ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
       ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
+      ++ lib.optional (cfg.keybindings != null) (
+        lib.nameValuePair "${cfg.configDir}/keybindings.json" {
+          source = jsonFormat.generate "pi-keybindings.json" cfg.keybindings;
+        }
+      )
     );
     home.packages = [ cfg.package ];
     home.sessionVariables =

@@ -66,6 +66,10 @@
       pi-promptsmith
       pi-review
     ];
+    keybindings = {
+      "tui.input.newLine" = [ "enter" ];
+      "tui.input.submit" = [ "super+enter" ];
+    };
     skills = with pkgs.skills; [
       affaan-m.everything-claude-code.golang-patterns
       anthropics.skills.skill-creator
