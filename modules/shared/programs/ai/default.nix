@@ -72,8 +72,9 @@
     };
     settings = {
       collapseChangelog = true;
-      quietStartup = true;
       defaultThinkingLevel = "xhigh";
+      enableInstallTelemetry = false;
+      quietStartup = true;
       theme = "github-dark";
     };
     skills = with pkgs.skills; [
