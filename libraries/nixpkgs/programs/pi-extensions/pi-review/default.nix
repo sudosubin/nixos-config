@@ -7,20 +7,20 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi-review.ts";
-  version = "1.5.0-unstable-2026-03-30";
+  version = "1.5.0-unstable-2026-04-13";
 
   src = fetchFromGitHub {
     owner = "mitsuhiko";
     repo = "agent-stuff";
-    rev = "80e1e96fa563ffc0c9d60422eac6dc9e67440385";
-    hash = "sha256-JKMqt5ionfF/aBFTSQe9BD49wAErNtEnf3Mnekk3nzk=";
+    rev = "2b70e8d53647c1e0277bd54dbbb2519cb5bea92b";
+    hash = "sha256-1bsuBvCWNsmV0r4+fU66oHWFu9MXKchuH/GRMnb7QxQ=";
   };
 
   dontBuild = true;
 
   installPhase = ''
     runHook preInstall
-    install -Dm644 pi-extensions/review.ts $out
+    install -Dm644 extensions/review.ts $out
     runHook postInstall
   '';
 

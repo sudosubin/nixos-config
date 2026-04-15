@@ -10,13 +10,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sentry";
-  version = "0.26.1";
+  version = "0.27.0";
 
   src = fetchFromGitHub {
     owner = "getsentry";
     repo = "cli";
     tag = finalAttrs.version;
-    hash = "sha256-T1Nxov5uC1P8eql6zhObec5r2xZUGrFCNN0xjhXAXu8=";
+    hash = "sha256-IDjSJNmfMXx0QV1IRrXGtjKLKWLxfmFLTYA7jH3vj4E=";
   };
 
   api_schema = stdenvNoCC.mkDerivation {

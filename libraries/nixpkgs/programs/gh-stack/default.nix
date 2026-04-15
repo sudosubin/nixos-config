@@ -7,13 +7,13 @@
 
 buildGoModule (finalAttrs: {
   pname = "gh-stack";
-  version = "0-unstable-2026-04-13";
+  version = "0.0.1-unstable-2026-04-14";
 
   src = fetchFromGitHub {
     owner = "github";
     repo = "gh-stack";
-    rev = "e06284ff5cc134d7432017c10e4ca17212ba1a21";
-    hash = "sha256-8iCixuRXn8DaUi1u/sllDfWGIgx2or7VcWvwQv9zinE=";
+    rev = "5c1fe16868c5a6e55ab008b111b1dcfab0967b2b";
+    hash = "sha256-rwOX3KQMMk3AYNYOoAhr7uErYd8zwthwZHXj8D5ryd8=";
   };
 
   vendorHash = "sha256-s85Lz6yfY1TiIFPolU1qESDyw8XoBORyuOMdiHj6Grc=";

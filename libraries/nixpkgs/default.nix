@@ -53,20 +53,6 @@
         });
       }
     )
-    # Fix: https://github.com/NixOS/nixpkgs/pull/507400
-    (
-      final: prev:
-      let
-        buildVscode = prev.callPackage (prev.path + "/pkgs/applications/editors/vscode/generic.nix") {
-          glibc = if prev.stdenv.hostPlatform.isLinux then prev.glibc else { bin = null; };
-        };
-      in
-      {
-        code-cursor = prev.callPackage (prev.path + "/pkgs/by-name/co/code-cursor/package.nix") {
-          inherit buildVscode;
-        };
-      }
-    )
     (final: prev: {
       sqlit-tui = prev.sqlit-tui.overridePythonAttrs (attrs: {
         dependencies = (attrs.dependencies or [ ]) ++ [ final.python3Packages.pymysql ];
