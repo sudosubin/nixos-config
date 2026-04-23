@@ -17,7 +17,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     runHook preInstall
 
     mkdir -p "$out/Applications" "$out/bin"
-    cp -R FigmaAgent.app "$out/Applications/"
+    cp -R . "$out/Applications/FigmaAgent.app"
     ln -s "$out/Applications/FigmaAgent.app/Contents/MacOS/figma_agent" "$out/bin/figma-agent"
 
     runHook postInstall

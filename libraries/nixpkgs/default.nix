@@ -39,6 +39,15 @@
         '';
       });
     })
+    # Fix: https://github.com/NixOS/nixpkgs/issues/507531
+    (
+      final: prev:
+      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
+        direnv = prev.direnv.overrideAttrs (_: {
+          doCheck = false;
+        });
+      }
+    )
     # Fix: https://github.com/eza-community/eza/issues/1224
     (
       final: prev:

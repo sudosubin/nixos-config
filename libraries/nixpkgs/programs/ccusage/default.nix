@@ -10,13 +10,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "ccusage";
-  version = "18.0.10";
+  version = "18.0.11";
 
   src = fetchFromGitHub {
     owner = "ryoppippi";
     repo = "ccusage";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-6KmSj2wgnkwJNnKaTmscbY+7fy2l6JHci3x3m/CV/Qg=";
+    hash = "sha256-EzHFKZVq0okgRumxn6+4rfxDtz0jY6FBoO9eyrGX4ys=";
   };
 
   nativeBuildInputs = [
@@ -39,7 +39,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       pnpmWorkspaces
       ;
     fetcherVersion = 2;
-    hash = "sha256-nygy6LEb1AMDFdDkJZ0zHCX3r2DAJM7PylzUNgOO8Hc=";
+    hash = "sha256-mvcrnqL+xraAqF9A6XFHCmR9hRGsTQTE80P6DGRvj+c=";
   };
 
   postPatch = ''

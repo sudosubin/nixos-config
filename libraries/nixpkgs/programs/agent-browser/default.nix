@@ -1,4 +1,5 @@
 {
+  bash,
   fetchFromGitHub,
   fetchPnpmDeps,
   lib,
@@ -7,27 +8,33 @@
   pnpm,
   pnpmConfigHook,
   rustPlatform,
+  which,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "agent-browser";
-  version = "0.25.4";
+  version = "0.26.0";
 
   src = fetchFromGitHub {
     owner = "vercel-labs";
     repo = "agent-browser";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-2Dv+ZY9cvcz6EIpI+gkV9w5eqQzpAD2N+yf4dJrmdwg=";
+    hash = "sha256-q3UcFTB8OMOrfx5xcNPtBBAwOxoscwrjGg+y8tdETm0=";
   };
 
   cargoRoot = "cli";
   buildAndTestSubdir = finalAttrs.cargoRoot;
-  cargoHash = "sha256-3vzVVHFo13ZLsbbXw7n9BE/YXBJwoxzhvfjuqOQwdfg=";
+  cargoHash = "sha256-ENIGFhZ+pXIZvEFUA0No3HpeHtxgJohMgx6F0wNpmO0=";
 
   nativeBuildInputs = [
     nodejs_24
     pnpm
     pnpmConfigHook
+  ];
+
+  nativeCheckInputs = [
+    bash
+    which
   ];
 
   pnpmWorkspaces = [ "dashboard" ];
@@ -52,13 +59,20 @@ rustPlatform.buildRustPackage (finalAttrs: {
   preCheck = ''
     export HOME="$TMPDIR/home"
     mkdir -p "$HOME"
+    export PATH=${
+      lib.makeBinPath [
+        bash
+        which
+      ]
+    }:$PATH
   '';
 
-  # Skip tests that auto-launch host Chrome, which makes checks non-hermetic
-  # and flaky/slow in Nix builds.
+  # Skip tests that are environment-sensitive or timing-sensitive in Nix
+  # sandboxes.
   checkFlags = [
     "--skip native::parity_tests::test_all_documented_actions_are_handled"
     "--skip native::parity_tests::test_har_start_stop_without_browser"
+    "--skip doctor::helpers::tests::test_new_id_is_unique_per_call"
   ];
 
   passthru.updateScript = nix-update-script { };

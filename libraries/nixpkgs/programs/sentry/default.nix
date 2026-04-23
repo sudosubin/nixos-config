@@ -10,13 +10,14 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sentry";
-  version = "0.27.0";
+  version = "0.28.1";
+  sentryClientId = "1d673b81d60ef84c951359c36296972ca6fd41bd8f45acd2d3a783a3b3c28e41";
 
   src = fetchFromGitHub {
     owner = "getsentry";
     repo = "cli";
     tag = finalAttrs.version;
-    hash = "sha256-IDjSJNmfMXx0QV1IRrXGtjKLKWLxfmFLTYA7jH3vj4E=";
+    hash = "sha256-J4ozDjMrtGc1nHA3AxYu913Ntb6rgGN4Qbkpl+IkCfI=";
   };
 
   api_schema = stdenvNoCC.mkDerivation {
@@ -88,7 +89,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     dontFixup = true;
 
-    outputHash = "sha256-B5qpReCW8niR22qBGH16n8BYCHN3NNMDTbSTmE0M6gc=";
+    outputHash = "sha256-UPDgbCA9VWS5OsZ59vUNZ1rd9ZmfRIl8C8r02geMcA8=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };
@@ -105,15 +106,15 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     mkdir -p src/generated
     cp ${finalAttrs.api_schema}/api-schema.json src/generated/
 
-    bun run script/generate-skill.ts
-    bun run script/generate-sdk.ts
+    bun run generate:docs
+    bun run generate:sdk
 
     bun build src/bin.ts \
       --outfile dist/bin.js \
       --target bun \
       --minify \
       --define 'SENTRY_CLI_VERSION="${finalAttrs.version}"' \
-      --define 'SENTRY_CLIENT_ID_BUILD="1d673b81d60ef84c951359c36296972ca6fd41bd8f45acd2d3a783a3b3c28e41"' \
+      --define 'SENTRY_CLIENT_ID_BUILD="${finalAttrs.sentryClientId}"' \
       --define 'process.env.NODE_ENV="production"'
 
     runHook postBuild
