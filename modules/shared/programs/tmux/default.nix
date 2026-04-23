@@ -8,9 +8,17 @@ in
   programs.tmux = {
     enable = true;
     keyMode = "vi";
-    terminal = "screen-256color";
+    terminal = "tmux-256color";
     extraConfig = ''
-      set -ga terminal-overrides ',*-256color*:Tc'
+      # terminal features
+      set -as terminal-features ',xterm-256color:RGB:extkeys'
+      set -as terminal-features ',wezterm:RGB:extkeys'
+      set -as terminal-features ',tmux-256color:RGB:extkeys'
+
+      # term
+      set -g allow-passthrough on
+      set -g extended-keys on
+      set -g history-limit 100000
 
       # ctrl+b highlight
       set -g status-right '#{?client_prefix,#[reverse] ^B #[noreverse],} | %a %Y-%m-%d %H:%M'
