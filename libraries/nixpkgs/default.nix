@@ -70,6 +70,8 @@
       clop = final.callPackage ./programs/clop { };
       deepwiki-cli = final.callPackage ./programs/deepwiki-cli { };
       deskpad = final.callPackage ./programs/deskpad { };
+      figma-agent = final.callPackage ./programs/figma-agent { };
+      figma-linux-font-helper = final.callPackage ./programs/figma-linux-font-helper { };
       gh-attach = final.callPackage ./programs/gh-attach { };
       gh-stack = final.callPackage ./programs/gh-stack { };
       git-spr = final.callPackage ./programs/git-spr { };
@@ -108,6 +110,7 @@
       "cursor"
       "cursor-cli"
       "datagrip"
+      "figma-agent"
       "firefox-bin"
       "firefox-bin-unwrapped"
       "homerow"

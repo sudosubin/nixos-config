@@ -61,6 +61,7 @@
         ../shared/programs/container
         ../shared/programs/direnv
         ../shared/programs/firefox
+        ../shared/programs/figma
         ../shared/programs/fonts
         ../shared/programs/git
         ../shared/programs/go
