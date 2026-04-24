@@ -10,14 +10,14 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sentry";
-  version = "0.28.1";
+  version = "0.29.1";
   sentryClientId = "1d673b81d60ef84c951359c36296972ca6fd41bd8f45acd2d3a783a3b3c28e41";
 
   src = fetchFromGitHub {
     owner = "getsentry";
     repo = "cli";
     tag = finalAttrs.version;
-    hash = "sha256-J4ozDjMrtGc1nHA3AxYu913Ntb6rgGN4Qbkpl+IkCfI=";
+    hash = "sha256-8hMSOw2FXBLw5zPySZbWJLGRBP/uOtctJA/jxPCPYyQ=";
   };
 
   api_schema = stdenvNoCC.mkDerivation {
@@ -52,7 +52,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     dontFixup = true;
 
-    outputHash = "sha256-LqnXK+LO/v6g1hrLAz4chMzq8VI9Su2+UinyBpvpdBg=";
+    outputHash = "sha256-l+2iJBiohqWXEbprQ5nJvWi+ck0Jtk/p46IbclB/WJw=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };
@@ -89,7 +89,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     dontFixup = true;
 
-    outputHash = "sha256-UPDgbCA9VWS5OsZ59vUNZ1rd9ZmfRIl8C8r02geMcA8=";
+    outputHash = "sha256-jyS7h3VCSb0ygu9LIpdeJxKPfC5NixsNzoHCeb0Sldc=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };

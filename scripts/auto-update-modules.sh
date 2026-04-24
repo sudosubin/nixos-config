@@ -9,17 +9,25 @@ trap 'rm -f "$ROOT_DIR/default.nix" "$ROOT_DIR/shell.nix"' ERR EXIT
 
 # Create temporary default.nix
 cat > "$ROOT_DIR/default.nix" <<EOF
-{}: import <nixpkgs> {
-  overlays = [
-    (final: prev: {
-      $(cd "$PACKAGES_DIR" && for dir in */default.nix pi-extensions/*/default.nix; do
-        [ -f "$dir" ] || continue
-        pkg="${dir%/default.nix}"
-        attr="${pkg//\//-}"
-        echo "$attr = final.callPackage $PACKAGES_DIR/$pkg { };"
-      done)
-    })
-  ];
+{}:
+let
+  overlay = final: prev:
+    let
+      localPackages = {
+        $(cd "$PACKAGES_DIR" && for dir in */default.nix pi-extensions/*/default.nix; do
+          [ -f "$dir" ] || continue
+          pkg="${dir%/default.nix}"
+          attr="${pkg//\//-}"
+          echo "$attr = final.callPackage $PACKAGES_DIR/$pkg { };"
+        done)
+      };
+    in
+    localPackages // {
+      __localUpdates = localPackages // { recurseForDerivations = true; };
+    };
+in
+import <nixpkgs> {
+  overlays = [ overlay ];
 }
 EOF
 
@@ -33,17 +41,6 @@ EOF
 nixpkgs="$(nix-instantiate --eval --expr "<nixpkgs>")"
 nix-shell "$nixpkgs/maintainers/scripts/update.nix" \
   --arg include-overlays "(import $ROOT_DIR/default.nix { }).overlays" \
-  --arg get-script "(
-    let prefix = \"$PACKAGES_DIR/\"; prefixLen = builtins.stringLength prefix;
-    in (p:
-      if (builtins.substring 0 prefixLen (p.meta.position or \"\")) == prefix then
-        p.updateScript or null
-      else
-        null)
-  )" \
+  --argstr path __localUpdates \
   --argstr keep-going true \
-  --arg predicate "(
-    let prefix = \"$PACKAGES_DIR/\"; prefixLen = builtins.stringLength prefix;
-    in (_: p: (builtins.substring 0 prefixLen (p.meta.position or \"\")) == prefix)
-  )" \
   --argstr skip-prompt true
