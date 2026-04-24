@@ -1,12 +1,20 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }:
 
 let
-  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
+  aws-eks-get-token-cache = pkgs.writeShellApplication {
+    name = "aws-eks-get-token-cache";
+    runtimeInputs = with pkgs; [
+      awscli2
+      coreutils
+      jq
+    ];
+    text = builtins.readFile ./files/aws-eks-get-token-cache.sh;
+    meta.mainProgram = "aws-eks-get-token-cache";
+  };
 
 in
 {
@@ -20,6 +28,7 @@ in
   };
 
   home.packages = with pkgs; [
+    aws-eks-get-token-cache
     kubectl
     kubectl-node-shell
     kubectx
