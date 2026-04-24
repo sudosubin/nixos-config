@@ -137,14 +137,10 @@
           (mkModule "kotlin" { disabled = true; })
           (mkModule "kubernetes" {
             config = {
+              disabled = false;
               format = "[$symbol$context( \\($namespace\\))]($style) ";
               style = "blue";
-              contexts = [
-                {
-                  context_pattern = ".*/(?P<name>[\\w-]+)";
-                  context_alias = "$name";
-                }
-              ];
+              detect_env_vars = [ "KUBECONFIG" ];
             };
           })
           (mkModule "gradle" { disabled = true; })
