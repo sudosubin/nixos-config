@@ -18,6 +18,7 @@ in
       # term
       set -g allow-passthrough on
       set -g extended-keys on
+      set -g extended-keys-format csi-u
       set -g history-limit 100000
 
       # ctrl+b highlight
