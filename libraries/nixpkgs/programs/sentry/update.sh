@@ -2,7 +2,13 @@
 #!nix-shell -i bash -p curl jq coreutils common-updater-scripts perl
 set -eu -o pipefail
 
-latestVersion=$(curl -s https://api.github.com/repos/getsentry/cli/releases/latest | jq -r ".tag_name")
+latestVersion=$(
+  curl -fsSL \
+    -H "Accept: application/vnd.github+json" \
+    ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} \
+    "https://api.github.com/repos/getsentry/cli/releases/latest" \
+      | jq -er ".tag_name"
+)
 currentVersion="$UPDATE_NIX_OLD_VERSION"
 file="$(nix-instantiate --eval -E 'with import ./. {}; (builtins.unsafeGetAttrPos "version" '"${UPDATE_NIX_ATTR_PATH}"').file' | tr -d '"')"
 fakeHash=$(nix eval --raw -f . lib.fakeHash)

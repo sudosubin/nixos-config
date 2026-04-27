@@ -2,7 +2,13 @@
 #!nix-shell -i bash -p curl jq coreutils common-updater-scripts
 set -eu -o pipefail
 
-latestVersion=$(curl -s https://api.github.com/repos/redis/RedisInsight/releases/latest | jq -r ".tag_name")
+latestVersion=$(
+  curl -fsSL \
+    -H "Accept: application/vnd.github+json" \
+    ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} \
+    "https://api.github.com/repos/redis/RedisInsight/releases/latest" \
+      | jq -er ".tag_name"
+)
 currentVersion=$(nix eval --raw -f . redisinsight.version)
 
 echo "latest  version: $latestVersion"
