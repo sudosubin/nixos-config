@@ -15,6 +15,7 @@
 
       home.packages = with pkgs; [
         # Development
+        agent-slack
         curl
         fd
         hadolint

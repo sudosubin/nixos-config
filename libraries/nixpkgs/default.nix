@@ -71,6 +71,7 @@
     })
     (final: prev: {
       agent-browser = final.callPackage ./programs/agent-browser { };
+      agent-slack = final.callPackage ./programs/agent-slack { };
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       ccusage = final.callPackage ./programs/ccusage { };
