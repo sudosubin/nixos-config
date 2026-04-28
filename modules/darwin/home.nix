@@ -15,7 +15,6 @@
 
       home.packages = with pkgs; [
         # Development
-        agent-slack
         curl
         cursor-cli
         devbox
@@ -74,6 +73,7 @@
         ../shared/programs/python
         ../shared/programs/rust
         ../shared/programs/shell
+        ../shared/programs/slack
         ../shared/programs/sqlit
         ../shared/programs/ssh
         ../shared/programs/terminal
