@@ -1,19 +1,30 @@
 {
+  autoPatchelfHook,
   fetchzip,
+  fontconfig,
+  freetype,
   lib,
+  stdenv,
   stdenvNoCC,
+  zlib,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "kotlin-lsp";
-  version = "262.2310.0";
+  version = "262.4739.0";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
-  postPatch = ''
-    substituteInPlace kotlin-lsp.sh \
-      --replace-fail 'chmod +x "$LOCAL_JRE_PATH/bin/java"' '# chmod removed for nixpkgs'
-  '';
+  nativeBuildInputs = lib.optionals stdenvNoCC.hostPlatform.isLinux [
+    autoPatchelfHook
+  ];
+
+  buildInputs = lib.optionals stdenvNoCC.hostPlatform.isLinux [
+    stdenv.cc.cc.lib
+    fontconfig
+    freetype
+    zlib
+  ];
 
   installPhase = ''
     runHook preInstall
@@ -22,14 +33,14 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     cp -r * $out/lib/kotlin-lsp
     ${
       if stdenvNoCC.hostPlatform.isDarwin then
-        "chmod +x $out/lib/kotlin-lsp/jre/Contents/Home/bin/java"
+        "chmod +x $out/lib/kotlin-lsp/jbr/Contents/Home/bin/java"
       else if stdenvNoCC.hostPlatform.isLinux then
-        "chmod +x $out/lib/kotlin-lsp/jre/bin/java"
+        "chmod +x $out/lib/kotlin-lsp/jbr/bin/java"
       else
         "echo 'Unsupported Platform' && exit 1"
     }
-    chmod +x $out/lib/kotlin-lsp/kotlin-lsp.sh
-    ln -s $out/lib/kotlin-lsp/kotlin-lsp.sh $out/bin/kotlin-lsp
+    chmod +x $out/lib/kotlin-lsp/bin/intellij-server
+    ln -s $out/lib/kotlin-lsp/bin/intellij-server $out/bin/kotlin-lsp
 
     runHook postInstall
   '';
@@ -37,24 +48,22 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   passthru = {
     sources = {
       x86_64-linux = fetchzip {
-        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-lsp-${finalAttrs.version}-linux-x64.zip";
-        stripRoot = false;
-        hash = "sha256-Bf2qkFpNhQC/Mz563OapmCXeKN+dTrYyQbOcF6z6b48=";
+        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-server-${finalAttrs.version}.tar.gz";
+        hash = "sha256-I1K/ypOnAtzHJ1btYur/SYAm7FLU2QzKcMjmeFXC+2c=";
       };
       aarch64-linux = fetchzip {
-        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-lsp-${finalAttrs.version}-linux-aarch64.zip";
-        stripRoot = false;
-        hash = "sha256-uyTVY4TX6YCv3/qow+CQeTRpez3PLegDX3OscpKPCUM=";
+        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-server-${finalAttrs.version}-aarch64.tar.gz";
+        hash = "sha256-/h51KBr1ob5RHyVlcdx0YBYYblPGlc+KxVG6y9HdqGs=";
       };
       x86_64-darwin = fetchzip {
-        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-lsp-${finalAttrs.version}-mac-x64.zip";
-        stripRoot = false;
-        hash = "sha256-VoDpfxzLBCvZcJlHmC0yp174s4Urc+cEGw0YA4ctRdE=";
+        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-server-${finalAttrs.version}.sit";
+        extension = "zip";
+        hash = "sha256-glBgiXGfiKHH9rb65eFWgmFsEycei6ZAVa0s/ButYaw=";
       };
       aarch64-darwin = fetchzip {
-        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-lsp-${finalAttrs.version}-mac-aarch64.zip";
-        stripRoot = false;
-        hash = "sha256-d9jImEUN4Np6PY7uczB5hIE89bq9O+hV+Ww1F8WLe68=";
+        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-server-${finalAttrs.version}-aarch64.sit";
+        extension = "zip";
+        hash = "sha256-/Wzvp0vbw8UQfCsHcT5SPLFYxo5clMy86Iy3uGDPOYQ=";
       };
     };
     updateScript = ./update.sh;

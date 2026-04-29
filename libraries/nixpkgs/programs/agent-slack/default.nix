@@ -8,13 +8,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "agent-slack";
-  version = "0.8.5";
+  version = "0.9.1";
 
   src = fetchFromGitHub {
     owner = "stablyai";
     repo = "agent-slack";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-yHxev08b7NGSat83utHUs4voGZbefm/TEHSbsi+VYa8=";
+    hash = "sha256-+uMwZ2XWZioG2OACEazBX8ARoFSezSQehXDFOzo6J+I=";
   };
 
   bunDeps = stdenvNoCC.mkDerivation {

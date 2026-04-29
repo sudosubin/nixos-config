@@ -19,11 +19,17 @@ if [[ "$latestVersion" == "$currentVersion" ]]; then
   exit 0
 fi
 
-declare -A platforms=( [x86_64-linux]="linux-x64" [aarch64-linux]="linux-aarch64" [x86_64-darwin]="mac-x64" [aarch64-darwin]="mac-aarch64" )
+declare -A filenames=(
+  [x86_64-linux]="kotlin-server-$latestVersion.tar.gz"
+  [aarch64-linux]="kotlin-server-$latestVersion-aarch64.tar.gz"
+  [x86_64-darwin]="kotlin-server-$latestVersion.sit"
+  [aarch64-darwin]="kotlin-server-$latestVersion-aarch64.sit"
+)
 
-for platform in "${!platforms[@]}"; do
-  url="https://download-cdn.jetbrains.com/kotlin-lsp/$latestVersion/kotlin-lsp-$latestVersion-${platforms[$platform]}.zip"
-  source=$(nix-prefetch-url "$url" --unpack)
+for platform in "${!filenames[@]}"; do
+  filename=${filenames[$platform]}
+  url="https://download-cdn.jetbrains.com/kotlin-lsp/$latestVersion/$filename"
+  source=$(nix-prefetch-url --unpack --name "${filename/%.sit/.zip}" "$url")
   hash=$(nix-hash --to-sri --type sha256 "$source")
   update-source-version kotlin-lsp "$latestVersion" "$hash" \
     --system="$platform" \
