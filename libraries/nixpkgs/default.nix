@@ -64,6 +64,7 @@
     )
     (final: prev: {
       sqlit-tui = prev.sqlit-tui.overridePythonAttrs (attrs: {
+        patches = (attrs.patches or [ ]) ++ [ ./patches/sqlit-tui-sort-connections.patch ];
         dependencies = (attrs.dependencies or [ ]) ++ [ final.python3Packages.pymysql ];
         disabledTestPaths = (attrs.disabledTestPaths or [ ]) ++ [ "tests/ui" ];
         disabledTests = builtins.filter (test: test != "tests/ui/") (attrs.disabledTests or [ ]);

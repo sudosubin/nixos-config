@@ -1,0 +1,41 @@
+diff --git a/sqlit/domains/connections/ui/screens/connection_picker/tabs/connections.py b/sqlit/domains/connections/ui/screens/connection_picker/tabs/connections.py
+index db8e0b1..7472f25 100644
+--- a/sqlit/domains/connections/ui/screens/connection_picker/tabs/connections.py
++++ b/sqlit/domains/connections/ui/screens/connection_picker/tabs/connections.py
+@@ -16,7 +16,7 @@ def build_connections_options(
+     options: list[Option] = []
+ 
+     saved_options: list[Option] = []
+-    for conn in connections:
++    for conn in sorted(connections, key=lambda c: c.name.lower()):
+         matches, indices = fuzzy_match(pattern, conn.name)
+         if matches or not pattern:
+             display = highlight_matches(conn.name, indices)
+diff --git a/sqlit/domains/explorer/ui/tree/builder.py b/sqlit/domains/explorer/ui/tree/builder.py
+index 0e5c77e..859c3ca 100644
+--- a/sqlit/domains/explorer/ui/tree/builder.py
++++ b/sqlit/domains/explorer/ui/tree/builder.py
+@@ -32,8 +32,8 @@ def _sort_connections_for_display(connections: list[Any]) -> list[Any]:
+         grouped[folder_path].append(conn)
+ 
+     ordered: list[Any] = []
+-    for folder_path in order:
+-        ordered.extend(grouped[folder_path])
++    for folder_path in sorted(order, key=str.lower):
++        ordered.extend(sorted(grouped[folder_path], key=lambda c: (getattr(c, "name", "") or "").lower()))
+     return ordered
+ 
+ 
+diff --git a/tests/integration/test_explorer_refresh_cursor.py b/tests/integration/test_explorer_refresh_cursor.py
+index 67d8984..02ea7a0 100644
+--- a/tests/integration/test_explorer_refresh_cursor.py
++++ b/tests/integration/test_explorer_refresh_cursor.py
+@@ -96,7 +96,7 @@ async def test_explorer_refresh_keeps_cursor_on_connection() -> None:
+             if child_config:
+                 ordered_names.append(child_config.name)
+ 
+-        assert ordered_names == ["Charlie", "Bravo", "Alpha"]
++        assert ordered_names == ["Alpha", "Bravo", "Charlie"]
+         assert config.name == "Bravo"
+         assert config.name not in {ordered_names[0], ordered_names[-1]}
+ 
