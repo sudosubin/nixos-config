@@ -115,7 +115,6 @@
       "1password-cli"
       "amp-cli"
       "claude-code"
-      "claude-code-bin"
       "cleanshot"
       "cursor"
       "cursor-cli"

@@ -25,7 +25,7 @@
 
   programs.claude-code = {
     enable = true;
-    package = pkgs.claude-code-bin;
+    package = pkgs.claude-code;
 
     settings = {
       alwaysThinkingEnabled = true;
@@ -47,6 +47,7 @@
       permissions = {
         defaultMode = "bypassPermissions";
       };
+      skipDangerousModePermissionPrompt = true;
       spinnerVerbs = {
         mode = "replace";
         verbs = [ "Working" ];
