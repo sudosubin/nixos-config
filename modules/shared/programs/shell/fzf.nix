@@ -16,6 +16,7 @@ in
       "--color=marker:${colors.ansi.blue},spinner:${colors.ansi.yellow},header:${colors.ansi.blue}"
       "--height=40%"
       "--layout=reverse"
+      "--prompt= "
     ];
     fileWidgetCommand = defaultCommand;
   };
