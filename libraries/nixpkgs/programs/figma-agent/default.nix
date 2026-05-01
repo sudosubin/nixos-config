@@ -7,7 +7,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "figma-agent";
-  version = "126.1.2";
+  version = "126.3.12";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -27,11 +27,11 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     sources = {
       aarch64-darwin = fetchurl {
         url = "https://desktop.figma.com/agent/mac-arm/FigmaAgent-${finalAttrs.version}.zip";
-        hash = "sha256-GHeiXX1/juTtotuNJH0BAV+kzIlgPxanx2/3FUjIdhE=";
+        hash = "sha256-4lzCdX31wJWOwYWtIKMFUhNX41R5+ocUC1aULKNYklY=";
       };
       x86_64-darwin = fetchurl {
         url = "https://desktop.figma.com/agent/mac/FigmaAgent-${finalAttrs.version}.zip";
-        hash = "sha256-mbo3UF7tlbsaYI3O7yrpT/8x/bMBH9tthFcj3DQA/ZE=";
+        hash = "sha256-Vh0oyN8dLVljRWa3W5RixzR2ssFx/u5iHZWYjhi1djk=";
       };
     };
     updateScript = ./update.sh;
