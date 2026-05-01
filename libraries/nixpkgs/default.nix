@@ -103,6 +103,7 @@
       redisinsight = final.callPackage ./programs/redisinsight { };
       sentry = final.callPackage ./programs/sentry { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
+      sqlitx = final.callPackage ./programs/sqlitx { };
       wtp = final.callPackage ./programs/wtp { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })

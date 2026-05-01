@@ -1,6 +1,8 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
+  home.packages = [ pkgs.sqlitx ];
+
   programs.sqlit = {
     enable = true;
     configDir = ".config/sqlit";
