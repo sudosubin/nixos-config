@@ -7,13 +7,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi-interactive-shell.ts";
-  version = "0.71.0";
+  version = "0.72.1";
 
   src = fetchFromGitHub {
     owner = "badlogic";
     repo = "pi-mono";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-SDfA+dKW7dCUMp0sjcB7B3gnX+0hcoNROREUH+aSTMo=";
+    hash = "sha256-SqUxghc60P3HfmaFJGB/m23mvzw0cD7cDEUrNFOqo0Y=";
   };
 
   dontBuild = true;

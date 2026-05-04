@@ -74,7 +74,7 @@ in
     "${configDir}/User/settings.json".source = ./files/settings.json;
   };
 
-  programs.vscode = rec {
+  programs.cursor = rec {
     enable = true;
     package = overlays.code-cursor;
     profiles.default.extensions =
