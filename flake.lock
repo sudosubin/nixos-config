@@ -58,29 +58,6 @@
         "type": "github"
       }
     },
-    "home-manager-secrets": {
-      "inputs": {
-        "lefthook": [
-          "lefthook"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1744208439,
-        "narHash": "sha256-2Nos2djaufVzcwfJM8cCW5fEW6mQnBVnqJiCoNPFITA=",
-        "owner": "sudosubin",
-        "repo": "home-manager-secrets",
-        "rev": "c6081807eb971924495860f3be1cd39411be2e7c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sudosubin",
-        "repo": "home-manager-secrets",
-        "type": "github"
-      }
-    },
     "lefthook": {
       "inputs": {
         "nixpkgs": [
@@ -164,10 +141,10 @@
     "nixos-config-private-karrot": {
       "locked": {
         "dir": "karrot",
-        "lastModified": 1777267239,
-        "narHash": "sha256-IJHzDKJ7S5G86SN2RF+JxtRSpeVwoQDC8aZ8j+OWCkE=",
+        "lastModified": 1778063425,
+        "narHash": "sha256-Fr/OntssutlNQ0y3WC67GA2rhQ3xsqGWj/I2v+e6CBo=",
         "ref": "main",
-        "rev": "f006e09acebcb588927a9ae9a1be58ed8dba0875",
+        "rev": "b1cf907e0c12e160536af8086df5f2cd248c052f",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private"
@@ -183,10 +160,10 @@
     "nixos-config-private-sudosubin": {
       "locked": {
         "dir": "sudosubin",
-        "lastModified": 1777267239,
-        "narHash": "sha256-IJHzDKJ7S5G86SN2RF+JxtRSpeVwoQDC8aZ8j+OWCkE=",
+        "lastModified": 1778063425,
+        "narHash": "sha256-Fr/OntssutlNQ0y3WC67GA2rhQ3xsqGWj/I2v+e6CBo=",
         "ref": "main",
-        "rev": "f006e09acebcb588927a9ae9a1be58ed8dba0875",
+        "rev": "b1cf907e0c12e160536af8086df5f2cd248c052f",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/sudosubin/nixos-config-private"
@@ -235,7 +212,6 @@
         "firefox-addons": "firefox-addons",
         "flake-utils": "flake-utils",
         "home-manager": "home-manager",
-        "home-manager-secrets": "home-manager-secrets",
         "lefthook": "lefthook",
         "nix-darwin": "nix-darwin",
         "nix-skills": "nix-skills",
@@ -243,7 +219,28 @@
         "nixos-config-private-karrot": "nixos-config-private-karrot",
         "nixos-config-private-sudosubin": "nixos-config-private-sudosubin",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "sops-nix": "sops-nix"
+      }
+    },
+    "sops-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1777944972,
+        "narHash": "sha256-VfGRo1qTBKOe3s2gOv8LSoA6Fk19PvBlwQ1ECN0Evn8=",
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "rev": "c591bf665727040c6cc5cb409079acb22dcce33c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "type": "github"
       }
     }
   },

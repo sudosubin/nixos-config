@@ -43,11 +43,7 @@
         unzip
       ];
 
-      secrets = {
-        mount = "${config.xdg.cacheHome}/home-manager-secrets";
-        identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
-        enableForceReload = true;
-      };
+      sops.age.sshKeyPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
 
       imports = [
         inputs.nixos-config-private-karrot.homeManagerModules.karrot

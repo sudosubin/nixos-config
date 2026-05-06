@@ -14,12 +14,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    home-manager-secrets = {
-      url = "github:sudosubin/home-manager-secrets";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.lefthook.follows = "lefthook";
-    };
-
     lefthook = {
       url = "github:sudosubin/lefthook.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -53,6 +47,11 @@
     };
 
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

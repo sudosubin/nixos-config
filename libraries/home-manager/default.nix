@@ -11,8 +11,8 @@ let
 in
 {
   home-manager.sharedModules = [
-    # home-manager-secrets (nix flake input)
-    inputs.home-manager-secrets.homeManagerModules.home-manager-secrets
+    # sops-nix (nix flake input)
+    inputs.sops-nix.homeManagerModules.sops
 
     # local programs (local)
     ./programs/1password
