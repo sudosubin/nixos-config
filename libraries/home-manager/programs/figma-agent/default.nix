@@ -34,6 +34,10 @@ in
     }
 
     (lib.mkIf (cfg.enable && isDarwin) {
+      # Stable path for figma_agent's Login Items entry; avoids Finder on boot.
+      home.file."Library/Application Support/Figma/FigmaAgent.app".source =
+        "${cfg.package}/Applications/FigmaAgent.app";
+
       launchd.agents.figma-agent = {
         enable = true;
         config = {
