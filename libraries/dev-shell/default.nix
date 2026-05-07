@@ -34,7 +34,9 @@ in
         ];
 
         shellHook = ''
-          export GITHUB_TOKEN="''${GITHUB_TOKEN:-$(gh auth token 2>/dev/null || true)}"
+          export GITHUB_TOKEN="''${GITHUB_TOKEN:-$(nix config show access-tokens | grep "github.com=" | cut -d= -f2 2>/dev/null || true)}"
+          export NIX_GITHUB_PRIVATE_USERNAME="''${NIX_GITHUB_PRIVATE_USERNAME:-x-access-token}"
+          export NIX_GITHUB_PRIVATE_PASSWORD="''${NIX_GITHUB_PRIVATE_PASSWORD:-$GITHUB_TOKEN}"
         '';
       };
   });

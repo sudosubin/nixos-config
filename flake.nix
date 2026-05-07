@@ -37,12 +37,12 @@
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
     nixos-config-private-karrot = {
-      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=karrot&shallow=1";
+      url = "github:sudosubin/nixos-config-private?dir=karrot";
       # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/karrot";
     };
 
     nixos-config-private-sudosubin = {
-      url = "git+ssh://git@github.com/sudosubin/nixos-config-private?ref=main&dir=sudosubin&shallow=1";
+      url = "github:sudosubin/nixos-config-private?dir=sudosubin";
       # url = "path:/Users/elvin/Code/github.com/sudosubin/nixos-config-private/sudosubin";
     };
 
@@ -60,6 +60,7 @@
       home-manager,
       nix-darwin,
       nixpkgs,
+      sops-nix,
       ...
     }@inputs:
     let
@@ -74,8 +75,8 @@
         system = "aarch64-darwin";
         modules = [
           home-manager-shared
-          nixpkgs-shared
           home-manager.darwinModules.home-manager
+          nixpkgs-shared
           ./modules/shared/configuration.nix
           ./modules/darwin/configuration.nix
           ./modules/darwin/home.nix
@@ -87,8 +88,8 @@
         system = "x86_64-linux";
         modules = [
           home-manager-shared
-          nixpkgs-shared
           home-manager.nixosModules.home-manager
+          nixpkgs-shared
           ./modules/shared/configuration.nix
           ./modules/linux/configuration.nix
           ./modules/linux/home.nix

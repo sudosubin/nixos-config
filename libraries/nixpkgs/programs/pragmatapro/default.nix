@@ -1,4 +1,5 @@
 {
+  fetchFromGitHub,
   lib,
   nerd-font-patcher,
   stdenvNoCC,
@@ -8,9 +9,12 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pragmatapro";
   version = "0.829";
 
-  src = builtins.fetchGit {
-    url = "ssh://git@github.com/sudosubin/pragmatapro.git";
+  src = fetchFromGitHub {
+    owner = "sudosubin";
+    repo = "pragmatapro";
     rev = "e8d972e226f64f844c710ae83272faa29c7cfbef";
+    private = true;
+    hash = "sha256-GKRqep/foC+si+YVJuLH/ee7xP6aRSJrhCkxKICk/E8=";
   };
 
   nativeBuildInputs = [ nerd-font-patcher ];
