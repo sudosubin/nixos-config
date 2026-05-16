@@ -126,6 +126,9 @@ in
       ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx-release; [
         eamodio.gitlens
       ])
+      ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).vscode-marketplace; [
+        typescriptteam.native-preview
+      ])
       ++ [
         overlays.pkief.material-icon-theme
       ];
