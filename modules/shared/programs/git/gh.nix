@@ -28,6 +28,7 @@ in
       editor = "";
       git_protocol = "https";
       prompt = "enabled";
+      telemetry = "disabled";
     };
     gitCredentialHelper.enable = false;
   };
