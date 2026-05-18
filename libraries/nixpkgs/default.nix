@@ -79,6 +79,7 @@
       ccusage-pi = final.callPackage ./programs/ccusage-pi { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
+      damn-my-slow-kt = final.callPackage ./programs/damn-my-slow-kt { };
       deepwiki-cli = final.callPackage ./programs/deepwiki-cli { };
       deskpad = final.callPackage ./programs/deskpad { };
       figma-agent = final.callPackage ./programs/figma-agent { };
