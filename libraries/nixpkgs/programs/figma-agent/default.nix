@@ -1,48 +1,31 @@
 {
-  fetchurl,
+  fetchFromGitHub,
   lib,
-  stdenvNoCC,
-  unzip,
+  nix-update-script,
+  rustPlatform,
 }:
 
-stdenvNoCC.mkDerivation (finalAttrs: {
+rustPlatform.buildRustPackage (finalAttrs: {
   pname = "figma-agent";
-  version = "126.3.12";
+  version = "0.2.1";
 
-  src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
-
-  nativeBuildInputs = [ unzip ];
-
-  installPhase = ''
-    runHook preInstall
-
-    mkdir -p "$out/Applications" "$out/bin"
-    cp -R . "$out/Applications/FigmaAgent.app"
-    ln -s "$out/Applications/FigmaAgent.app/Contents/MacOS/figma_agent" "$out/bin/figma-agent"
-
-    runHook postInstall
-  '';
-
-  passthru = {
-    sources = {
-      aarch64-darwin = fetchurl {
-        url = "https://desktop.figma.com/agent/mac-arm/FigmaAgent-${finalAttrs.version}.zip";
-        hash = "sha256-4lzCdX31wJWOwYWtIKMFUhNX41R5+ocUC1aULKNYklY=";
-      };
-      x86_64-darwin = fetchurl {
-        url = "https://desktop.figma.com/agent/mac/FigmaAgent-${finalAttrs.version}.zip";
-        hash = "sha256-Vh0oyN8dLVljRWa3W5RixzR2ssFx/u5iHZWYjhi1djk=";
-      };
-    };
-    updateScript = ./update.sh;
+  src = fetchFromGitHub {
+    owner = "sudosubin";
+    repo = "figma-agent";
+    tag = "v${finalAttrs.version}";
+    hash = "sha256-u3LgZd/wLRjO6cWleV9edI6Wi/yfsZ8N6t8F9iKjCps=";
   };
+
+  cargoHash = "sha256-PyFIh9EBYYmfyiGYle17Ek/kkxePk3aZKyJn5yiJLFk=";
+
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     mainProgram = "figma-agent";
-    description = "Local Figma agent server";
-    homepage = "https://www.figma.com/";
-    license = lib.licenses.unfree;
+    description = "Local font helper for Figma, Linux and macOS";
+    homepage = "https://github.com/sudosubin/figma-agent";
+    license = lib.licenses.mit;
     maintainers = with lib.maintainers; [ sudosubin ];
-    platforms = builtins.attrNames finalAttrs.passthru.sources;
+    platforms = lib.platforms.unix;
   };
 })
