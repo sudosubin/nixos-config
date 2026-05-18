@@ -90,6 +90,7 @@
       homerow = final.callPackage ./programs/homerow { };
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       kotlin-lsp-wrapper = final.callPackage ./programs/kotlin-lsp-wrapper { };
+      kt-speed-client = final.callPackage ./programs/kt-speed-client { };
       linear-cli = final.callPackage ./programs/linear-cli { };
       music-decoy = final.callPackage ./programs/music-decoy { };
       nanum-square = final.callPackage ./programs/fonts/nanum-square { };
@@ -125,6 +126,7 @@
       "homerow"
       "idea"
       "ijhttp"
+      "kt-speed-client"
       "ngrok"
       "orbstack"
       "postman"
