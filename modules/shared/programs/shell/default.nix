@@ -28,6 +28,9 @@
     enable = true;
     historySize = 1000000;
     historyFileSize = 1000000;
+    profileExtra = ''
+      export PATH="$PATH:$HOME/.local/bin"
+    '';
     initExtra = lib.mkOrder 0 ''
       if [ -n "$CLAUDECODE" ]; then
         if command -v direnv >/dev/null 2>&1; then
