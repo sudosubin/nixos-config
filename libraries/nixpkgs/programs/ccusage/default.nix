@@ -6,6 +6,8 @@
   nix-update-script,
   nodejs_24,
   pnpm,
+  pnpmConfigHook,
+  fetchPnpmDeps,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
@@ -21,7 +23,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   nativeBuildInputs = [
     nodejs_24
-    pnpm.configHook
+    pnpm
+    pnpmConfigHook
     makeBinaryWrapper
   ];
 
@@ -31,7 +34,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     "@ccusage/internal"
   ];
 
-  pnpmDeps = pnpm.fetchDeps {
+  pnpmDeps = fetchPnpmDeps {
     inherit (finalAttrs)
       pname
       version
