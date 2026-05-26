@@ -7,16 +7,16 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "grep-app-cli";
-  version = "0.1.0";
+  version = "0.1.1";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "grep-app-cli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-pM+Z7oBNFrYmSrL66mFOBcnpdSUB+VvOWCuP8bhNlHI=";
+    hash = "sha256-adOaAhZkRvvyLZ39PcqG0jBULjcaEoVhTmyoKAaAiD4=";
   };
 
-  cargoHash = "sha256-hiIr02G0G2jmHvxRrijS/xKnRams5XxZBMoe5GwpB1I=";
+  cargoHash = "sha256-P7wCDXF/x3qeif8nDsBEMo22QibM3hDx2Rirdn+5wMc=";
 
   passthru.updateScript = nix-update-script { };
 

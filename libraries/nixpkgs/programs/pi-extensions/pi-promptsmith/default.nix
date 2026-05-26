@@ -7,13 +7,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi-promptsmith";
-  version = "0.3.1";
+  version = "0.4.0";
 
   src = fetchFromGitHub {
     owner = "ayagmar";
     repo = "pi-promptsmith";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-PVBwR4LKYSYz9PWza7zW2+4ko/9bIwv+JuJyBttLrsA=";
+    hash = "sha256-eBMzQbmbi8shudqyz96DHAnoNiWYcD+ACJKq/sWhzYQ=";
   };
 
   patches = [

@@ -1,80 +1,39 @@
 {
-  lib,
-  stdenvNoCC,
   fetchFromGitHub,
-  makeBinaryWrapper,
+  fetchurl,
+  lib,
   nix-update-script,
-  nodejs_24,
-  pnpm,
-  pnpmConfigHook,
-  fetchPnpmDeps,
+  rustPlatform,
+  versionCheckHook,
 }:
 
-stdenvNoCC.mkDerivation (finalAttrs: {
+rustPlatform.buildRustPackage (finalAttrs: {
   pname = "ccusage";
-  version = "18.0.11";
+  version = "20.0.5";
 
   src = fetchFromGitHub {
     owner = "ryoppippi";
     repo = "ccusage";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-EzHFKZVq0okgRumxn6+4rfxDtz0jY6FBoO9eyrGX4ys=";
+    hash = "sha256-BbjNh3yHu/Cn6edKLMzj+2GfjZpZxplM56qYx0+SmJQ=";
+  };
+
+  cargoRoot = "rust";
+  buildAndTestSubdir = finalAttrs.cargoRoot;
+  cargoHash = "sha256-ce2Zq0w0tcpgsvt7UhokajBAIi3HX421AT6RWjhkxX8=";
+
+  litellmPricingJson = fetchurl {
+    url = "https://raw.githubusercontent.com/BerriAI/litellm/e59e34bed3670a6894d43129c2af16af28057d03/model_prices_and_context_window.json";
+    hash = "sha256-aPue4NpPpTKAtAYCI8S8ojmVCDtYr+mxwtYkOASEg3w=";
   };
 
   nativeBuildInputs = [
-    nodejs_24
-    pnpm
-    pnpmConfigHook
-    makeBinaryWrapper
+    versionCheckHook
   ];
 
-  pnpmWorkspaces = [
-    "ccusage"
-    "@ccusage/terminal"
-    "@ccusage/internal"
-  ];
+  env.CCUSAGE_PRICING_JSON_PATH = "${finalAttrs.litellmPricingJson}";
 
-  pnpmDeps = fetchPnpmDeps {
-    inherit (finalAttrs)
-      pname
-      version
-      src
-      pnpmWorkspaces
-      ;
-    fetcherVersion = 2;
-    hash = "sha256-mvcrnqL+xraAqF9A6XFHCmR9hRGsTQTE80P6DGRvj+c=";
-  };
-
-  postPatch = ''
-    substituteInPlace apps/ccusage/package.json \
-      --replace-fail '"build": "pnpm run generate:schema && tsdown"' '"build": "tsdown"'
-  '';
-
-  buildPhase = ''
-    runHook preBuild
-
-    pnpm run --filter ccusage... build
-
-    rm node_modules/.modules.yaml
-    rm node_modules/.pnpm-workspace-state-v1.json
-    find . -type d -name .bin -exec rm -r {} +
-
-    runHook postBuild
-  '';
-
-  installPhase = ''
-    runHook preInstall
-
-    mkdir -p $out/{bin,lib/ccusage/apps}
-    cp -r apps/ccusage $out/lib/ccusage/apps/
-    cp -r node_modules package.json packages $out/lib/ccusage/
-
-    makeWrapper ${lib.getExe nodejs_24} $out/bin/ccusage \
-      --inherit-argv0 \
-      --add-flags $out/lib/ccusage/apps/ccusage/dist/index.js
-
-    runHook postInstall
-  '';
+  doInstallCheck = true;
 
   passthru.updateScript = nix-update-script { };
 

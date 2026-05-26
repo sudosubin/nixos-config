@@ -4,6 +4,7 @@
   fetchPnpmDeps,
   lib,
   nix-update-script,
+  nodejs_22,
   nodejs_24,
   pnpm,
   pnpmConfigHook,
@@ -11,24 +12,28 @@
   which,
 }:
 
+let
+  pnpm' = pnpm.override { nodejs = nodejs_22; };
+
+in
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "agent-browser";
-  version = "0.26.0";
+  version = "0.27.0";
 
   src = fetchFromGitHub {
     owner = "vercel-labs";
     repo = "agent-browser";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-q3UcFTB8OMOrfx5xcNPtBBAwOxoscwrjGg+y8tdETm0=";
+    hash = "sha256-c+AJAXMX88t+zzFsEAtFJDjDY5EbhmEyMRGFL4t63nE=";
   };
 
   cargoRoot = "cli";
   buildAndTestSubdir = finalAttrs.cargoRoot;
-  cargoHash = "sha256-ENIGFhZ+pXIZvEFUA0No3HpeHtxgJohMgx6F0wNpmO0=";
+  cargoHash = "sha256-2u7yokHCxIVq16370Mg+n5kf03yUDYJmctFxN1fnaAA=";
 
   nativeBuildInputs = [
     nodejs_24
-    pnpm
+    pnpm'
     pnpmConfigHook
   ];
 
@@ -46,12 +51,14 @@ rustPlatform.buildRustPackage (finalAttrs: {
       src
       pnpmWorkspaces
       ;
-    fetcherVersion = 2;
-    hash = "sha256-M29MITaUUYPvg7h8A0oGrrT9oerBE97RFd6apiwOlBM=";
+    pnpm = pnpm';
+    fetcherVersion = 3;
+    hash = "sha256-e7KlsuqS1YRcdQbKJwH9Dd6N28tYM3nPinJB5ZzSbp4=";
   };
 
   preBuild = ''
     export NEXT_TELEMETRY_DISABLED=1
+    export NEXT_CPUS=1
     pnpm --dir packages/dashboard build
   '';
 

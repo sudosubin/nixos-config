@@ -6,11 +6,11 @@
 
 {
   home.packages = with pkgs; [
-    ccusage
-    (ccusage-pi.overrideAttrs (finalAttrs: {
-      installPhase = finalAttrs.installPhase + ''
-        wrapProgram $out/bin/ccusage-pi \
-          --set PI_AGENT_DIR "${config.xdg.configHome}/pi/agent"
+    (ccusage.overrideAttrs (oldAttrs: {
+      nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ makeWrapper ];
+      postInstall = (oldAttrs.postInstall or "") + ''
+        wrapProgram $out/bin/ccusage \
+          --set PI_AGENT_DIR "${config.xdg.configHome}/pi/agent/sessions"
       '';
     }))
     deepwiki-cli
