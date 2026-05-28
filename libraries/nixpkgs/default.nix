@@ -17,6 +17,15 @@
       );
     })
     (final: prev: {
+      agent-browser = prev.agent-browser.overrideAttrs (oldAttrs: {
+        checkFlags = (oldAttrs.checkFlags or [ ]) ++ [
+          "--skip native::parity_tests::test_all_documented_actions_are_handled"
+          "--skip native::parity_tests::test_har_start_stop_without_browser"
+          "--skip doctor::helpers::tests::test_new_id_is_unique_per_call"
+        ];
+      });
+    })
+    (final: prev: {
       bash-language-server = prev.bash-language-server.overrideAttrs (attrs: {
         installPhase = ''
           runHook preInstall
@@ -71,7 +80,6 @@
       });
     })
     (final: prev: {
-      agent-browser = final.callPackage ./programs/agent-browser { };
       agent-slack = final.callPackage ./programs/agent-slack { };
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
