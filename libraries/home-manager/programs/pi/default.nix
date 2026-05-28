@@ -33,7 +33,7 @@ in
   options.programs.pi = {
     enable = lib.mkEnableOption "pi";
 
-    package = lib.mkPackageOption pkgs "pi" { };
+    package = lib.mkPackageOption pkgs "pi-coding-agent" { };
 
     configDir = lib.mkOption {
       type = lib.types.str;
