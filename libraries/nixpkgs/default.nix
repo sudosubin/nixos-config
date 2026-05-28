@@ -83,7 +83,7 @@
       deskpad = final.callPackage ./programs/deskpad { };
       figma-agent = final.callPackage ./programs/figma-agent { };
       gh-attach = final.callPackage ./programs/gh-attach { };
-      gh-stack = final.callPackage ./programs/gh-stack { };
+
       git-spr = final.callPackage ./programs/git-spr { };
       grep-app-cli = final.callPackage ./programs/grep-app-cli { };
       hammerspoon = final.callPackage ./programs/hammerspoon { };

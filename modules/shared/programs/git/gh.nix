@@ -21,7 +21,6 @@ in
     enable = true;
     extensions = with pkgs; [
       gh-attach
-      gh-stack
     ];
     settings = {
       aliases = { };
