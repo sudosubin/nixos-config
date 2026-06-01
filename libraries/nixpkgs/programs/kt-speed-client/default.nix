@@ -11,11 +11,11 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "kt-speed-client";
-  version = "3.0.5";
+  version = "3.0.6";
 
   src = fetchurl {
     url = "https://speed.kt.com/file/ktspeed.pkg";
-    hash = "sha256-fA6Jpf9Ahp+Bcs4I1o9SIkbwDTCUr6MVQr2yutqanVU=";
+    hash = "sha256-8oCvX/OeNnMCwg+wEoZOzebVCdHLNUJDyyh1EUxG/vk=";
   };
 
   nativeBuildInputs = [

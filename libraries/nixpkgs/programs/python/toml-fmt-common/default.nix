@@ -12,14 +12,14 @@
 
 buildPythonPackage rec {
   pname = "toml-fmt-common";
-  version = "1.3.1";
+  version = "1.3.5";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt";
-    rev = "b7a4e8e0772f2a4cf82be1b624af7543363a0661";
-    hash = "sha256-3hVw0m7v9c/+GPdXgvAUOa60oS1dh5PG3ItPCsfAZls=";
+    rev = "bc9ee6239734bd2c99be6b7c6ce99e4b2914544e";
+    hash = "sha256-Tiwq3995nzfTyEYSgxqdoosk1XwVfMLGh2JypOPTeI4=";
   };
 
   sourceRoot = "${src.name}/toml-fmt-common";

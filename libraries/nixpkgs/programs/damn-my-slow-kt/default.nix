@@ -10,17 +10,17 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "damn-my-slow-kt";
-  version = "0.5.26";
+  version = "0.5.27";
 
   src = fetchFromGitHub {
     owner = "kargnas";
     repo = "damn-my-slow-kt";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-4S86frx83fAK5+hKpzfuZGTD1rcNNLmd22358xUUCUw=";
+    hash = "sha256-dz0CmSaGSwlGq0JYjcH3SNZ+8EBlkDAaki66POFiWjM=";
   };
 
   nodejs = nodejs_24;
-  npmDepsHash = "sha256-dotsF+VpMbjPmW2d47z+LVR9vrZQ3RetTvbZWZAxGBQ=";
+  npmDepsHash = "sha256-l5JuyBneViNSMzyNkO0SaIIlElw43qCFaqSLnd53PCw=";
 
   nativeBuildInputs = [ makeWrapper ];
 

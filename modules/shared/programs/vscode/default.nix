@@ -101,7 +101,7 @@ in
         graphql.vscode-graphql
         graphql.vscode-graphql-syntax
         hashicorp.terraform
-        jnoortheen.nix-ide
+        # jnoortheen.nix-ide
         kevinrose.vsc-python-indent
         ms-pyright.pyright
         ms-python.debugpy
