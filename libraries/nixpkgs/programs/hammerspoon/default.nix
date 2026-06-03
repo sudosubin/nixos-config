@@ -1,7 +1,6 @@
 {
   fetchzip,
   lib,
-  nix-update-script,
   stdenvNoCC,
 }:
 
@@ -19,7 +18,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     cp -R . "$out/Applications/Hammerspoon.app"
   '';
 
-  passthru.updateScript = nix-update-script { };
+  passthru.updateScript = ./update.sh;
 
   meta = {
     description = "Staggeringly powerful macOS desktop automation with Lua";
