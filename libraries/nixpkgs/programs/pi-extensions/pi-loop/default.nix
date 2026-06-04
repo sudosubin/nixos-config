@@ -7,13 +7,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi-loop.ts";
-  version = "1.6.0-unstable-2026-05-28";
+  version = "1.6.0-unstable-2026-06-01";
 
   src = fetchFromGitHub {
     owner = "mitsuhiko";
     repo = "agent-stuff";
-    rev = "39e6911d27f0733687560e971a7455ce2ef07cc1";
-    hash = "sha256-7GzAh4p/yOXDTyrvgwci3IlHYjBjA8hanyRkIMIn2w4=";
+    rev = "2ac44802c3629e8feb3e46ccf16c3928a4b356d6";
+    hash = "sha256-2860bugsgoXmEsVhdJCzPJGFoeKusr17O+dsPpOZaBY=";
   };
 
   dontBuild = true;

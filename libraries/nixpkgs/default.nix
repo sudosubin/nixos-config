@@ -72,6 +72,15 @@
       }
     )
     (final: prev: {
+      pi-coding-agent = prev.pi-coding-agent.overrideAttrs (oldAttrs: {
+        postInstall =
+          builtins.replaceStrings
+            [ ''find "$nm/koffi/build/koffi"'' ]
+            [ ''! [ -d "$nm/koffi/build/koffi" ] || find "$nm/koffi/build/koffi"'' ]
+            oldAttrs.postInstall;
+      });
+    })
+    (final: prev: {
       sqlit-tui = prev.sqlit-tui.overridePythonAttrs (attrs: {
         patches = (attrs.patches or [ ]) ++ [ ./patches/sqlit-tui-sort-connections.patch ];
         dependencies = (attrs.dependencies or [ ]) ++ [ final.python3Packages.pymysql ];
