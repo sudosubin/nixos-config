@@ -1,27 +1,28 @@
 {
-  bun,
   fetchFromGitHub,
   fetchurl,
   lib,
   makeBinaryWrapper,
   nix-update-script,
+  nodejs_24,
+  pnpm_10,
   stdenvNoCC,
   writableTmpDirAsHomeHook,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sentry";
-  version = "0.34.0";
+  version = "0.35.0";
   sentryClientId = "1d673b81d60ef84c951359c36296972ca6fd41bd8f45acd2d3a783a3b3c28e41";
 
   src = fetchFromGitHub {
     owner = "getsentry";
     repo = "cli";
     tag = finalAttrs.version;
-    hash = "sha256-OURZ6ZSv7PHkw+Yb/njp2b3Jf5EOfzTNG4zbS1iZ5mc=";
+    hash = "sha256-CpQyzvD7aMJWS8a0piwHLEdjl8rUF2XbiGo5yP/enK4=";
   };
 
-  # @sentry/api version pinned in bun.lock; determines the OpenAPI spec tag
+  # @sentry/api version pinned in pnpm-lock.yaml; determines the OpenAPI spec tag
   sentryApiVersion = "0.141.0";
 
   openapi_spec = fetchurl {
@@ -39,16 +40,21 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     ];
 
     nativeBuildInputs = [
-      bun
+      nodejs_24
+      pnpm_10
       writableTmpDirAsHomeHook
     ];
 
     dontConfigure = true;
 
+    # Add .npmrc, package.json, pnpm-workspace.yaml patches
+    patches = [ ./pnpm-workspace.patch ];
+
     buildPhase = ''
       runHook preBuild
-      export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
-      bun install --frozen-lockfile --no-progress
+      pnpm install --frozen-lockfile
+      # Prevent timestamp and absolute build paths recorded by pnpm
+      rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json
       runHook postBuild
     '';
 
@@ -61,39 +67,38 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     dontFixup = true;
 
-    outputHash = "sha256-XsixZfs4U5EuVEqyLNikkNSm54pEX4wQuOM2uny3Cgs=";
+    outputHash = "sha256-hruS16AN8H32ZIW9hwNnyHgS85Bz8Ypulh6mG+Re8b8=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };
 
   nativeBuildInputs = [
-    bun
     makeBinaryWrapper
+    nodejs_24
+    pnpm_10
   ];
+
+  # Add .npmrc, package.json, pnpm-workspace.yaml patches
+  patches = [ ./pnpm-workspace.patch ];
+
+  postPatch = ''
+    # Prevent schema fetch by replacing the OpenAPI spec with nix derivation
+    substituteInPlace script/generate-api-schema.ts \
+      --replace-fail \
+        'await fetch(openApiUrl)' \
+        'await (async () => ({ ok: true, json: async () => JSON.parse(require("fs").readFileSync("${finalAttrs.openapi_spec}", "utf-8")) }))()'
+  '';
 
   buildPhase = ''
     runHook preBuild
 
     export HOME=$TMPDIR
+    export SENTRY_CLIENT_ID="${finalAttrs.sentryClientId}"
 
     cp -r ${finalAttrs.node_modules}/node_modules .
     chmod -R u+w node_modules
 
-    substituteInPlace script/generate-api-schema.ts \
-      --replace-fail 'await fetch(openApiUrl)' \
-        'await (async () => ({ ok: true, json: async () => JSON.parse(require("fs").readFileSync("${finalAttrs.openapi_spec}", "utf-8")) }))()'
-
-    bun run generate:schema
-    bun run generate:docs
-    bun run generate:sdk
-
-    bun build src/bin.ts \
-      --outdir dist \
-      --target bun \
-      --minify \
-      --define 'SENTRY_CLI_VERSION="${finalAttrs.version}"' \
-      --define 'SENTRY_CLIENT_ID_BUILD="${finalAttrs.sentryClientId}"' \
-      --define 'process.env.NODE_ENV="production"'
+    pnpm run bundle
 
     runHook postBuild
   '';
@@ -102,10 +107,10 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     runHook preInstall
 
     mkdir -p $out/{bin,lib/sentry}
-    cp -r dist/* $out/lib/sentry/
+    cp dist/bin.cjs dist/index.cjs dist/ink-app.js $out/lib/sentry/
 
-    makeWrapper ${lib.getExe bun} $out/bin/sentry \
-      --add-flags "$out/lib/sentry/bin.js"
+    makeWrapper ${lib.getExe nodejs_24} $out/bin/sentry \
+      --add-flags "$out/lib/sentry/bin.cjs"
 
     runHook postInstall
   '';

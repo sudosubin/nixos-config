@@ -1,0 +1,36 @@
+diff --git a/.npmrc b/.npmrc
+index d67f374..5e3b938 100644
+--- a/.npmrc
++++ b/.npmrc
+@@ -1 +1,2 @@
+ node-linker=hoisted
++manage-package-manager-versions=false
+diff --git a/package.json b/package.json
+index 50063fb..99041c3 100644
+--- a/package.json
++++ b/package.json
+@@ -83,10 +83,7 @@
+       "@stricli/core": "patches/@stricli%2Fcore@1.2.5.patch",
+       "@sentry/node-core": "patches/@sentry%2Fnode-core@10.50.0.patch",
+       "@sentry/core": "patches/@sentry%2Fcore@10.50.0.patch"
+-    },
+-    "onlyBuiltDependencies": [
+-      "esbuild"
+-    ]
++    }
+   },
+   "scripts": {
+     "tsx": "tsx --import ./script/require-shim.mjs",
+diff --git a/pnpm-workspace.yaml b/pnpm-workspace.yaml
+new file mode 100644
+index 0000000..5fe101c
+--- /dev/null
++++ b/pnpm-workspace.yaml
+@@ -0,0 +1,7 @@
++supportedArchitectures:
++  os:
++    - darwin
++    - linux
++  cpu:
++    - arm64
++    - x64
