@@ -28,6 +28,7 @@ in
     ./programs/orbstack
     ./programs/pi
     ./programs/sqlit
+    ./programs/wifi-unredactor
     ./programs/yabai
 
     # os systems

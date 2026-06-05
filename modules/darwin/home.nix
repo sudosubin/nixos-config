@@ -85,6 +85,7 @@
         ../darwin/programs/hammerspoon
         ../darwin/programs/homerow
         ../darwin/programs/music-decoy
+        ../darwin/programs/wifi-unredactor
         ../darwin/programs/yabai
       ];
 

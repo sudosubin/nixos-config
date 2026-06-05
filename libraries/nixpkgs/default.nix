@@ -120,6 +120,7 @@
       sentry = final.callPackage ./programs/sentry { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
       sqlitx = final.callPackage ./programs/sqlitx { };
+      wifi-unredactor = final.callPackage ./programs/wifi-unredactor { };
       wtp = final.callPackage ./programs/wtp { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
