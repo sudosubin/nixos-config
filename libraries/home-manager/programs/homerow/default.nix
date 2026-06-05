@@ -17,6 +17,11 @@ in
     package = lib.mkPackageOption pkgs "homerow" { };
 
     config = {
+      auto-activate-mission-control = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Auto-activate click mode in Mission Control";
+      };
       auto-deactivate-scrolling = lib.mkOption {
         type = lib.types.bool;
         default = false;
@@ -34,6 +39,11 @@ in
         type = lib.types.str;
         default = "com.apple.keylayout.ABC";
         description = "Input source";
+      };
+      chain-clicks = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Chain clicks";
       };
       check-for-updates-automatically = lib.mkOption {
         type = lib.types.bool;
@@ -74,10 +84,20 @@ in
         default = false;
         description = "Hide labels before search";
       };
+      include-beta-updates = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Get beta updates";
+      };
       is-auto-click-enabled = lib.mkOption {
         type = lib.types.bool;
         default = true;
         description = "Automatic click";
+      };
+      is-experimental-support-enabled = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable experimental app support";
       };
       is-scroll-shortcuts-enabled = lib.mkOption {
         type = lib.types.bool;
