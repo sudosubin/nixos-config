@@ -25,6 +25,7 @@ in
     ./programs/hammerspoon
     ./programs/homerow
     ./programs/music-decoy
+    ./programs/orbstack
     ./programs/pi
     ./programs/sqlit
     ./programs/yabai
