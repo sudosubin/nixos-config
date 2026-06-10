@@ -7,11 +7,11 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "music-decoy";
-  version = "1.1";
+  version = "1.2";
 
   src = fetchzip {
     url = "https://github.com/FuzzyIdeas/MusicDecoy/releases/download/v${finalAttrs.version}/MusicDecoy.zip";
-    hash = "sha256-Aew9i9PXd3mm/wePXReUXKZxx2VcPIFlwFzQTwOywY4=";
+    hash = "sha256-yTKsOS/jg0uP2Qi3Wdroi9659iGFj3GpmdFa9IXJ4Nk=";
   };
 
   installPhase = ''

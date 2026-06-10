@@ -12,22 +12,22 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sentry";
-  version = "0.35.0";
+  version = "0.36.0";
   sentryClientId = "1d673b81d60ef84c951359c36296972ca6fd41bd8f45acd2d3a783a3b3c28e41";
 
   src = fetchFromGitHub {
     owner = "getsentry";
     repo = "cli";
     tag = finalAttrs.version;
-    hash = "sha256-CpQyzvD7aMJWS8a0piwHLEdjl8rUF2XbiGo5yP/enK4=";
+    hash = "sha256-Nbo/MFSYWHg1X8Zl4nNK2dJOGwl9SDgVlPZ6S5a50Mw=";
   };
 
   # @sentry/api version pinned in pnpm-lock.yaml; determines the OpenAPI spec tag
-  sentryApiVersion = "0.141.0";
+  sentryApiVersion = "0.180.0";
 
   openapi_spec = fetchurl {
     url = "https://raw.githubusercontent.com/getsentry/sentry-api-schema/${finalAttrs.sentryApiVersion}/openapi-derefed.json";
-    hash = "sha256-GjGMWxTRVora4p2EwizEpvdcKbIbXHpn1/+fyKeCO+4=";
+    hash = "sha256-wbY8nDUOeVrHi9wXzS+YowISvTXcKK9oa2bbZPMfVhU=";
   };
 
   node_modules = stdenvNoCC.mkDerivation {
@@ -67,7 +67,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     dontFixup = true;
 
-    outputHash = "sha256-hruS16AN8H32ZIW9hwNnyHgS85Bz8Ypulh6mG+Re8b8=";
+    outputHash = "sha256-Y2+aZGH56E/lAnqq655Q5O8mKIc6kBMg2HPyBbEjLoQ=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };

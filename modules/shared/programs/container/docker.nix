@@ -25,6 +25,9 @@ in
     package = pkgs.orbstack.overrideAttrs (old: {
       postInstall = (old.postInstall or "") + ''
         rm -f "$out/bin/kubectl"
+        rm -f "$out/share/bash-completion/completions/kubectl.bash"
+        rm -f "$out/share/zsh/site-functions/_kubectl"
+        rm -f "$out/share/fish/vendor_completions.d/kubectl.fish"
       '';
     });
 
