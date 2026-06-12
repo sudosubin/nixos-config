@@ -35,9 +35,8 @@
         # Utility
         cleanshot
         deskpad
-        grandperspective
-        keepassxc
         linear-cli
+        ntn
         redisinsight
         ripgrep
         unzip
