@@ -10,7 +10,7 @@
   };
 
   home.packages = with pkgs; [
-    nil
+    nixd
     nixfmt
     nixVersions.stable
     nix-activate
