@@ -56,6 +56,10 @@
     };
   };
 
+  programs.kiro-cli = {
+    enable = true;
+  };
+
   programs.pi = {
     enable = true;
     environment = {

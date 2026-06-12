@@ -8,8 +8,6 @@
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
 
-  configDir =
-    if isLinux then "${config.xdg.configHome}/Cursor" else "Library/Application Support/Cursor";
   monospace = "'PragmataProMono Nerd Font Mono'";
 
   stylesheet = {
@@ -27,7 +25,7 @@ let
     lib.strings.concatStrings (lib.attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
-    code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {
+    kiro = pkgs.kiro.overrideDerivation (attrs: {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
       resources = if isDarwin then "Contents/Resources" else "resources";
@@ -65,76 +63,86 @@ let
         node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
       '';
     });
+
+    jnoortheen.nix-ide = pkgs.open-vsx.jnoortheen.nix-ide.overrideAttrs (attrs: {
+      nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.jq ];
+
+      postInstall = ''
+        ${attrs.postInstall or ""}
+
+        pkg="$out/share/vscode/extensions/jnoortheen.nix-ide/package.json"
+        jq '.engines.vscode = "^1.107.0"' "$pkg" > "$pkg.tmp"
+        mv "$pkg.tmp" "$pkg"
+      '';
+    });
   };
 
 in
 {
-  home.file = {
-    "${configDir}/product.json".source = ./files/product.json;
-    "${configDir}/User/settings.json".source = ./files/settings.json;
-  };
-
-  programs.cursor = rec {
+  programs.kiro = rec {
     enable = true;
-    package = overlays.code-cursor;
-    profiles.default.extensions =
-      (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
-        adguard.adblock
-        anthropic.claude-code
-        arcanis.vscode-zipfs
-        astral-sh.ty
-        bierner.markdown-preview-github-styles
-        biomejs.biome
-        bradlc.vscode-tailwindcss
-        bufbuild.vscode-buf
-        charliermarsh.ruff
-        coderabbit.coderabbit-vscode
-        davidanson.vscode-markdownlint
-        dbaeumer.vscode-eslint
-        denoland.vscode-deno
-        esbenp.prettier-vscode
-        exiasr.hadolint
-        foxundermoon.shell-format
-        fwcd.kotlin
-        github.github-vscode-theme
-        golang.go
-        graphql.vscode-graphql
-        graphql.vscode-graphql-syntax
-        hashicorp.terraform
-        # jnoortheen.nix-ide
-        kevinrose.vsc-python-indent
-        ms-pyright.pyright
-        ms-python.debugpy
-        ms-python.python
-        oxc.oxc-vscode
-        pkief.material-product-icons
-        prisma.prisma
-        redhat.java
-        redhat.vscode-yaml
-        rust-lang.rust-analyzer
-        samuelcolvin.jinjahtml
-        shardulm94.trailing-spaces
-        styled-components.vscode-styled-components
-        tamasfe.even-better-toml
-        teticio.python-envy
-        timonwong.shellcheck
-        # usernamehw.errorlens
-        vercel.turbo-vsc
-        yoavbls.pretty-ts-errors
-        yzhang.markdown-all-in-one
-      ])
-      ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx-release; [
-        eamodio.gitlens
-      ])
-      ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).vscode-marketplace; [
-        typescriptteam.native-preview
-      ])
-      ++ [
-        overlays.pkief.material-icon-theme
-      ];
+    package = overlays.kiro;
+    profiles.default = {
+      extensions =
+        (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
+          adguard.adblock
+          anthropic.claude-code
+          arcanis.vscode-zipfs
+          astral-sh.ty
+          bierner.markdown-preview-github-styles
+          biomejs.biome
+          bradlc.vscode-tailwindcss
+          bufbuild.vscode-buf
+          charliermarsh.ruff
+          coderabbit.coderabbit-vscode
+          davidanson.vscode-markdownlint
+          dbaeumer.vscode-eslint
+          denoland.vscode-deno
+          esbenp.prettier-vscode
+          exiasr.hadolint
+          foxundermoon.shell-format
+          fwcd.kotlin
+          github.github-vscode-theme
+          golang.go
+          graphql.vscode-graphql
+          graphql.vscode-graphql-syntax
+          hashicorp.terraform
+          kevinrose.vsc-python-indent
+          ms-pyright.pyright
+          ms-python.debugpy
+          ms-python.python
+          oxc.oxc-vscode
+          pkief.material-product-icons
+          prisma.prisma
+          redhat.java
+          redhat.vscode-yaml
+          rust-lang.rust-analyzer
+          samuelcolvin.jinjahtml
+          shardulm94.trailing-spaces
+          styled-components.vscode-styled-components
+          tamasfe.even-better-toml
+          teticio.python-envy
+          timonwong.shellcheck
+          usernamehw.errorlens
+          vercel.turbo-vsc
+          yoavbls.pretty-ts-errors
+          yzhang.markdown-all-in-one
+        ])
+        ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx-release; [
+          eamodio.gitlens
+        ])
+        ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).vscode-marketplace; [
+          typescriptteam.native-preview
+        ])
+        ++ [
+          overlays.pkief.material-icon-theme
+          overlays.jnoortheen.nix-ide
+        ];
+      userSettings = ./files/settings.json;
+    };
   };
 
   home.shellAliases = {
-    code = "cursor";
+    code = "kiro";
   };
 }
