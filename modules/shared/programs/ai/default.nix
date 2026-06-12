@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }:
@@ -58,7 +59,18 @@
 
   programs.kiro-cli = {
     enable = true;
+    enableBashIntegration = false;
+    enableZshIntegration = false;
   };
+
+  home.activation.kiroCliSettings =
+    let
+      kiro-cli = lib.getExe config.programs.kiro-cli.package;
+    in
+    lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      ${kiro-cli} settings app.launchOnStartup false || true
+      ${kiro-cli} settings app.disableAutoupdates true || true
+    '';
 
   programs.pi = {
     enable = true;
