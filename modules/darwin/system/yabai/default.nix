@@ -20,6 +20,8 @@
     };
 
     extraConfig = ''
+      yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa && yabai -m config window_shadow float"
+
       # First-party
       yabai -m rule --add app="^System Settings$" manage="off"
 
