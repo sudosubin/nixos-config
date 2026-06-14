@@ -21,10 +21,11 @@
 
     extraConfig = ''
       # First-party
-      yabai -m rule --add app="^System Preferences$" manage="off"
+      yabai -m rule --add app="^System Settings$" manage="off"
 
       # Third-party
-      yabai -m rule --add app="^Homerow$" manage="off"
+      yabai -m rule --add app="^CleanShot X$" manage="off"
+      yabai -m rule --add app="^1Password$" title="^Quick Access — 1Password$" manage="off"
     '';
   };
 }
