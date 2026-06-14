@@ -80,10 +80,7 @@ lrhk:bind({"lCmd"}, "h", function() end, nil, function() end)
 
 -- Hammerspoon
 hs.hotkey.bind({"alt", "shift"}, "r", function()
-  local home = os.getenv("HOME")
-  local plist = home .. "/Library/LaunchAgents/org.nix-community.home.yabai.plist"
-  hs.execute("launchctl unload " .. plist)
-  hs.execute("launchctl load " .. plist)
+  hs.execute("launchctl kickstart -k gui/$(id -u)/org.nixos.yabai", true)
   hs.reload()
 end)
 

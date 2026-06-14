@@ -79,6 +79,7 @@
           nixpkgs-shared
           ./modules/shared/configuration.nix
           ./modules/darwin/configuration.nix
+          ./modules/darwin/system/yabai
           ./modules/darwin/home.nix
         ];
         specialArgs = { inherit inputs; };

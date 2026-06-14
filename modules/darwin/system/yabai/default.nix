@@ -3,6 +3,7 @@
 {
   services.yabai = {
     enable = true;
+    enableScriptingAddition = true;
 
     config = {
       # Global Settings

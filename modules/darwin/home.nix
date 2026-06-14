@@ -85,7 +85,6 @@
         ../darwin/programs/homerow
         ../darwin/programs/music-decoy
         ../darwin/programs/wifi-unredactor
-        ../darwin/programs/yabai
       ];
 
       home.stateVersion = "25.05";

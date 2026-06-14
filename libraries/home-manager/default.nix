@@ -29,7 +29,6 @@ in
     ./programs/pi
     ./programs/sqlit
     ./programs/wifi-unredactor
-    ./programs/yabai
 
     # os systems
     (lib.mkIf isDarwin ./systems/darwin)
