@@ -2,6 +2,10 @@
 
 {
   nix = {
+    gc = {
+      automatic = true;
+      options = "--delete-old";
+    };
     optimise = {
       automatic = true;
     };
