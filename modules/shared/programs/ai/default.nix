@@ -60,6 +60,10 @@
     };
   };
 
+  programs.codex = {
+    enable = true;
+  };
+
   programs.kiro-cli = {
     enable = true;
     enableBashIntegration = false;
