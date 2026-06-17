@@ -94,7 +94,6 @@ in
           bradlc.vscode-tailwindcss
           bufbuild.vscode-buf
           charliermarsh.ruff
-          coderabbit.coderabbit-vscode
           davidanson.vscode-markdownlint
           dbaeumer.vscode-eslint
           denoland.vscode-deno
@@ -107,7 +106,6 @@ in
           graphql.vscode-graphql
           graphql.vscode-graphql-syntax
           hashicorp.terraform
-          kevinrose.vsc-python-indent
           ms-pyright.pyright
           ms-python.debugpy
           ms-python.python
@@ -119,7 +117,6 @@ in
           rust-lang.rust-analyzer
           samuelcolvin.jinjahtml
           shardulm94.trailing-spaces
-          styled-components.vscode-styled-components
           tamasfe.even-better-toml
           teticio.python-envy
           timonwong.shellcheck
