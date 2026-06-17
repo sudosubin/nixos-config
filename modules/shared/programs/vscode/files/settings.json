@@ -18,6 +18,7 @@
 
   // theme
   "workbench.activityBar.location": "bottom",
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
   "workbench.colorTheme": "GitHub Dark Default",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.productIconTheme": "material-product-icons",
@@ -62,13 +63,11 @@
   "editor.cursorSmoothCaretAnimation": "on",
 
   // git
-  "git.autofetch": false,
   "git.openRepositoryInParentFolders": "always",
   "gitlens.currentLine.format": "${author} • ${date}, ${message}",
   "gitlens.currentLine.dateFormat": "YYYY-MM-DD",
   "gitlens.codeLens.enabled": false,
   "gitlens.statusBar.enabled": false,
-  "gitlens.showWelcomeOnInstall": false,
   "gitlens.showWhatsNewAfterUpgrades": false,
 
   // files
@@ -88,14 +87,8 @@
   "editor.accessibilitySupport": "off",
   "editor.trimAutoWhitespace": true,
 
-  // kubernetes
-  "vs-kubernetes": {
-    "checkForMinikubeUpgrade": false
-  },
-
   // language (python)
   "[python]": {
-    "editor.rulers": [80, 120],
     "editor.tabSize": 4,
     "editor.formatOnSave": true,
     "files.insertFinalNewline": true,
@@ -112,7 +105,6 @@
   },
 
   // language (javascript)
-  "biome.suggestInstallingGlobally": false,
   "emmet.excludeLanguages": ["typescriptreact"],
   "svelte.enable-ts-plugin": true,
   "typescript.disableAutomaticTypeAcquisition": true,
@@ -183,9 +175,6 @@
   "[makefile]": {
     "editor.insertSpaces": false
   },
-  "[nim]": {
-    "editor.tabSize": 2
-  },
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
@@ -193,11 +182,15 @@
     "editor.formatOnSave": true
   },
   "java.import.generatesMetadataFilesAtProjectRoot": false,
-  "prisma.showPrismaDataPlatformNotification": false,
   "errorLens.margin": "6ch",
   "errorLens.gutterIconsEnabled": true,
   "errorLens.gutterIconSize": "65%",
   "errorLens.gutterIconSet": "defaultOutline",
+
+  // kiro
+  "kiroAgent.experiments": {
+    "acpChat": false
+  },
 
   // telemetry, etc
   "http.proxyStrictSSL": false,

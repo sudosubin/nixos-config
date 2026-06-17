@@ -1,12 +1,11 @@
 {
-  config,
   lib,
   pkgs,
   ...
 }:
 
 let
-  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin isLinux;
+  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
 
   monospace = "'PragmataProMono Nerd Font Mono'";
 
@@ -135,6 +134,12 @@ in
           overlays.pkief.material-icon-theme
           overlays.jnoortheen.nix-ide
         ];
+      keybindings = [
+        {
+          key = if isDarwin then "cmd+shift+i" else "ctrl+shift+i";
+          command = "workbench.action.toggleAuxiliaryBar";
+        }
+      ];
       userSettings = ./files/settings.json;
     };
   };
