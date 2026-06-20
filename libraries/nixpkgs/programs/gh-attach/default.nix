@@ -7,16 +7,16 @@
 
 buildGoModule (finalAttrs: {
   pname = "gh-attach";
-  version = "0.2.1";
+  version = "0.3.0";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "gh-attach";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-5QAfcDVm1OqPkXZR77dMogkvfoKYCjColDFEoAaLP5A=";
+    hash = "sha256-hdgdIlAcumXtiNc3dMK/gk30M2JTbhkccj6x6rMG7y8=";
   };
 
-  vendorHash = "sha256-AdNwhGVAADT8o1yZ9trL0Kc4XiHhWeinrRT7RGMD8bE=";
+  vendorHash = "sha256-Kdqt/hM0mYo9CER5AmBrV5RhnT9x/2Oj+vQH0wrVw74=";
 
   subPackages = [ "cmd/gh-attach" ];
 

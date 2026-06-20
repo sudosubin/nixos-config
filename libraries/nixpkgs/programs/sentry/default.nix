@@ -12,14 +12,14 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sentry";
-  version = "0.36.0";
+  version = "0.37.0";
   sentryClientId = "1d673b81d60ef84c951359c36296972ca6fd41bd8f45acd2d3a783a3b3c28e41";
 
   src = fetchFromGitHub {
     owner = "getsentry";
     repo = "cli";
     tag = finalAttrs.version;
-    hash = "sha256-Nbo/MFSYWHg1X8Zl4nNK2dJOGwl9SDgVlPZ6S5a50Mw=";
+    hash = "sha256-wTVDqtd2+T2KhTYnkqTvC0dabAJRfjfuZfhGViJlaxw=";
   };
 
   # @sentry/api version pinned in pnpm-lock.yaml; determines the OpenAPI spec tag
@@ -67,7 +67,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     dontFixup = true;
 
-    outputHash = "sha256-Y2+aZGH56E/lAnqq655Q5O8mKIc6kBMg2HPyBbEjLoQ=";
+    outputHash = "sha256-ZZTIa23r+gEws+cf++wCBoBc1JTca+n5JnxFmMLwruw=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };

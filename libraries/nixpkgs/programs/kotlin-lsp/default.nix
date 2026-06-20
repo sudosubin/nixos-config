@@ -48,20 +48,20 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   passthru = {
     sources = {
       x86_64-linux = fetchzip {
-        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-server-${finalAttrs.version}.tar.gz";
+        url = "https://download-cdn.jetbrains.com/language-server/kotlin-server/${finalAttrs.version}/kotlin-server-${finalAttrs.version}.tar.gz";
         hash = "sha256-u2IcSjMCAukvcDEZdvfyT6hWJJ+e5O49/SAWbqlXJyo=";
       };
       aarch64-linux = fetchzip {
-        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-server-${finalAttrs.version}-aarch64.tar.gz";
+        url = "https://download-cdn.jetbrains.com/language-server/kotlin-server/${finalAttrs.version}/kotlin-server-${finalAttrs.version}-aarch64.tar.gz";
         hash = "sha256-nV4q64DG3P7/84YMjJbNYfLFkezNrrTPvuIyb5Yr+DQ=";
       };
       x86_64-darwin = fetchzip {
-        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-server-${finalAttrs.version}.sit";
+        url = "https://download-cdn.jetbrains.com/language-server/kotlin-server/${finalAttrs.version}/kotlin-server-${finalAttrs.version}.sit";
         extension = "zip";
         hash = "sha256-4AB41QwRlJiW5SGMQZpZGPucg7lmOiqWlW6WWwF4Yng=";
       };
       aarch64-darwin = fetchzip {
-        url = "https://download-cdn.jetbrains.com/kotlin-lsp/${finalAttrs.version}/kotlin-server-${finalAttrs.version}-aarch64.sit";
+        url = "https://download-cdn.jetbrains.com/language-server/kotlin-server/${finalAttrs.version}/kotlin-server-${finalAttrs.version}-aarch64.sit";
         extension = "zip";
         hash = "sha256-2joLFpUOWHx36pIv98/aHigAjqMkbjGeqXYo20GLxok=";
       };

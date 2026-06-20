@@ -28,7 +28,7 @@ declare -A filenames=(
 
 for platform in "${!filenames[@]}"; do
   filename=${filenames[$platform]}
-  url="https://download-cdn.jetbrains.com/kotlin-lsp/$latestVersion/$filename"
+  url="https://download-cdn.jetbrains.com/language-server/kotlin-server/$latestVersion/$filename"
   source=$(nix-prefetch-url --unpack --name "${filename/%.sit/.zip}" "$url")
   hash=$(nix-hash --to-sri --type sha256 "$source")
   update-source-version kotlin-lsp "$latestVersion" "$hash" \
