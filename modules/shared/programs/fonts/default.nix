@@ -12,7 +12,6 @@ let
       "Noto Serif CJK KR"
     ];
     sans-serif = [
-      "Pretendard"
       "Noto Sans CJK KR"
       "Noto Sans CJK JP"
       "Noto Sans CJK TC"
@@ -21,6 +20,7 @@ let
     ];
     monospace = [
       "Pravka Nerd Font Mono"
+      "Source Han Mono K"
     ];
   };
 
@@ -110,9 +110,11 @@ in
     nanum-square-round
     noto-fonts
     noto-fonts-cjk-sans
+    noto-fonts-cjk-sans-static
     noto-fonts-color-emoji
     pravka
     pretendard
+    source-han-mono
     s-core-dream
   ];
 
@@ -122,7 +124,7 @@ in
 
   gtk = lib.mkIf isLinux {
     enable = true;
-    font.name = "Pretendard";
+    font.name = "Noto Sans CJK KR";
     font.size = 10;
   };
 

@@ -1,9 +1,9 @@
 {
   // fonts
-  "markdown.preview.fontFamily": "Pretendard",
-  "editor.fontFamily": "'Pravka Nerd Font Mono', 'Pretendard'",
-  "debug.console.fontFamily": "'Pravka Nerd Font Mono', 'Pretendard'",
-  "terminal.integrated.fontFamily": "'Pravka Nerd Font Mono', 'Pretendard'",
+  "markdown.preview.fontFamily": "Noto Sans CJK KR",
+  "editor.fontFamily": "'Pravka Nerd Font Mono', 'Source Han Mono K'",
+  "debug.console.fontFamily": "'Pravka Nerd Font Mono', 'Source Han Mono K'",
+  "terminal.integrated.fontFamily": "'Pravka Nerd Font Mono', 'Source Han Mono K'",
   "editor.fontSize": 13.25,
   "debug.console.fontSize": 13.25,
   "markdown.preview.fontSize": 13.25,
