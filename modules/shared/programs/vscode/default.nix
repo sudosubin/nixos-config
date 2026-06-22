@@ -7,7 +7,7 @@
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
 
-  monospace = "'PragmataProMono Nerd Font Mono'";
+  monospace = "'Pravka Nerd Font Mono'";
 
   stylesheet = {
     ".mac, .windows, .linux" = "font-family: ${monospace}, monospace !important;";

@@ -12,11 +12,11 @@ let
   font =
     if isLinux then
       [
-        { family = "PragmataProMono Nerd Font Mono"; }
+        { family = "Pravka Nerd Font Mono"; }
       ]
     else
       [
-        { family = "PragmataProMono Nerd Font Mono"; }
+        { family = "Pravka Nerd Font Mono"; }
         {
           family = "Apple Color Emoji";
           assume_emoji_presentation = true;

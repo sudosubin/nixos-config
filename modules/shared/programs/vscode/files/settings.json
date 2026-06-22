@@ -1,15 +1,15 @@
 {
   // fonts
   "markdown.preview.fontFamily": "Pretendard",
-  "editor.fontFamily": "'PragmataProMono Nerd Font Mono', 'Pretendard'",
-  "debug.console.fontFamily": "'PragmataProMono Nerd Font Mono', 'Pretendard'",
-  "terminal.integrated.fontFamily": "'PragmataProMono Nerd Font Mono', 'Pretendard'",
+  "editor.fontFamily": "'Pravka Nerd Font Mono', 'Pretendard'",
+  "debug.console.fontFamily": "'Pravka Nerd Font Mono', 'Pretendard'",
+  "terminal.integrated.fontFamily": "'Pravka Nerd Font Mono', 'Pretendard'",
   "editor.fontSize": 13.25,
   "debug.console.fontSize": 13.25,
   "markdown.preview.fontSize": 13.25,
   "terminal.integrated.fontSize": 13.25,
-  "editor.codeLensFontFamily": "'PragmataProMono Nerd Font Mono'",
-  "editor.inlineSuggest.fontFamily": "'PragmataProMono Nerd Font Mono'",
+  "editor.codeLensFontFamily": "'Pravka Nerd Font Mono'",
+  "editor.inlineSuggest.fontFamily": "'Pravka Nerd Font Mono'",
   "scm.inputFontFamily": "editor",
 
   // search

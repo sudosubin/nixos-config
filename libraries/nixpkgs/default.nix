@@ -128,7 +128,7 @@
       nix-activate = final.callPackage ./programs/nix-activate { };
       ntn = final.callPackage ./programs/ntn { };
       pi-extensions = final.callPackage ./programs/pi-extensions { };
-      pragmatapro = final.callPackage ./programs/pragmatapro { };
+      pravka = final.callPackage ./programs/pravka { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       redisinsight = final.callPackage ./programs/redisinsight { };
       sentry = final.callPackage ./programs/sentry { };
@@ -163,7 +163,6 @@
       "ngrok"
       "orbstack"
       "postman"
-      "pragmatapro"
       "redisinsight"
       "sentry"
       "slack"

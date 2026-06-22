@@ -29,7 +29,7 @@ in
       modifier = "Mod4";
       terminal = lib.getExe pkgs.wezterm;
       fonts = {
-        names = [ "PragmataProMono Nerd Font Mono" ];
+        names = [ "Pravka Nerd Font Mono" ];
         style = "";
         size = 9.0;
       };

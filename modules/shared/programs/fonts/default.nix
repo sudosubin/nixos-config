@@ -20,7 +20,7 @@ let
       "Noto Sans CJK HK"
     ];
     monospace = [
-      "PragmataProMono Nerd Font Mono"
+      "Pravka Nerd Font Mono"
     ];
   };
 
@@ -111,7 +111,7 @@ in
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
-    pragmatapro
+    pravka
     pretendard
     s-core-dream
   ];
