@@ -7,12 +7,12 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pravka";
-  version = "0.1.1";
+  version = "0.1.2";
 
   src = fetchzip {
     url = "https://github.com/sudosubin/pravka/releases/download/v${finalAttrs.version}/PravkaNerdFontMono-${finalAttrs.version}.zip";
     stripRoot = false;
-    hash = "sha256-majYoSfT8hbz4GW2m0T/ukPPZ7fCjDyoLsIQPKKHotw=";
+    hash = "sha256-uSnh1Zd2epF5f80aRevXnqCMd5y3U40Dw2EOakNQCuc=";
   };
 
   installPhase = ''
