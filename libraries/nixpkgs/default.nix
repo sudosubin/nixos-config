@@ -127,6 +127,7 @@
       nanum-square-round = final.callPackage ./programs/fonts/nanum-square-round { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       ntn = final.callPackage ./programs/ntn { };
+      orca = final.callPackage ./programs/orca { };
       pi-extensions = final.callPackage ./programs/pi-extensions { };
       pravka = final.callPackage ./programs/pravka { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };

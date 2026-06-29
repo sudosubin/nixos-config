@@ -37,6 +37,7 @@
         deskpad
         linear-cli
         ntn
+        orca
         redisinsight
         ripgrep
         unzip
