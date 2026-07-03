@@ -71,19 +71,6 @@
         });
       }
     )
-    (
-      final: prev:
-      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
-        kiro = prev.kiro.overrideAttrs (oldAttrs: {
-          nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ prev._7zz ];
-          sourceRoot = "Kiro.app";
-          postInstall = (oldAttrs.postInstall or "") + ''
-            mv "$out/Applications/Kiro.app/Contents/Resources/app/bin/code" \
-               "$out/Applications/Kiro.app/Contents/Resources/app/bin/kiro"
-          '';
-        });
-      }
-    )
     (final: prev: {
       pi-coding-agent = prev.pi-coding-agent.overrideAttrs (oldAttrs: {
         postInstall =
