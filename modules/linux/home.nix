@@ -19,8 +19,6 @@
         fd
         hadolint
         ijhttp
-        jetbrains.datagrip
-        jetbrains.idea
         sentry
         shfmt
         tree

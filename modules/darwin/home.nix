@@ -22,8 +22,6 @@
         google-cloud-sdk
         hadolint
         ijhttp
-        jetbrains.datagrip
-        jetbrains.idea
         ngrok
         postman
         procps
