@@ -18,6 +18,7 @@ in
       "--layout=reverse"
       "--prompt=' '"
     ];
-    fileWidgetCommand = defaultCommand;
+    fileWidget.command = defaultCommand;
+    historyWidget.command = "";
   };
 }

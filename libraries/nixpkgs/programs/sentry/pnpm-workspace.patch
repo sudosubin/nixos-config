@@ -9,10 +9,10 @@ diff --git a/package.json b/package.json
 index 50063fb..99041c3 100644
 --- a/package.json
 +++ b/package.json
-@@ -83,10 +83,7 @@
-       "@stricli/core": "patches/@stricli%2Fcore@1.2.5.patch",
-       "@sentry/node-core": "patches/@sentry%2Fnode-core@10.50.0.patch",
-       "@sentry/core": "patches/@sentry%2Fcore@10.50.0.patch"
+@@ -92,10 +92,7 @@
+       "qs@>=6.11.1 <=6.15.1": "6.15.2",
+       "form-data@<4.0.6": "4.0.6",
+       "vite": "8.0.16"
 -    },
 -    "onlyBuiltDependencies": [
 -      "esbuild"

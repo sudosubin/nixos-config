@@ -6,21 +6,21 @@
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
-  pname = "pi-loop.ts";
-  version = "1.6.0-unstable-2026-06-14";
+  pname = "pi-goal.ts";
+  version = "1.6.0-unstable-2026-06-21";
 
   src = fetchFromGitHub {
     owner = "mitsuhiko";
     repo = "agent-stuff";
-    rev = "19abb5afc61269d1ddbec39047a9e93faa70bd0d";
-    hash = "sha256-5ipGVC+B+6NDZXQVVw9ezXGy3++bvEt7yv/f969m7Ys=";
+    rev = "f1c881db21a9ec53977ff8379b74e64e290fef93";
+    hash = "sha256-NCeQlZ1IPVB5O+Zkh24mqIpgKI92aION6R0IXoceKpM=";
   };
 
   dontBuild = true;
 
   installPhase = ''
     runHook preInstall
-    install -Dm644 extensions/loop.ts $out
+    install -Dm644 extensions/goal.ts $out
     runHook postInstall
   '';
 
@@ -29,7 +29,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   };
 
   meta = {
-    description = "Loop extension for pi with breakout conditions";
+    description = "Session-log-backed long-running objective mode for pi";
     homepage = "https://github.com/mitsuhiko/agent-stuff";
     license = lib.licenses.asl20;
     maintainers = with lib.maintainers; [ sudosubin ];

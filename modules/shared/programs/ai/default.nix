@@ -86,8 +86,8 @@
     };
     configDir = ".config/pi/agent";
     extensions = with pkgs.pi-extensions; [
+      pi-goal
       pi-interactive-shell
-      pi-loop
       pi-promptsmith
       pi-review
     ];
