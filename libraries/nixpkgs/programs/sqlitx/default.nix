@@ -7,16 +7,16 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "sqlitx";
-  version = "0.1.3";
+  version = "0.1.4";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "sqlitx";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-Y3rpbnjmys4Y6AiU8RvFWj6Yv7SjzhJtppJX4pwKdMU=";
+    hash = "sha256-pdWkDwpeWfoPHRJ49HEcQ75Aa1Q138d+O/zOjBtzjk0=";
   };
 
-  cargoHash = "sha256-9vNemDdRoDeoFpI6QQh/ueRAWYHh6+u1EqOuX02nJ60=";
+  cargoHash = "sha256-Q2j4XwnWNrjz+YFmFq9Z/h/wRihF24pkerO1VKnl6ms=";
 
   passthru.updateScript = nix-update-script { };
 
