@@ -35,6 +35,7 @@
         deskpad
         linear-cli
         ntn
+        querypie-cli
         redisinsight
         ripgrep
         unzip

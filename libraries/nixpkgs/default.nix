@@ -118,6 +118,7 @@
       pi-extensions = final.callPackage ./programs/pi-extensions { };
       pravka = final.callPackage ./programs/pravka { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
+      querypie-cli = final.callPackage ./programs/querypie-cli { };
       redisinsight = final.callPackage ./programs/redisinsight { };
       sentry = final.callPackage ./programs/sentry { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
