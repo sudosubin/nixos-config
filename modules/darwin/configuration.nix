@@ -1,6 +1,10 @@
 { pkgs, ... }:
 
 {
+  # Fix: https://github.com/nix-darwin/nix-darwin/issues/1817
+  documentation.doc.enable = false;
+  system.tools.darwin-uninstaller.enable = false;
+
   security.pam = {
     services.sudo_local.touchIdAuth = true;
   };
