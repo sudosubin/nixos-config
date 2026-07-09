@@ -36,6 +36,11 @@
     autoPrune.enable = true;
   };
 
+  # Compressed RAM swap. This host runs on a small (4 GiB) t4g.medium, so
+  # zram provides headroom for memory-heavy Nix builds without provisioning a
+  # disk swap file.
+  zramSwap.enable = true;
+
   # Define the primary user account. No password login: access is via SSH
   # keys (over SSM) and passwordless sudo for the wheel group.
   users.users.sudosubin = {
