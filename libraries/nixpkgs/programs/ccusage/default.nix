@@ -33,6 +33,15 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   env.CCUSAGE_PRICING_JSON_PATH = "${finalAttrs.litellmPricingJson}";
 
+  # These tests assume the builder's local timezone (the maintainer builds on
+  # Asia/Seoul, UTC+9); the Nix build sandbox runs in UTC, so date formatting
+  # comes out off by one day. Skip them — they exercise environment-dependent
+  # behaviour, not package logic that varies by target.
+  checkFlags = [
+    "--skip=commands::tests::builds_statusline_today_filter_from_timezone"
+    "--skip=tests::formats_dates_with_timezone"
+  ];
+
   doInstallCheck = true;
 
   passthru.updateScript = nix-update-script { };
