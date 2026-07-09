@@ -111,6 +111,12 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     cp -r ${finalAttrs.node_modules}/node_modules .
     chmod -R u+w node_modules
 
+    # node_modules is produced on a host that provides /usr/bin/env (macOS);
+    # the Linux build sandbox has none, so the bundled `.bin` shebangs
+    # (`#!/usr/bin/env node`) fail with "bad interpreter". Rewrite them to the
+    # Nix nodejs before running the bundler.
+    patchShebangs node_modules
+
     pnpm run bundle
 
     runHook postBuild
