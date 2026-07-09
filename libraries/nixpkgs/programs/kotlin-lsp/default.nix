@@ -26,6 +26,23 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     zlib
   ];
 
+  # The bundled JetBrains Runtime ships AWT / splash-screen / sound native
+  # libraries that link against desktop GUI stacks (X11, Wayland, ALSA). The
+  # Kotlin language server runs headless (`intellij-server`) and never loads
+  # them, so ignore these otherwise-unsatisfiable deps instead of dragging a
+  # full desktop stack into the closure.
+  autoPatchelfIgnoreMissingDeps = [
+    "libX11.so.6"
+    "libXext.so.6"
+    "libXi.so.6"
+    "libXrender.so.1"
+    "libXtst.so.6"
+    "libasound.so.2"
+    "libwayland-client.so.0"
+    "libwayland-cursor.so.0"
+    "libxkbcommon.so.0"
+  ];
+
   installPhase = ''
     runHook preInstall
 
