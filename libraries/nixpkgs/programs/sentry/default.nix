@@ -1,6 +1,7 @@
 {
   fetchFromGitHub,
   fetchurl,
+  cacert,
   lib,
   makeBinaryWrapper,
   nix-update-script,
@@ -40,10 +41,22 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     ];
 
     nativeBuildInputs = [
+      cacert
       nodejs_24
       pnpm_10
       writableTmpDirAsHomeHook
     ];
+
+    # nixpkgs' Node.js uses the system OpenSSL CA store, which is empty inside
+    # the (fixed-output) build sandbox, so pnpm's TLS fetches to the npm
+    # registry fail with UNABLE_TO_GET_ISSUER_CERT_LOCALLY. Point both Node
+    # and OpenSSL at the cacert bundle. This only enables the network fetch;
+    # the resolved package set stays lockfile-deterministic so the fixed
+    # outputHash is unaffected.
+    env = {
+      NODE_EXTRA_CA_CERTS = "${cacert}/etc/ssl/certs/ca-bundle.crt";
+      SSL_CERT_FILE = "${cacert}/etc/ssl/certs/ca-bundle.crt";
+    };
 
     dontConfigure = true;
 
