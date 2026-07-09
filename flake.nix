@@ -89,7 +89,7 @@
       };
 
       nixosConfigurations.linux = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
+        system = "aarch64-linux";
         modules = [
           home-manager-shared
           home-manager.nixosModules.home-manager

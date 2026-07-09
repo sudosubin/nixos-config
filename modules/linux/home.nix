@@ -1,5 +1,4 @@
 {
-  inputs,
   pkgs,
   ...
 }:
@@ -8,7 +7,7 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.users.sudosubin =
-    { config, ... }:
+    { ... }:
     {
       home.username = "sudosubin";
       home.homeDirectory = "/home/sudosubin";
@@ -25,35 +24,18 @@
         wtp
 
         # Utility
-        figma-linux
-        gnome.nautilus
-        keepassxc
-        linear-cli
-        ngrok
-        pavucontrol
-        pulseaudio
         ripgrep
-        slack
         unzip
-        xdg-utils
       ];
 
-      sops.age.sshKeyPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
-
       imports = [
-        inputs.nixos-config-private-karrot.homeManagerModules.karrot
-        inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
-
-        ../shared/programs/1password
+        # Shared CLI tooling only — no GUI modules on a headless server.
         ../shared/programs/act
         ../shared/programs/ai
         ../shared/programs/aws
         ../shared/programs/bat
         ../shared/programs/container
         ../shared/programs/direnv
-        ../shared/programs/firefox
-        ../shared/programs/figma
-        ../shared/programs/fonts
         ../shared/programs/git
         ../shared/programs/go
         ../shared/programs/gpg
@@ -64,19 +46,29 @@
         ../shared/programs/python
         ../shared/programs/rust
         ../shared/programs/shell
-        ../shared/programs/slack
         ../shared/programs/sqlit
         ../shared/programs/ssh
-        ../shared/programs/terminal
         ../shared/programs/terraform
         ../shared/programs/tmux
-        ../shared/programs/vscode
         ../shared/programs/xdg
 
-        ../linux/programs/input-method
-        ../linux/programs/theme
-        ../linux/programs/wayland
-        ../linux/programs/zpl-open
+        # Removed for headless EC2 (GUI / desktop only):
+        #   ../shared/programs/1password  (1Password GUI)
+        #   ../shared/programs/figma      (figma-agent)
+        #   ../shared/programs/firefox    (browser)
+        #   ../shared/programs/slack      (agent-slack)
+        #   ../shared/programs/terminal   (wezterm)
+        #   ../shared/programs/fonts      (desktop fonts)
+        #   ../shared/programs/vscode     (editor GUI)
+        #   ../linux/programs/input-method (kime IME)
+        #   ../linux/programs/theme        (gtk/cursor theme)
+        #   ../linux/programs/wayland      (sway/rofi)
+        #   ../linux/programs/zpl-open     (desktop mime handler)
+        #
+        # Private modules also depend on desktop/secret setup; re-enable
+        # once sops age keys are provisioned on the instance:
+        #   inputs.nixos-config-private-karrot.homeManagerModules.karrot
+        #   inputs.nixos-config-private-sudosubin.homeManagerModules.sudosubin
       ];
 
       home.stateVersion = "25.05";
