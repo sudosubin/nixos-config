@@ -8,7 +8,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "ntn";
-  version = "0.18.1";
+  version = "0.19.0";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -31,19 +31,19 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     sources = {
       aarch64-darwin = fetchurl {
         url = "https://ntn.dev/releases/v${finalAttrs.version}/ntn-aarch64-apple-darwin.tar.gz";
-        hash = "sha256-owbRR96+59dmxt8IL0pnzvJ8YJUrehl9m/5A1arHT9k=";
+        hash = "sha256-SDlq5dAuo3jRKcuPmEBoCv7RD7SAdrM7jSLkLP7CsPM=";
       };
       x86_64-darwin = fetchurl {
         url = "https://ntn.dev/releases/v${finalAttrs.version}/ntn-x86_64-apple-darwin.tar.gz";
-        hash = "sha256-6Yqj22a/QUYKHX9+Zp8f3Etr7PKAqOBylBlmWCfYtY4=";
+        hash = "sha256-lhB6pxqtw+CMyg+dRNP6qwEaYhmDZW/9n8cEyWvb9SA=";
       };
       aarch64-linux = fetchurl {
         url = "https://ntn.dev/releases/v${finalAttrs.version}/ntn-aarch64-unknown-linux-musl.tar.gz";
-        hash = "sha256-7LlPSZy+f0qGAwscuwSxpM7L72/5WB/U7pKwZD5jjPI=";
+        hash = "sha256-v/W13kCCC0xaTIn+IUwrlKbq0jY7kXxg7Buybx0UMh8=";
       };
       x86_64-linux = fetchurl {
         url = "https://ntn.dev/releases/v${finalAttrs.version}/ntn-x86_64-unknown-linux-musl.tar.gz";
-        hash = "sha256-w4tYyJlIJjxuEQiD4lIQQl1yB0P0oRps7Ph5ekL0OcU=";
+        hash = "sha256-DCwwqCQvMWfpjbKS0U84PKH6KLWZmsvnMThj2x9bUMU=";
       };
     };
     updateScript = ./update.sh;

@@ -9,22 +9,18 @@
 
 python3Packages.buildPythonPackage rec {
   pname = "pyproject-fmt";
-  version = "2.25.1";
+  version = "2.25.3";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt";
     rev = "${pname}/${version}";
-    sha256 = "sha256-3px8bd94CTDF22g4+o9dzGgi6n774Q3VE3E76/5Q8vg=";
+    sha256 = "sha256-Zv0SFuGn2e4d37auH/GEDNJAM0UNLAsEi0tEQ/UL/sQ=";
   };
 
   sourceRoot = "${src.name}/pyproject-fmt";
   cargoRoot = "..";
-
-  postUnpack = ''
-    (cd source && python tasks/generate_readme.py pyproject-fmt)
-  '';
 
   postPatch = ''
     cp -r ${tombi.src}/www.schemastore.org "$cargoDepsCopy/"
@@ -40,7 +36,7 @@ python3Packages.buildPythonPackage rec {
       version
       src
       ;
-    hash = "sha256-Bva+9dyB4LCD86c15vgYJ0sfAPSGbjwIEnlg/BtdDaI=";
+    hash = "sha256-Y2AEd06Q9bjvQmvDZp5PqD7QyMWBpK+c/sJ6nWtAFeA=";
   };
 
   dependencies = with python3Packages; [
