@@ -4,8 +4,9 @@ set -eu -o pipefail
 
 latestVersion=$(
   curl -fsSL https://speed.kt.com/js/app.js \
-    | grep -o 'macVersion: \\"[^\\]*\\"' \
-    | grep -o '[0-9][^\\]*'
+    | grep -oE 'macVersion: ?\\?"[0-9][0-9.]*' \
+    | grep -oE '[0-9][0-9.]*' \
+    | head -n1
 )
 currentVersion=$(nix eval --raw -f . kt-speed-client.version)
 

@@ -19,7 +19,7 @@ if [[ "$latestVersion" == "$currentVersion" ]]; then
   exit 0
 fi
 
-declare -A platforms=( [aarch64-darwin]="arm64" [x86_64-darwin]="x64" )
+declare -A platforms=( [aarch64-darwin]="arm64" )
 
 for platform in "${!platforms[@]}"; do
   url="https://s3.amazonaws.com/redisinsight.download/public/releases/$latestVersion/Redis-Insight-mac-${platforms[$platform]}.dmg"

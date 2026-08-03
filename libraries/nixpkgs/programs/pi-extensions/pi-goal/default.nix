@@ -7,13 +7,13 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "pi-goal.ts";
-  version = "1.6.0-unstable-2026-07-13";
+  version = "1.6.0-unstable-2026-07-26";
 
   src = fetchFromGitHub {
     owner = "mitsuhiko";
     repo = "agent-stuff";
-    rev = "4bce45560fa55ace2f5dc8634a63a2af464ddc8b";
-    hash = "sha256-bA1SCLzphgoqErOnDOZGTl9WihmXLONVcS2jtmzZ5F8=";
+    rev = "d265b8ef32f896d3ef3bc6a45bd7b8e0d02150e0";
+    hash = "sha256-lIJU6meuAZUsK126TwCb4lK0+tzV2IICEBHUgblftrA=";
   };
 
   dontBuild = true;

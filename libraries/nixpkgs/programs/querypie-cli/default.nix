@@ -7,16 +7,16 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "querypie-cli";
-  version = "0.1.1";
+  version = "0.2.3";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "querypie-cli";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-aLTMWX4ZGRvz1xxt79GOmHw04Vkl9luA8u9e6MQx20c=";
+    hash = "sha256-m7/A5cBeHFNY9dYG3yqES/k6cGbQaNTSZObiLp7GEwY=";
   };
 
-  cargoHash = "sha256-irBRhgJ1Yb/QjG1XH21rTejVLAG6JQAydwYAdmRa8TA=";
+  cargoHash = "sha256-E4Iun8kpKC96II3qpA23cMiNrpjVMVXq0vKE96Sg4PY=";
 
   passthru.updateScript = nix-update-script { };
 

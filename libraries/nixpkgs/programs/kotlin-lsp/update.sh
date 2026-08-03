@@ -22,7 +22,6 @@ fi
 declare -A filenames=(
   [x86_64-linux]="kotlin-server-$latestVersion.tar.gz"
   [aarch64-linux]="kotlin-server-$latestVersion-aarch64.tar.gz"
-  [x86_64-darwin]="kotlin-server-$latestVersion.sit"
   [aarch64-darwin]="kotlin-server-$latestVersion-aarch64.sit"
 )
 

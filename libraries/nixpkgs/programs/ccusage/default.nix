@@ -9,18 +9,18 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "ccusage";
-  version = "20.0.17";
+  version = "20.0.19";
 
   src = fetchFromGitHub {
     owner = "ryoppippi";
     repo = "ccusage";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-486iLPRqQVRnKVbVT93D08RTRzd6/h503ckB//24nho=";
+    hash = "sha256-/x/RsJ8JLrGm8UXBewF/kbFLTdE51P+tPb3LwBT+LT8=";
   };
 
   cargoRoot = "rust";
   buildAndTestSubdir = finalAttrs.cargoRoot;
-  cargoHash = "sha256-23l/BCCGcZ1i5mFBC6Q+FE7sQRHnPLbU4QoQe7TfoiQ=";
+  cargoHash = "sha256-VJBLhQrVmeZSJ0EVpZaDiQ0eMpk5fgcaipgRd2GN9gw=";
 
   litellmPricingJson = fetchurl {
     url = "https://raw.githubusercontent.com/BerriAI/litellm/e59e34bed3670a6894d43129c2af16af28057d03/model_prices_and_context_window.json";

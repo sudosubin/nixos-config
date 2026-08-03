@@ -19,7 +19,7 @@ if [[ "$latestVersion" == "$currentVersion" ]]; then
   exit 0
 fi
 
-declare -A platforms=( [aarch64-darwin]="aarch64-apple-darwin" [x86_64-darwin]="x86_64-apple-darwin" [aarch64-linux]="aarch64-unknown-linux-gnu" [x86_64-linux]="x86_64-unknown-linux-gnu" )
+declare -A platforms=( [aarch64-darwin]="aarch64-apple-darwin" [aarch64-linux]="aarch64-unknown-linux-gnu" [x86_64-linux]="x86_64-unknown-linux-gnu" )
 
 for platform in "${!platforms[@]}"; do
   url="https://github.com/schpet/linear-cli/releases/download/v$latestVersion/linear-${platforms[$platform]}.tar.xz"
