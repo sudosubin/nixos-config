@@ -1,5 +1,6 @@
 {
   fetchFromGitHub,
+  installShellFiles,
   lib,
   nix-update-script,
   rustPlatform,
@@ -17,6 +18,15 @@ rustPlatform.buildRustPackage (finalAttrs: {
   };
 
   cargoHash = "sha256-CsMXFjaedFqO0T8yEDO4b7LEqzXmVLzd6aS66HeGxYE=";
+
+  nativeBuildInputs = [ installShellFiles ];
+
+  postInstall = ''
+    installShellCompletion --cmd grep-app-cli \
+      --bash <($out/bin/grep-app-cli completion bash) \
+      --fish <($out/bin/grep-app-cli completion fish) \
+      --zsh <($out/bin/grep-app-cli completion zsh)
+  '';
 
   passthru.updateScript = nix-update-script { };
 
