@@ -18,7 +18,7 @@
 
   // theme
   "workbench.activityBar.location": "bottom",
-  "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "workbench.sideBar.location": "left",
   "workbench.colorTheme": "GitHub Dark Default",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.productIconTheme": "material-product-icons",
@@ -106,9 +106,8 @@
 
   // language (javascript)
   "emmet.excludeLanguages": ["typescriptreact"],
-  "svelte.enable-ts-plugin": true,
-  "typescript.disableAutomaticTypeAcquisition": true,
-  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "js/ts.tsserver.automaticTypeAcquisition.enabled": false,
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
   "[css]": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
@@ -187,20 +186,16 @@
   "errorLens.gutterIconSize": "65%",
   "errorLens.gutterIconSet": "defaultOutline",
 
-  // kiro
-  "kiroAgent.experiments": {
-    "acpChat": false
-  },
+  // cursor
+  "cursor.composer.showEmptyStateTips": false,
 
   // telemetry, etc
   "http.proxyStrictSSL": false,
   "redhat.telemetry.enabled": false,
-  "telemetry.feedback.enabled": false,
-  "telemetry.telemetryLevel": "off",
+  "crashReporting.enabled": "off",
   "extensions.ignoreRecommendations": true,
   "extensions.autoCheckUpdates": false,
   "extensions.autoUpdate": false,
-  "update.showReleaseNotes": false,
   "update.mode": "none",
   "workbench.welcomePage.walkthroughs.openOnInstall": false
 }

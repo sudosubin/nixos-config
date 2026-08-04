@@ -24,7 +24,7 @@ let
     lib.strings.concatStrings (lib.attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
 
   overlays = {
-    kiro = pkgs.kiro.overrideDerivation (attrs: {
+    code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {
       nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
 
       resources = if isDarwin then "Contents/Resources" else "resources";
@@ -62,25 +62,13 @@ let
         node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
       '';
     });
-
-    jnoortheen.nix-ide = pkgs.open-vsx.jnoortheen.nix-ide.overrideAttrs (attrs: {
-      nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.jq ];
-
-      postInstall = ''
-        ${attrs.postInstall or ""}
-
-        pkg="$out/share/vscode/extensions/jnoortheen.nix-ide/package.json"
-        jq '.engines.vscode = "^1.107.0"' "$pkg" > "$pkg.tmp"
-        mv "$pkg.tmp" "$pkg"
-      '';
-    });
   };
 
 in
 {
-  programs.kiro = rec {
+  programs.cursor = rec {
     enable = true;
-    package = overlays.kiro;
+    package = overlays.code-cursor;
     profiles.default = {
       extensions =
         (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
@@ -88,7 +76,6 @@ in
           anthropic.claude-code
           arcanis.vscode-zipfs
           astral-sh.ty
-          bierner.markdown-preview-github-styles
           biomejs.biome
           bradlc.vscode-tailwindcss
           bufbuild.vscode-buf
@@ -105,6 +92,7 @@ in
           graphql.vscode-graphql
           graphql.vscode-graphql-syntax
           hashicorp.terraform
+          jnoortheen.nix-ide
           ms-pyright.pyright
           ms-python.debugpy
           ms-python.python
@@ -128,23 +116,17 @@ in
           eamodio.gitlens
         ])
         ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).vscode-marketplace; [
+          bierner.markdown-preview-github-styles
           typescriptteam.native-preview
         ])
         ++ [
           overlays.pkief.material-icon-theme
-          overlays.jnoortheen.nix-ide
         ];
-      keybindings = [
-        {
-          key = if isDarwin then "cmd+shift+i" else "ctrl+shift+i";
-          command = "workbench.action.toggleAuxiliaryBar";
-        }
-      ];
       userSettings = ./files/settings.json;
     };
   };
 
   home.shellAliases = {
-    code = "kiro";
+    code = "cursor";
   };
 }
