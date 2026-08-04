@@ -1,5 +1,6 @@
 {
   fetchFromGitHub,
+  installShellFiles,
   lib,
   nix-update-script,
   rustPlatform,
@@ -17,6 +18,15 @@ rustPlatform.buildRustPackage (finalAttrs: {
   };
 
   cargoHash = "sha256-E4Iun8kpKC96II3qpA23cMiNrpjVMVXq0vKE96Sg4PY=";
+
+  nativeBuildInputs = [ installShellFiles ];
+
+  postInstall = ''
+    installShellCompletion --cmd querypie \
+      --bash <($out/bin/querypie completion bash) \
+      --fish <($out/bin/querypie completion fish) \
+      --zsh <($out/bin/querypie completion zsh)
+  '';
 
   passthru.updateScript = nix-update-script { };
 
