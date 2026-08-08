@@ -141,11 +141,11 @@
     "nixos-config-private-karrot": {
       "locked": {
         "dir": "karrot",
-        "lastModified": 1785743255,
-        "narHash": "sha256-QBvZim6t1Z8uARHsSr0uaup1/YIoc3ABJZvTGMSQgyE=",
+        "lastModified": 1785917567,
+        "narHash": "sha256-9stnDoJqNDY/GR444Lcb9215U+F5DpjJ7OcFao+DJfY=",
         "owner": "sudosubin",
         "repo": "nixos-config-private",
-        "rev": "08782bfa9d8b6be0e379570510a1c651fbb1cae4",
+        "rev": "a8cf98a5d2bc240725ea7bcb225958d85d0d354a",
         "type": "github"
       },
       "original": {
@@ -158,11 +158,11 @@
     "nixos-config-private-sudosubin": {
       "locked": {
         "dir": "sudosubin",
-        "lastModified": 1785743255,
-        "narHash": "sha256-QBvZim6t1Z8uARHsSr0uaup1/YIoc3ABJZvTGMSQgyE=",
+        "lastModified": 1785917567,
+        "narHash": "sha256-9stnDoJqNDY/GR444Lcb9215U+F5DpjJ7OcFao+DJfY=",
         "owner": "sudosubin",
         "repo": "nixos-config-private",
-        "rev": "08782bfa9d8b6be0e379570510a1c651fbb1cae4",
+        "rev": "a8cf98a5d2bc240725ea7bcb225958d85d0d354a",
         "type": "github"
       },
       "original": {
