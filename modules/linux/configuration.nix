@@ -14,6 +14,8 @@
   imports = [
     # EC2 hardware / boot profile (amazon-image).
     ./hardware-configuration.nix
+    # Persistent /home volume + EIP re-attach for the Spot + ASG deployment.
+    ./spot-home-volume.nix
   ];
 
   # Set your time zone.
