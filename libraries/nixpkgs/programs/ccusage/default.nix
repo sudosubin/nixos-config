@@ -9,22 +9,22 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "ccusage";
-  version = "20.0.19";
+  version = "20.0.20";
 
   src = fetchFromGitHub {
     owner = "ryoppippi";
     repo = "ccusage";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-/x/RsJ8JLrGm8UXBewF/kbFLTdE51P+tPb3LwBT+LT8=";
+    hash = "sha256-fMEun+cbIUWBJgH26FsY0xh9uq86ySZsiRpRgBqEUCk=";
   };
 
   cargoRoot = "rust";
   buildAndTestSubdir = finalAttrs.cargoRoot;
-  cargoHash = "sha256-VJBLhQrVmeZSJ0EVpZaDiQ0eMpk5fgcaipgRd2GN9gw=";
+  cargoHash = "sha256-uKJlz37i/y2sCBHA12yY4pkjT6HOV9Nbw1ATyUsG+uY=";
 
   litellmPricingJson = fetchurl {
-    url = "https://raw.githubusercontent.com/BerriAI/litellm/e59e34bed3670a6894d43129c2af16af28057d03/model_prices_and_context_window.json";
-    hash = "sha256-aPue4NpPpTKAtAYCI8S8ojmVCDtYr+mxwtYkOASEg3w=";
+    url = "https://raw.githubusercontent.com/BerriAI/litellm/1a183efaa1a2108aed7e1bed8d445d93bd1aa60d/model_prices_and_context_window.json";
+    hash = "sha256-p0U40u3BPh609nhw+8LuBQNTJubq7Q3FvOEdNyz/bmA=";
   };
 
   nativeBuildInputs = [

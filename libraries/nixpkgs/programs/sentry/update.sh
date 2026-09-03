@@ -38,7 +38,7 @@ sentryApiVersion=$(
     -H "Accept: application/vnd.github.raw" \
     ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} \
     "https://api.github.com/repos/getsentry/cli/contents/pnpm-lock.yaml?ref=$latestVersion" \
-    | yq -r '.importers["."] | (.dependencies["@sentry/api"].version // .devDependencies["@sentry/api"].version) | sub("[(].*", "")'
+    | yq -r '.importers["packages/cli"].devDependencies["@sentry/api"].version | sub("[(].*", "")'
 )
 curl -fsSL \
   -H "Accept: application/vnd.github.raw" \

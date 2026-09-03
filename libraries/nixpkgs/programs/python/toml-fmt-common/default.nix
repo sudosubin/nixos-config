@@ -18,8 +18,9 @@ buildPythonPackage rec {
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt";
-    rev = "bc9ee6239734bd2c99be6b7c6ce99e4b2914544e";
-    hash = "sha256-Tiwq3995nzfTyEYSgxqdoosk1XwVfMLGh2JypOPTeI4=";
+    # pyproject-fmt 2.29.3 needs common changes newer than the 1.3.5 common tag.
+    rev = "pyproject-fmt/2.29.3";
+    hash = "sha256-yFhWiP2Cd/CRsYF1kxgp2nRFF7MRFaQAvV2XTkhrdCo=";
   };
 
   sourceRoot = "${src.name}/toml-fmt-common";

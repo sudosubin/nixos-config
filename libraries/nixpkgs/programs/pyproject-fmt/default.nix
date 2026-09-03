@@ -9,14 +9,14 @@
 
 python3Packages.buildPythonPackage rec {
   pname = "pyproject-fmt";
-  version = "2.26.0";
+  version = "2.29.3";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt";
     rev = "${pname}/${version}";
-    sha256 = "sha256-drxF8gq8o+EuNtuqVCi8PW1VNntMHc1EcBXVeBOZNQw=";
+    sha256 = "sha256-yFhWiP2Cd/CRsYF1kxgp2nRFF7MRFaQAvV2XTkhrdCo=";
   };
 
   sourceRoot = "${src.name}/pyproject-fmt";
@@ -36,7 +36,7 @@ python3Packages.buildPythonPackage rec {
       version
       src
       ;
-    hash = "sha256-uxZKz9ENcRwV8Z9IGn8PtBgts8gX/0eFhVF1hcyd0mM=";
+    hash = "sha256-S5O1KTT16W7gK0aYqLk6lILfkrqv82ErD7yIPFSku4Y=";
   };
 
   dependencies = with python3Packages; [
@@ -52,12 +52,6 @@ python3Packages.buildPythonPackage rec {
   nativeBuildInputs = [
     rustPlatform.cargoSetupHook
     rustPlatform.maturinBuildHook
-  ];
-
-  # toml-fmt-common 1.3.5 does not yet respect NO_COLOR, fixed in main but unreleased
-  disabledTests = [
-    "test_main[format-cwd-no_check-in_place]"
-    "test_main[format-absolute-no_check-in_place]"
   ];
 
   nativeCheckInputs = with python3Packages; [

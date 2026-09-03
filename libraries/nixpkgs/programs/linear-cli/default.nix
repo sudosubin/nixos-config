@@ -9,7 +9,7 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "linear-cli";
-  version = "2.3.0";
+  version = "2.6.0";
 
   src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -39,15 +39,15 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     sources = {
       aarch64-darwin = fetchzip {
         url = "https://github.com/schpet/linear-cli/releases/download/v${finalAttrs.version}/linear-aarch64-apple-darwin.tar.xz";
-        hash = "sha256-FwP8a/PP8Rkg1ECF5tZKY0infCAi/VEukLBEaQ4IryU=";
+        hash = "sha256-uuxWxWjgsO89GggPXYjmw+1S+v2l29dkZt91mJ+Ghbo=";
       };
       aarch64-linux = fetchzip {
         url = "https://github.com/schpet/linear-cli/releases/download/v${finalAttrs.version}/linear-aarch64-unknown-linux-gnu.tar.xz";
-        hash = "sha256-ft3LBVDLIGPveDWDR2NW95ygjvUGP6geAuDgEDIzqjU=";
+        hash = "sha256-Dc8mIv1jpf58AAgx/RQnSwXtdxzSEj66oOytGvh2Fio=";
       };
       x86_64-linux = fetchzip {
         url = "https://github.com/schpet/linear-cli/releases/download/v${finalAttrs.version}/linear-x86_64-unknown-linux-gnu.tar.xz";
-        hash = "sha256-9dKwD5t784/n+vus/n7YnMqsX05QH4gXZwwY31qcvhY=";
+        hash = "sha256-i6U571U5w9+dSEkBbCZZ5aiXmfL2zjDyJBGUQQbV2dE=";
       };
     };
     updateScript = ./update.sh;
