@@ -92,7 +92,6 @@
       agent-slack = final.callPackage ./programs/agent-slack { };
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
-      ccusage = final.callPackage ./programs/ccusage { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       damn-my-slow-kt = final.callPackage ./programs/damn-my-slow-kt { };
