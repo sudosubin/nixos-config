@@ -14,6 +14,9 @@ in
     # sops-nix (nix flake input)
     inputs.sops-nix.homeManagerModules.sops
 
+    # accounts (local)
+    ./accounts/gh
+
     # local programs (local)
     ./programs/1password
     ./programs/act
