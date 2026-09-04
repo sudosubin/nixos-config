@@ -29,31 +29,27 @@ in
   programs.wezterm = {
     enable = true;
 
-    extraConfig = ''
-      return ${
-        toLua {
-          animation_fps = 60;
-          automatically_reload_config = true;
-          color_scheme = "default";
-          enable_kitty_keyboard = true;
-          font = lib.generators.mkLuaInline ''
-            wezterm.font_with_fallback(${toLua font})
-          '';
-          font_size = font-size;
-          front_end = "WebGpu";
-          hide_tab_bar_if_only_one_tab = true;
-          keys = [
-            {
-              key = "Enter";
-              mods = "SHIFT";
-              action = lib.generators.mkLuaInline "wezterm.action.SendString '\\n'";
-            }
-          ];
-          scrollback_lines = 100000;
-          window_decorations = "RESIZE";
+    settings = {
+      animation_fps = 60;
+      automatically_reload_config = true;
+      color_scheme = "default";
+      enable_kitty_keyboard = true;
+      font = lib.generators.mkLuaInline ''
+        wezterm.font_with_fallback(${toLua font})
+      '';
+      font_size = font-size;
+      front_end = "WebGpu";
+      hide_tab_bar_if_only_one_tab = true;
+      keys = [
+        {
+          key = "Enter";
+          mods = "SHIFT";
+          action = lib.generators.mkLuaInline "wezterm.action.SendString '\\n'";
         }
-      };
-    '';
+      ];
+      scrollback_lines = 100000;
+      window_decorations = "RESIZE";
+    };
 
     colorSchemes = {
       default = {
