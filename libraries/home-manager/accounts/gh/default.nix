@@ -7,10 +7,12 @@
 
 let
   inherit (lib)
+    attrNames
     attrValues
-    filter
     filterAttrs
     genAttrs
+    head
+    length
     mapAttrs'
     mapAttrsToList
     nameValuePair
@@ -26,28 +28,39 @@ let
   accountsForHost = host: filterAttrs (_name: account: account.host == host) cfg;
 
   # gh's hosts.yml allows exactly one active `user` per host.
-  defaultUsernameForHost =
+  primaryForHost =
     host:
     let
-      primaries = filter (account: account.primary) (attrValues (accountsForHost host));
+      primaries = filterAttrs (_name: account: account.primary) (accountsForHost host);
     in
-    if lib.length primaries != 1 then
+    if length (attrNames primaries) != 1 then
       throw "accounts.gh: host '${host}' must have exactly one account with primary = true"
     else
-      (lib.head primaries).username;
+      nameValuePair (head (attrNames primaries)) (head (attrValues primaries));
+
+  mkTokenName = name: "gh-token-${name}";
 
   # Rendered to YAML via pkgs.formats.yaml instead of hand-built strings.
-  hostsData = genAttrs hosts (host: {
-    users = mapAttrs' (
-      name: account:
-      nameValuePair account.username {
-        oauth_token = config.sops.placeholder."gh-token-${name}";
-        git_protocol = "https";
-      }
-    ) (accountsForHost host);
-    user = defaultUsernameForHost host;
-    git_protocol = "https";
-  });
+  hostsData = genAttrs hosts (
+    host:
+    let
+      primary = primaryForHost host;
+    in
+    {
+      users = mapAttrs' (
+        name: account:
+        nameValuePair account.username {
+          oauth_token = config.sops.placeholder.${mkTokenName name};
+          git_protocol = "https";
+        }
+      ) (accountsForHost host);
+
+      # gh reads the active account's token from the host level, not from `users`.
+      user = primary.value.username;
+      oauth_token = config.sops.placeholder.${mkTokenName primary.name};
+      git_protocol = "https";
+    }
+  );
 
 in
 {
@@ -86,7 +99,7 @@ in
   config = lib.mkIf (cfg != { }) {
     sops.secrets = mapAttrs' (
       name: account:
-      nameValuePair "gh-token-${name}" {
+      nameValuePair (mkTokenName name) {
         sopsFile = account.file;
         format = "binary";
       }
