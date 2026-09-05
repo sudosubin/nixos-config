@@ -7,16 +7,16 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "figma-agent";
-  version = "0.2.4";
+  version = "0.2.5";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "figma-agent";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-PoLOxRmzZZTY+7EEYab3Qk+aoyJ7BXClpNe5iSH4hAE=";
+    hash = "sha256-Wh69R0XtLOE6TT3xTkahPGHQN6ukbRU2243STQFuz3c=";
   };
 
-  cargoHash = "sha256-hgMx/4/zKds9KUmkXe15x1Vsq/YPmCng76l474yI6IE=";
+  cargoHash = "sha256-0iSaV6p4tN9Ml1owmVTJxx3pJZHnl7hSKqluRcWw/J0=";
 
   passthru.updateScript = nix-update-script { };
 
