@@ -9,14 +9,14 @@
 
 python3Packages.buildPythonPackage rec {
   pname = "pyproject-fmt";
-  version = "2.29.3";
+  version = "2.29.4";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "tox-dev";
     repo = "toml-fmt";
     rev = "${pname}/${version}";
-    sha256 = "sha256-yFhWiP2Cd/CRsYF1kxgp2nRFF7MRFaQAvV2XTkhrdCo=";
+    sha256 = "sha256-tP5BsCkfnRyxvAZpg65qYrCLapa0HvZVlEywMURKE+s=";
   };
 
   sourceRoot = "${src.name}/pyproject-fmt";
@@ -36,7 +36,7 @@ python3Packages.buildPythonPackage rec {
       version
       src
       ;
-    hash = "sha256-S5O1KTT16W7gK0aYqLk6lILfkrqv82ErD7yIPFSku4Y=";
+    hash = "sha256-IB0cJr1ODsL4qadGluqrNzf3tyEOxXrbj0Uub4tQtFQ=";
   };
 
   dependencies = with python3Packages; [
@@ -58,6 +58,7 @@ python3Packages.buildPythonPackage rec {
     pytest-cov
     pytest-mock
     pytestCheckHook
+    trove-classifiers
   ];
 
   passthru.updateScript = nix-update-script {
