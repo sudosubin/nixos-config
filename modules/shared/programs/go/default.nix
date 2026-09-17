@@ -2,7 +2,7 @@
 
 {
   home.sessionVariables = {
-    GOPATH = "${config.xdg.configHome}/go";
+    GOPATH = "${config.xdg.dataHome}/go";
     GOTELEMETRY = "off";
   };
 }

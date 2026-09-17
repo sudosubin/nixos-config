@@ -19,7 +19,6 @@
         fd
         hadolint
         ijhttp
-        sentry
         shfmt
         tree
         wtp
@@ -57,12 +56,16 @@
         ../shared/programs/git
         ../shared/programs/go
         ../shared/programs/gpg
+        ../shared/programs/gradle
         ../shared/programs/helix
         ../shared/programs/jq
         ../shared/programs/nix
         ../shared/programs/node
+        ../shared/programs/pulumi
         ../shared/programs/python
+        ../shared/programs/ruby
         ../shared/programs/rust
+        ../shared/programs/sentry
         ../shared/programs/shell
         ../shared/programs/slack
         ../shared/programs/sqlit

@@ -41,6 +41,7 @@ in
     ./programs/music-decoy
     ./programs/orbstack
     ./programs/pi
+    ./programs/redisinsight
     ./programs/sqlit
     ./programs/wifi-unredactor
 

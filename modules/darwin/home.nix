@@ -25,7 +25,6 @@
         ngrok
         postman
         procps
-        sentry
         shfmt
         tree
         wtp
@@ -36,7 +35,6 @@
         linear-cli
         ntn
         querypie-cli
-        redisinsight
         ripgrep
         unzip
       ];
@@ -60,12 +58,16 @@
         ../shared/programs/git
         ../shared/programs/go
         ../shared/programs/gpg
+        ../shared/programs/gradle
         ../shared/programs/helix
         ../shared/programs/jq
         ../shared/programs/nix
         ../shared/programs/node
+        ../shared/programs/pulumi
         ../shared/programs/python
+        ../shared/programs/ruby
         ../shared/programs/rust
+        ../shared/programs/sentry
         ../shared/programs/shell
         ../shared/programs/slack
         ../shared/programs/sqlit
@@ -83,6 +85,7 @@
         ../darwin/programs/hammerspoon
         ../darwin/programs/homerow
         ../darwin/programs/music-decoy
+        ../darwin/programs/redisinsight
         ../darwin/programs/wifi-unredactor
       ];
 

@@ -2,7 +2,7 @@
 
 {
   home.sessionVariables = {
-    CARGO_HOME = "${config.xdg.configHome}/cargo";
-    RUSTUP_HOME = "${config.xdg.configHome}/rustup";
+    CARGO_HOME = "${config.xdg.dataHome}/cargo";
+    RUSTUP_HOME = "${config.xdg.dataHome}/rustup";
   };
 }

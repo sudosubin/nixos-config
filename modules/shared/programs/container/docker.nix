@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -9,6 +10,10 @@ let
 
 in
 {
+  home.sessionVariables = {
+    DOCKER_CONFIG = "${config.xdg.configHome}/docker";
+  };
+
   home.packages = lib.optionals isLinux (
     with pkgs;
     [
