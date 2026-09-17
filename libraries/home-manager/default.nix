@@ -13,6 +13,17 @@ in
   home-manager.sharedModules = [
     # sops-nix (nix flake input)
     inputs.sops-nix.homeManagerModules.sops
+    # Compatibility until sops-nix stops requiring the removed Go 1.25 builder.
+    {
+      sops.package =
+        (pkgs.callPackage inputs.sops-nix {
+          pkgs = pkgs.extend (
+            _: prev: {
+              buildGo125Module = prev.buildGo126Module;
+            }
+          );
+        }).sops-install-secrets;
+    }
 
     # accounts (local)
     ./accounts/gh
