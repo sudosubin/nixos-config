@@ -20,7 +20,7 @@ let
   shouldWrapXdgRuntimeDir = cfg.enableXdgRuntimeDir && xdgRuntimeDirCommand != null;
 
   package =
-    if shouldWrapXdgRuntimeDir || cfg.enableNativeMode then
+    if shouldWrapXdgRuntimeDir || cfg.stateExpireDays != null then
       pkgs.agent-browser.overrideAttrs (oldAttrs: {
         nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
 
@@ -28,7 +28,9 @@ let
           ${oldAttrs.postInstall or ""}
           wrapProgram $out/bin/agent-browser \
             ${lib.concatStringsSep " \\\n  " (
-              (lib.optional cfg.enableNativeMode "--set AGENT_BROWSER_NATIVE 1")
+              (lib.optional (
+                cfg.stateExpireDays != null
+              ) "--set-default AGENT_BROWSER_STATE_EXPIRE_DAYS ${toString cfg.stateExpireDays}")
               ++ (lib.optional shouldWrapXdgRuntimeDir "--run '${xdgRuntimeDirCommand}'")
             )}
         '';
@@ -41,14 +43,6 @@ in
   options.programs.agent-browser = {
     enable = lib.mkEnableOption "agent-browser";
 
-    enableNativeMode = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = ''
-        Set AGENT_BROWSER_NATIVE=1 at runtime when launching agent-browser.
-      '';
-    };
-
     enableXdgRuntimeDir = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -56,6 +50,16 @@ in
         Set XDG_RUNTIME_DIR at runtime when launching agent-browser.
         Linux: /run/user/$UID
         Darwin: $(getconf DARWIN_USER_TEMP_DIR)
+      '';
+    };
+
+    stateExpireDays = lib.mkOption {
+      type = lib.types.nullOr lib.types.ints.positive;
+      default = null;
+      example = 7;
+      description = ''
+        Auto-delete saved browser states older than this many days, via
+        `AGENT_BROWSER_STATE_EXPIRE_DAYS` (agent-browser defaults to 30).
       '';
     };
   };

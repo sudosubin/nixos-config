@@ -20,8 +20,8 @@
 
   programs.agent-browser = {
     enable = true;
-    enableNativeMode = true;
     enableXdgRuntimeDir = true;
+    stateExpireDays = 7;
   };
 
   programs.claude-code = {

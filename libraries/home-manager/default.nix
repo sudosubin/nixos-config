@@ -32,6 +32,7 @@ in
     ./programs/1password
     ./programs/act
     ./programs/agent-browser
+    ./programs/agent-slack
     ./programs/caffeinate
     ./programs/cleanshot
     ./programs/clop
