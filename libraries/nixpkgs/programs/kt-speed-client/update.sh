@@ -2,9 +2,13 @@
 #!nix-shell -i bash -p curl jq coreutils common-updater-scripts
 set -eu -o pipefail
 
+systemOptionPath=$(
+  curl -fsSL https://speed.kt.com/ \
+    | grep -m1 -oE '/assets/systemOption-[^" ]+\.js'
+)
 latestVersion=$(
-  curl -fsSL https://speed.kt.com/js/app.js \
-    | grep -oE 'macVersion: ?\\?"[0-9][0-9.]*' \
+  curl -fsSL "https://speed.kt.com$systemOptionPath" \
+    | grep -m1 -oE 'macVersion:`[0-9][0-9.]*`' \
     | grep -oE '[0-9][0-9.]*' \
     | head -n1
 )
