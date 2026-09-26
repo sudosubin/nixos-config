@@ -92,6 +92,7 @@
       agent-slack = final.callPackage ./programs/agent-slack { };
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
+      atlas = final.callPackage ./programs/atlas { };
       cleanshot = final.callPackage ./programs/cleanshot { };
       clop = final.callPackage ./programs/clop { };
       damn-my-slow-kt = final.callPackage ./programs/damn-my-slow-kt { };
@@ -113,7 +114,6 @@
       nanum-square-round = final.callPackage ./programs/fonts/nanum-square-round { };
       nix-activate = final.callPackage ./programs/nix-activate { };
       ntn = final.callPackage ./programs/ntn { };
-      orca = final.callPackage ./programs/orca { };
       pi-extensions = final.callPackage ./programs/pi-extensions { };
       pravka = final.callPackage ./programs/pravka { };
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
@@ -145,6 +145,7 @@
       "ijhttp"
       "kiro"
       "kiro-cli"
+      "kiro-cli-unwrapped"
       "kt-speed-client"
       "ngrok"
       "orbstack"
