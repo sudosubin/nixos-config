@@ -5,24 +5,18 @@
   ...
 }:
 
-let
-  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
-
-in
 {
-  home.packages =
-    (with pkgs; [
-      (ccusage.overrideAttrs (oldAttrs: {
-        nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ makeWrapper ];
-        postInstall = (oldAttrs.postInstall or "") + ''
-          wrapProgram $out/bin/ccusage \
-            --set PI_AGENT_DIR "${config.xdg.configHome}/pi/agent/sessions"
-        '';
-      }))
-      deepwiki-cli
-      grep-app-cli
-    ])
-    ++ lib.optionals isDarwin (with pkgs; [ atlas ]);
+  home.packages = with pkgs; [
+    (ccusage.overrideAttrs (oldAttrs: {
+      nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ makeWrapper ];
+      postInstall = (oldAttrs.postInstall or "") + ''
+        wrapProgram $out/bin/ccusage \
+          --set PI_AGENT_DIR "${config.xdg.configHome}/pi/agent/sessions"
+      '';
+    }))
+    deepwiki-cli
+    grep-app-cli
+  ];
 
   programs.agent-browser = {
     enable = true;
