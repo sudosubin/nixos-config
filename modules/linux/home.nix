@@ -25,9 +25,9 @@
 
         # Utility
         figma-linux
-        gnome.nautilus
         keepassxc
         linear-cli
+        nautilus
         ngrok
         pavucontrol
         pulseaudio

@@ -35,7 +35,7 @@ in
   options.programs._1password = {
     enable = lib.mkEnableOption "1password";
 
-    package = lib.mkPackageOption pkgs "_1password" { };
+    package = lib.mkPackageOption pkgs "_1password-cli" { };
 
     enableFHSEnvironment = lib.mkOption {
       type = lib.types.bool;

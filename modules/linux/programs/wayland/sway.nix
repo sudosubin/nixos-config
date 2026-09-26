@@ -6,9 +6,8 @@
 }:
 
 let
-  colors = import ../../../shared/colors.nix // {
-    sway.selection = "${colors.ansi.blue}80";
-  };
+  palette = import ../../../shared/colors.nix;
+  selection = "${palette.ansi.blue}80";
 
   sway = config.wayland.windowManager.sway.package;
   left = "h";
@@ -38,41 +37,41 @@ in
       };
       colors = {
         focused = {
-          border = colors.sway.selection;
-          background = colors.sway.selection;
-          text = colors.ansi.white;
-          indicator = colors.sway.selection;
-          childBorder = colors.sway.selection;
+          border = selection;
+          background = selection;
+          text = palette.ansi.white;
+          indicator = selection;
+          childBorder = selection;
         };
         focusedInactive = {
-          border = colors.background;
-          background = colors.background;
-          text = colors.ansi.white;
-          indicator = colors.background;
-          childBorder = colors.background;
+          border = palette.background;
+          background = palette.background;
+          text = palette.ansi.white;
+          indicator = palette.background;
+          childBorder = palette.background;
         };
         unfocused = {
-          border = colors.background;
-          background = colors.background;
-          text = colors.ansi.white;
-          indicator = colors.background;
-          childBorder = colors.background;
+          border = palette.background;
+          background = palette.background;
+          text = palette.ansi.white;
+          indicator = palette.background;
+          childBorder = palette.background;
         };
         urgent = {
-          border = colors.background;
-          background = colors.ansi.red;
-          text = colors.ansi.white;
-          indicator = colors.ansi.red;
-          childBorder = colors.ansi.red;
+          border = palette.background;
+          background = palette.ansi.red;
+          text = palette.ansi.white;
+          indicator = palette.ansi.red;
+          childBorder = palette.ansi.red;
         };
         placeholder = {
-          border = colors.background;
-          background = colors.background;
-          text = colors.ansi.white;
-          indicator = colors.background;
-          childBorder = colors.background;
+          border = palette.background;
+          background = palette.background;
+          text = palette.ansi.white;
+          indicator = palette.background;
+          childBorder = palette.background;
         };
-        background = colors.brights.white;
+        background = palette.brights.white;
       };
       bars = [ ];
       startup = [
