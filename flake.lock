@@ -141,11 +141,11 @@
     "nixos-config-private-karrot": {
       "locked": {
         "dir": "karrot",
-        "lastModified": 1788535381,
-        "narHash": "sha256-L1ctdTdJ8Tpx1OxaCoxgrL7/2rwDtaOka4wEeWD27Ms=",
+        "lastModified": 1790495711,
+        "narHash": "sha256-732NG1mGw17tC7UxO1/vx/UKAOOvxJUSBnagnQw0BTc=",
         "owner": "sudosubin",
         "repo": "nixos-config-private",
-        "rev": "a909bf5d8607b1cea8c57221fddd3df529e40a5f",
+        "rev": "6a266212af0fc8fef5438be9f4eb522cd948404b",
         "type": "github"
       },
       "original": {
