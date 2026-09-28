@@ -33,6 +33,7 @@
       attribution = {
         commit = "";
         pr = "";
+        sessionUrl = false;
       };
       cleanupPeriodDays = 99999;
       env = {
@@ -47,8 +48,8 @@
         # DISABLE_TELEMETRY = "1";
         ENABLE_TOOL_SEARCH = "true";
       };
+      feedbackDrafts = "off";
       includeCoAuthoredBy = false;
-      model = "opusplan";
       permissions = {
         defaultMode = "bypassPermissions";
       };
@@ -57,6 +58,7 @@
         mode = "replace";
         verbs = [ "Working" ];
       };
+      tui = "fullscreen";
     };
   };
 
