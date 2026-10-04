@@ -104,16 +104,11 @@
       quietStartup = true;
       theme = "github-dark";
     };
-    skills = with pkgs.skills; [
-      affaan-m.everything-claude-code.golang-patterns
-      anthropics.skills.skill-creator
+    skills = with pkgs.agent-skills.github; [
       hamsurang.kit.deepwiki-cli
-      nextlevelbuilder.ui-ux-pro-max-skill.ui-ux-pro-max
       getsentry.cli.sentry-cli
-      sudosubin.grep-app-cli.grep-app-cli
       (toss.es-toolkit.guide.override { name = "es-toolkit-guide"; })
       (toss.es-toolkit.recommend.override { name = "es-toolkit-recommend"; })
-      (vercel.ai.adr-skill.override { name = "adr"; })
       vercel-labs.agent-browser.agent-browser
       vercel-labs.agent-skills.react-best-practices
     ];

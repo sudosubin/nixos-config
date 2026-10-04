@@ -116,7 +116,7 @@ in
       default = [ ];
       example = lib.literalExpression ''
         [
-          pkgs.skills.some-skill
+          pkgs.agent-skills.github.some-owner.some-repo.some-skill
 
           # Wrap a local skill directory (must contain SKILL.md)
           (pkgs.runCommand "my-skill" {} '''

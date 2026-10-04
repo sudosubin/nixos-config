@@ -6,8 +6,8 @@
 
 {
   nixpkgs.overlays = [
+    inputs.agents-nix.overlays.default
     inputs.firefox-addons.overlays.default
-    inputs.nix-skills.overlays.default
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
       python3Packages = prev.python3Packages.overrideScope (
