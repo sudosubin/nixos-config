@@ -78,6 +78,15 @@ end
 -- Default (ignore cmd+h)
 lrhk:bind({"lCmd"}, "h", function() end, nil, function() end)
 
+-- Text replacement
+local textReplacement = hs.loadSpoon("TextReplacement")
+textReplacement.rules = {
+  ["->"] = "→",
+  ["<-"] = "←",
+}
+textReplacement.excludedApps = {}
+textReplacement:start()
+
 -- Hammerspoon
 hs.hotkey.bind({"alt", "shift"}, "r", function()
   hs.execute("launchctl kickstart -k gui/$(id -u)/org.nixos.yabai", true)
