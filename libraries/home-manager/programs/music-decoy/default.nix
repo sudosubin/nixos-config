@@ -38,6 +38,10 @@ in
           assertion = cfg.enable -> isDarwin;
           message = "Nix music-decoy only supports darwin.";
         }
+        {
+          assertion = cfg.enable -> config.targets.darwin.copyApps.enable;
+          message = "services.music-decoy requires targets.darwin.copyApps.enable.";
+        }
       ];
     }
 
@@ -54,7 +58,7 @@ in
         enable = true;
         config = {
           ProgramArguments = [
-            "${config.home.homeDirectory}/Applications/Home Manager Apps/Music Decoy.app/Contents/MacOS/Music Decoy"
+            "${config.home.homeDirectory}/${config.targets.darwin.copyApps.directory}/Music Decoy.app/Contents/MacOS/Music Decoy"
           ];
           KeepAlive = true;
           RunAtLoad = true;

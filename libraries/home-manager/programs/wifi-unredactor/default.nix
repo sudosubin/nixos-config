@@ -8,7 +8,6 @@
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
   cfg = config.programs.wifi-unredactor;
-  copyApps = config.targets.darwin.copyApps;
 
 in
 {
@@ -26,8 +25,8 @@ in
           message = "Nix wifi-unredactor only supports darwin.";
         }
         {
-          assertion = cfg.enable -> copyApps.enable;
-          message = "programs.wifi-unredactor requires targets.darwin.copyApps.enable: Location Services authorization is bound to the bundle path under ~/${copyApps.directory}, which copyApps provides.";
+          assertion = cfg.enable -> config.targets.darwin.copyApps.enable;
+          message = "programs.wifi-unredactor requires targets.darwin.copyApps.enable (for Location Services authorization).";
         }
       ];
     }
@@ -37,7 +36,7 @@ in
       home.packages = [
         cfg.package
         (pkgs.writeShellScriptBin "wifi-unredactor" ''
-          exec "${config.home.homeDirectory}/${copyApps.directory}/WiFi Unredactor.app/Contents/MacOS/wifi-unredactor" "$@"
+          exec "${config.home.homeDirectory}/${config.targets.darwin.copyApps.directory}/WiFi Unredactor.app/Contents/MacOS/wifi-unredactor" "$@"
         '')
       ];
     })

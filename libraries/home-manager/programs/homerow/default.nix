@@ -182,6 +182,10 @@ in
           assertion = cfg.enable -> isDarwin;
           message = "Nix homerow only supports darwin.";
         }
+        {
+          assertion = cfg.enable -> config.targets.darwin.copyApps.enable;
+          message = "services.homerow requires targets.darwin.copyApps.enable.";
+        }
       ];
     }
 
@@ -196,7 +200,7 @@ in
         enable = true;
         config = {
           ProgramArguments = [
-            "${config.home.homeDirectory}/Applications/Home Manager Apps/Homerow.app/Contents/MacOS/Homerow"
+            "${config.home.homeDirectory}/${config.targets.darwin.copyApps.directory}/Homerow.app/Contents/MacOS/Homerow"
           ];
           KeepAlive = true;
           ProcessType = "Interactive";

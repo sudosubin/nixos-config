@@ -24,6 +24,10 @@ in
           assertion = cfg.enable -> isDarwin;
           message = "Nix clop only supports darwin.";
         }
+        {
+          assertion = cfg.enable -> config.targets.darwin.copyApps.enable;
+          message = "services.clop requires targets.darwin.copyApps.enable.";
+        }
       ];
     }
 
@@ -34,7 +38,7 @@ in
         enable = true;
         config = {
           ProgramArguments = [
-            "${config.home.homeDirectory}/Applications/Home Manager Apps/Clop.app/Contents/MacOS/Clop"
+            "${config.home.homeDirectory}/${config.targets.darwin.copyApps.directory}/Clop.app/Contents/MacOS/Clop"
           ];
           KeepAlive = true;
           ProcessType = "Interactive";

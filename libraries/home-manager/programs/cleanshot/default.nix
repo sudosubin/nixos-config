@@ -24,6 +24,10 @@ in
           assertion = cfg.enable -> isDarwin;
           message = "Nix cleanshot only supports darwin.";
         }
+        {
+          assertion = cfg.enable -> config.targets.darwin.copyApps.enable;
+          message = "services.cleanshot requires targets.darwin.copyApps.enable.";
+        }
       ];
     }
 
@@ -34,7 +38,7 @@ in
         enable = true;
         config = {
           ProgramArguments = [
-            "${config.home.homeDirectory}/Applications/Home Manager Apps/CleanShot X.app/Contents/MacOS/CleanShot X"
+            "${config.home.homeDirectory}/${config.targets.darwin.copyApps.directory}/CleanShot X.app/Contents/MacOS/CleanShot X"
           ];
           KeepAlive = true;
           ProcessType = "Interactive";

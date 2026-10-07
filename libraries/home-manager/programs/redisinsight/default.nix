@@ -8,8 +8,7 @@
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
   cfg = config.programs.redisinsight;
-  copyApps = config.targets.darwin.copyApps;
-  appPath = "${config.home.homeDirectory}/${copyApps.directory}/Redis Insight.app";
+  appPath = "${config.home.homeDirectory}/${config.targets.darwin.copyApps.directory}/Redis Insight.app";
 
 in
 {
@@ -37,8 +36,8 @@ in
           message = "Nix redisinsight only supports darwin.";
         }
         {
-          assertion = cfg.enable && cfg.dataDir != null -> copyApps.enable;
-          message = "programs.redisinsight.dataDir requires targets.darwin.copyApps.enable: LSEnvironment injection needs a writable copy under ~/${copyApps.directory}, which copyApps provides.";
+          assertion = cfg.enable && cfg.dataDir != null -> config.targets.darwin.copyApps.enable;
+          message = "programs.redisinsight.dataDir requires targets.darwin.copyApps.enable (for LSEnvironment injection).";
         }
       ];
     }
