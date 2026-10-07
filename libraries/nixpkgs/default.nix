@@ -80,6 +80,23 @@
             oldAttrs.postInstall;
       });
     })
+    # Fix: https://github.com/asmvik/yabai/issues/2799
+    (
+      final: prev:
+      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
+        yabai = prev.yabai.overrideAttrs (oldAttrs: {
+          version = "7.1.25-unstable-2026-06-14";
+          src = prev.fetchFromGitHub {
+            owner = "asmvik";
+            repo = "yabai";
+            rev = "dd845723416f5fe92af49fad5ebab00369e07edd";
+            hash = "sha256-RPiGAuJS+tGsexekIzwgKYf/v+kA3lVn0+qMVIMC2Vk=";
+          };
+          postPatch = builtins.replaceStrings [ " -Wl,-no_uuid" ] [ "" ] oldAttrs.postPatch;
+          doInstallCheck = false;
+        });
+      }
+    )
     (final: prev: {
       sqlit-tui = prev.sqlit-tui.overridePythonAttrs (attrs: {
         patches = (attrs.patches or [ ]) ++ [ ./patches/sqlit-tui-sort-connections.patch ];
