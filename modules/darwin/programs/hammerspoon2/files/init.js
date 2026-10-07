@@ -60,7 +60,8 @@ const stroke = (modifiers, key) => {
 // keyCodes whose keyDown was swallowed, so their keyUp is swallowed too
 const swallowed = new Set();
 
-eventtap
+// Keep referenced, or its callback is dropped on garbage collection
+const vimTap = eventtap
   .addWatcher(
     [types.keyDown, types.keyUp],
     (event) => {
