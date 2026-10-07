@@ -82,7 +82,7 @@
         ../darwin/programs/cleanshot
         ../darwin/programs/clop
         ../darwin/programs/desktop
-        ../darwin/programs/hammerspoon
+        ../darwin/programs/hammerspoon2
         ../darwin/programs/homerow
         ../darwin/programs/music-decoy
         ../darwin/programs/redisinsight

@@ -26,7 +26,7 @@ in
     ./programs/cleanshot
     ./programs/clop
     ./programs/figma-agent
-    ./programs/hammerspoon
+    ./programs/hammerspoon2
     ./programs/homerow
     ./programs/music-decoy
     ./programs/orbstack

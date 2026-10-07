@@ -102,7 +102,7 @@
 
       git-spr = final.callPackage ./programs/git-spr { };
       grep-app-cli = final.callPackage ./programs/grep-app-cli { };
-      hammerspoon = final.callPackage ./programs/hammerspoon { };
+      hammerspoon2 = final.callPackage ./programs/hammerspoon2 { };
       homerow = final.callPackage ./programs/homerow { };
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       kotlin-lsp-wrapper = final.callPackage ./programs/kotlin-lsp-wrapper { };

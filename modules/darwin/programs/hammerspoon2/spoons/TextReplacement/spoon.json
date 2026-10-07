@@ -1,0 +1,6 @@
+{
+  "name": "TextReplacement",
+  "author": "sudosubin",
+  "version": "0.1",
+  "description": "System-wide text replacement (e.g. `->` to `→`) with Backspace to undo."
+}
