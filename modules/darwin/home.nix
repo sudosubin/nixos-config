@@ -30,7 +30,6 @@
         wtp
 
         # Utility
-        cleanshot
         deskpad
         linear-cli
         ntn
@@ -79,7 +78,6 @@
         ../shared/programs/xdg
 
         ../darwin/programs/caffeinate
-        ../darwin/programs/cleanshot
         ../darwin/programs/clop
         ../darwin/programs/desktop
         ../darwin/programs/hammerspoon2

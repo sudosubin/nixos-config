@@ -1,7 +1,0 @@
-{ ... }:
-
-{
-  services.cleanshot = {
-    enable = true;
-  };
-}

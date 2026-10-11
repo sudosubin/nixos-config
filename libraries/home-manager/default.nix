@@ -23,7 +23,6 @@ in
     ./programs/agent-browser
     ./programs/agent-slack
     ./programs/caffeinate
-    ./programs/cleanshot
     ./programs/clop
     ./programs/figma-agent
     ./programs/hammerspoon2
