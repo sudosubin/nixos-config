@@ -19,8 +19,7 @@
         programWithEnv = lib.concatStringsSep " " (
           [ "/usr/bin/env" ]
           ++ map lib.escapeShellArg (
-            lib.mapAttrsToList (name: value: "${name}=${toString value}") config.sops.environment
-            ++ [ program ]
+            lib.mapAttrsToList (name: value: "${name}=${toString value}") config.sops.environment ++ [ program ]
           )
         );
       in
