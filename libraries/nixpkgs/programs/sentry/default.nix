@@ -3,11 +3,9 @@
   fetchurl,
   lib,
   makeBinaryWrapper,
-  nix-update-script,
   nodejs_24,
   pnpm_10,
   stdenvNoCC,
-  writableTmpDirAsHomeHook,
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
@@ -30,56 +28,26 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     hash = "sha256-O+nVUIfXVEvqTDNSSdAVONHpqlrA1VaTDf0Q/kLBQI8=";
   };
 
-  node_modules = stdenvNoCC.mkDerivation {
-    pname = "${finalAttrs.pname}-node_modules";
-    inherit (finalAttrs) version src;
+  # Hoist workspace dependencies and fetch binaries for supported platforms
+  patches = [ ./pnpm-workspace.patch ];
 
-    impureEnvVars = lib.fetchers.proxyImpureEnvVars ++ [
-      "GIT_PROXY_COMMAND"
-      "SOCKS_SERVER"
-    ];
-
-    nativeBuildInputs = [
-      nodejs_24
-      pnpm_10
-      writableTmpDirAsHomeHook
-    ];
-
-    dontConfigure = true;
-
-    # Hoist workspace dependencies and fetch binaries for supported platforms
-    patches = [ ./pnpm-workspace.patch ];
-
-    buildPhase = ''
-      runHook preBuild
-      pnpm install --frozen-lockfile
-      # Prevent timestamp and absolute build paths recorded by pnpm
-      rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json
-      runHook postBuild
-    '';
-
-    installPhase = ''
-      runHook preInstall
-      mkdir -p $out
-      cp -R node_modules $out/
-      runHook postInstall
-    '';
-
-    dontFixup = true;
-
-    outputHash = "sha256-SvpFE1zQxjPRqDVO6psYRcelXvhR3KJ/kaWWzR2dgd4=";
-    outputHashAlgo = "sha256";
-    outputHashMode = "recursive";
+  pnpmDeps = pnpm_10.fetchDeps {
+    inherit (finalAttrs)
+      pname
+      version
+      src
+      patches
+      ;
+    fetcherVersion = 4;
+    hash = "sha256-E8l5V/As0m9IzL6A1YKv5l8C1i+08yIEvMxew7k2rr8=";
   };
 
   nativeBuildInputs = [
     makeBinaryWrapper
     nodejs_24
+    pnpm_10.configHook
     pnpm_10
   ];
-
-  # Hoist workspace dependencies for the offline build
-  patches = [ ./pnpm-workspace.patch ];
 
   postPatch = ''
     # Prevent schema fetch by replacing the OpenAPI spec with nix derivation
@@ -92,11 +60,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   buildPhase = ''
     runHook preBuild
 
-    export HOME=$TMPDIR
     export SENTRY_CLIENT_ID="${finalAttrs.sentryClientId}"
-
-    cp -r ${finalAttrs.node_modules}/node_modules .
-    chmod -R u+w node_modules
 
     pnpm run bundle
 

@@ -32,7 +32,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       cp -r node_modules $out
     '';
 
-    outputHash = "sha256-JU/joVXY5FNE6ffkZXDlYNoTNboHiYVOaDR/0OxUKVo=";
+    outputHash = "sha256-KH84YdKCWRFNyKYTnNmqoRDbOoz0cmsuw+BAcpilxVA=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };

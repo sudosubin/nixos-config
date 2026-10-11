@@ -29,8 +29,8 @@ curl -fsSL \
 hash=$(nix-hash --to-sri --type sha256 "$(nix-prefetch-url --unpack "file://$tmp/src.tar.gz")")
 update-source-version sentry "$latestVersion" "$hash" --ignore-same-version
 
-# Update for node_modules
-update-source-version sentry --source-key=node_modules --ignore-same-version
+# Update for pnpmDeps
+update-source-version sentry --source-key=pnpmDeps --ignore-same-version
 
 # Update for openapi_spec
 sentryApiVersion=$(
