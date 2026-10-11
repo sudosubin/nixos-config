@@ -93,10 +93,6 @@
       pi-promptsmith
       pi-review
     ];
-    keybindings = {
-      "tui.input.newLine" = [ "enter" ];
-      "tui.input.submit" = [ "super+enter" ];
-    };
     settings = {
       collapseChangelog = true;
       defaultThinkingLevel = "xhigh";
