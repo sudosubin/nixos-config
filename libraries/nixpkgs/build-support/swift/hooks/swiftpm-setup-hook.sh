@@ -14,6 +14,19 @@ swiftpmSetupPostUnpackHook() {
 }
 
 swiftpmSetupPostPatchHook() {
+    # Resource bundle accessors fall back to the scratch path, so it must outlive the build
+    if [ -z "${swiftpmScratchPath-}" ]; then
+        swiftpmScratchPath="$out/libexec/swiftpm"
+    fi
+    mkdir -p "$(dirname "$swiftpmScratchPath")"
+    if [ -d .build ]; then
+        mv .build "$swiftpmScratchPath"
+    else
+        mkdir -p "$swiftpmScratchPath"
+    fi
+    ln -s "$swiftpmScratchPath" .build
+    appendToVar swiftpmFlags --scratch-path "$swiftpmScratchPath"
+
     # swiftpmUnpackHook leaves out binary targets
     if [ -d "${swiftpmDeps-}/artifacts" ]; then
         mv "$swiftpmDeps/artifacts" .build/
@@ -26,7 +39,7 @@ swiftpmSetupPostPatchHook() {
 
     # `#Preview` expands through PreviewsMacros, a plugin that ships only with Xcode
     if [ -z "${dontStripSwiftPreviews-}" ]; then
-        grep -rlZ --include='*.swift' '^[[:space:]]*#Preview\b' . | xargs -0r @perl@ -0777 -pi -e \
+        (grep -rlZ --include='*.swift' '^[[:space:]]*#Preview\b' . || true) | xargs -0r @perl@ -0777 -pi -e \
             's/^([ \t]*#Preview\b[^{]*(\{(?:[^{}]++|(?2))*\}))/#if false\n$1\n#endif/gm'
     fi
 }
@@ -34,3 +47,23 @@ swiftpmSetupPostPatchHook() {
 # Must run before swiftpmUnpackHook, which vendors $swiftpmDeps and reads Package.swift
 postUnpackHooks=(swiftpmSetupPostUnpackHook "${postUnpackHooks[@]}")
 postPatchHooks+=(swiftpmSetupPostPatchHook)
+
+# Drop the scratch path except for the resource bundles
+swiftpmSetupPreFixupHook() {
+    if [ -n "${swiftpmScratchPath-}" ] && [ -d "$swiftpmScratchPath" ]; then
+        local binPath bundle
+        binPath="$(swiftpmBinPath)"
+        mkdir -p "$NIX_BUILD_TOP/swiftpm-bundles"
+        for bundle in "$binPath"/*.bundle; do
+            [ -e "$bundle" ] && mv "$bundle" "$NIX_BUILD_TOP/swiftpm-bundles/"
+        done
+        rm -rf "$swiftpmScratchPath" .build
+        rmdir "$(dirname "$swiftpmScratchPath")" 2>/dev/null || true
+        if [ -n "$(ls -A "$NIX_BUILD_TOP/swiftpm-bundles")" ]; then
+            mkdir -p "$binPath"
+            mv "$NIX_BUILD_TOP/swiftpm-bundles"/* "$binPath/"
+        fi
+        rmdir "$NIX_BUILD_TOP/swiftpm-bundles"
+    fi
+}
+preFixupHooks+=(swiftpmSetupPreFixupHook)

@@ -43,5 +43,7 @@ lib.extendMkDerivation {
       ];
 
       strictDeps = true;
+
+      __structuredAttrs = true;
     };
 }

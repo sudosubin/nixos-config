@@ -3,6 +3,9 @@
 swiftAppBundleInstallPhase() {
     runHook preInstall
 
+    # Structured attrs are not exported to child processes
+    export xcodeProject xcodeTarget xcodeConfiguration version
+
     local resourcesArray=()
     concatTo resourcesArray appResources
     @swiftAppBundle@ "$(swiftpmBinPath)" "${resourcesArray[@]}"
