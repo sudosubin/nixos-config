@@ -84,6 +84,7 @@
         ../darwin/programs/homerow
         ../darwin/programs/music-decoy
         ../darwin/programs/redisinsight
+        ../darwin/programs/snapzy
         ../darwin/programs/sops
         ../darwin/programs/wifi-unredactor
       ];

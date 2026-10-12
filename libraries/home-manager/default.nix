@@ -31,6 +31,7 @@ in
     ./programs/orbstack
     ./programs/pi
     ./programs/redisinsight
+    ./programs/snapzy
     ./programs/sqlit
     ./programs/wifi-unredactor
 

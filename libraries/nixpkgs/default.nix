@@ -106,6 +106,14 @@
       });
     })
     (final: prev: {
+      inherit (final.callPackages ./build-support/swift { })
+        buildSwiftPackage
+        fetchSwiftpmDeps
+        swiftAppBundleHook
+        swiftpmSetupHook
+        ;
+    })
+    (final: prev: {
       agent-slack = final.callPackage ./programs/agent-slack { };
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
       apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
@@ -135,6 +143,7 @@
       querypie-cli = final.callPackage ./programs/querypie-cli { };
       redisinsight = final.callPackage ./programs/redisinsight { };
       sentry = final.callPackage ./programs/sentry { };
+      snapzy = final.callPackage ./programs/snapzy { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
       sqlitx = final.callPackage ./programs/sqlitx { };
       wifi-unredactor = final.callPackage ./programs/wifi-unredactor { };

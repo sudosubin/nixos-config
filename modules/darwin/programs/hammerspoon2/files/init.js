@@ -124,6 +124,14 @@ bind(["alt"], "return", () => {
   hs.task.runAsync("/usr/bin/open", ["-na", "WezTerm.app"]).catch(alertStderr);
 });
 
+// Snapzy
+const snapzy = (action) => hs.task.runAsync("/usr/bin/open", ["-g", `snapzy://${action}`]).catch(alertStderr);
+
+bind(["ctrl", "cmd"], "3", () => snapzy("capture/area"));
+bind(["ctrl", "cmd"], "4", () => snapzy("capture/area-annotate"));
+bind(["ctrl", "cmd"], "5", () => snapzy("capture/repeat-area"));
+bind(["ctrl", "cmd"], "6", () => snapzy("record/screen"));
+
 // Yabai
 const yabai = (args) =>
   bin.yabai
