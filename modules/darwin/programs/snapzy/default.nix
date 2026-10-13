@@ -9,7 +9,8 @@
       capture.after.screenshot = {
         save = true;
         quick_access = true;
-        copy_file = true;
+        copy_file = false;
+        open_annotate = true;
       };
       recording = {
         remember_last_area = true;
