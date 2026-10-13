@@ -12,6 +12,7 @@
         copy_file = false;
         open_annotate = true;
       };
+      quick_access.position = "bottomLeft";
       recording = {
         remember_last_area = true;
         show_cursor = false;
