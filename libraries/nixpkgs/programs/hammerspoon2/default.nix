@@ -43,6 +43,9 @@ buildSwiftPackage (finalAttrs: {
     # MapKit's geocoding requests are not Sendable in the macOS 26.5 SDK
     substituteInPlace "Hammerspoon 2/Modules/hs.location/HSLocationGeocoder.swift" \
       --replace-fail "import MapKit" "@preconcurrency import MapKit"
+
+    substituteInPlace scripts/extract-docs.js \
+      --replace-fail "new Date().toISOString()" "new Date(process.env.SOURCE_DATE_EPOCH * 1000).toISOString()"
   '';
 
   preBuild = ''

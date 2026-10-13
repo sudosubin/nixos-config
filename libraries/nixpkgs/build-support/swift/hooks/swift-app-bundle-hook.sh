@@ -30,12 +30,10 @@ swiftAppBundleFixupRpaths() {
 }
 
 swiftAppBundleSign() {
-    local flagsArray=(--code-signature-flags runtime)
-    if [ -f "$NIX_BUILD_TOP/entitlements.plist" ]; then
-        flagsArray+=(--entitlements-xml-file "$NIX_BUILD_TOP/entitlements.plist")
-    fi
     for app in "$out"/Applications/*.app; do
-        rcodesign sign "${flagsArray[@]}" "$app"
+        rcodesign sign --code-signature-flags runtime \
+            --code-requirements-path "$NIX_BUILD_TOP/requirement.bin" \
+            --entitlements-xml-file "$NIX_BUILD_TOP/entitlements.plist" "$app"
     done
 }
 
