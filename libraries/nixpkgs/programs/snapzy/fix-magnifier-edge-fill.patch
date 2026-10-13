@@ -1,0 +1,59 @@
+--- a/Snapzy/Services/Capture/AreaSelectionMagnifier.swift
++++ b/Snapzy/Services/Capture/AreaSelectionMagnifier.swift
+@@ -81,6 +81,7 @@
+   /// since `imageLayer`'s own light border can blend into a light backdrop underneath it.
+   private(set) var imageOuterBorderLayer: CALayer?
+   private(set) var imageLayer: CALayer?
++  private var imageContentLayer: CALayer?
+   private(set) var gridLayer: CAShapeLayer?
+   private(set) var crosshairLayer: CAShapeLayer?
+   private(set) var centerPixelLayer: CAShapeLayer?
+@@ -183,9 +184,16 @@
+     imgLayer.shadowRadius = 8
+     imgLayer.shadowOpacity = 0.4
+     imgLayer.actions = disabledActions
++    imgLayer.backgroundColor = NSColor.black.cgColor
+     container.addSublayer(imgLayer)
+     self.imageLayer = imgLayer
+ 
++    let imageContent = CALayer()
++    imageContent.magnificationFilter = .nearest
++    imageContent.actions = disabledActions
++    imgLayer.addSublayer(imageContent)
++    self.imageContentLayer = imageContent
++
+     // Pixel grid: faint lines delineating source-pixel boundaries at high zoom
+     let grid = CAShapeLayer()
+     grid.strokeColor = NSColor.white.withAlphaComponent(0.18).cgColor
+@@ -352,7 +360,7 @@
+     setupLayersIfNeeded(in: rootLayer, contentsScale: contentsScale)
+ 
+     guard let container = containerLayer,
+-          let imgLayer = imageLayer,
++          let imageContent = imageContentLayer,
+           let grid = gridLayer,
+           let crosshair = crosshairLayer,
+           let centerIndicator = centerPixelLayer,
+@@ -390,12 +398,20 @@
+     panel.isHidden = !showsColorPanel
+ 
+     // Set cropped and scaled image contents via contentsRect (nearest-neighbor)
+-    imgLayer.contents = backdropImage
++    imageContent.contents = backdropImage
+     let norm_w = magnifierSize / (zoom * bounds.width)
+     let norm_h = magnifierSize / (zoom * bounds.height)
+     let norm_x = (point.x / bounds.width) - norm_w / 2.0
+     let norm_y = (point.y / bounds.height) - norm_h / 2.0
+-    imgLayer.contentsRect = CGRect(x: norm_x, y: norm_y, width: norm_w, height: norm_h)
++    let visible = CGRect(x: norm_x, y: norm_y, width: norm_w, height: norm_h)
++      .intersection(CGRect(x: 0, y: 0, width: 1, height: 1))
++    imageContent.contentsRect = visible
++    imageContent.frame = CGRect(
++      x: (visible.minX - norm_x) / norm_w * magnifierSize,
++      y: (visible.minY - norm_y) / norm_h * magnifierSize,
++      width: visible.width / norm_w * magnifierSize,
++      height: visible.height / norm_h * magnifierSize
++    )
+ 
+     // On-screen size of a single source pixel, accounting for the backdrop's own resolution
+     // (which is typically higher than view points on Retina) so the highlighted pixel, grid,

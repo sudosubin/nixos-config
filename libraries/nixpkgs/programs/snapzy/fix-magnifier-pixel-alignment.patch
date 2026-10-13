@@ -1,0 +1,17 @@
+--- a/Snapzy/Services/Capture/AreaSelectionMagnifier.swift
++++ b/Snapzy/Services/Capture/AreaSelectionMagnifier.swift
+@@ -401,8 +401,12 @@
+     imageContent.contents = backdropImage
+     let norm_w = magnifierSize / (zoom * bounds.width)
+     let norm_h = magnifierSize / (zoom * bounds.height)
+-    let norm_x = (point.x / bounds.width) - norm_w / 2.0
+-    let norm_y = (point.y / bounds.height) - norm_h / 2.0
++    let imageWidth = CGFloat(max(1, backdropImage.width))
++    let imageHeight = CGFloat(max(1, backdropImage.height))
++    let pixelX = floor(point.x * imageWidth / bounds.width)
++    let pixelY = floor(point.y * imageHeight / bounds.height)
++    let norm_x = (pixelX + 0.5) / imageWidth - norm_w / 2.0
++    let norm_y = (pixelY + 0.5) / imageHeight - norm_h / 2.0
+     let visible = CGRect(x: norm_x, y: norm_y, width: norm_w, height: norm_h)
+       .intersection(CGRect(x: 0, y: 0, width: 1, height: 1))
+     imageContent.contentsRect = visible

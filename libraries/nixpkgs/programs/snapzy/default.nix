@@ -22,6 +22,11 @@ buildSwiftPackage (finalAttrs: {
   swiftpmResolved = "Snapzy.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved";
   swiftpmDepsHash = "sha256-yxxEU9nC5T7NbJf3HLFYN5DlxOBWVKUJXxxIMNQk+W4=";
 
+  patches = [
+    ./fix-magnifier-edge-fill.patch
+    ./fix-magnifier-pixel-alignment.patch
+  ];
+
   nativeBuildInputs = [ swiftAppBundleHook ];
 
   # GRDB requires SQLITE_ENABLE_SNAPSHOT
