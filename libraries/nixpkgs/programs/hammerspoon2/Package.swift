@@ -80,5 +80,13 @@ let package = Package(
         .strictMemorySafety(),
       ]
     ),
+    .executableTarget(
+      name: "HammerspoonIPCBroker",
+      path: "HammerspoonIPCBroker",
+      swiftSettings: concurrency + [
+        .swiftLanguageMode(.v6),
+        .strictMemorySafety(),
+      ]
+    ),
   ]
 )

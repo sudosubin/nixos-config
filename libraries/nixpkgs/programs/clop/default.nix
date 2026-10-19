@@ -8,11 +8,11 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "clop";
-  version = "3.5.0";
+  version = "3.6.1";
 
   src = fetchurl {
     url = "https://github.com/FuzzyIdeas/Clop/releases/download/v${finalAttrs.version}/Clop-${finalAttrs.version}.dmg";
-    hash = "sha256-9awZd+fs22ENdWV38lmRFNrf38lN55QjNNkOLCDbkzQ=";
+    hash = "sha256-bl4cBIu/s/O77CAcrHlxObfB/pDYQFQooq3fsS9RYUw=";
   };
 
   sourceRoot = "Clop.app";

@@ -84,7 +84,6 @@ in
           dbaeumer.vscode-eslint
           denoland.vscode-deno
           esbenp.prettier-vscode
-          exiasr.hadolint
           foxundermoon.shell-format
           fwcd.kotlin
           github.github-vscode-theme

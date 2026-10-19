@@ -3,20 +3,21 @@
   fetchFromGitHub,
   lib,
   nix-update-script,
+  go_1_27,
 }:
 
-buildGoModule (finalAttrs: {
+(buildGoModule.override { go = go_1_27; }) (finalAttrs: {
   pname = "gh-attach";
-  version = "0.4.3";
+  version = "0.5.0";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "gh-attach";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-+RoHXOJX8Zd99+Ie9jWAEsA/I0rRMkAEYPgayGlSjnY=";
+    hash = "sha256-O3hocWsMvPGLWZAJhdehQM36chM7bq90wKuZFTFn4K0=";
   };
 
-  vendorHash = "sha256-uDt8EnGrikNab3Dq5FQRGO0/b59A7IgW1FOwzcDp2xg=";
+  vendorHash = "sha256-1Jp5gkwt97Wy+7nOp55Io2Rrj5TzObNNo9J/hOzgQ3k=";
 
   subPackages = [ "cmd/gh-attach" ];
 
