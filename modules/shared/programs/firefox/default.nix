@@ -52,6 +52,15 @@ in
       GenerativeAI.Enabled = false;
       SearchBar = "unified";
       SearchEngines.Remove = [ "Perplexity" ];
+      SitePolicies = [
+        {
+          Match = [
+            "notion.com"
+            "notion.so"
+          ];
+          Policies.DisableServiceWorkers = true;
+        }
+      ];
     };
 
     profiles.default = rec {
