@@ -12,7 +12,6 @@
   home.packages = with pkgs; [
     nixd
     nixfmt
-    nixVersions.stable
     nix-activate
   ];
 }

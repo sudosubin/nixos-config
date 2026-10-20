@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
   yamlFormat = pkgs.formats.yaml { };
@@ -7,12 +7,10 @@ let
 
 in
 {
-  home.packages = with pkgs; [ gh ];
-
   xdg.configFile = {
     "gh/attach.yml".source = yamlFormat.generate "gh-attach.yml" {
       browsers = [
-        (mkGhAttachBrowser "firefox" "default")
+        (mkGhAttachBrowser "firefox" "${config.home.homeDirectory}/${config.programs.firefox.profilesPath}/${config.programs.firefox.profiles.default.path}")
       ];
     };
   };

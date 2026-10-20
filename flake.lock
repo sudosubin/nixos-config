@@ -42,22 +42,6 @@
         "type": "gitlab"
       }
     },
-    "flake-utils": {
-      "locked": {
-        "lastModified": 1681036252,
-        "narHash": "sha256-Xi2mpgpKHtOI5m1Zg7XTjn+UU/4kDdoraNUNZG9Btso=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "13faa43c34c0c943585532dacbb457007416d50b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "13faa43c34c0c943585532dacbb457007416d50b",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -212,7 +196,6 @@
       "inputs": {
         "agents-nix": "agents-nix",
         "firefox-addons": "firefox-addons",
-        "flake-utils": "flake-utils",
         "home-manager": "home-manager",
         "lefthook": "lefthook",
         "nix-darwin": "nix-darwin",

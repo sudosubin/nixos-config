@@ -27,24 +27,9 @@
     })
     (final: prev: {
       bash-language-server = prev.bash-language-server.overrideAttrs (attrs: {
-        installPhase = ''
-          runHook preInstall
-
-          mkdir -p $out/{bin,lib/bash-language-server}
-          cp -r {node_modules,server} $out/lib/bash-language-server/
-
-          # Create the executable, based upon what happens in npmHooks.npmInstallHook
-          makeWrapper ${lib.getExe prev.nodejs} $out/bin/bash-language-server \
-            --suffix PATH : ${
-              lib.makeBinPath [
-                prev.shellcheck
-                prev.shfmt
-              ]
-            } \
-            --inherit-argv0 \
-            --add-flags $out/lib/bash-language-server/server/out/cli.js
-
-          runHook postInstall
+        postInstall = (attrs.postInstall or "") + ''
+          wrapProgram $out/bin/bash-language-server \
+            --suffix PATH : ${lib.makeBinPath [ prev.shfmt ]}
         '';
       });
     })
@@ -54,20 +39,6 @@
       lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
         direnv = prev.direnv.overrideAttrs (_: {
           doCheck = false;
-        });
-      }
-    )
-    # Fix: https://github.com/eza-community/eza/issues/1224
-    (
-      final: prev:
-      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
-        eza = prev.eza.overrideAttrs (oldAttrs: {
-          nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
-          postInstall = ''
-            ${oldAttrs.postInstall or ""}
-            wrapProgram $out/bin/eza \
-              --run 'export EZA_CONFIG_DIR="''${EZA_CONFIG_DIR:-''${XDG_CONFIG_HOME:-$HOME/.config}/eza}"'
-          '';
         });
       }
     )
@@ -122,6 +93,17 @@
       });
     })
     (final: prev: {
+      wtp = prev.wtp.overrideAttrs (attrs: {
+        nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ prev.installShellFiles ];
+        postInstall = (attrs.postInstall or "") + ''
+          installShellCompletion --cmd wtp \
+            --bash <($out/bin/wtp completion bash) \
+            --fish <($out/bin/wtp completion fish) \
+            --zsh <($out/bin/wtp completion zsh)
+        '';
+      });
+    })
+    (final: prev: {
       inherit (final.callPackages ./build-support/swift { })
         buildSwiftPackage
         fetchSwiftpmDeps
@@ -143,7 +125,6 @@
       git-spr = final.callPackage ./programs/git-spr { };
       grep-app-cli = final.callPackage ./programs/grep-app-cli { };
       hammerspoon2 = final.callPackage ./programs/hammerspoon2 { };
-      homerow = final.callPackage ./programs/homerow { };
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       kotlin-lsp-wrapper = final.callPackage ./programs/kotlin-lsp-wrapper { };
       kt-speed-client = final.callPackage ./programs/kt-speed-client { };
@@ -163,7 +144,6 @@
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
       sqlitx = final.callPackage ./programs/sqlitx { };
       wifi-unredactor = final.callPackage ./programs/wifi-unredactor { };
-      wtp = final.callPackage ./programs/wtp { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
   ];
@@ -174,7 +154,6 @@
       # pkgs
       "1password"
       "1password-cli"
-      "amp-cli"
       "claude-code"
       "cursor"
       "cursor-cli"

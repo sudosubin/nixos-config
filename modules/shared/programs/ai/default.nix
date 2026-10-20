@@ -83,9 +83,6 @@
 
   programs.pi = {
     enable = true;
-    environment = {
-      PI_SKIP_VERSION_CHECK = "1";
-    };
     configDir = ".config/pi/agent";
     extensions = with pkgs.pi-extensions; [
       pi-goal

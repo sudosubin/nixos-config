@@ -1,4 +1,9 @@
-{ ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   colors = import ../../colors.nix;
@@ -12,6 +17,10 @@ let
 
 in
 {
+  home.sessionVariables = lib.optionalAttrs pkgs.stdenvNoCC.hostPlatform.isDarwin {
+    EZA_CONFIG_DIR = "${config.xdg.configHome}/eza";
+  };
+
   home.shellAliases = {
     l = "eza --all --color=auto --group-directories-first --icons=auto";
     ls = "eza --all --color=auto --color-scale --group --group-directories-first --icons=auto --long --time-style=\"+%Y-%m-%d %H:%M\"";

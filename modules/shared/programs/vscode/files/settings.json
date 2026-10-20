@@ -141,15 +141,11 @@
     ".env": true
   },
   "shellcheck.disableVersionCheck": true,
-  "shellformat.path": "/etc/profiles/per-user/sudosubin/bin/shfmt",
 
   // language (nix)
   "nix.enableLanguageServer": true,
   "nix.serverSettings": {
-    "nil": {
-      "diagnostics": {
-        "ignored": ["unused_binding", "unused_with"]
-      },
+    "nixd": {
       "formatting": {
         "command": ["nixfmt"]
       }
