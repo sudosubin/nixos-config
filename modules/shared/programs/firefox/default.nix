@@ -195,6 +195,7 @@ in
           "dirtyAreaCache" = [ ];
           "currentVersion" = 22;
         };
+        "browser.uidensity" = 0;
         "extensions.autoDisableScopes" = 0;
         "extensions.update.autoUpdateDefault" = false;
         "extensions.update.enabled" = false;
@@ -202,7 +203,6 @@ in
         "gnomeTheme.normalWidthTabs" = true;
         "layout.spellcheckDefault" = 0;
         "svg.context-properties.content.enabled" = true;
-        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "widget.gtk.rounded-bottom-corners.enabled" = true;
       };
       userChrome = ''

@@ -71,6 +71,22 @@
         });
       }
     )
+    # Fix: https://github.com/rafaelmardojai/firefox-gnome-theme/issues/1136
+    (final: prev: {
+      firefox-gnome-theme =
+        if lib.versionOlder prev.firefox-gnome-theme.version "158" then
+          prev.firefox-gnome-theme.overrideAttrs (oldAttrs: {
+            version = "157.1-unstable-2026-10-19";
+            src = prev.fetchFromGitHub {
+              owner = "rafaelmardojai";
+              repo = "firefox-gnome-theme";
+              rev = "fdc1af075073f93dc63e43b28a499b2251bcfcc2";
+              hash = "sha256-0M5/QfbfHwI7gP+q6IGdidxl5caGXMaEalNj2E2Rxyg=";
+            };
+          })
+        else
+          prev.firefox-gnome-theme;
+    })
     (final: prev: {
       pi-coding-agent = prev.pi-coding-agent.overrideAttrs (oldAttrs: {
         postInstall =
