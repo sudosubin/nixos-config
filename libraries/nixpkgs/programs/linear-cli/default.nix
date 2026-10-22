@@ -1,27 +1,49 @@
 {
-  autoPatchelfHook,
-  fetchzip,
+  coreutils,
+  fetchFromGitHub,
   installShellFiles,
   lib,
-  stdenvNoCC,
+  nix-update-script,
+  runtimeShell,
+  rustPlatform,
+  stdenv,
+  util-linux,
   versionCheckHook,
 }:
 
-stdenvNoCC.mkDerivation (finalAttrs: {
+rustPlatform.buildRustPackage (finalAttrs: {
   pname = "linear-cli";
   version = "3.0.0";
 
-  src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
+  src = fetchFromGitHub {
+    owner = "schpet";
+    repo = "linear-cli";
+    tag = "v${finalAttrs.version}";
+    hash = "sha256-jTQeOx78GuclgLiXccOy6smdrGTEfydm4HD+/luOlFM=";
+  };
 
-  nativeBuildInputs = [
-    installShellFiles
-  ]
-  ++ lib.optional stdenvNoCC.hostPlatform.isLinux autoPatchelfHook;
+  cargoHash = "sha256-ItoCHuZ1maJ8n2MagqR8x3ch6mbPplDYipRJ/jtgEGQ=";
 
-  installPhase = ''
-    runHook preInstall
-    install -Dm755 linear $out/bin/linear
-    runHook postInstall
+  nativeBuildInputs = [ installShellFiles ];
+
+  # The upstream test helpers use system paths that are absent in the Nix sandbox.
+  postPatch = lib.optionalString stdenv.hostPlatform.isLinux ''
+    substituteInPlace \
+      crates/linear-cli/src/auth/keyring/process/tests.rs \
+      crates/linear-cli/src/platform/editor.rs \
+      crates/linear-cli/tests/cli/issue_read.rs \
+      crates/linear-cli/tests/cli/support/sandbox.rs \
+      --replace-fail /bin/sh ${runtimeShell}
+
+    substituteInPlace crates/linear-cli/src/auth/file.rs \
+      --replace-fail /usr/bin/mkfifo ${lib.getExe' coreutils "mkfifo"}
+    substituteInPlace crates/linear-cli/src/auth/keyring/process/tests.rs \
+      --replace-fail /bin/cat ${lib.getExe' coreutils "cat"} \
+      --replace-fail /bin/sleep ${lib.getExe' coreutils "sleep"} \
+      --replace-fail /bin/kill ${lib.getExe' coreutils "kill"}
+    substituteInPlace crates/linear-cli/tests/cli/support/sandbox.rs \
+      --replace-fail /usr/bin/script ${lib.getExe' util-linux "script"} \
+      --replace-fail PATH=/usr/bin:/bin PATH=${lib.makeBinPath [ coreutils ]}
   '';
 
   postInstall = ''
@@ -35,23 +57,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   nativeInstallCheckInputs = [ versionCheckHook ];
   versionCheckProgram = "${placeholder "out"}/bin/linear";
 
-  passthru = {
-    sources = {
-      aarch64-darwin = fetchzip {
-        url = "https://github.com/schpet/linear-cli/releases/download/v${finalAttrs.version}/linear-aarch64-apple-darwin.tar.xz";
-        hash = "sha256-Ae9R/lbo0uB+2LNz5r4AyOo88vDgcsmTaCzFQtzFg/I=";
-      };
-      aarch64-linux = fetchzip {
-        url = "https://github.com/schpet/linear-cli/releases/download/v${finalAttrs.version}/linear-aarch64-unknown-linux-gnu.tar.xz";
-        hash = "sha256-CdEGupREcKVRaDeTR8FhgmruI+jBRiPcOclCpuzIN+s=";
-      };
-      x86_64-linux = fetchzip {
-        url = "https://github.com/schpet/linear-cli/releases/download/v${finalAttrs.version}/linear-x86_64-unknown-linux-gnu.tar.xz";
-        hash = "sha256-Cg3xnOl/X3dsiw7eGYdZZdW/0lYmr8R7lGhjaoAPJX8=";
-      };
-    };
-    updateScript = ./update.sh;
-  };
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "CLI tool for linear.app that uses git branch names and directory names to open issues and team pages";
@@ -59,6 +65,10 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     license = lib.licenses.isc;
     maintainers = with lib.maintainers; [ sudosubin ];
     mainProgram = "linear";
-    platforms = builtins.attrNames finalAttrs.passthru.sources;
+    platforms = [
+      "aarch64-darwin"
+      "aarch64-linux"
+      "x86_64-linux"
+    ];
   };
 })
