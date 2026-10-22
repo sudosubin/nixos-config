@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/badlogic/pi-mono/main/packages/coding-agent/src/modes/interactive/theme/theme-schema.json",
+  "$schema": "https://pi.dev/schemas/theme.schema.json",
   "name": "github-dark",
   "vars": {
     "scale.blue.1": "#a5d6ff",
@@ -78,6 +78,7 @@
     "thinkingMedium": "#8e74bc",
     "thinkingHigh": "#a580de",
     "thinkingXhigh": "#bc8cff",
+    "thinkingMax": "scale.yellow.1",
 
     "bashMode": "scale.yellow.2"
   },
