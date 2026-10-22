@@ -114,7 +114,6 @@
     (final: prev: {
       agent-slack = final.callPackage ./programs/agent-slack { };
       amazon-ember = final.callPackage ./programs/fonts/amazon-ember { };
-      apple-cursor-theme = final.callPackage ./programs/apple-cursor-theme { };
       clop = final.callPackage ./programs/clop { };
       damn-my-slow-kt = final.callPackage ./programs/damn-my-slow-kt { };
       deepwiki-cli = final.callPackage ./programs/deepwiki-cli { };
@@ -154,6 +153,7 @@
       # pkgs
       "1password"
       "1password-cli"
+      "apple_cursor"
       "claude-code"
       "cursor"
       "cursor-cli"

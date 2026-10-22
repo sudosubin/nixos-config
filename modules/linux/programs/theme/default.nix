@@ -28,8 +28,8 @@
   };
 
   home.pointerCursor = {
-    package = pkgs.apple-cursor-theme;
-    name = "apple-cursor-theme";
+    package = pkgs.apple-cursor;
+    name = "macOS";
     size = 22;
 
     x11.enable = true;
