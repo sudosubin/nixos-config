@@ -86,7 +86,6 @@
         ../darwin/programs/redisinsight
         ../darwin/programs/snapzy
         ../darwin/programs/sops
-        ../darwin/programs/wifi-unredactor
       ];
 
       home.stateVersion = "26.11";

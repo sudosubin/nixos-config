@@ -33,7 +33,6 @@ in
     ./programs/redisinsight
     ./programs/snapzy
     ./programs/sqlit
-    ./programs/wifi-unredactor
 
     # os systems
     (lib.mkIf isDarwin ./systems/darwin)

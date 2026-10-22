@@ -142,7 +142,6 @@
       snapzy = final.callPackage ./programs/snapzy { };
       s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
       sqlitx = final.callPackage ./programs/sqlitx { };
-      wifi-unredactor = final.callPackage ./programs/wifi-unredactor { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
   ];
