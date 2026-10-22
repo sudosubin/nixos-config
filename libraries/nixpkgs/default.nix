@@ -17,15 +17,6 @@
       );
     })
     (final: prev: {
-      agent-browser = prev.agent-browser.overrideAttrs (oldAttrs: {
-        checkFlags = (oldAttrs.checkFlags or [ ]) ++ [
-          "--skip native::parity_tests::test_all_documented_actions_are_handled"
-          "--skip native::parity_tests::test_har_start_stop_without_browser"
-          "--skip doctor::helpers::tests::test_new_id_is_unique_per_call"
-        ];
-      });
-    })
-    (final: prev: {
       bash-language-server = prev.bash-language-server.overrideAttrs (attrs: {
         postInstall = (attrs.postInstall or "") + ''
           wrapProgram $out/bin/bash-language-server \
@@ -33,15 +24,6 @@
         '';
       });
     })
-    # Fix: https://github.com/NixOS/nixpkgs/issues/507531
-    (
-      final: prev:
-      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
-        direnv = prev.direnv.overrideAttrs (_: {
-          doCheck = false;
-        });
-      }
-    )
     # Fix: https://github.com/rafaelmardojai/firefox-gnome-theme/issues/1136
     (final: prev: {
       firefox-gnome-theme =
@@ -57,15 +39,6 @@
           })
         else
           prev.firefox-gnome-theme;
-    })
-    (final: prev: {
-      pi-coding-agent = prev.pi-coding-agent.overrideAttrs (oldAttrs: {
-        postInstall =
-          builtins.replaceStrings
-            [ ''find "$nm/koffi/build/koffi"'' ]
-            [ ''! [ -d "$nm/koffi/build/koffi" ] || find "$nm/koffi/build/koffi"'' ]
-            oldAttrs.postInstall;
-      });
     })
     # Fix: https://github.com/asmvik/yabai/issues/2799
     (
