@@ -81,17 +81,19 @@
       ${kiro-cli} settings app.disableAutoupdates true || true
     '';
 
-  programs.pi = {
+  programs.pi-coding-agent = {
     enable = true;
-    configDir = ".config/pi/agent";
+    configDir = "${config.xdg.configHome}/pi/agent";
     extensions = with pkgs.pi-extensions; [
       pi-goal
       pi-interactive-shell
       pi-promptsmith
       pi-review
     ];
-    settings = {
+    mutableSettings = {
       collapseChangelog = true;
+      defaultModel = "gpt-6.1-sol";
+      defaultProvider = "openai-codex";
       defaultThinkingLevel = "xhigh";
       enableInstallTelemetry = false;
       quietStartup = true;
@@ -110,7 +112,7 @@
       # toolErrorBg = #0d1117 + #ff808033
       # customMessageBg = #0d1117 + #5cacff33
       # thinkingXxx = #484f58 + (#bc8cff00, #bc8cff33, #bc8cff66, #bc8cff99, #bc8cffcc, #bc8cffff)
-      github-dark.src = ./files/pi-github-dark.json;
+      github-dark = ./files/pi-github-dark.json;
     };
   };
 }
