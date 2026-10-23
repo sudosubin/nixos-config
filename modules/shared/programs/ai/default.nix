@@ -87,8 +87,8 @@
     extensions = with pkgs.pi-extensions; [
       pi-goal
       pi-interactive-shell
-      pi-promptsmith
       pi-review
+      pi-subagent
     ];
     mutableSettings = {
       collapseChangelog = true;

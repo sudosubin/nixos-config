@@ -6,34 +6,31 @@
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
-  pname = "pi-promptsmith";
-  version = "0.4.0";
+  pname = "pi-subagent";
+  version = "1.3.0";
 
   src = fetchFromGitHub {
-    owner = "ayagmar";
-    repo = "pi-promptsmith";
+    owner = "earendil-works";
+    repo = "pi";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-eBMzQbmbi8shudqyz96DHAnoNiWYcD+ACJKq/sWhzYQ=";
+    hash = "sha256-AsutbwnjiwwLkB5tqLW+1GdGZyLmXsU0W+SNdNhJu7U=";
   };
-
-  patches = [
-    ./use-agent-dir.patch
-  ];
 
   dontBuild = true;
 
   installPhase = ''
     runHook preInstall
     mkdir -p $out
-    cp -r LICENSE README.md package.json src $out/
+    cp -r packages/coding-agent/examples/extensions/subagent/. $out/
+    install -m644 LICENSE $out/LICENSE
     runHook postInstall
   '';
 
   passthru.updateScript = nix-update-script { };
 
   meta = {
-    description = "Intent-aware prompt rewriter and execution-contract compiler for Pi";
-    homepage = "https://github.com/ayagmar/pi-promptsmith";
+    description = "Subagent delegation extension for pi";
+    homepage = "https://github.com/earendil-works/pi/tree/main/packages/coding-agent/examples/extensions/subagent";
     license = lib.licenses.mit;
     maintainers = with lib.maintainers; [ sudosubin ];
   };
