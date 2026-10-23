@@ -84,12 +84,24 @@
   programs.pi-coding-agent = {
     enable = true;
     configDir = "${config.xdg.configHome}/pi/agent";
-    extensions = with pkgs.pi-extensions; [
-      pi-goal
-      pi-interactive-shell
-      pi-review
-      pi-subagent
-    ];
+    extensions =
+      let
+        piFrontierDir = "${config.home.homeDirectory}/Code/github.com/sudosubin/pi-frontier";
+        mkLocalExtension =
+          name: source:
+          pkgs.runCommandLocal name { } ''
+            ln -s ${lib.escapeShellArg source} "$out"
+          '';
+      in
+      (with pkgs.pi-extensions; [
+        pi-goal
+        pi-interactive-shell
+        pi-review
+        pi-subagent
+        (mkLocalExtension "pi-cline" "${piFrontierDir}/pi-cline")
+        (mkLocalExtension "pi-cursor-agent" "${piFrontierDir}/pi-cursor-agent")
+        (mkLocalExtension "pi-kilocode" "${piFrontierDir}/pi-kilocode")
+      ]);
     mutableSettings = {
       collapseChangelog = true;
       defaultModel = "gpt-6.1-sol";
