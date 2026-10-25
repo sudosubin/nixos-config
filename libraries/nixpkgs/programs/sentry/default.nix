@@ -1,10 +1,12 @@
 {
   fetchFromGitHub,
+  fetchPnpmDeps,
   fetchurl,
   lib,
   makeBinaryWrapper,
   nodejs_24,
   pnpm_10,
+  pnpmConfigHook,
   stdenvNoCC,
 }:
 
@@ -31,13 +33,14 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   # Hoist workspace dependencies and fetch binaries for supported platforms
   patches = [ ./pnpm-workspace.patch ];
 
-  pnpmDeps = pnpm_10.fetchDeps {
+  pnpmDeps = fetchPnpmDeps {
     inherit (finalAttrs)
       pname
       version
       src
       patches
       ;
+    pnpm = pnpm_10;
     fetcherVersion = 4;
     hash = "sha256-E8l5V/As0m9IzL6A1YKv5l8C1i+08yIEvMxew7k2rr8=";
   };
@@ -45,7 +48,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     makeBinaryWrapper
     nodejs_24
-    pnpm_10.configHook
+    pnpmConfigHook
     pnpm_10
   ];
 
