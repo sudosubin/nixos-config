@@ -58,6 +58,7 @@ let package = Package(
       linkerSettings: [
         .linkedFramework("AVKit"),
         .linkedFramework("ScriptingBridge"),
+        .linkedLibrary("sqlite3"),
       ]
     ),
     .executableTarget(

@@ -13,16 +13,16 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "linear-cli";
-  version = "3.0.0";
+  version = "3.1.0";
 
   src = fetchFromGitHub {
     owner = "schpet";
     repo = "linear-cli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-jTQeOx78GuclgLiXccOy6smdrGTEfydm4HD+/luOlFM=";
+    hash = "sha256-Bk4UPFqKVFH51iqiEhCSVfy/CX8CBnD8pHMMCIT83Pw=";
   };
 
-  cargoHash = "sha256-ItoCHuZ1maJ8n2MagqR8x3ch6mbPplDYipRJ/jtgEGQ=";
+  cargoHash = "sha256-FTm/RheZVjqILLM+T9JF5agZQOZF2OILI8znfZvw4Ms=";
 
   nativeBuildInputs = [ installShellFiles ];
 

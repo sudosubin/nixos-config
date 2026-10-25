@@ -63,6 +63,7 @@ buildSwiftPackage (finalAttrs: {
 
   passthru.updateScript = nix-update-script {
     extraArgs = [
+      "--use-github-releases"
       "--version-regex"
       "^v(\\d+\\.\\d+\\.\\d+)$"
       "--custom-dep"

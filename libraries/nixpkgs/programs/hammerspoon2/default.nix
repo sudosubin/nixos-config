@@ -6,18 +6,19 @@
   nix-update-script,
   nodejs,
   npmHooks,
+  sqlite,
   swiftAppBundleHook,
 }:
 
 buildSwiftPackage (finalAttrs: {
   pname = "hammerspoon2";
-  version = "0.0.14";
+  version = "0.0.16";
 
   src = fetchFromGitHub {
     owner = "cmsj";
     repo = "Hammerspoon2";
     tag = finalAttrs.version;
-    hash = "sha256-NUFaaTMUqTp0PveVqNfJ8GLCfXykQ/mvs4OKMLHfr1U=";
+    hash = "sha256-ZACwWGtvYiUKDGmuTPLaH4lNHldb3oiKNJdqWkGEHLw=";
   };
 
   swiftpmManifest = ./Package.swift;
@@ -35,7 +36,13 @@ buildSwiftPackage (finalAttrs: {
     swiftAppBundleHook
   ];
 
+  buildInputs = [ sqlite ];
+
   postPatch = ''
+    # SQLite is already exposed by Bridging-Header.h; avoid the SDK's broken module map.
+    substituteInPlace "Hammerspoon 2/Modules/node/NodeModuleSQLite.swift" \
+      --replace-fail "import SQLite3" ""
+
     # Sources Xcode compiles into more than one target
     cp HammerspoonOSAScriptHelper/HSOSAScriptShared.swift "Hammerspoon 2/"
     cp "Hammerspoon 2/Utilities/LoggingLevels.swift" hs2/

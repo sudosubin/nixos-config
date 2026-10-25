@@ -102,7 +102,8 @@
         (mkLocalExtension "pi-cursor-agent" "${piFrontierDir}/pi-cursor-agent")
         (mkLocalExtension "pi-kilocode" "${piFrontierDir}/pi-kilocode")
       ]);
-    mutableSettings = {
+    mutableSettings = true;
+    settings = {
       collapseChangelog = true;
       defaultModel = "gpt-6.1-sol";
       defaultProvider = "openai-codex";
