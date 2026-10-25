@@ -96,6 +96,7 @@
 
       git-spr = final.callPackage ./programs/git-spr { };
       grep-app-cli = final.callPackage ./programs/grep-app-cli { };
+      grok-bot = final.callPackage ./programs/grok-bot { };
       hammerspoon2 = final.callPackage ./programs/hammerspoon2 { };
       kotlin-lsp = final.callPackage ./programs/kotlin-lsp { };
       kotlin-lsp-wrapper = final.callPackage ./programs/kotlin-lsp-wrapper { };
@@ -131,6 +132,7 @@
       "cursor-cli"
       "firefox-bin"
       "firefox-bin-unwrapped"
+      "grok-bot"
       "homerow"
       "ijhttp"
       "kiro"

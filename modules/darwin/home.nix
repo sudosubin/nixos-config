@@ -31,6 +31,7 @@
 
         # Utility
         deskpad
+        grok-bot
         linear-cli
         ntn
         querypie-cli
