@@ -1,280 +1,179 @@
 <!-- markdownlint-disable MD013 MD014 -->
 
-# Linux on Cloud (AWS EC2)
+# Linux on AWS: native ASG scheduling without an extra scheduling bill
 
-`modules/linux` 를 headless AWS EC2(arm64 / Graviton) 서버로 배포/운영하기 위한 AWS CLI 가이드입니다.
-접속은 **SSM Session Manager** 를 기본 채널로 사용하며, 보안 그룹에 인바운드 포트를 열지 않습니다.
+이 브랜치는 `feature/linux-on-cloud`의 ARM NixOS 설정입니다. **스케줄 실행은 AWS ASG 자체에 등록**하며, 로컬 컴퓨터·Git 저장소·상주 클라이언트 없이 실행됩니다. NixOS는 EC2 내부 안전 가드와 부팅 환경만 제공합니다.
 
-> **2026-08-15 부로 Spot + Auto Scaling Group 구성으로 전환했습니다.** 인스턴스는 더 이상
-> 고정 ID로 상시 실행되지 않고, Spot 회수 시 ASG 가 자동으로 새 인스턴스를 띄웁니다.
-> `/home` 과 Elastic IP 는 인스턴스 교체와 무관하게 유지되지만, **인스턴스 ID 는 매번 바뀝니다.**
-> 아래 명령들은 그 점을 반영해 갱신되었습니다.
+## 현재 배포 상태 (2026-10-27 격리 이미지 검증)
 
-## 리소스 정보
+- 운영 ASG: `nixos-ec2-asg`, 서울 `ap-northeast-2d`, min=0 / max=1.
+- native 예약 3개 등록: 평일 16:30 / 주말 10:30 시작, 익일 02:00 scale-in 요청.
+- 신규/현재 인스턴스의 scale-in protection 활성화.
+- 운영 EC2에는 **armed=false 컴파일된 Nix 관찰 가드**를 runtime unit으로 설치.
+- 58개 오프라인 테스트와 Nix 평가 통과. 새 암호화 32 GiB 루트를 빈 파일시스템에 설치하고 **AMI `ami-041ca977ead7a7198`의 UEFI/SSM 실제 격리 부팅**을 확인함. 운영 시스템 switch/boot 기본값/AMI 전환은 하지 않음. 홈 복원·앱·작업 추적·종료/재생성 전체 검증은 아직 필요함.
+- 새 프로필 복구 모듈로 현재 closure 1,294개를 별도 빈 Nix 스토어에 복원하여 모든 본문 해시·서명을 검증했고 임시 스토어도 정리함.
+- 프로필 변경 path 감시와 5분 보완 timer를 runtime 설치하여 실제 자동 캐시 갱신을 확인함.
+- 새 AMI의 InService/scale-in protection 게이트를 격리 ASG에서 실제 통과시킴. 홈이 없을 때 SSM만 접근 가능하고 사용자/HM/Docker/EIP가 비활성인 것도 확인함. 테스트 역할의 운영 홈 연결/EIP 연계 거부를 실제 dry-run으로 검증함.
+- `main`의 Darwin 설정은 이 변경으로 수정하지 않음.
+
+**예약 Desired=0과 실제 종료는 다릅니다.** 보호가 켜진 서버는 예약 시각에도 남습니다. 현재는 아직 실제 자동 종료가 비활성화된 관찰 단계입니다.
+
+## 요금 계약
+
+EC2 Auto Scaling 예약 기능 자체에는 추가 요금이 없습니다. Free Tier에 기대지 않습니다.
+
+사용하지 않는 것: Lambda, Step Functions, DynamoDB, EventBridge Scheduler, SNS, 유료 CloudWatch 알람/사용자 지정 지표/로그 전송, 로컬 cron.
+
+기존 EC2 안의 systemd 가드가 기본 AWS API로 보호 여부를 제어합니다. 별도 제어 서버는 없습니다. EC2 실행 시간, EBS, IPv4, 스냅샷 및 초기 검증용 임시 리소스는 별도 과금됩니다.
+
+- <https://aws.amazon.com/ec2/autoscaling/pricing/>
+- <https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-instance-protection.html>
+
+## 운영 리소스
 
 | 항목 | 값 |
-|------|----|
-| Auto Scaling Group | `nixos-ec2-asg` (min=max=desired=1, 단일 인스턴스 유지) |
-| Launch Template | `nixos-ec2-spot-lt` (`lt-01468c818ef1bb11a`) |
-| Instance Types | `m6g.large` / `m7g.large` / `m8g.large` / `m6gd.large` (Spot, `price-capacity-optimized`, 2 vCPU / 8 GiB) |
-| Region / AZ | `ap-northeast-2` (Seoul) / `ap-northeast-2d` (subnet-0500a35263dc62859) |
-| AWS Profile | `sudosubin` |
-| Root Disk | gp3 64 GiB, `DeleteOnTermination=true` (인스턴스 교체 시 AMI 기준으로 새로 생성됨 — **영구 아님**) |
-| `/home` 데이터 | 별도 EBS gp3 80 GiB (`vol-09fea2ff4615b1088`, `Name=nixos-ec2-home`, ap-northeast-2d 고정) — 인스턴스 교체와 무관하게 유지 |
-| Elastic IP | `52.78.88.164` (`eipalloc-04d6e702ea3b20bd7`) — 인스턴스 교체와 무관하게 유지 |
-| Security Group | `sg-065aa5f3bd3cac988` (인바운드 없음) |
-| IAM Instance Profile | `nixos-ec2-ssm-profile` (role `nixos-ec2-ssm-role`: `AmazonSSMManagedInstanceCore` + 인라인 `SpotHomeVolumeAndEip`) |
-| OS user | `sudosubin` (SSH key `~/.ssh/id_ed25519`) |
-| 배포용 AMI | `ami-0f82d67a7f735cab1` (`nixos-ec2-spot-*`, `modules/linux/spot-home-volume.nix` 반영됨) |
-| Flake target | `github:sudosubin/nixos-config#linux` |
+|---|---|
+| AWS account / region | 537112465379 / ap-northeast-2 |
+| ASG / subnet | nixos-ec2-asg / subnet-0500a35263dc62859 |
+| Launch template | lt-01468c818ef1bb11a, 기존 숫자 버전 1에 고정 ($Latest 제거) |
+| 현재 AMI | ami-0f82d67a7f735cab1 (새 이미지 검증/교체 전의 8월 이미지) |
+| 현재 후보/정책 | m6g.large / m7g.large / m8g.large / m6gd.large, price-capacity-optimized |
+| 추후 후보 | 위 4종 + m7gd.large, 이미지 검증 후 최저가 우선 정책 적용 예정 |
+| 영구 홈 EBS | vol-09fea2ff4615b1088, gp3 80GiB, UUID e47b82eb-22d2-4b12-9e58-92d5aabfbc65 |
+| EIP | 52.78.88.164 / eipalloc-04d6e702ea3b20bd7 |
+| SG | sg-065aa5f3bd3cac988, inbound 없음 |
+| instance profile | nixos-ec2-ssm-profile |
+| OS user | sudosubin, UID 1001 |
 
-> 모든 명령은 `--profile sudosubin --region ap-northeast-2` 를 사용합니다.
-> 편의상 `export AWS_PROFILE=sudosubin AWS_REGION=ap-northeast-2` 를 설정하면 아래에서 두 플래그를 생략할 수 있습니다.
+운영 인스턴스 ID는 교체 시 바뀝니다. 원본 보호를 위해 현재 루트는 DeleteOnTermination=false로 임시 보존했습니다. 기존 launch template의 루트는 여전히 true입니다. 영구 홈은 항상 false여야 합니다.
 
-## 0. 사전 준비 (로컬)
+## AWS 콘솔/CloudShell로 상태 확인
 
-```sh
-# AWS CLI v2 + Session Manager plugin 필요
-$ aws --version
-$ session-manager-plugin --version
-
-# NixOS 환경에서는 다음 패키지 제공: awscli2, ssm-session-manager-plugin
-```
-
-## 1. 현재 인스턴스 ID 조회
-
-인스턴스는 ASG 가 관리하므로 ID 가 고정되어 있지 않습니다. 아래 명령으로 항상 먼저 현재 ID 를 조회하세요.
+CloudShell에서는 로그인한 AWS 자격 증명을 사용합니다. 로컬 `sudosubin` 프로필 파일이 필요하지 않습니다. 로컬 AWS CLI를 운영 도구로 사용하는 경우에만 `--profile sudosubin`을 추가하면 됩니다.
 
 ```sh
-$ INSTANCE_ID=$(aws autoscaling describe-auto-scaling-groups \
-    --auto-scaling-group-names nixos-ec2-asg \
-    --profile sudosubin --region ap-northeast-2 \
-    --query "AutoScalingGroups[0].Instances[0].InstanceId" --output text)
-$ echo "$INSTANCE_ID"
+export AWS_REGION=ap-northeast-2
+aws sts get-caller-identity
+
+aws autoscaling describe-scheduled-actions \
+  --auto-scaling-group-name nixos-ec2-asg
+
+aws autoscaling describe-auto-scaling-groups \
+  --auto-scaling-group-names nixos-ec2-asg \
+  --query 'AutoScalingGroups[0].{Desired:DesiredCapacity,Instances:Instances[].{Id:InstanceId,State:LifecycleState,Protected:ProtectedFromScaleIn}}'
+
+INSTANCE_ID=$(aws autoscaling describe-auto-scaling-groups \
+  --auto-scaling-group-names nixos-ec2-asg \
+  --query 'AutoScalingGroups[0].Instances[?LifecycleState==`InService`].InstanceId|[0]' --output text)
+
+aws ssm start-session --target "$INSTANCE_ID"
 ```
 
-이후 모든 `--instance-ids`/`--target` 자리에 이 값을 사용합니다.
+SSM은 public SSH 포트 없이 작동합니다. CloudShell 자체는 Session Manager plugin 제공 여부에 따라 EC2 콘솔의 Session Manager를 대신 사용할 수 있습니다.
 
-## 2. SSM 연결 방법
+## Native 예약
 
-### 2-1. 대화형 셸 (Session Manager)
+ASG cron은 5개 필드이며 `--time-zone Asia/Seoul`이 중요합니다.
+
+| action | cron | desired |
+|---|---|---:|
+| nixos-start-weekdays | 30 16 * * 1-5 | 1 |
+| nixos-start-weekends | 30 10 * * 0,6 | 1 |
+| nixos-guarded-scale-in | 0 2 * * * | 0 |
+
+02:00 요청이 와도 scale-in protection을 가드가 해제하기 전에는 서버가 종료되지 않습니다. 장애/판정 실패면 보호를 유지합니다. **프로세스가 없다는 이유만으로 EC2 Stop을 호출하거나 보호를 수동 해제하지 마세요.** ASG는 Stop을 비정상 상태로 보고 대체 인스턴스를 만들 수 있습니다.
+
+## 수동 깨우기
+
+AWS 콘솔 또는 CloudShell에서:
 
 ```sh
-$ aws ssm start-session \
-    --target "$INSTANCE_ID" \
-    --profile sudosubin --region ap-northeast-2
+aws autoscaling set-desired-capacity \
+  --auto-scaling-group-name nixos-ec2-asg --desired-capacity 1
 ```
 
-- `ssm-user` 로 접속됩니다. `sudo -i` 또는 `sudo su - sudosubin` 로 전환하세요.
-- 인바운드 포트가 전혀 필요 없고, AWS TLS 터널로 종단간 암호화됩니다.
+이후 새 ID와 SSM Online을 확인합니다. 시간 밖에서 켰다면 필요 시 AWS의 무료 일회 ASG 예약으로 종료를 요청할 수 있습니다. 그 요청도 보호 검사를 우회하면 안 됩니다. 다음 정규 운영 시간과 충돌하는 일회 종료 예약은 만들지 마세요.
 
-### 2-2. 인스턴스가 SSM 에 등록되어 있는지 확인
+## 인스턴스 내부 가드
+
+소스:
+
+- `modules/linux/spot-schedule-guard.py`
+- `modules/linux/spot-schedule-guard.nix`
+- `modules/linux/test-spot-schedule-guard.py`
 
 ```sh
-$ aws ssm describe-instance-information \
-    --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
-    --query "InstanceInformationList[0].PingStatus" --output text
-# => Online
+sudo systemctl status spot-schedule-guard.timer
+sudo journalctl -u spot-schedule-guard.service -n 10 --no-pager
+sudo python3 -m json.tool /run/spot-schedule-guard/status.json
 ```
 
-### 2-3. 한 번에 명령 실행 (run-command)
+시스템 PATH에 python3가 없는 관찰용 runtime 설치에서는 journal로 확인하거나 설치된 Python 경로를 사용합니다. NixOS 모듈 설치 후에는 `spot-schedule-guard` 패키지가 자체 Python 경로를 포함합니다.
+
+다음 중 하나라도 해당하면 종료를 보류합니다.
+
+- armed=false, 미검증 manifest, 프로필 불일치
+- 정규 운영 시간, ASG가 Desired=0을 요청하지 않은 상태
+- 활성 SSM, 작업/유지보수 lease, 미추적 작업 프로세스
+- 홈 마운트/UUID/연결 대상 불일치, 암호화 준비 미완료
+- AWS API/상태 판정 실패
+
+01:45 알림은 NixOS 모듈의 TTY/journal notice이며 외부 유료 알림 채널을 사용하지 않습니다. 가드가 사용자 작업을 강제로 끝내게 하지 않습니다. Spot 회수나 건강 검사 교체는 이 보호로 막을 수 없으므로 작업 상태는 영구 홈에 저장해야 합니다.
+
+## 프로필 복구와 부팅 의존성
+
+소스: `modules/linux/spot-profile-cache.py`, `spot-profile-cache.nix`.
+
+준비된 새 시스템의 순서:
+
+```text
+network → InService/종료 보호 확인 → 지정 EBS 연결 + serial/UUID 확인
+        → /home 마운트 → 서명된 프로필 캐시 복구 → 사용자/HM/Docker/EIP
+```
+
+- 태그 검색 결과의 첫 볼륨을 임의로 쓰지 않음. 홈 EBS ID는 `services.spotScheduleGuard.homeVolume`, UUID는 `homeUUID`로 명시.
+- UUID가 잘못되거나 홈/패키지가 복구되지 않으면 앱을 시작하지 않되 SSM은 독립적으로 접근 가능하게 유지.
+- 캐시 복원/갱신은 종료 가드와 공통 lock을 사용하므로 홈을 내리는 중에 캐시를 기록하지 않음.
+- `spot-profile-cache-refresh.path`와 5분 timer가 프로필 변경을 서명 캐시에 게시. 복사 실패·용량 부족·프로필 변경 경합에서는 새 완료 manifest를 게시하지 않음.
+- `/home/persist/manifests/profile-cache.json`이 현재 시스템/프로필과 맞지 않으면 가드는 종료 보류.
+- 새 루트의 GC가 복원된 프로필을 지우지 않도록 `/nix/var/nix/gcroots/spot-profile-cache`에 Nix 자체 API로 명시적인 root를 등록·갱신. 단순히 홈 심볼릭 링크 체인이 보호될 것이라고 가정하지 않음.
+- 현재 운영 OS에 설치한 timer/path는 runtime unit이다. 새 AMI로 영구 제공하기 전에는 재부팅 시 유지된다고 취급하지 않음.
+- OpenClaw의 비강제 idle admission lease 및 Herdr agent 상태 API는 실제 확인했으나, 가드의 최종 작업 판정에는 아직 연결 전. 프로세스가 있다는 이유만으로 active 작업이라고 단정하거나 그 반대로 유휴라 단정하지 않음.
+
+## 데이터와 이미지의 계약
+
+- `/home/sudosubin`, `/home/docker-data`: 영구 홈 EBS에 있음.
+- `/root`의 필요한 상태: `/home/persist/root`의 root 전용 보존본으로 추가 백업. 원본은 별도 승인 전 삭제하지 않음.
+- Nix 프로필 메타데이터: `/home/sudosubin/.local/state/nix/profiles`에 이미 보존됨.
+- Nix 패키지: `/home/persist/nix-closure-cache`에 서명된 closure checkpoint 보존. 빈 스토어 복원은 통과했지만 **새 인스턴스의 부팅 중 자동 복구/활성화까지 검증된 것은 아님.**
+- AWS 안의 준비된 소스/시스템: `/home/persist/nixos-cloud-build`, `/home/persist/build-results/nixos-gc-safe`. 운영 원본 소스를 보존하고 Linux 변경만 별도 overlay함.
+- 정확한 새 이미지 빌드 소스와 후보 볼륨 옵션: `/home/persist/root/cloud-image-release-source-20261027-v1.tar.gz` (root:root 0600, SHA256 `307f39240a6e0967e60cde3afbe0909213b83be7ccf01aae39ccc86549ec588d`). 후보 옵션은 운영에 아직 적용하지 않음.
+- 새 루트 실측: 32 GiB 중 약 14 GiB 사용/18 GiB 여유, cold 암호화 스냅샷 전체 크기 14,870,904,832 bytes. 기존 운영 루트/백업은 보존하며 이 수치를 운영 절감 실적으로 간주하지 않음.
+- 새 암호화 홈은 스냅샷에서 사전 복사 중이며 전체 checksum 검증/실시간 최종 동기화/전환은 미완료. 아직 운영 홈은 기존 비암호화 볼륨임.
+- AWS 안의 배포 상태: `/home/persist/manifests/deployment-status.json`. 스케줄 운영에 로컬 메모/checkout이 필요하지 않음.
+- 새 루트는 임시이므로 `nixos-rebuild switch`만으로는 다음 ASG 인스턴스에 변경이 남지 않음. 검증된 새 root-only AMI와 숫자 LT 버전이 필요함.
+- `create-image`는 추가 EBS를 자동 제외하지 않으며 기본 재부팅이 발생할 수 있음. 무조건 `--no-reboot`로 만들고 무결성이 보장된다고 간주하지 않음.
+- 복원 테스트는 운영 홈/EIP에 접근할 수 없는 별도 역할과 복제 볼륨으로 수행. Discord/외부 작업 서비스를 테스트에서 자동 실행하지 않음.
+
+## Linux 변경 검증
 
 ```sh
-$ CMD_ID=$(aws ssm send-command \
-    --instance-ids "$INSTANCE_ID" \
-    --document-name "AWS-RunShellScript" \
-    --parameters '{"commands":["uptime","free -h","df -h /"]}' \
-    --query "Command.CommandId" --output text)
-
-$ aws ssm get-command-invocation \
-    --command-id "$CMD_ID" --instance-id "$INSTANCE_ID" \
-    --query "StandardOutputContent" --output text
+python3 modules/linux/test-spot-schedule-guard.py -v
+python3 modules/linux/test-spot-profile-cache.py -v
+nix-instantiate --parse modules/linux/spot-schedule-guard.nix
+nix-instantiate --parse modules/linux/spot-profile-cache.nix
+nix-instantiate --parse modules/linux/spot-home-volume.nix
+nix eval --no-write-lock-file --raw \
+  'path:/absolute/path/to/this/worktree#nixosConfigurations.linux.config.system.build.toplevel.drvPath'
 ```
 
-## 3. SSH over SSM (권장)
+이 브랜치의 패키지는 aarch64-linux이므로 전체 빌드는 AWS의 ARM 빌더에서 해야 합니다. 운영 루트가 부족할 때 큰 이미지 빌드를 밀어 넣지 않습니다. 진행 중인 작업이 있는 운영 서버에 전체 switch/reboot/terminate를 실행하지 마세요.
 
-SSM 터널 위에서 SSH 를 사용합니다. 포트를 열지 않으면서도 `scp`, `nixos-rebuild --target-host`, 포트 포워딩이 가능합니다.
-인스턴스 ID 가 매번 바뀌므로, `HostName` 을 고정하지 말고 **ProxyCommand 안에서 매번 ASG 를 조회**하도록 구성합니다.
+새 이미지 검증이 끝나기 전 `services.spotScheduleGuard.armed`를 true로 바꾸거나 검증 플래그를 임의로 채우지 않습니다. 관찰 단계는 실수로 종료를 활성화하지 않도록 설계되었습니다.
 
-`~/.ssh/config` 에 추가:
+## 비용·백업 주의
 
-```sshconfig
-Host nixos-ec2
-  User sudosubin
-  IdentityFile ~/.ssh/id_ed25519
-  ProxyCommand bash -c 'aws ssm start-session --target $(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names nixos-ec2-asg --profile sudosubin --region ap-northeast-2 --query "AutoScalingGroups[0].Instances[0].InstanceId" --output text) --document-name AWS-StartSSHSession --parameters portNumber=%p --profile sudosubin --region ap-northeast-2'
-```
-
-사용:
-
-```sh
-$ ssh nixos-ec2
-$ ssh nixos-ec2 "uptime"
-$ scp ./file nixos-ec2:/home/sudosubin/
-```
-
-> Elastic IP(`52.78.88.164`)는 고정이지만 SSM/SSH-over-SSM 은 IP 가 아니라 인스턴스 ID 로 접속하므로,
-> 위 ProxyCommand 방식이 IP 를 직접 다루는 것보다 항상 안전합니다.
-
-### 3-1. 포트 포워딩 (예: 원격 8080 → 로컬 8080)
-
-```sh
-$ aws ssm start-session \
-    --target "$INSTANCE_ID" \
-    --document-name AWS-StartPortForwardingSession \
-    --parameters '{"portNumber":["8080"],"localPortNumber":["8080"]}' \
-    --profile sudosubin --region ap-northeast-2
-```
-
-## 4. 인스턴스 시작 / 중지 / 상태 (비용 절감)
-
-Spot + ASG 구조에서는 개별 인스턴스를 stop/start 하지 않습니다. **ASG 의 desired capacity 를 0 으로 낮춰 "일시정지"**하고,
-다시 1 로 올려 재개합니다.
-
-```sh
-# 상태 확인
-$ aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names nixos-ec2-asg \
-    --query "AutoScalingGroups[0].Instances[].[InstanceId,InstanceType,LifecycleState]" --output text
-
-# 일시정지 (컴퓨트/IPv4 과금 정지 — /home 볼륨과 EIP 는 그대로 남아 계속 과금)
-$ aws autoscaling update-auto-scaling-group --auto-scaling-group-name nixos-ec2-asg \
-    --min-size 0 --max-size 0 --desired-capacity 0
-
-# 재개
-$ aws autoscaling update-auto-scaling-group --auto-scaling-group-name nixos-ec2-asg \
-    --min-size 1 --max-size 1 --desired-capacity 1
-
-# 재개 후 새 인스턴스 ID 다시 조회 (섹션 1) 후 SSM 등록 대기
-$ aws ssm describe-instance-information \
-    --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
-    --query "InstanceInformationList[0].PingStatus" --output text
-```
-
-> desired capacity 를 0 으로 내리면 EIP 는 자동으로 연결 해제되고, 1 로 올리면 `associate-eip.service` 가
-> 부팅 시 다시 붙입니다. `/home` 볼륨도 `attach-home-volume.service` 가 동일하게 재부착합니다.
-
-## 5. 배포 (nixos-rebuild)
-
-빌드는 인스턴스에서 네이티브(arm64)로 수행합니다.
-
-> **중요 — 이전과 달라진 점**: 루트 디스크는 이제 인스턴스 교체마다 AMI 기준으로 새로 생성되는
-> **휘발성**입니다. 아래 방식으로 `nixos-rebuild switch` 를 돌리면 **지금 떠 있는 인스턴스에는**
-> 바로 반영되지만, 다음 Spot 회수 후 새 인스턴스는 다시 옛 AMI 기준으로 부팅됩니다.
-> 변경을 영구 반영하려면 반드시 **6번(AMI 재굽기)** 까지 진행하세요. `/home` 은 별도 볼륨이라
-> 이 문제와 무관하게 항상 보존됩니다.
-
-### 5-1. SSM run-command 로 배포 (임시 반영, 현재 인스턴스에만)
-
-```sh
-$ aws ssm send-command \
-    --instance-ids "$INSTANCE_ID" \
-    --document-name "AWS-RunShellScript" \
-    --comment "nixos-rebuild switch" \
-    --timeout-seconds 3600 \
-    --parameters '{"executionTimeout":["3600"],"commands":["export NIX_CONFIG=\"experimental-features = nix-command flakes\"","nixos-rebuild switch --flake github:sudosubin/nixos-config#linux --refresh"]}' \
-    --query "Command.CommandId" --output text
-```
-
-- 소스 빌드가 많으면 오래 걸립니다. 장시간 빌드는 아래처럼 백그라운드로 실행하고 상태 파일을 폴링하세요.
-
-```sh
-# 백그라운드(detached) 빌드 — SSM 명령 타임아웃에 영향받지 않음
-$ aws ssm send-command --instance-ids "$INSTANCE_ID" \
-    --document-name "AWS-RunShellScript" --timeout-seconds 120 \
-    --parameters '{"commands":["rm -f /tmp/deploy.status","export NIX_CONFIG=\"experimental-features = nix-command flakes\"","setsid bash -c '\''nixos-rebuild switch --flake github:sudosubin/nixos-config#linux --refresh --max-jobs 2 --cores 2 > /tmp/deploy.log 2>&1; echo $? > /tmp/deploy.status'\'' </dev/null >/dev/null 2>&1 &","echo started"]}'
-
-# 진행/완료 확인
-$ ssh nixos-ec2 'cat /tmp/deploy.status 2>/dev/null || tail -n3 /tmp/deploy.log'
-```
-
-### 5-2. 로컬에서 원격 배포 (SSH-over-SSM, 빌드는 원격)
-
-```sh
-$ nixos-rebuild switch \
-    --flake .#linux \
-    --target-host nixos-ec2 --build-host nixos-ec2 --use-remote-sudo
-```
-
-> 로컬(aarch64-darwin)에서 aarch64-linux 를 직접 빌드하려면 remote/linux 빌더가 필요하므로 `--build-host nixos-ec2` 로 원격 빌드를 권장합니다.
-
-## 6. 변경을 영구 반영하기 (AMI 재굽기)
-
-5번으로 검증까지 마친 변경을, 다음 Spot 회수 이후에도 살아남게 하려면 현재 인스턴스를 새 AMI 로 캡처하고
-Launch Template 을 그 AMI 로 갱신해야 합니다.
-
-```sh
-# 1) 새 AMI 생성 (데이터 볼륨은 이미 별도 attach/detach 되므로 자동으로 제외됨)
-$ AMI_ID=$(aws ec2 create-image \
-    --instance-id "$INSTANCE_ID" \
-    --name "nixos-ec2-spot-$(date +%Y%m%d-%H%M%S)" \
-    --description "nixos-ec2 spot AMI" \
-    --no-reboot \
-    --tag-specifications 'ResourceType=image,Tags=[{Key=Name,Value=nixos-ec2-spot},{Key=project,Value=nixos-config}]' \
-    --query "ImageId" --output text)
-$ aws ec2 wait image-available --image-ids "$AMI_ID"
-
-# 2) Launch Template 새 버전 생성 + 기본 버전으로 지정
-$ aws ec2 create-launch-template-version \
-    --launch-template-name nixos-ec2-spot-lt \
-    --source-version '$Latest' \
-    --launch-template-data "{\"ImageId\":\"$AMI_ID\"}"
-$ aws ec2 modify-launch-template \
-    --launch-template-name nixos-ec2-spot-lt --default-version '$Latest'
-
-# 3) (선택) 지금 바로 새 AMI 로 교체하고 싶다면 인스턴스를 재기동
-$ aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
-# ASG 가 새 Launch Template 기본 버전(방금 만든 AMI)으로 자동 재기동합니다.
-```
-
-> 3번을 생략하면, 다음번 자연 발생하는 Spot 회수 시점에 새 AMI 가 적용됩니다.
-
-## 7. 상태 / 리소스 점검
-
-```sh
-$ ssh nixos-ec2 'systemctl is-active sshd amazon-ssm-agent docker attach-home-volume associate-eip'
-$ ssh nixos-ec2 'free -h; df -h /; df -h /home; uptime; zramctl'
-$ ssh nixos-ec2 'readlink -f /run/current-system'   # 현재 세대
-
-# Helix LSP 정상 여부
-$ ssh nixos-ec2 'hx --health python; hx --health nix'
-
-# 시스템 세대 목록 / 롤백 (주의: 롤백은 이번 부팅에만 적용, AMI 는 그대로)
-$ ssh nixos-ec2 'sudo nix-env --list-generations -p /nix/var/nix/profiles/system'
-$ ssh nixos-ec2 'sudo nixos-rebuild switch --rollback'
-```
-
-## 8. 비용 / 스냅샷 관리
-
-```sh
-# 이 프로젝트 리소스 조회
-$ aws ec2 describe-instances --filters "Name=tag:project,Values=nixos-config" \
-    --query "Reservations[].Instances[].[InstanceId,InstanceType,State.Name]" --output table
-$ aws ec2 describe-volumes --filters "Name=tag:project,Values=nixos-config" \
-    --query "Volumes[].[VolumeId,Size,State]" --output table
-
-# 백업 스냅샷 조회 / 삭제
-$ aws ec2 describe-snapshots --owner-ids self \
-    --filters "Name=tag:project,Values=nixos-config" \
-    --query "Snapshots[].[SnapshotId,VolumeSize,StartTime]" --output table
-$ aws ec2 delete-snapshot --snapshot-id snap-xxxxxxxx
-```
-
-- 컴퓨트: 이전 t4g.large On-Demand 대비 Spot 전환으로 **약 70% 절감** (AZ/타입에 따라 시간당 $0.025~0.04 수준).
-- 스토리지: 루트 gp3 64GiB (~$5.8/월) + `/home` gp3 80GiB (~$7.3/월).
-- Elastic IP: 인스턴스에 연결되어 있는 동안 무료, ASG desired=0 으로 내려 연결 해제된 상태로 방치하면 시간당 과금됩니다 — 오래 안 쓸 거면 EIP 자체를 release 하세요.
-- 정확한 예측: <https://calculator.aws>
-
-## 9. 트러블슈팅
-
-- **SSM 접속 불가**: 섹션 1 로 현재 인스턴스 ID 를 다시 조회했는지 먼저 확인 (교체 직후 ID 가 바뀌어 있을 수 있음). 그다음 인스턴스가 실행 중인지(`describe-instances`), SSM `Online` 인지(`describe-instance-information`) 확인. 기동 직후엔 등록에 1~2분 걸립니다.
-- **`/home` 이 비어 보임**: `systemctl status attach-home-volume` 확인. 볼륨이 이전 인스턴스에서 아직 detach 중이면 최대 수 분간 재시도합니다. `nofail` 옵션 때문에 최종 실패해도 부팅 자체는 됩니다.
-- **Elastic IP 로 접속이 안 됨**: `systemctl status associate-eip` 확인, 또는 `aws ec2 describe-addresses --allocation-ids eipalloc-04d6e702ea3b20bd7` 로 현재 어느 인스턴스에 붙어있는지 확인.
-- **빌드 중 메모리 부족(OOM)**: zram 이 켜져 있지만, 무거운 소스 빌드는 `--max-jobs 1 --cores 2` 로 병렬도를 낮추거나 임시 swapfile 을 추가하세요.
-
-  ```sh
-  $ ssh nixos-ec2 'sudo fallocate -l 8G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile'
-  # 빌드 후 정리: sudo swapoff /swapfile && sudo rm /swapfile
-  ```
-
-- **빌드가 매우 느림**: Launch Template 의 override 인스턴스 타입 목록에 더 큰 타입(예: `c7g.2xlarge`)을 임시로 추가하고 ASG 를 순환시키는 방법이 있으나, 간단히는 `nixos-rebuild switch --max-jobs 2 --cores 2` 로 병렬도를 낮춰 현재 타입에서 버티는 쪽을 권장합니다. (이전 가이드의 "인스턴스 stop 후 modify-instance-attribute 로 타입 변경" 절차는 ASG 관리 하에서는 더 이상 적용되지 않습니다 — ASG 가 다음 회수 시 Launch Template 타입으로 되돌립니다.)
-- **Spot 회수(인터럽션)**: AWS 가 2분 전 경고 후 인스턴스를 회수합니다. `capacity-rebalance` 가 켜져 있어 ASG 가 경고를 감지하면 선제적으로 대체 인스턴스를 띄웁니다. `/home` 과 EIP 는 자동으로 새 인스턴스에 재연결되지만, 진행 중이던 셸 세션/빌드는 끊깁니다.
+- EIP는 연결 중에도, 미연결 보유 중에도 public IPv4 요금이 발생함.
+- 스냅샷은 EBS 볼륨과 별도 과금되며 볼륨 삭제 시 자동 삭제되지 않음.
+- 정상 운영용 홈 백업은 cold snapshot과 최근 성공본 3개 보존을 검증한 뒤 활성화. 보호 스냅샷/AMI 참조 스냅샷은 일반 정리 대상에서 제외.
+- 안전장치가 종료를 보류하면 EC2 실행료는 계속됨. 별도 스케줄링 요금 0원과 전체 청구액 0원은 다른 개념.

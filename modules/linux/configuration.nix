@@ -16,7 +16,18 @@
     ./hardware-configuration.nix
     # Persistent /home volume + EIP re-attach for the Spot + ASG deployment.
     ./spot-home-volume.nix
+    ./spot-schedule-guard.nix
+    ./spot-profile-cache.nix
   ];
+
+  # Native AWS ASG schedules are independent of this repository or any client.
+  # Never arm the on-instance guard before replacement/backup validation.
+  services.spotScheduleGuard = {
+    enable = true;
+    armed = false;
+  };
+
+  services.spotProfileCache.enable = true;
 
   # Set your time zone.
   time.timeZone = "Asia/Seoul";
@@ -36,16 +47,40 @@
   virtualisation.docker = {
     enable = true;
     autoPrune.enable = true;
+    daemon.settings."data-root" = "/home/docker-data";
+  };
+  systemd.services.docker = {
+    requires = [ "home.mount" ];
+    after = [ "home.mount" ];
+    unitConfig = {
+      RequiresMountsFor = "/home/docker-data";
+      ConditionPathIsMountPoint = "/home";
+    };
+  };
+  systemd.services."user@1001" = {
+    overrideStrategy = "asDropin";
+    requires = [ "home.mount" ];
+    after = [ "home.mount" ];
+    unitConfig.ConditionPathIsMountPoint = "/home";
   };
 
-  # Compressed RAM swap. This host runs on a small (4 GiB) t4g.medium, so
-  # zram provides headroom for memory-heavy Nix builds without provisioning a
-  # disk swap file.
+  # Do not catch up 03:xx maintenance on every scheduled afternoon boot.
+  nix.gc.dates = "01:00";
+  nix.gc.options = lib.mkForce "--delete-older-than 7d";
+  nix.optimise.dates = [ "Sat 01:15" ];
+  systemd.timers.nix-gc.timerConfig.Persistent = lib.mkForce false;
+  systemd.timers.nix-optimise.timerConfig.Persistent = lib.mkForce false;
+  systemd.services.nix-optimise.after = [ "nix-gc.service" ];
+
+  # Compressed RAM swap adds headroom on the 8 GiB Graviton Spot host
+  # without provisioning a disk swap file.
   zramSwap.enable = true;
 
   # Define the primary user account. No password login: access is via SSH
   # keys (over SSM) and passwordless sudo for the wheel group.
   users.users.sudosubin = {
+    uid = 1001;
+    linger = true;
     shell = pkgs.bashInteractive;
     isNormalUser = true;
     extraGroups = [
