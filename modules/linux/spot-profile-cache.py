@@ -111,13 +111,20 @@ def register_roots(config, paths):
 
 def restore(config):
     profile, paths = roots(config)
-    valid = subprocess.run(["nix-store", "--check-validity", *paths], capture_output=True, timeout=60)
-    if valid.returncode != 0 or not all(Path(p).exists() for p in paths):
+    missing = []
+    for path in paths:
+        valid = subprocess.run(["nix-store", "--check-validity", path], capture_output=True, timeout=60)
+        if valid.returncode != 0 or not Path(path).exists():
+            missing.append(path)
+    if missing:
         secure_directory("/home/persist", 0o755)
         secure_directory("/home/persist/manifests", 0o755)
         secure_directory(config["cache"], 0o700)
         key = public_key(config["public_key"])
-        command("nix", "--option", "trusted-public-keys", key, "--option", "max-substitution-jobs", "2", "copy", "--from", "file://" + config["cache"], *paths)
+        # Nix queries every requested source root, even if already valid in the
+        # destination. A new image's baked system may never have been exported
+        # by the old instance; request only roots that actually need importing.
+        command("nix", "--option", "trusted-public-keys", key, "--option", "max-substitution-jobs", "2", "copy", "--from", "file://" + config["cache"], *missing)
         command("nix-store", "--check-validity", *paths, timeout=60)
     register_roots(config, paths)
     # A concurrent profile update must never let the old profile pass boot gating.

@@ -108,6 +108,21 @@ class RestoreTests(unittest.TestCase):
             self.assertIn(KEY, call)
             self.assertNotIn("--no-check-sigs", call)
 
+    def test_valid_image_system_need_not_exist_in_source_cache(self):
+        with patch.object(cache, "roots", return_value=(PROFILE, [SYSTEM, PROFILE])), patch.object(cache.subprocess, "run", side_effect=[SimpleNamespace(returncode=0), SimpleNamespace(returncode=1)]), patch.object(Path, "exists", return_value=True), patch.object(cache, "secure_directory"), patch.object(cache, "public_key", return_value=KEY), patch.object(cache, "command") as command:
+            cache.restore(self.config)
+            copy = command.call_args_list[0].args
+            self.assertIn(PROFILE, copy)
+            self.assertNotIn(SYSTEM, copy)
+            self.assertNotIn("--no-check-sigs", copy)
+            self.assertEqual(command.call_args_list[1].args, ("nix-store", "--check-validity", SYSTEM, PROFILE))
+
+    def test_validity_metadata_without_files_still_requires_import(self):
+        with patch.object(cache, "roots", return_value=(PROFILE, [SYSTEM, PROFILE])), patch.object(cache.subprocess, "run", return_value=SimpleNamespace(returncode=0)), patch.object(Path, "exists", side_effect=[True, False]), patch.object(cache, "secure_directory"), patch.object(cache, "public_key", return_value=KEY), patch.object(cache, "command") as command:
+            cache.restore(self.config)
+            self.assertIn(PROFILE, command.call_args_list[0].args)
+            self.assertNotIn(SYSTEM, command.call_args_list[0].args)
+
     def test_profile_change_cancels_restore(self):
         with patch.object(cache, "roots", side_effect=[(PROFILE, [PROFILE]), (OTHER, [OTHER])]), patch.object(cache.subprocess, "run", return_value=SimpleNamespace(returncode=0)), patch.object(Path, "exists", return_value=True), self.assertRaises(RuntimeError):
             cache.restore(self.config)
