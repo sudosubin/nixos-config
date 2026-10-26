@@ -160,6 +160,45 @@ class SafetyTests(unittest.TestCase):
             protection.assert_called_once_with(self.config, True)
 
 
+class GatewayDrainTests(unittest.TestCase):
+    def test_busy_gateway_rolls_back_before_other_services_stop(self):
+        from unittest.mock import MagicMock
+        cfg={'uid':1001,'instance_id':'i-test'};gateway=MagicMock();gateway.acquire.side_effect=RuntimeError('busy')
+        with patch.object(guard,'work_protocol') as protocol, patch.object(guard.spot_gateway,'configured',return_value=gateway), patch.object(guard,'shutdown_request_current'), patch.object(guard,'protection'), patch.object(guard,'group_state',return_value={'Instances':[{'InstanceId':'i-test','ProtectedFromScaleIn':True}]}), patch.object(guard,'command') as command:
+            with self.assertRaises(RuntimeError):guard.drain(cfg)
+            command.assert_not_called();gateway.rollback.assert_called_once();protocol.return_value.unseal.assert_called_once()
+
+    def test_gateway_recovery_failure_cannot_reopen_admission(self):
+        from unittest.mock import MagicMock
+        cfg={'uid':1001,'instance_id':'i-test'};gateway=MagicMock();gateway.acquire.side_effect=RuntimeError('busy');gateway.rollback.side_effect=RuntimeError('recovery unknown')
+        with patch.object(guard,'work_protocol') as protocol, patch.object(guard.spot_gateway,'configured',return_value=gateway), patch.object(guard,'shutdown_request_current'), patch.object(guard,'protection'), patch.object(guard,'group_state',return_value={'Instances':[{'InstanceId':'i-test','ProtectedFromScaleIn':True}]}):
+            with self.assertRaises(RuntimeError):guard.drain(cfg)
+            protocol.return_value.unseal.assert_not_called()
+
+    def test_gateway_stop_precedes_user_manager_and_home_stop(self):
+        from types import SimpleNamespace
+        from unittest.mock import MagicMock
+        events=[];gateway=MagicMock();gateway.acquire.side_effect=lambda:events.append('acquire');gateway.stop.side_effect=lambda:events.append('gateway_stop')
+        cfg={'uid':1001,'home_volume':'vol','instance_id':'i-test'}
+        def command(*args,**kwargs):events.append(args[2] if len(args)>2 else 'command')
+        with patch.object(guard,'work_protocol'), patch.object(guard.spot_gateway,'configured',return_value=gateway), patch.object(guard,'shutdown_request_current'), patch.object(guard,'drain_recheck'), patch.object(guard,'command',side_effect=command), patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=1)), patch.object(guard,'aws',return_value={'Encrypted':True,'SnapshotId':'snap'}), patch.object(guard,'protection'), patch.object(guard,'status'):
+            guard.drain(cfg)
+        self.assertLess(events.index('acquire'),events.index('gateway_stop'));self.assertLess(events.index('gateway_stop'),events.index('user@1001.service'));self.assertLess(events.index('user@1001.service'),events.index('home.mount'))
+
+    def test_stopped_gateway_exemption_requires_confirmed_unit_state(self):
+        from unittest.mock import MagicMock
+        gateway=MagicMock();gateway.stopped=True;gateway.manager.assert_stopped=MagicMock(side_effect=RuntimeError('not stopped'))
+        with patch.object(guard,'group_state'),patch.object(guard,'probe') as probe:
+            with self.assertRaises(RuntimeError):guard.drain_recheck({},gateway)
+            probe.assert_not_called()
+
+    def test_readonly_gateway_projection_is_mandatory_when_configured(self):
+        test=SafetyTests();test.setUp();test.config['gateway']={'enabled':True}
+        self.assertIn('gateway_status_unknown',test.reasons())
+        test.node['gateway']={'observable':True,'maintenance_busy':True}
+        self.assertIn('gateway_maintenance_busy',test.reasons())
+
+
 class StartupTests(unittest.TestCase):
     def test_startup_requires_confirmed_protection(self):
         cfg = {"instance_id":"i-test"}

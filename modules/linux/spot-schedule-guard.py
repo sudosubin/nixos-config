@@ -7,6 +7,8 @@ before arming. Spot/health replacement is outside scale-in protection's scope.
 from __future__ import annotations
 
 import argparse
+from contextlib import nullcontext
+import spot_gateway
 from datetime import datetime, time, timezone
 import fcntl
 import importlib.util
@@ -109,6 +111,7 @@ def probe(config, now):
         "profile": os.path.realpath("/home/sudosubin/.nix-profile"),
         "workers": workers, "leases": leases,
         "maintenance": maintenance_running(),
+        "gateway": spot_gateway.configured(config, work_protocol(config)).observe() if config.get("gateway") else None,
     }
 
 
@@ -149,6 +152,12 @@ def reasons(config, now, group, node, sessions, volume):
         result.append("active_or_invalid_leases")
     if node["maintenance"]:
         result.append("maintenance_running")
+    if config.get("gateway"):
+        gateway = node.get("gateway")
+        if not isinstance(gateway, dict) or gateway.get("observable") is not True:
+            result.append("gateway_status_unknown")
+        elif gateway.get("maintenance_busy") is not False:
+            result.append("gateway_maintenance_busy")
     if volume.get("Encrypted") is not True:
         result.append("home_encryption_not_ready")
     if not any(a.get("InstanceId") == config["instance_id"] and a.get("State") == "attached"
@@ -199,13 +208,22 @@ def status(data):
     tmp.replace(RUNTIME / "status.json")
 
 
-def drain_recheck(config):
+def drain_recheck(config, gateway=None):
     """Recheck the whole mounted-home predicate AFTER new job admission closes."""
     now = datetime.now(timezone.utc)
     group = group_state(config)
-    node = probe(config, now)
+    observed_config = config
+    if gateway is not None:
+        if gateway.stopped:
+            # Unavailability is expected ONLY after our bound atomic stop was
+            # acknowledged and the manager confirmed this service inactive.
+            gateway.manager.assert_stopped()
+            observed_config = {key: value for key, value in config.items() if key != "gateway"}
+        else:
+            gateway.check()
+    node = probe(observed_config, now)
     volume = aws(config, "ec2", "describe-volumes", "--volume-ids", config["home_volume"])["Volumes"][0]
-    blocked = reasons(config, now, group, node, sessions(config), volume)
+    blocked = reasons(observed_config, now, group, node, sessions(config), volume)
     # The cadence controls starting a drain, not how long a valid drain may run.
     blocked = [reason for reason in blocked if reason != "waiting_15_minute_recheck"]
     if blocked:
@@ -223,14 +241,20 @@ def drain(config):
     protocol.seal()
     services_stopped = False
     released = False
+    gateway = None
     try:
         shutdown_request_current(config)
-        drain_recheck(config)
+        gateway = spot_gateway.configured(config, protocol)
+        if gateway is not None:
+            gateway.acquire()
+        drain_recheck(config, gateway)
+        if gateway is not None:
+            gateway.stop()
         # Mark before issuing stop: a timed-out client does not prove no service
         # was stopped. Rollback must restore any partial transition as well.
         services_stopped = True
         command("systemctl", "stop", "user@%d.service" % config["uid"], "docker.service", timeout=60)
-        drain_recheck(config)
+        drain_recheck(config, gateway)
         command("systemctl", "stop", "home.mount", timeout=40)
         check = subprocess.run(["findmnt", "--mountpoint", "/home"], capture_output=True, timeout=5)
         if check.returncode != 1:
@@ -253,11 +277,18 @@ def drain(config):
         group = group_state(config)
         if not any(i["InstanceId"] == config["instance_id"] and i.get("ProtectedFromScaleIn") is True for i in group["Instances"]):
             raise RuntimeError("rollback protection unconfirmed; admission remains closed")
-        if services_stopped:
-            subprocess.run(["systemctl", "start", "home.mount"], check=True, timeout=60)
-            subprocess.run(["systemctl", "start", "docker.service", "user@%d.service" % config["uid"]], check=True, timeout=60)
+        recovery = protocol.recover_services([gateway.manager.unit]) if gateway is not None else nullcontext()
+        with recovery:
+            if services_stopped:
+                subprocess.run(["systemctl", "start", "home.mount"], check=True, timeout=60)
+                subprocess.run(["systemctl", "start", "docker.service", "user@%d.service" % config["uid"]], check=True, timeout=60)
+            if gateway is not None:
+                gateway.rollback()
         protocol.unseal()
         raise
+    finally:
+        if gateway is not None:
+            gateway.close()
 
 
 def main():

@@ -150,10 +150,25 @@ sudo /run/spot-work status
 - ACP 요청을 backend에 전달하기 **전에** 기존 admission lock 아래 작업 lease를 게시함. fence 뒤 요청은 명시적인 JSON-RPC 오류로 거절하며 backend에 전달하지 않음. 취소 알림 자체는 작업 완료로 간주하지 않음.
 - `session/prompt`는 알려진 최종 `stopReason` 응답과 출력 전달까지 확인해야 lease를 해제함. 도구 승인 응답의 전달도 대기함. ACK만 반환하는 비동기 확장, 오류, 불명확한 메시지, 낡은 상태는 유휴가 아님.
 - frontend EOF/출력 단절/잘못된 늦은 입력 때문에 진행 중인 backend 작업을 중단하지 않음. 실제 UID 1001 stdio sandbox에서 작업 보존과 fence, 분할 UTF-8, 상태 파일의 프롬프트 비기록을 검증함.
-- 전체 ARM 회귀 **136개 단위 테스트 + 11개 실제 Linux 테스트 = 147개** 통과. 실제 native Kiro의 ACP protocol 1 초기화 및 fence 뒤 요청 거절도 network namespace에서 확인했으며 실제 세션/모델 요청은 만들지 않음.
+- ACP 단계 당시 ARM 회귀 **136개 단위 테스트 + 11개 실제 Linux 테스트 = 147개** 통과. 실제 native Kiro의 ACP protocol 1 초기화 및 fence 뒤 요청 거절도 network namespace에서 확인했으며 실제 세션/모델 요청은 만들지 않음.
 - 준비된 Nix entry를 실제 Bun으로 검증했지만 **native launcher가 해당 override를 사용해 실제 vendor TUI를 여는 경로와 실제 모델 turn 완료는 아직 검증 전**. 단순 fake TUI 검증을 전체 앱 검증으로 확대하지 않음.
 - `services.spotAcp.enable`은 기본 false이며 운영 앱/환경에는 반영하지 않음. `/run/spot-schedule-guard/participants`의 레코드는 coordinator가 프로세스·프로토콜·fence 범위를 검증하기 전까지 **모두 unverified blocker**임. 기존 worker 검사를 완화하지 않음.
 - AWS 준비 소스 `/home/persist/nixos-workload-build`, 빌드 결과 `/home/persist/build-results/nixos-acp-prepared`는 **빌드 전용**. 현재 v2 AMI에 포함되지 않았고 `work_tracking_verified`/`armed`도 승인하지 않음. OpenClaw/Herdr/일반 생산자 및 전체 프로세스 범위 연결은 계속 필요함.
+
+## Gateway 비강제 admission·종료/복구 어댑터 (후속 준비)
+
+소스: `spot_gateway.py`, `spot-gateway-rpc.mjs`, `spot-gateway.nix`, 관련 테스트.
+
+- 실제 운영 Gateway는 조회만 수행. UID/서비스 MainPID/프로세스 시작 식별자와 RPC processInstanceId/연결 boot ID를 묶고 loopback만 허용함. 공개 lifecycle 모듈의 hash도 고정하며 인증값·설정·예외 원문을 인수/로그에 노출하지 않음.
+- readonly status는 **부분 활동 투영이지 전체 idle 증거가 아님**. root admission 차단 뒤 `terminalPolicy=preserve, drain=false`의 full prepare가 ready인 경우만 진행. busy는 기존 작업을 중단하지 않고 취소/재검사하며 오류·불명확한 응답을 busy/idle로 바꾸지 않음.
+- 동일 request ID로 lease를 갱신하고 owner/만료/write custody를 검사함. 서비스 정지는 만료 전 조회만으로 허용하지 않고 resident의 PID+processInstanceId에 묶인 atomic handoff commit이 확인된 뒤에만 수행. 실패 시 일반 systemctl stop으로 우회하지 않음.
+- 실제 로드된 non-ignoring ExecCondition, 무한 stop timeout, SendSIGKILL=no를 확인해야 제어 가능. NixOS `asDropin`으로 HM의 원래 ExecStart/인증/재시작 설정을 교체하지 않음. rollback 중에는 종료 보호 재확인 후 root/boot/살아 있는 controller PID에 묶인 특정 서비스 시작만 허용하고, 일반 작업 admission은 열지 않음. Gateway RPC 복구 성공 후에만 outer admission을 다시 엶.
+- **175개 단위 + 14개 실제 root/UID1001 Linux = 189개를 ARM에서 모두 실행했고 skip이 없음을 검사함.** 실제 별도 Gateway의 세션 변경 허용→거절→재허용, lease 갱신, atomic 종료, 새 PID로 rollback 재시작을 검증. 기존 작업/개인 홈/인증을 복제하지 않고 private network/mount/tmp, ProtectHome, 읽기 전용 앱/Node bind, 빈 설정으로 수행했으며 모델·채널·외부 네트워크는 쓰지 않음.
+- busy/만료/스케줄러 실패/회복은 **별도 Node 프로세스의 실제 vendor coordinator + 주입한 활동 counter**로 검증함. 실제 production 모델 busy나 전체 프로세스 추적의 증거로 확대하지 않음.
+- 초기 테스트의 Node 경로 skip, base Node 24.12의 SQLite TEXT/NUL 호환성 오류, Nix `/etc/systemd/user` 중첩 symlink 충돌을 실제로 찾아 수정함. 지금은 skip을 성공으로 세지 않으며, 이미 홈에 영구 보존된 지원 Node 26.4.0을 사용함. `nativeStopBudget=false`는 무한 supervisor timeout에서도 정상이며 idle/기능 지원 여부와 혼동하지 않음.
+- 준비 소스 `/home/persist/nixos-gateway-build`, 빌드 결과 `/home/persist/build-results/nixos-gateway-prepared`는 **빌드 전용**. `services.spotGateway.enable` 기본 false, 운영 drop-in/앱/OS/홈/EIP/LT에는 적용하지 않음. v2 AMI에도 포함되지 않음.
+- 최신 가드와 admission 초기화만 runtime unit으로 갱신해 실제 운영 Gateway를 읽기 전용으로 관찰함. `/run/spot-schedule-guard/observation-gateway.json`은 armed=false이며 실제 현재 캐시 manifest도 검사함. 운영 prepare/stop/resume는 호출하지 않았고, 앱/OS 재시작이나 재부팅 영속성 검증과는 구별함.
+- 기존 WORKERS/participant blocker를 완화하지 않음. Herdr/PTY/모든 프로세스·생산자, 실제 Kiro frontend, 중단된 drain의 자동 reconcile, 성공 백업 3개 보존, 최신 이미지·홈 전환·운영 종료/깨우기 검증과 남은 임시 도구 정리는 아직 필요함. `work_tracking_verified`와 `armed`는 승인하지 않음.
 
 ## 프로필 복구와 부팅 의존성
 
@@ -201,9 +216,11 @@ python3 modules/linux/test-spot-schedule-guard.py -v
 python3 modules/linux/test-spot-profile-cache.py -v
 python3 modules/linux/test-spot-work.py -v
 python3 modules/linux/test-spot-acp.py -v
+python3 modules/linux/test-spot-gateway.py -v
 # root Linux sandbox에서 실행 (Mac에서는 skip됨):
 python3 modules/linux/test-spot-work-linux.py -v
 python3 modules/linux/test-spot-acp-linux.py -v
+python3 modules/linux/test-spot-gateway-linux.py -v
 nix-instantiate --parse modules/linux/spot-schedule-guard.nix
 nix-instantiate --parse modules/linux/spot-profile-cache.nix
 nix-instantiate --parse modules/linux/spot-home-volume.nix

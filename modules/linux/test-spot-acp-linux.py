@@ -62,12 +62,13 @@ class ACPStdioTests(unittest.TestCase):
         code="import sys;sys.path.insert(0,sys.argv[1]);import spot_acp,spot_work;p=spot_work.Protocol(sys.argv[2],uid=1001,gid=int(sys.argv[3]));sys.exit(spot_acp.bridge(p,[sys.executable,'-u',sys.argv[4],sys.argv[5]]))"
         def user():os.initgroups(self.user.pw_name,self.user.pw_gid);os.setgid(self.user.pw_gid);os.setuid(1001)
         self.child=subprocess.Popen([sys.executable,'-u','-c',code,str(self.base),str(self.protocol.runtime),str(self.user.pw_gid),str(self.fake),str(self.log)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,preexec_fn=user,cwd='/',start_new_session=True,bufsize=0)
+        self.addCleanup(self.cleanup)
         self.buffer=b'';self.messages=[]
         self.send({'jsonrpc':'2.0','id':0,'method':'initialize','params':{}})
         self.assertEqual(self.reply(0)['result']['protocolVersion'],1)
         self.wait_idle()
 
-    def tearDown(self):
+    def cleanup(self):
         if self.child.poll() is None:
             self.child.stdin.close()
             try:self.child.wait(timeout=5)
@@ -96,9 +97,20 @@ class ACPStdioTests(unittest.TestCase):
 
     def jobs(self):return [x for x in self.protocol.blockers() if x['reason']!='participant_unverified']
 
+    def participant_records(self):
+        with self.protocol.locked():
+            return [json.loads(p.read_text()) for p in (self.protocol.runtime/'participants').iterdir()]
+
     def wait_idle(self):
         for i in range(100):
-            if not self.jobs():return
+            # Inspect leases + participants under the SAME publication lock,
+            # never transient .pending files while an atomic rename is pending.
+            with self.protocol.locked():
+                records=[json.loads(p.read_text()) for p in (self.protocol.runtime/'participants').iterdir()]
+                jobs=[x for x in self.protocol.blockers_unlocked() if x['reason']!='participant_unverified']
+            # Lease removal precedes publishing the new participant count. That
+            # intermediate BUSY record is conservative, not an idle failure.
+            if not jobs and all(x['active_requests']==0 and x['server_requests']==0 for x in records):return
             time.sleep(0.02)
         self.fail('fixture did not reach request completion')
 
@@ -118,17 +130,18 @@ class ACPStdioTests(unittest.TestCase):
     def test_fragmented_unicode_transparent_without_transcript_files(self):
         self.send({'jsonrpc':'2.0','id':'text-id','method':'session/prompt','params':{'content':[{'text':'PRIVATE_PROMPT_🙂'}]}},fragment=True)
         time.sleep(0.1)
-        records=''.join(p.read_text() for directory in ['leases','participants'] for p in (self.protocol.runtime/directory).iterdir())
+        with self.protocol.locked():
+            records=''.join(p.read_text() for directory in ['leases','participants'] for p in (self.protocol.runtime/directory).iterdir())
         self.assertNotIn('PRIVATE_PROMPT',records);self.assertNotIn('text-id',records)
         self.assertEqual(self.reply('text-id')['result']['stopReason'],'end_turn');self.wait_idle()
-        records=[json.loads(p.read_text()) for p in (self.protocol.runtime/'participants').iterdir()]
+        records=self.participant_records()
         self.assertTrue(records[0]['healthy']);self.assertTrue(records[0]['initialized']);self.assertEqual(records[0]['active_requests'],0)
 
     def test_ack_only_reply_never_makes_model_work_idle(self):
         self.send({'jsonrpc':'2.0','id':1,'method':'session/prompt','params':{'ackOnly':True}})
         self.assertTrue(self.reply(1)['result']['accepted'])
         self.assertTrue(self.jobs())
-        record=json.loads(next((self.protocol.runtime/'participants').iterdir()).read_text())
+        record=self.participant_records()[0]
         self.assertFalse(record['healthy']);self.assertEqual(record['reason'],'prompt_response_not_terminal')
 
     def test_oversized_late_input_does_not_abort_an_existing_turn(self):
@@ -151,14 +164,14 @@ class ACPStdioTests(unittest.TestCase):
         self.child.wait(timeout=6)
         self.assertTrue(self.log.with_name('completed').exists())
         self.assertTrue(self.jobs())
-        record=json.loads(next((self.protocol.runtime/'participants').iterdir()).read_text())
+        record=self.participant_records()[0]
         self.assertFalse(record['healthy'])
 
     def test_backend_output_eof_is_unknown_even_while_backend_still_alive(self):
         self.log.with_name('close-output').touch()
         record=None
         for i in range(100):
-            record=json.loads(next((self.protocol.runtime/'participants').iterdir()).read_text())
+            record=self.participant_records()[0]
             if not record['healthy']:break
             time.sleep(0.02)
         self.assertFalse(record['healthy']);os.kill(record['backend_pid'],0)

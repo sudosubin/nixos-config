@@ -29,6 +29,46 @@ class AdmissionTests(unittest.TestCase):
     def test_empty_protocol_is_open(self):
         self.assertEqual(self.p.state(), 'open'); self.assertEqual(self.p.blockers(), [])
 
+    def test_service_start_defaults_to_closed_during_drain(self):
+        self.assertTrue(self.p.service_start_allowed('app.service'))
+        self.p.seal();self.assertFalse(self.p.service_start_allowed('app.service'))
+
+    def test_recovery_authorizes_only_named_service_not_jobs(self):
+        self.p.seal()
+        with patch.object(work,'process_start',return_value=123), patch.object(work,'process_uid',return_value=os.geteuid()):
+            with self.p.recover_services(['app.service']):
+                self.assertTrue(self.p.service_start_allowed('app.service'))
+                self.assertFalse(self.p.service_start_allowed('other.service'))
+                with self.assertRaises(RuntimeError):self.p.create('job')
+            self.assertFalse(self.p.service_start_allowed('app.service'))
+
+    def test_dead_recovery_controller_cannot_authorize_start(self):
+        self.p.seal()
+        with patch.object(work,'process_start',return_value=123), patch.object(work,'process_uid',return_value=os.geteuid()):
+            with self.p.recover_services(['app.service']):
+                with patch.object(work,'process_start',side_effect=ProcessLookupError):
+                    self.assertFalse(self.p.service_start_allowed('app.service'))
+
+    def test_recovery_does_not_grant_permission_after_release(self):
+        self.p.seal()
+        with patch.object(work,'process_start',return_value=123), patch.object(work,'process_uid',return_value=os.geteuid()):
+            with self.p.recover_services(['app.service']):
+                self.p.write_state('releasing');self.assertFalse(self.p.service_start_allowed('app.service'))
+
+    def test_recovery_blocks_release_and_early_unseal(self):
+        self.p.seal()
+        with patch.object(work,'process_start',return_value=123):
+            with self.p.recover_services(['app.service']):
+                with self.assertRaises(RuntimeError):
+                    with self.p.commit():self.fail('recovery is not idle')
+                with self.assertRaises(RuntimeError):self.p.unseal()
+        self.p.unseal();self.assertEqual(self.p.state(),'open')
+
+    def test_stale_recovery_authority_never_overwritten(self):
+        self.p.seal();(self.p.runtime/'recover-services').write_text('{}')
+        with self.assertRaises(RuntimeError):
+            with self.p.recover_services(['app.service']):self.fail('must not replace unknown authority')
+
     def test_manual_extension_blocks_until_expiry(self):
         data = self.p.create('manual', 100)
         self.assertEqual(self.p.blockers(data['created_at']+99)[0]['reason'], 'manual_extension')

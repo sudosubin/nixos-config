@@ -19,6 +19,7 @@
     ./spot-schedule-guard.nix
     ./spot-work.nix
     ./spot-acp.nix
+    ./spot-gateway.nix
     ./spot-profile-cache.nix
   ];
 

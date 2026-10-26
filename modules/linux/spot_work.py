@@ -33,6 +33,10 @@ def process_start(pid):
     return int(Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()[19])
 
 
+def process_uid(pid):
+    return Path(f'/proc/{pid}').stat().st_uid
+
+
 def read_record(path, owners, limit=4096):
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
     with os.fdopen(fd) as stream:
@@ -144,7 +148,53 @@ class Protocol:
         with self.locked():
             if os.geteuid() != self.root_uid:
                 raise PermissionError('only root may reopen admission')
+            if os.path.lexists(self.runtime / 'recover-services'):
+                raise RuntimeError('service recovery must finish before admission reopens')
             (self.runtime / 'draining').unlink(missing_ok=True)
+
+    def service_start_allowed(self, unit):
+        with self.locked():
+            state = self.state()
+            if state == 'open':
+                return True
+            if state != 'draining':
+                return False
+            try:
+                data, _ = read_record(self.runtime / 'recover-services', {self.root_uid})
+                pid = data.get('pid')
+                return (data.get('schema') == 1 and type(data.get('schema')) is int
+                        and data.get('boot_id') == self.boot_id
+                        and isinstance(data.get('units'), list) and unit in data['units']
+                        and type(pid) is int and pid > 0
+                        and type(data.get('pid_start')) is int
+                        and process_uid(pid) == self.root_uid
+                        and process_start(pid) == data['pid_start'])
+            except (OSError, ValueError, TypeError):
+                return False
+
+    @contextmanager
+    def recover_services(self, units):
+        # Caller must first reconfirm ASG protection. This grants only service
+        # startup during rollback, NEVER admission for new jobs or extensions
+        # after release. A dead recovery controller cannot authorize startup.
+        if os.geteuid() != self.root_uid or not units or any(not isinstance(x, str) for x in units):
+            raise PermissionError('root recovery service allowlist required')
+        path = self.runtime / 'recover-services'
+        recovery_id = uuid.uuid4().hex
+        with self.locked():
+            if self.state() != 'draining' or os.path.lexists(path):
+                raise RuntimeError('unknown recovery state')
+            self.publish(path, {'schema': 1, 'id': recovery_id, 'boot_id': self.boot_id, 'units': units,
+                                'pid': os.getpid(), 'pid_start': process_start(os.getpid())})
+            os.chmod(path, 0o644)
+        try:
+            yield
+        finally:
+            with self.locked():
+                data, _ = read_record(path, {self.root_uid})
+                if data.get('id') != recovery_id:
+                    raise RuntimeError('service recovery authority changed')
+                path.unlink()
 
     def blockers_unlocked(self, now=None):
         now = time.time() if now is None else now
@@ -178,6 +228,8 @@ class Protocol:
                     raise ValueError('unknown lease kind')
             except (OSError, ValueError, KeyError, TypeError):
                 blocked.append({'id': path.name, 'reason': 'invalid_lease_unknown'})
+        if os.path.lexists(self.runtime / 'recover-services'):
+            blocked.append({'id': 'recover-services', 'reason': 'service_recovery_in_progress'})
         # A participant record alone never grants authority to exempt a worker.
         # Until the workload coordinator verifies its live PID/protocol/fence,
         # even an apparent idle record remains unverified (fail closed).
@@ -314,6 +366,7 @@ def main(protocol=None):
     sub.add_parser('initialize')
     sub.add_parser('status')
     sub.add_parser('check-open')
+    service_start = sub.add_parser('check-service-open'); service_start.add_argument('unit')
     extend = sub.add_parser('extend'); extend.add_argument('--seconds', type=float, default=7200)
     cancel = sub.add_parser('cancel'); cancel.add_argument('id')
     run = sub.add_parser('run'); run.add_argument('command', nargs=argparse.REMAINDER)
@@ -327,6 +380,8 @@ def main(protocol=None):
     elif args.action == 'check-open':
         with protocol.locked():
             return 0 if protocol.state() == 'open' else 1
+    elif args.action == 'check-service-open':
+        return 0 if protocol.service_start_allowed(args.unit) else 1
     elif args.action == 'extend':
         print(json.dumps(protocol.create('manual', args.seconds)))
     elif args.action == 'cancel':

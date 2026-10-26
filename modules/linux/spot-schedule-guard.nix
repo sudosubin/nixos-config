@@ -12,6 +12,8 @@ let
     mkdir -p "$out"
     cp ${./spot-schedule-guard.py} "$out/spot-schedule-guard.py"
     cp ${./spot_work.py} "$out/spot_work.py"
+    cp ${./spot_gateway.py} "$out/spot_gateway.py"
+    cp ${./spot-gateway-rpc.mjs} "$out/spot-gateway-rpc.mjs"
   '';
   guard = pkgs.writeShellApplication {
     name = "spot-schedule-guard";
@@ -40,6 +42,13 @@ let
   }
   // lib.optionalAttrs config.services.spotProfileCache.enable {
     profile_cache_manifest = "/home/persist/manifests/profile-cache.json";
+  }
+  // lib.optionalAttrs config.services.spotGateway.enable {
+    gateway = {
+      inherit (config.services.spotGateway) unit node;
+      vendor_dir = config.services.spotGateway.vendorDirectory;
+      startup_check = "${config.services.spotWork.package}/bin/spot-work";
+    };
   };
 in
 {
@@ -104,7 +113,9 @@ in
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "${guard}/bin/spot-schedule-guard";
-        TimeoutStartSec = 300;
+        # A timeout must not kill the coordinator during cold backup/recovery.
+        # Individual API observations remain bounded and fail closed.
+        TimeoutStartSec = "infinity";
         UMask = "0077";
         Nice = 10;
         WorkingDirectory = "/run/spot-schedule-guard";

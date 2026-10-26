@@ -15,7 +15,15 @@ let
   };
 in
 {
-  options.services.spotWork.enable = lib.mkEnableOption "atomic job admission and manual shutdown extensions";
+  options.services.spotWork = {
+    enable = lib.mkEnableOption "atomic job admission and manual shutdown extensions";
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = tool;
+      readOnly = true;
+      internal = true;
+    };
+  };
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [ tool ];
     systemd.tmpfiles.rules = [
