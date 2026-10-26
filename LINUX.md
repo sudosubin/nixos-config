@@ -10,11 +10,11 @@
 - native 예약 3개 등록: 평일 16:30 / 주말 10:30 시작, 익일 02:00 scale-in 요청.
 - 신규/현재 인스턴스의 scale-in protection 활성화.
 - 운영 EC2에는 **armed=false 컴파일된 Nix 관찰 가드**를 runtime unit으로 설치.
-- 60개 오프라인 테스트와 Nix 평가 통과. 새 암호화 32 GiB 루트를 빈 파일시스템에 설치하고 **AMI `ami-041ca977ead7a7198`의 UEFI/SSM 실제 격리 부팅**을 확인함. 운영 시스템 switch/boot 기본값/AMI 전환은 하지 않음. 홈 복원·앱·작업 추적·종료/재생성 전체 검증은 아직 필요함.
+- 60개 오프라인 테스트와 Nix 평가 통과. 새 암호화 32 GiB 루트를 빈 파일시스템에 설치하고 **v2 AMI `ami-0d44956a8229b0dad`의 UEFI/SSM 실제 격리 부팅**과 탑재된 수정 코드의 SHA256 일치를 확인함. 운영 시스템 switch/boot 기본값/AMI 전환은 하지 않음. 운영 암호화 홈 전환·실제 작업 추적·백업 보존·최종 종료/깨우기 검증은 아직 필요함.
 - 새 프로필 복구 모듈로 현재 closure 1,294개를 별도 빈 Nix 스토어에 복원하여 모든 본문 해시·서명을 검증했고 임시 스토어도 정리함.
 - 프로필 변경 path 감시와 5분 보완 timer를 runtime 설치하여 실제 자동 캐시 갱신을 확인함.
 - 새 AMI의 InService/scale-in protection 게이트를 격리 ASG에서 실제 통과시킴. 홈이 없을 때 SSM만 접근 가능하고 사용자/HM/Docker/EIP가 비활성인 것도 확인함. 테스트 역할의 운영 홈 연결/EIP 연계 거부를 실제 dry-run으로 검증함.
-- 실제 Nix로 혼합 캐시 경계를 추가 검증함: 새 이미지에 이미 있는 시스템도 `nix copy --from` 요청에 넣으면, 옛 캐시에 없는 시스템 때문에 실패함. **없는 root만 서명 캐시에서 요청**하도록 소스를 수정했고 실제 모듈/서명 import 회귀 테스트도 통과. 이 수정은 v1 AMI에 아직 없으므로 후속 이미지 반영·부팅 검증이 필요함.
+- 실제 Nix로 혼합 캐시 경계를 추가 검증함: 새 이미지에 이미 있는 시스템도 `nix copy --from` 요청에 넣으면, 옛 캐시에 없는 시스템 때문에 실패함. **없는 root만 서명 캐시에서 요청**하도록 소스를 수정했고 실제 모듈/서명 import 회귀 테스트도 통과. 이 수정은 v2 이미지에 반영하여 부팅 검증함. 홈 누락 시 실제 GC 실행도 차단됨을 확인함. 격리 EC2에서 새 패키지 설치 → 자동 캐시 게시 → 실제 루트 삭제 → 새 EC2의 서명 복구 → 실제 GC 이후 실행까지 통과함.
 - `main`의 Darwin 설정은 이 변경으로 수정하지 않음.
 
 **예약 Desired=0과 실제 종료는 다릅니다.** 보호가 켜진 서버는 예약 시각에도 남습니다. 현재는 아직 실제 자동 종료가 비활성화된 관찰 단계입니다.
@@ -146,15 +146,19 @@ network → InService/종료 보호 확인 → 지정 EBS 연결 + serial/UUID �
 - `/home/sudosubin`, `/home/docker-data`: 영구 홈 EBS에 있음.
 - `/root`의 필요한 상태: `/home/persist/root`의 root 전용 보존본으로 추가 백업. 원본은 별도 승인 전 삭제하지 않음.
 - Nix 프로필 메타데이터: `/home/sudosubin/.local/state/nix/profiles`에 이미 보존됨.
-- Nix 패키지: `/home/persist/nix-closure-cache`에 서명된 closure checkpoint 보존. 빈 스토어 복원은 통과했지만 **새 인스턴스의 부팅 중 자동 복구/활성화까지 검증된 것은 아님.**
+- Nix 패키지: `/home/persist/nix-closure-cache`에 서명된 closure checkpoint 보존. **실제 인스턴스 재생성으로 사라진 새 프로필/패키지를 복구**하고 서명·본문 검사 및 실제 GC 후 실행까지 확인함. 증거는 `/home/persist/manifests/nix-profile-recreation-verified-20261027.json`에 보존.
 - AWS 안의 준비된 소스/시스템: `/home/persist/nixos-cloud-build`, `/home/persist/build-results/nixos-gc-safe`. 운영 원본 소스를 보존하고 Linux 변경만 별도 overlay함.
-- 정확한 새 이미지 빌드 소스와 후보 볼륨 옵션: `/home/persist/root/cloud-image-release-source-20261027-v1.tar.gz` (root:root 0600, SHA256 `307f39240a6e0967e60cde3afbe0909213b83be7ccf01aae39ccc86549ec588d`). 후보 옵션은 운영에 아직 적용하지 않음.
-- 새 루트 실측: 32 GiB 중 약 14 GiB 사용/18 GiB 여유, cold 암호화 스냅샷 전체 크기 14,870,904,832 bytes. 기존 운영 루트/백업은 보존하며 이 수치를 운영 절감 실적으로 간주하지 않음.
-- 새 암호화 홈은 스냅샷에서 사전 복사 중이며 전체 checksum 검증/실시간 최종 동기화/전환은 미완료. 아직 운영 홈은 기존 비암호화 볼륨임.
+- 정확한 v2 이미지 빌드 소스와 후보 볼륨 옵션: `/home/persist/root/cloud-image-release-source-20261027-v2.tar.gz` (root:root 0600, SHA256 `7b7ca6cc2b2145abd283a750e24203e512a2f63d5cf2fcbb92b0c7bdb334033f`). 후보 옵션은 운영에 아직 적용하지 않음.
+- 새 루트 실측: 32 GiB 중 약 14 GiB 사용/18 GiB 여유, v2 cold 암호화 스냅샷 전체 크기 14,921,236,480 bytes. 기존 운영 루트/백업은 보존하며 이 수치를 운영 절감 실적으로 간주하지 않음.
+- 새 암호화 홈은 사전 복사·전체 파일 checksum/메타데이터 비교·cold 읽기 전용 fsck를 통과함. 첫 cold 스냅샷의 FullSnapshotSize는 41,889,038,336 bytes로 실측됨. 실시간 최종 동기화/전환은 미완료이며 아직 운영 홈은 기존 비암호화 볼륨임.
+- 최신 루트/홈 암호화 백업의 파일시스템 복원과 루트 Nix DB 검사를 통과함. 가려진 옛 홈도 읽기 전용 namespace에서 실제 내용/심볼릭 링크 비교 완료. 차이가 있거나 현재 홈에 없는 데이터는 원본 루트와 보호된 암호화 루트 스냅샷 `snap-09235382ac255d357`에 보존하며 현재 홈에 덮어쓰지 않음.
+- Home Manager/사용자 관리자/OpenClaw 코어도 **loopback 전용 network namespace + NoNewPrivileges**에서 부팅·상태 RPC 확인. 운영 Discord/모델 서비스에는 연결하지 않았으며 운영 앱 전환 검증과 구별함.
+- 빌더·canary·테스트 EBS/ASG/LT/IAM 역할은 AWS 증거 보존 후 정리 완료. 후보 홈/이미지/스냅샷만 보존하며 이미지 부팅/향후 스케줄은 빌더나 로컬 파일에 의존하지 않음.
+- 이번 이미지 단계의 일회 로컬 스크립트 6개도 삭제함. 감사용 레시피는 `/home/persist/root/image-phase-operator-recipe-20261027.tar.gz` (0600)에 보존하며 운영 런타임에는 쓰지 않음. 이전 단계의 다른 배포 도구까지 모두 정리된 것은 아님.
 - AWS 안의 배포 상태: `/home/persist/manifests/deployment-status.json`. 스케줄 운영에 로컬 메모/checkout이 필요하지 않음.
 - 새 루트는 임시이므로 `nixos-rebuild switch`만으로는 다음 ASG 인스턴스에 변경이 남지 않음. 검증된 새 root-only AMI와 숫자 LT 버전이 필요함.
 - `create-image`는 추가 EBS를 자동 제외하지 않으며 기본 재부팅이 발생할 수 있음. 무조건 `--no-reboot`로 만들고 무결성이 보장된다고 간주하지 않음.
-- 복원 테스트는 운영 홈/EIP에 접근할 수 없는 별도 역할과 복제 볼륨으로 수행. Discord/외부 작업 서비스를 테스트에서 자동 실행하지 않음.
+- 복원 테스트는 운영 홈/EIP 제어가 거부된 별도 역할과 복제 볼륨으로 수행. 외부 통신이 차단되고 권한 상승이 금지된 환경에서만 앱을 시험하며 실제 Discord/모델 작업을 중복 실행하지 않음.
 
 ## Linux 변경 검증
 
