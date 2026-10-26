@@ -18,6 +18,7 @@
     ./spot-home-volume.nix
     ./spot-schedule-guard.nix
     ./spot-work.nix
+    ./spot-acp.nix
     ./spot-profile-cache.nix
   ];
 

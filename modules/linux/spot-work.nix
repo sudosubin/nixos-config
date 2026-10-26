@@ -21,6 +21,7 @@ in
     systemd.tmpfiles.rules = [
       "d /run/spot-schedule-guard 0755 root root -"
       "d /run/spot-schedule-guard/leases 1733 root root -"
+      "d /run/spot-schedule-guard/participants 1733 root root -"
       "f /run/spot-schedule-guard/admission.lock 0660 root users -"
     ];
     # Jobs already starting before the fence remain visible as systemd jobs;

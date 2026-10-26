@@ -142,6 +142,19 @@ sudo /run/spot-work status
 - 실제 Linux UID 1001 작업·double-fork 자손·강제 종료된 테스트 wrapper의 stale lease·수동 연장 경합을 **별도 `/run` sandbox에서 검증**했으며 해당 sandbox는 삭제함. 운영자의 짧은 테스트 연장도 관찰 가드가 인식하고 테스트 lease만 제거했음.
 - **아직 모든 기존 작업이 이 wrapper를 쓰는 것은 아님.** OpenClaw/Herdr/Kiro의 실제 admission/활동 상태, 전체 프로세스 소유권 및 일반 작업 생산자 연결은 남아 있고 `work_tracking_verified`는 승인하지 않음. lease가 없다는 이유만으로 전체 서버를 유휴라 판단하지 않음.
 
+## Kiro ACP 요청 경계 (후속 준비, 운영 비활성)
+
+소스: `spot_acp.py`, `spot-acp.nix`, `test-spot-acp.py`, `test-spot-acp-linux.py`.
+
+- 실제 실행 중인 Kiro 2.10.0의 hook 스키마와 ACP/Bun 코드를 확인함. `UserPromptSubmit` 실패는 프롬프트 제출을 차단하지 못하므로 종료 admission으로 사용하지 않음.
+- ACP 요청을 backend에 전달하기 **전에** 기존 admission lock 아래 작업 lease를 게시함. fence 뒤 요청은 명시적인 JSON-RPC 오류로 거절하며 backend에 전달하지 않음. 취소 알림 자체는 작업 완료로 간주하지 않음.
+- `session/prompt`는 알려진 최종 `stopReason` 응답과 출력 전달까지 확인해야 lease를 해제함. 도구 승인 응답의 전달도 대기함. ACK만 반환하는 비동기 확장, 오류, 불명확한 메시지, 낡은 상태는 유휴가 아님.
+- frontend EOF/출력 단절/잘못된 늦은 입력 때문에 진행 중인 backend 작업을 중단하지 않음. 실제 UID 1001 stdio sandbox에서 작업 보존과 fence, 분할 UTF-8, 상태 파일의 프롬프트 비기록을 검증함.
+- 전체 ARM 회귀 **136개 단위 테스트 + 11개 실제 Linux 테스트 = 147개** 통과. 실제 native Kiro의 ACP protocol 1 초기화 및 fence 뒤 요청 거절도 network namespace에서 확인했으며 실제 세션/모델 요청은 만들지 않음.
+- 준비된 Nix entry를 실제 Bun으로 검증했지만 **native launcher가 해당 override를 사용해 실제 vendor TUI를 여는 경로와 실제 모델 turn 완료는 아직 검증 전**. 단순 fake TUI 검증을 전체 앱 검증으로 확대하지 않음.
+- `services.spotAcp.enable`은 기본 false이며 운영 앱/환경에는 반영하지 않음. `/run/spot-schedule-guard/participants`의 레코드는 coordinator가 프로세스·프로토콜·fence 범위를 검증하기 전까지 **모두 unverified blocker**임. 기존 worker 검사를 완화하지 않음.
+- AWS 준비 소스 `/home/persist/nixos-workload-build`, 빌드 결과 `/home/persist/build-results/nixos-acp-prepared`는 **빌드 전용**. 현재 v2 AMI에 포함되지 않았고 `work_tracking_verified`/`armed`도 승인하지 않음. OpenClaw/Herdr/일반 생산자 및 전체 프로세스 범위 연결은 계속 필요함.
+
 ## 프로필 복구와 부팅 의존성
 
 소스: `modules/linux/spot-profile-cache.py`, `spot-profile-cache.nix`.
@@ -186,6 +199,11 @@ network → InService/종료 보호 확인 → 지정 EBS 연결 + serial/UUID �
 ```sh
 python3 modules/linux/test-spot-schedule-guard.py -v
 python3 modules/linux/test-spot-profile-cache.py -v
+python3 modules/linux/test-spot-work.py -v
+python3 modules/linux/test-spot-acp.py -v
+# root Linux sandbox에서 실행 (Mac에서는 skip됨):
+python3 modules/linux/test-spot-work-linux.py -v
+python3 modules/linux/test-spot-acp-linux.py -v
 nix-instantiate --parse modules/linux/spot-schedule-guard.nix
 nix-instantiate --parse modules/linux/spot-profile-cache.nix
 nix-instantiate --parse modules/linux/spot-home-volume.nix

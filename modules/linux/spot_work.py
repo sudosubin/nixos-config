@@ -63,7 +63,7 @@ class Protocol:
     def initialize(self):
         if os.geteuid() != self.root_uid:
             raise PermissionError('only root initializes work admission')
-        for path, mode in [(self.runtime, 0o755), (self.leases, 0o1733)]:
+        for path, mode in [(self.runtime, 0o755), (self.leases, 0o1733), (self.runtime / 'participants', 0o1733)]:
             path.mkdir(mode=mode, exist_ok=True)
             info = path.lstat()
             if not stat.S_ISDIR(info.st_mode) or info.st_uid != self.root_uid:
@@ -178,6 +178,14 @@ class Protocol:
                     raise ValueError('unknown lease kind')
             except (OSError, ValueError, KeyError, TypeError):
                 blocked.append({'id': path.name, 'reason': 'invalid_lease_unknown'})
+        # A participant record alone never grants authority to exempt a worker.
+        # Until the workload coordinator verifies its live PID/protocol/fence,
+        # even an apparent idle record remains unverified (fail closed).
+        try:
+            for path in (self.runtime / 'participants').iterdir():
+                blocked.append({'id': path.name, 'reason': 'participant_unverified'})
+        except OSError:
+            blocked.append({'id': 'participants', 'reason': 'participant_registry_unknown'})
         return blocked
 
     def blockers(self, now=None):
