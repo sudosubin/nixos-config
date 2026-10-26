@@ -8,6 +8,11 @@
 }:
 let
   cfg = config.services.spotScheduleGuard;
+  sources = pkgs.runCommand "spot-schedule-sources" { } ''
+    mkdir -p "$out"
+    cp ${./spot-schedule-guard.py} "$out/spot-schedule-guard.py"
+    cp ${./spot_work.py} "$out/spot_work.py"
+  '';
   guard = pkgs.writeShellApplication {
     name = "spot-schedule-guard";
     runtimeInputs = with pkgs; [
@@ -17,7 +22,7 @@ let
       util-linux
     ];
     text = ''
-      exec ${pkgs.python3}/bin/python3 ${./spot-schedule-guard.py} "$@"
+      exec ${pkgs.python3}/bin/python3 ${sources}/spot-schedule-guard.py "$@"
     '';
   };
   settings = {
@@ -30,6 +35,7 @@ let
     home_uuid = cfg.homeUUID;
     home_volume = cfg.homeVolume;
     uid = 1001;
+    gid = 100;
     manifest = "/home/persist/manifests/active.json";
   }
   // lib.optionalAttrs config.services.spotProfileCache.enable {
@@ -66,16 +72,17 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
+    services.spotWork.enable = true;
     environment.systemPackages = [ guard ];
     environment.etc."spot-schedule-guard.json".text = builtins.toJSON settings;
-    systemd.tmpfiles.rules = [
-      "d /run/spot-schedule-guard 0755 root root -"
-      "d /run/spot-schedule-guard/leases 1733 root root -"
-    ];
     systemd.services.spot-scale-in-protection-ready = {
       description = "Confirm protected InService membership before attaching production data";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network-online.target" ];
+      requires = [ "spot-work-admission-ready.service" ];
+      after = [
+        "network-online.target"
+        "spot-work-admission-ready.service"
+      ];
       wants = [ "network-online.target" ];
       before = [ "attach-home-volume.service" ];
       serviceConfig = {
@@ -88,7 +95,11 @@ in
     };
     systemd.services.spot-schedule-guard = {
       description = "Preserve ASG scale-in protection unless termination is verified safe";
-      after = [ "network-online.target" ];
+      requires = [ "spot-work-admission-ready.service" ];
+      after = [
+        "network-online.target"
+        "spot-work-admission-ready.service"
+      ];
       wants = [ "network-online.target" ];
       serviceConfig = {
         Type = "oneshot";

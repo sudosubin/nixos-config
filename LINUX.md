@@ -10,7 +10,7 @@
 - native 예약 3개 등록: 평일 16:30 / 주말 10:30 시작, 익일 02:00 scale-in 요청.
 - 신규/현재 인스턴스의 scale-in protection 활성화.
 - 운영 EC2에는 **armed=false 컴파일된 Nix 관찰 가드**를 runtime unit으로 설치.
-- 60개 오프라인 테스트와 Nix 평가 통과. 새 암호화 32 GiB 루트를 빈 파일시스템에 설치하고 **v2 AMI `ami-0d44956a8229b0dad`의 UEFI/SSM 실제 격리 부팅**과 탑재된 수정 코드의 SHA256 일치를 확인함. 운영 시스템 switch/boot 기본값/AMI 전환은 하지 않음. 운영 암호화 홈 전환·실제 작업 추적·백업 보존·최종 종료/깨우기 검증은 아직 필요함.
+- 102개 오프라인 테스트, root Linux에서 실제 UID 전환/프로세스 경합 테스트 4개 및 Nix 평가 통과. 새 암호화 32 GiB 루트를 빈 파일시스템에 설치하고 **v2 AMI `ami-0d44956a8229b0dad`의 UEFI/SSM 실제 격리 부팅**과 탑재된 수정 코드의 SHA256 일치를 확인함. 운영 시스템 switch/boot 기본값/AMI 전환은 하지 않음. 운영 암호화 홈 전환·실제 작업 추적·백업 보존·최종 종료/깨우기 검증은 아직 필요함.
 - 새 프로필 복구 모듈로 현재 closure 1,294개를 별도 빈 Nix 스토어에 복원하여 모든 본문 해시·서명을 검증했고 임시 스토어도 정리함.
 - 프로필 변경 path 감시와 5분 보완 timer를 runtime 설치하여 실제 자동 캐시 갱신을 확인함.
 - 새 AMI의 InService/scale-in protection 게이트를 격리 ASG에서 실제 통과시킴. 홈이 없을 때 SSM만 접근 가능하고 사용자/HM/Docker/EIP가 비활성인 것도 확인함. 테스트 역할의 운영 홈 연결/EIP 연계 거부를 실제 dry-run으로 검증함.
@@ -120,6 +120,27 @@ sudo python3 -m json.tool /run/spot-schedule-guard/status.json
 - AWS API/상태 판정 실패
 
 01:45 알림은 NixOS 모듈의 TTY/journal notice이며 외부 유료 알림 채널을 사용하지 않습니다. 가드가 사용자 작업을 강제로 끝내게 하지 않습니다. Spot 회수나 건강 검사 교체는 이 보호로 막을 수 없으므로 작업 상태는 영구 홈에 저장해야 합니다.
+
+## 작업 등록·수동 연장과 종료 admission (2026-10-27 후속)
+
+소스: `spot_work.py`, `spot-work.nix`, `test-spot-work.py`, `test-spot-work-linux.py`.
+
+현재 운영 OS에는 **새 관찰 가드와 admission 초기화만 runtime 배포**했으며 앱·SSM·Docker 재시작/OS switch는 하지 않음. `/run/spot-work`는 검증된 Nix 패키지로 가는 임시 실행 경로이고, 새 이미지 배포 후에는 `spot-work`가 PATH에 제공됨. 현재 v2 AMI에는 이 후속 변경이 아직 포함되지 않음.
+
+```sh
+/run/spot-work run -- your-command arg1
+/run/spot-work extend --seconds 7200
+/run/spot-work cancel manual-<returned-id>
+sudo /run/spot-work status
+```
+
+- 작업 lease를 만든 후에만 명령을 시작하며 명령 인수/프롬프트는 기록하지 않음. 메인 명령이 종료되어도 background/double-fork/setsid 자손이 남으면 Linux subreaper가 작업 lease를 유지함.
+- wrapper가 죽거나 heartbeat가 낡아도 lease는 유휴 판정으로 만료되지 않음. 불명확한 작업은 계속 보류하며 일반 연장 취소 명령으로 작업 lease를 제거하지 못함.
+- 종료 준비와 작업 시작은 root 소유 admission lock으로 경합을 제어. 준비 후 새 작업은 실행하지 않으며, 마지막 release 이전에 승인된 수동 연장은 종료를 취소함. release 중/이후의 늦은 요청은 성공했다고 응답하지 않음.
+- 서비스 중지 전/후에 안전 조건을 재검사함. rollback은 종료 보호 재확인 → 홈/앱 복구 성공 후에만 admission을 다시 열며, 이미 release한 뒤에는 로깅 실패로 앱을 다시 열지 않음.
+- GC/optimise/Docker prune는 admission 조건을 통과해야 시작. 이미 실행 중인 maintenance도 queue 유무와 별개로 가드를 차단함.
+- 실제 Linux UID 1001 작업·double-fork 자손·강제 종료된 테스트 wrapper의 stale lease·수동 연장 경합을 **별도 `/run` sandbox에서 검증**했으며 해당 sandbox는 삭제함. 운영자의 짧은 테스트 연장도 관찰 가드가 인식하고 테스트 lease만 제거했음.
+- **아직 모든 기존 작업이 이 wrapper를 쓰는 것은 아님.** OpenClaw/Herdr/Kiro의 실제 admission/활동 상태, 전체 프로세스 소유권 및 일반 작업 생산자 연결은 남아 있고 `work_tracking_verified`는 승인하지 않음. lease가 없다는 이유만으로 전체 서버를 유휴라 판단하지 않음.
 
 ## 프로필 복구와 부팅 의존성
 

@@ -17,6 +17,7 @@
     # Persistent /home volume + EIP re-attach for the Spot + ASG deployment.
     ./spot-home-volume.nix
     ./spot-schedule-guard.nix
+    ./spot-work.nix
     ./spot-profile-cache.nix
   ];
 

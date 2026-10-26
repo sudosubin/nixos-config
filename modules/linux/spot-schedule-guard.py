@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, time, timezone
 import fcntl
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -22,6 +23,22 @@ KST = ZoneInfo("Asia/Seoul")
 RUNTIME = Path("/run/spot-schedule-guard")
 WORKERS = {"kiro-cli", "kiro-cli-chat", "bun", "nix", "nix-build", "cargo", "rustc", "java", ".agent-browser-"}
 REQUIRED = ("replacement_verified", "closure_restore_verified", "work_tracking_verified", "backup_restore_verified")
+_work_spec = importlib.util.spec_from_file_location("spot_work", Path(__file__).with_name("spot_work.py"))
+work = importlib.util.module_from_spec(_work_spec)
+_work_spec.loader.exec_module(work)
+
+
+def work_protocol(config):
+    return work.Protocol(RUNTIME, uid=config["uid"], gid=config.get("gid", 100))
+
+
+def maintenance_running():
+    units = ("nix-gc.service", "nix-optimise.service", "docker-prune.service")
+    jobs = command("systemctl", "list-jobs", "--no-pager", "--no-legend")
+    states = command("systemctl", "show", *units, "--property=ActiveState", "--value").split()
+    if len(states) != len(units):
+        raise ValueError("maintenance state unknown")
+    return any(unit in jobs for unit in units) or any(state != "inactive" for state in states)
 
 
 def running_window(now):
@@ -85,26 +102,13 @@ def probe(config, now):
                 workers.append({"pid": int(proc.name), "name": name})
         except OSError:
             continue
-    leases = []
-    for path in (RUNTIME / "leases").iterdir():
-        try:
-            fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
-            with os.fdopen(fd) as stream:
-                info = os.fstat(stream.fileno())
-                if not stat.S_ISREG(info.st_mode) or info.st_uid not in (0, config["uid"]) or info.st_size > 4096:
-                    raise ValueError("invalid lease")
-                lease = json.load(stream)
-            if float(lease["expires_at"]) > now.timestamp():
-                leases.append(path.name)
-        except (OSError, ValueError, KeyError, TypeError):
-            leases.append("invalid_lease")
-    jobs = command("systemctl", "list-jobs", "--no-pager", "--no-legend")
+    leases = work_protocol(config).blockers(now.timestamp())
     return {
         "mounted": mounted, "uuid": uuid, "manifest": manifest, "profile_cache": cache,
         "system": os.path.realpath("/run/current-system"),
         "profile": os.path.realpath("/home/sudosubin/.nix-profile"),
         "workers": workers, "leases": leases,
-        "maintenance": any(x in jobs for x in ("nix-gc", "nix-optimise", "docker-prune")),
+        "maintenance": maintenance_running(),
     }
 
 
@@ -195,16 +199,38 @@ def status(data):
     tmp.replace(RUNTIME / "status.json")
 
 
+def drain_recheck(config):
+    """Recheck the whole mounted-home predicate AFTER new job admission closes."""
+    now = datetime.now(timezone.utc)
+    group = group_state(config)
+    node = probe(config, now)
+    volume = aws(config, "ec2", "describe-volumes", "--volume-ids", config["home_volume"])["Volumes"][0]
+    blocked = reasons(config, now, group, node, sessions(config), volume)
+    # The cadence controls starting a drain, not how long a valid drain may run.
+    blocked = [reason for reason in blocked if reason != "waiting_15_minute_recheck"]
+    if blocked:
+        raise RuntimeError("shutdown recheck blocked: " + ",".join(blocked))
+
+
+def shutdown_request_current(config):
+    if running_window(datetime.now(timezone.utc)) or group_state(config)["DesiredCapacity"] != 0 or sessions(config):
+        raise RuntimeError("shutdown superseded")
+
+
 def drain(config):
     """Only reachable after explicit arming, verified replacement, and idle checks."""
-    (RUNTIME / "draining").touch()
+    protocol = work_protocol(config)
+    protocol.seal()
+    services_stopped = False
+    released = False
     try:
-        # A new native start action supersedes any old night-time shutdown.
-        if running_window(datetime.now(timezone.utc)) or group_state(config)["DesiredCapacity"] != 0 or sessions(config):
-            raise RuntimeError("shutdown superseded")
+        shutdown_request_current(config)
+        drain_recheck(config)
+        # Mark before issuing stop: a timed-out client does not prove no service
+        # was stopped. Rollback must restore any partial transition as well.
+        services_stopped = True
         command("systemctl", "stop", "user@%d.service" % config["uid"], "docker.service", timeout=60)
-        if sessions(config):
-            raise RuntimeError("new session while draining")
+        drain_recheck(config)
         command("systemctl", "stop", "home.mount", timeout=40)
         check = subprocess.run(["findmnt", "--mountpoint", "/home"], capture_output=True, timeout=5)
         if check.returncode != 1:
@@ -213,16 +239,24 @@ def drain(config):
         snapshot = aws(config, "ec2", "create-snapshot", "--volume-id", config["home_volume"], "--description", "Cold persistent home before scheduled ASG scale-in", "--tag-specifications", json.dumps([{"ResourceType":"snapshot","Tags":[{"Key":"ManagedBy","Value":"nixos-spot-schedule"},{"Key":"Purpose","Value":"daily-home"},{"Key":"Protected","Value":"false"}]}]))
         if not snapshot.get("Encrypted"):
             raise RuntimeError("snapshot encryption not verified")
-        if running_window(datetime.now(timezone.utc)) or group_state(config)["DesiredCapacity"] != 0 or sessions(config):
-            raise RuntimeError("shutdown superseded after snapshot")
-        # From this point ASG owns termination. Never call EC2 Stop/Terminate.
-        protection(config, False)
+        with protocol.commit():
+            shutdown_request_current(config)
+            # No extension acknowledged before this lock can be missed. Never
+            # call EC2 Stop/Terminate; ASG owns the irreversible transition.
+            protection(config, False)
+            released = True
         status({"state":"scale_in_released","snapshot_id":snapshot["SnapshotId"]})
     except Exception:
+        if released:
+            raise  # Never reopen admission after confirmed release.
         protection(config, True)
-        subprocess.run(["systemctl", "start", "home.mount"], check=False, timeout=60)
-        subprocess.run(["systemctl", "start", "docker.service", "user@%d.service" % config["uid"]], check=False, timeout=60)
-        (RUNTIME / "draining").unlink(missing_ok=True)
+        group = group_state(config)
+        if not any(i["InstanceId"] == config["instance_id"] and i.get("ProtectedFromScaleIn") is True for i in group["Instances"]):
+            raise RuntimeError("rollback protection unconfirmed; admission remains closed")
+        if services_stopped:
+            subprocess.run(["systemctl", "start", "home.mount"], check=True, timeout=60)
+            subprocess.run(["systemctl", "start", "docker.service", "user@%d.service" % config["uid"]], check=True, timeout=60)
+        protocol.unseal()
         raise
 
 

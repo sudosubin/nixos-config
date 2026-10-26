@@ -153,7 +153,7 @@ class SafetyTests(unittest.TestCase):
 
     def test_drain_cancels_before_stopping_services_if_schedule_resumes(self):
         self.config["uid"] = 1001
-        with patch.object(guard, "running_window", return_value=True), patch.object(guard, "protection") as protection, patch.object(guard, "command") as command, patch.object(guard, "RUNTIME") as runtime, patch.object(guard.subprocess, "run"):
+        with patch.object(guard, "work_protocol"), patch.object(guard, "group_state", return_value={"Instances":[{"InstanceId":"i-test","ProtectedFromScaleIn":True}]}), patch.object(guard, "running_window", return_value=True), patch.object(guard, "protection") as protection, patch.object(guard, "command") as command, patch.object(guard, "RUNTIME") as runtime, patch.object(guard.subprocess, "run"):
             with self.assertRaises(RuntimeError):
                 guard.drain(self.config)
             command.assert_not_called()
@@ -205,8 +205,8 @@ class FailureTests(unittest.TestCase):
 
     def test_snapshot_failure_restores_services_and_keeps_protection(self):
         from types import SimpleNamespace
-        cfg = {"uid":1001,"home_volume":"vol-test"}
-        with patch.object(guard, "RUNTIME"), patch.object(guard, "running_window", return_value=False), patch.object(guard, "group_state", return_value={"DesiredCapacity":0}), patch.object(guard, "sessions", return_value=[]), patch.object(guard, "command"), patch.object(guard.subprocess, "run", return_value=SimpleNamespace(returncode=1)) as run, patch.object(guard, "aws", side_effect=RuntimeError("snapshot failed")), patch.object(guard, "protection") as protection:
+        cfg = {"uid":1001,"home_volume":"vol-test","instance_id":"i-test"}
+        with patch.object(guard, "work_protocol"), patch.object(guard, "drain_recheck"), patch.object(guard, "RUNTIME"), patch.object(guard, "running_window", return_value=False), patch.object(guard, "group_state", return_value={"DesiredCapacity":0,"Instances":[{"InstanceId":"i-test","ProtectedFromScaleIn":True}]}), patch.object(guard, "sessions", return_value=[]), patch.object(guard, "command"), patch.object(guard.subprocess, "run", return_value=SimpleNamespace(returncode=1)) as run, patch.object(guard, "aws", side_effect=RuntimeError("snapshot failed")), patch.object(guard, "protection") as protection:
             with self.assertRaises(RuntimeError):
                 guard.drain(cfg)
             protection.assert_called_once_with(cfg, True)
@@ -219,6 +219,98 @@ class FailureTests(unittest.TestCase):
             with self.subTest(value=value):
                 case.config["armed"] = value
                 self.assertIn("observation_mode", case.reasons())
+
+
+class AdmissionDrainTests(unittest.TestCase):
+    def setUp(self):
+        import os,tempfile
+        from contextlib import ExitStack
+        from types import SimpleNamespace
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.protocol=guard.work.Protocol(Path(self.temp.name)/'runtime',uid=os.geteuid(),gid=os.getegid(),root_uid=os.geteuid(),boot_id='test')
+        self.protocol.initialize()
+        self.cfg={'uid':1001,'instance_id':'i-test','home_volume':'vol-test'}
+        self.group={'DesiredCapacity':0,'Instances':[{'InstanceId':'i-test','ProtectedFromScaleIn':True}]}
+        self.stack=ExitStack();self.addCleanup(self.stack.close)
+        def mock(name,**kwargs):return self.stack.enter_context(patch.object(guard,name,**kwargs))
+        mock('work_protocol',return_value=self.protocol);mock('running_window',return_value=False)
+        self.group_mock=mock('group_state',return_value=self.group);mock('sessions',return_value=[])
+        self.recheck=mock('drain_recheck');self.command=mock('command')
+        self.run=self.stack.enter_context(patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=1)))
+        self.aws=mock('aws',return_value={'Encrypted':True,'SnapshotId':'snap-test'})
+        self.protection=mock('protection');self.status=mock('status')
+
+    def test_extension_after_snapshot_cancels_before_release(self):
+        def snapshot(*args):
+            self.protocol.create('manual',100)
+            return {'Encrypted':True,'SnapshotId':'snap-test'}
+        self.aws.side_effect=snapshot
+        with self.assertRaises(RuntimeError):guard.drain(self.cfg)
+        self.protection.assert_called_once_with(self.cfg,True)
+        self.assertEqual(self.protocol.state(),'open')
+        self.assertTrue(self.protocol.blockers())
+
+    def test_post_fence_preflight_failure_never_stops_services(self):
+        self.recheck.side_effect=RuntimeError('new work')
+        with self.assertRaises(RuntimeError):guard.drain(self.cfg)
+        self.command.assert_not_called();self.run.assert_not_called()
+        self.assertEqual(self.protocol.state(),'open')
+
+    def test_post_stop_recheck_failure_restores_services(self):
+        self.recheck.side_effect=[None,RuntimeError('new session')]
+        with self.assertRaises(RuntimeError):guard.drain(self.cfg)
+        self.aws.assert_not_called();self.assertEqual(self.run.call_count,2)
+        self.assertEqual(self.protocol.state(),'open')
+
+    def test_success_keeps_admission_closed_and_releases_only_last(self):
+        guard.drain(self.cfg)
+        self.protection.assert_called_once_with(self.cfg,False)
+        self.assertEqual(self.protocol.state(),'released')
+        with self.assertRaises(RuntimeError):self.protocol.create('manual',100)
+
+    def test_release_timeout_reprotects_before_reopening(self):
+        self.protection.side_effect=[RuntimeError('AWS timeout'),None]
+        with self.assertRaises(RuntimeError):guard.drain(self.cfg)
+        self.assertEqual([c.args[1] for c in self.protection.call_args_list],[False,True])
+        self.assertEqual(self.protocol.state(),'open')
+
+    def test_unconfirmed_reprotection_never_reopens_or_restarts(self):
+        self.protection.side_effect=[RuntimeError('AWS timeout'),None]
+        self.group_mock.return_value={'DesiredCapacity':0,'Instances':[{'InstanceId':'i-test','ProtectedFromScaleIn':False}]}
+        with self.assertRaises(RuntimeError):guard.drain(self.cfg)
+        self.assertEqual(self.protocol.state(),'releasing')
+        self.assertEqual(self.run.call_count,1)  # findmnt, not service restarts
+
+    def test_failed_rollback_mount_keeps_admission_closed(self):
+        import subprocess
+        from types import SimpleNamespace
+        self.aws.side_effect=RuntimeError('snapshot failed')
+        self.run.side_effect=[SimpleNamespace(returncode=1),subprocess.CalledProcessError(1,['mount'])]
+        with self.assertRaises(subprocess.CalledProcessError):guard.drain(self.cfg)
+        self.assertEqual(self.protocol.state(),'draining')
+
+    def test_status_failure_after_release_cannot_admit_new_work(self):
+        self.status.side_effect=OSError('log full')
+        with self.assertRaises(OSError):guard.drain(self.cfg)
+        self.protection.assert_called_once_with(self.cfg,False)
+        self.assertEqual(self.protocol.state(),'released')
+        self.assertEqual(self.run.call_count,1)
+
+
+class MaintenanceTests(unittest.TestCase):
+    def test_running_or_failed_maintenance_blocks_even_without_queued_job(self):
+        for states in ['active inactive inactive','inactive failed inactive','activating inactive inactive']:
+            with self.subTest(states=states),patch.object(guard,'command',side_effect=['',states]):
+                self.assertTrue(guard.maintenance_running())
+
+    def test_unknown_maintenance_is_not_idle(self):
+        with patch.object(guard,'command',side_effect=['','inactive']),self.assertRaises(ValueError):guard.maintenance_running()
+
+    def test_queued_maintenance_blocks(self):
+        with patch.object(guard,'command',side_effect=['12 nix-gc.service start waiting','inactive inactive inactive']):self.assertTrue(guard.maintenance_running())
+
+    def test_all_inactive_and_no_queue_is_allowed(self):
+        with patch.object(guard,'command',side_effect=['','inactive inactive inactive']):self.assertFalse(guard.maintenance_running())
 
 
 if __name__ == "__main__":
