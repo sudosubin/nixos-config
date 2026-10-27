@@ -144,16 +144,20 @@ sudo /run/spot-work status
 
 ## Kiro ACP 요청 경계 (후속 준비, 운영 비활성)
 
-소스: `spot_acp.py`, `spot-acp.nix`, `test-spot-acp.py`, `test-spot-acp-linux.py`.
+소스: `spot_acp.py`, `spot-acp.nix`, `test-spot-acp.py`, `test-spot-acp-linux.py`, `verify-spot-kiro-native.py`.
 
 - 실제 실행 중인 Kiro 2.10.0의 hook 스키마와 ACP/Bun 코드를 확인함. `UserPromptSubmit` 실패는 프롬프트 제출을 차단하지 못하므로 종료 admission으로 사용하지 않음.
 - ACP 요청을 backend에 전달하기 **전에** 기존 admission lock 아래 작업 lease를 게시함. fence 뒤 요청은 명시적인 JSON-RPC 오류로 거절하며 backend에 전달하지 않음. 취소 알림 자체는 작업 완료로 간주하지 않음.
 - `session/prompt`는 알려진 최종 `stopReason` 응답과 출력 전달까지 확인해야 lease를 해제함. 도구 승인 응답의 전달도 대기함. ACK만 반환하는 비동기 확장, 오류, 불명확한 메시지, 낡은 상태는 유휴가 아님.
 - frontend EOF/출력 단절/잘못된 늦은 입력 때문에 진행 중인 backend 작업을 중단하지 않음. 실제 UID 1001 stdio sandbox에서 작업 보존과 fence, 분할 UTF-8, 상태 파일의 프롬프트 비기록을 검증함.
 - ACP 단계 당시 ARM 회귀 **136개 단위 테스트 + 11개 실제 Linux 테스트 = 147개** 통과. 실제 native Kiro의 ACP protocol 1 초기화 및 fence 뒤 요청 거절도 network namespace에서 확인했으며 실제 세션/모델 요청은 만들지 않음.
-- 준비된 Nix entry를 실제 Bun으로 검증했지만 **native launcher가 해당 override를 사용해 실제 vendor TUI를 여는 경로와 실제 모델 turn 완료는 아직 검증 전**. 단순 fake TUI 검증을 전체 앱 검증으로 확대하지 않음.
+- 후속 검증에서 **실제 native outer CLI → native chat launcher → vendor Bun/TUI → immutable Nix admission proxy → 실제 native ACP backend** 경로를 확인함. backend의 모델 스트림만 vendor `KIRO_MOCK_CHAT_RESPONSE`로 대체하고 비기능 fixture API key만 사용함. 개인 홈/복구 파일/host 사용자 socket을 숨긴 private PID/mount/network namespace, 빈 홈, 도구/Hook/MCP 없는 agent, UID1001/NoNewPrivileges에서 실행하며 외부 모델·실제 인증·운영 앱은 쓰지 않음. **실제 provider/model/tool/subagent 완료나 전체 작업 추적의 증거는 아님.**
+- native test-entry 경로는 일반 bundled 경로와 달리 PATH의 `bun`을 사용한다는 실제 ENOENT를 찾아 수정함. 준비된 명시적 `spot-kiro [chat options]`만 vendor runtime PATH와 entry 환경을 설정하고 native CLI를 그대로 실행함. 전역 `KIRO_TEST_TUI_JS_PATH`를 주입하지 않으며 legacy/v3/noninteractive 우회, runtime 부재, 이미 닫힌 admission은 fallback 없이 거절함. 기존 plain native launcher는 검증된 경로로 자동 승격하지 않음.
+- 실제 TUI boot의 readonly settings/session-list RPC와 제한된 metadata schema를 확인함. 비어 있지 않은 subagent/pending-stage/tool/MCP inventory와 새 schema는 여전히 unknown. metadata/metric은 idle 권한이 아니며 기존 작업 lease를 해제하지 않음. 거절 횟수만 기록하고 프롬프트·세션/RPC ID는 기록하지 않음.
+- 실제 PTY에서 먼저 승인된 요청을 유지한 채 fence 이후 busy steering을 거절하고, 원래 native mock turn의 최종 응답/화면 출력까지 보존함. 이어 idle 상태의 새 prompt도 거절함. busy UI가 wire 오류를 `Failed to queue message`로 감추므로 **실제 UI 오류 + 전달 전 admission 거절 counter + 기존 요청 custody + 후속 모델 출력 부재**를 함께 검사함. busy는 자기 canary backend를 일시 정지한 wire-inflight 조건이며 실제 모델 지연으로 표현하지 않음.
+- 최신 ARM 회귀 **221개 단위 + 17개 root Linux = 238개**, 전부 실행/skip 없음. 새 Linux 3개는 실제 native ACP, 실제 native/vendor TUI, 컴파일된 launcher의 거절 경로임. 실제 vendor TUI의 detached ACP process group도 namespace 안에서 식별/정리하며 생산 프로세스를 신호하거나 재시작하지 않음.
 - `services.spotAcp.enable`은 기본 false이며 운영 앱/환경에는 반영하지 않음. `/run/spot-schedule-guard/participants`의 레코드는 coordinator가 프로세스·프로토콜·fence 범위를 검증하기 전까지 **모두 unverified blocker**임. 기존 worker 검사를 완화하지 않음.
-- AWS 준비 소스 `/home/persist/nixos-workload-build`, 빌드 결과 `/home/persist/build-results/nixos-acp-prepared`는 **빌드 전용**. 현재 v2 AMI에 포함되지 않았고 `work_tracking_verified`/`armed`도 승인하지 않음. OpenClaw/Herdr/일반 생산자 및 전체 프로세스 범위 연결은 계속 필요함.
+- 최신 준비 소스 `/home/persist/nixos-kiro-build`, 빌드 결과 `/home/persist/build-results/nixos-kiro-prepared`는 **빌드 전용**. 이전 ACP 준비본은 역사적 증거이며 현재 v2 AMI에는 최신 통합이 없음. `work_tracking_verified`/`armed`는 승인하지 않음. open 상태의 async steering/queue, 실제 도구/MCP/subagent와 frontend crash/output custody, Herdr/일반 생산자/전체 프로세스 범위 및 중단된 coordinator 복구를 계속 검증해야 함.
 
 ## Gateway 비강제 admission·종료/복구 어댑터 (후속 준비)
 

@@ -6,6 +6,7 @@ acknowledgement, EOF, errors and missing heartbeats are not evidence of idle.
 """
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import signal
@@ -23,12 +24,50 @@ STOP_REASONS = {'end_turn', 'max_tokens', 'max_turn_requests', 'refusal', 'cance
 # semantics in the pinned Kiro/ACP contract. Unknown extensions fail closed.
 REQUEST_SCOPED = {'initialize', 'authenticate', 'session/new', 'session/load',
                   'session/list', 'session/set_mode', 'session/set_model',
-                  'session/set_config_option', '_kiro.dev/commands/options'}
+                  'session/set_config_option', '_kiro.dev/commands/options',
+                  '_kiro.dev/settings/list', '_kiro.dev/session/list'}
 CONTROL_NOTIFICATIONS = {'session/cancel', 'notifications/initialized', 'initialized', '_session/terminate'}
 WORK_UPDATES = {'agent_message_chunk', 'agent_thought_chunk', 'user_message_chunk',
                 'tool_call', 'tool_call_update', 'plan'}
 METADATA_UPDATES = {'available_commands_update', 'current_mode_update',
                     'config_option_update', 'session_info_update', 'usage_update'}
+
+
+def kiro_metadata(method, params):
+    """Pinned v2 notification shapes observed with the real native backend.
+
+    These are declarations/metrics, never idle authority. Nonempty subagent or
+    tool/MCP inventories remain unknown until their separate custody is proven.
+    Participants still independently block whole-server release.
+    """
+    if not isinstance(params, dict):
+        return False
+    if method == '_kiro.dev/subagent/list_update':
+        return (set(params) == {'subagents', 'pendingStages'}
+                and params['subagents'] == [] and params['pendingStages'] == [])
+    session = params.get('sessionId')
+    if not isinstance(session, str) or not 0 < len(session) <= 256:
+        return False
+    if method in {'_kiro.dev/mcp/governance_disabled', '_kiro.dev/webTools/governance_disabled'}:
+        return set(params) == {'sessionId', 'apiFailure'} and type(params['apiFailure']) is bool
+    if method == '_kiro.dev/commands/available':
+        return (set(params) == {'sessionId', 'commands', 'prompts', 'tools', 'mcpServers'}
+                and all(params[key] == [] for key in ('prompts', 'tools', 'mcpServers'))
+                and isinstance(params['commands'], list)
+                and all(isinstance(c, dict) and set(c) <= {'name', 'description', 'meta'}
+                        and isinstance(c.get('name'), str) and isinstance(c.get('description'), str)
+                        and ('meta' not in c or isinstance(c['meta'], dict))
+                        for c in params['commands']))
+    if method == '_kiro.dev/metadata':
+        if not {'sessionId'} < set(params) <= {'sessionId', 'contextUsagePercentage', 'turnDurationMs'}:
+            return False
+        return (('contextUsagePercentage' not in params
+                 or (type(params['contextUsagePercentage']) in (int, float)
+                     and 0 <= params['contextUsagePercentage'] <= 100
+                     and math.isfinite(params['contextUsagePercentage'])))
+                and ('turnDurationMs' not in params
+                     or (type(params['turnDurationMs']) is int and params['turnDurationMs'] >= 0)))
+    return False
 
 
 def rpc_id(value):
@@ -56,12 +95,14 @@ class Tracker:
         self.healthy = True
         self.closing = False
         self.unknown_lease = None
+        self.admission_rejections = 0
         self.reason = 'initializing'
 
     def state(self):
         # Deliberately excludes method parameters, request/session IDs and text.
         return {'initialized': self.initialized, 'healthy': self.healthy and not self.closing,
                 'active_requests': len(self.pending), 'server_requests': len(self.server_pending),
+                'admission_rejections': self.admission_rejections,
                 'reason': 'backend_output_closed' if self.closing and self.healthy else self.reason}
 
     def unknown(self, reason):
@@ -119,6 +160,10 @@ class Tracker:
             try:
                 lease = self.protocol.create('job')
             except (OSError, ValueError, RuntimeError):
+                # A count, not request contents or an idle claim. It makes
+                # masked frontend errors distinguishable from accepted work.
+                self.admission_rejections += 1
+                self.publish(self.state())
                 return False, error_response(message['id'], -32074, 'Shutdown admission closed; request not started')
             self.pending[ident] = {'method': method, 'lease': lease, 'completed': False, 'response_delivered': False}
             self.reason = 'requests_active'
@@ -172,8 +217,10 @@ class Tracker:
                     params = message.get('params')
                     update = params.get('update') if isinstance(params, dict) else None
                     kind = update.get('sessionUpdate') if isinstance(update, dict) else None
-                    if (message['method'] != 'session/update' or not isinstance(kind, str)
-                            or kind not in WORK_UPDATES | METADATA_UPDATES):
+                    if message['method'] != 'session/update':
+                        if not kiro_metadata(message['method'], params):
+                            self.unknown('unknown_backend_notification'); return
+                    elif not isinstance(kind, str) or kind not in WORK_UPDATES | METADATA_UPDATES:
                         self.unknown('unknown_backend_notification'); return
                     if kind in WORK_UPDATES and not self.pending:
                         self.unknown('unsolicited_work_update'); return

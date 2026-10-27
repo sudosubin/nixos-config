@@ -44,6 +44,7 @@ class ACPTests(unittest.TestCase):
         self.initialize();self.protocol.seal()
         forward,error=self.t.client(request(1));self.assertFalse(forward)
         self.assertEqual(error['id'],1);self.assertEqual(error['error']['code'],-32074)
+        self.assertEqual(self.t.state()['admission_rejections'],1)
         self.assertEqual(self.protocol.blockers(),[])
 
     def test_existing_request_blocks_commit_then_completes_behind_fence(self):
@@ -99,8 +100,11 @@ class ACPTests(unittest.TestCase):
         self.initialize();self.assertFalse(self.t.backend_exit(1));self.assertTrue(self.protocol.blockers())
 
     def test_request_scoped_control_completes(self):
-        self.initialize();self.t.client(request(1,'session/list'));self.t.backend(response(1,{'sessions':[]}))
-        self.assertTrue(self.t.healthy);self.assertEqual(self.protocol.blockers(),[])
+        self.initialize()
+        for index,method in enumerate(['session/list','_kiro.dev/session/list','_kiro.dev/settings/list'],1):
+            with self.subTest(method=method):
+                self.t.client(request(index,method));self.t.backend(response(index,{'sessions':[]}))
+                self.assertTrue(self.t.healthy);self.assertEqual(self.protocol.blockers(),[])
 
     def test_backend_error_stays_unknown(self):
         self.initialize();self.t.client(request(1));self.t.backend({'jsonrpc':'2.0','id':1,'error':{'code':-1,'message':'not logged or failure'}})
@@ -187,6 +191,45 @@ class ACPTests(unittest.TestCase):
     def test_unverified_participant_never_grants_idle_authority(self):
         p=self.protocol.runtime/'participants'/'acp-fixture';p.write_text('{}')
         self.assertEqual(self.protocol.blockers()[0]['reason'],'participant_unverified')
+
+    def test_real_native_empty_inventory_and_metrics_preserve_request_custody(self):
+        self.initialize();self.t.client(request(1))
+        frames=[('_kiro.dev/subagent/list_update',{'subagents':[],'pendingStages':[]}),
+                ('_kiro.dev/mcp/governance_disabled',{'sessionId':'fixture','apiFailure':True}),
+                ('_kiro.dev/webTools/governance_disabled',{'sessionId':'fixture','apiFailure':False}),
+                ('_kiro.dev/commands/available',{'sessionId':'fixture','commands':[{'name':'help','description':'declaration','meta':{}}],'prompts':[],'tools':[],'mcpServers':[]}),
+                ('_kiro.dev/metadata',{'sessionId':'fixture','contextUsagePercentage':0.0}),
+                ('_kiro.dev/metadata',{'sessionId':'fixture','turnDurationMs':5})]
+        for method,params in frames:
+            self.t.backend({'jsonrpc':'2.0','method':method,'params':params})
+            self.assertTrue(self.t.healthy);self.assertTrue(self.protocol.blockers())
+        self.t.backend(response(1,{'stopReason':'end_turn'}));self.assertEqual(self.protocol.blockers(),[])
+
+    def test_nonempty_or_pending_subagents_never_become_idle(self):
+        for params in [{'subagents':[{}],'pendingStages':[]},{'subagents':[],'pendingStages':[{}]},
+                       {'subagents':[],'pendingStages':[],'unknown':True}]:
+            with self.subTest(params=params):self.assertFalse(acp.kiro_metadata('_kiro.dev/subagent/list_update',params))
+        self.initialize();self.t.backend({'jsonrpc':'2.0','method':'_kiro.dev/subagent/list_update','params':{'subagents':[{}],'pendingStages':[]}})
+        self.t.backend({'jsonrpc':'2.0','method':'_kiro.dev/subagent/list_update','params':{'subagents':[],'pendingStages':[]}})
+        self.assertFalse(self.t.healthy);self.assertTrue(self.protocol.blockers())
+
+    def test_tool_mcp_and_prompt_inventories_require_separate_tracking(self):
+        baseline={'sessionId':'fixture','commands':[],'prompts':[],'tools':[],'mcpServers':[]}
+        for key in ['prompts','tools','mcpServers']:
+            with self.subTest(key=key):self.assertFalse(acp.kiro_metadata('_kiro.dev/commands/available',{**baseline,key:[{}]}))
+        for commands in [[{}],[{'name':'help','description':'declaration','work':True}],{}]:
+            self.assertFalse(acp.kiro_metadata('_kiro.dev/commands/available',{**baseline,'commands':commands}))
+
+    def test_malformed_or_new_native_metrics_fail_closed(self):
+        for params in [None,{}, {'sessionId':'fixture'}, {'sessionId':'fixture','active':False},
+                       {'sessionId':'fixture','turnDurationMs':True}, {'sessionId':'fixture','turnDurationMs':-1},
+                       {'sessionId':'fixture','contextUsagePercentage':float('nan')},
+                       {'sessionId':'fixture','contextUsagePercentage':float('inf')},
+                       {'sessionId':'fixture','contextUsagePercentage':101},
+                       {'sessionId':'fixture','contextUsagePercentage':10**1000}]:
+            with self.subTest(params=params):self.assertFalse(acp.kiro_metadata('_kiro.dev/metadata',params))
+        self.assertFalse(acp.kiro_metadata('_kiro.dev/mcp/governance_disabled',{'sessionId':'fixture','apiFailure':1}))
+        self.assertFalse(acp.kiro_metadata('_kiro.dev/mcp/governance_disabled',{'sessionId':'fixture','apiFailure':False,'work':True}))
 
     def test_read_frame_rejects_truncation_and_oversize(self):
         for data in [b'{}',b'x'*(acp.MAX_FRAME+1)]:
