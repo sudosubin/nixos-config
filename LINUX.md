@@ -185,14 +185,14 @@ sudo /run/spot-work status
 - prepare reply 유실은 동일 request ID로 소유 lease를 복구해 resume함. commit 유실은 같은 PID/start/connection boot와 retired lifecycle을 확인한 경우에만 vendor의 idempotent handoff ACK로 해소함. 일반 `systemctl stop` fallback은 없음. held 상태의 `system.info`가 실제 vendor fence에 막힌다는 실패를 발견해, 저장된 hello boot ID를 dispatch 전에 확인하고 suspend-control RPC만 사용하도록 수정함.
 - 이미 발행한 release와 일치하는 닫힌 fence는 로깅 실패만으로 되돌리지 않음. wake/SSM/window가 supersede하면 보호를 다시 확인한 뒤 복구함. `spot-schedule-guard --recover-only`는 새 shutdown을 시작하지 않음. 이것은 off-instance wake 자체를 대체하는 명령이 아니며 cloud-only wake UX는 계속 필요함.
 - 실제 별도 Gateway에서 **controller SIGKILL 4개**(held, prepare reply 유실, commit reply 유실, committed/dead permit)를 실행해 새 controller가 durable journal만으로 복구하고 실제 새/기존 Gateway RPC와 mutation을 확인함. 기존 3개와 합쳐 Gateway Linux **7개**가 실제 실행됨. private network/mount/tmp/빈 홈/읽기 전용 vendor runtime/NoNewPrivileges를 유지하며 **AWS/EBS 관측만 주입**함. 운영 API·실제 EBS remount·OS reboot 복구나 모델 작업 보존의 증거로 확대하지 않음.
-- 최신 ARM 회귀 **272개 단위 + 21개 실제 root Linux = 293개**, 전부 실행/skip 없음. parent fsync를 위해 UID1001 runtime 디렉터리(1733)의 읽기 권한을 넓히지 않음. directory fsync는 root-private persistent journal에서만 요청하며 기존 cross-UID work/ACP/실제 TUI 사례도 다시 통과함.
+- recovery 단계 ARM 회귀 **272개 단위 + 21개 실제 root Linux = 293개**, 전부 실행/skip 없음. parent fsync를 위해 UID1001 runtime 디렉터리(1733)의 읽기 권한을 넓히지 않음. directory fsync는 root-private persistent journal에서만 요청하며 기존 cross-UID work/ACP/실제 TUI 사례도 다시 통과함.
 - 준비 소스 `/home/persist/nixos-recovery-build`, 결과 `/home/persist/build-results/nixos-recovery-prepared`는 빌드 전용임. 기존 runtime observer/운영 앱/서비스/홈/AMI/LT를 전환하지 않았고 `armed`/`work_tracking_verified`는 계속 false. 실제 boot/API/storage 중단 복구, 전체 producer/custody, final image/home 전환 및 실제 종료/깨우기 검증은 남아 있음.
 
 ## 완료된 cold 백업과 최근 성공본 3개 보존 (준비, 운영 미활성)
 
 소스: `spot_backup.py`, `spot-backup-iam.py`, `verify-spot-backup-aws.py`, `verify-spot-backup-restore.py`.
 
-- 가드는 홈을 내린 뒤 **현재 mount namespace에서** 해당 UUID의 mount가 없는지, 정확한 encrypted EBS가 현재 인스턴스에 attached/DeleteOnTermination=false인지 검사함. 다른 namespace/container/live-restore의 잔여 mount·write custody까지 확인하는 최종 cold predicate는 전체 producer 검증과 함께 아직 보강해야 함. create 응답의 pending/암호화 표시는 성공 증거가 아님. 완료 상태·소유 계정·source volume·고정 schema/set/attempt·cold 확인 tag를 다시 읽고, 마지막 release lock 안에서도 성공본을 재검사함.
+- 현재 namespace의 빈 `findmnt`만으로 cold를 승인하지 않음. 홈을 내린 뒤 아래 kernel filesystem claim을 보유하고 정확한 encrypted EBS의 단일 attachment/DeleteOnTermination=false와 source identity를 재검사함. filesystem mount custody와 전체 producer/raw-I/O write custody는 별개이며 후자는 아직 전체 작업 추적과 함께 검증해야 함. create 응답의 pending/암호화 표시는 성공 증거가 아님. 완료 상태·소유 계정·source volume·고정 schema/set/attempt·cold 확인 tag를 다시 읽고, 마지막 release lock 안에서도 성공본을 재검사함.
 - `CreateSnapshot`에는 ClientToken이 없으므로 SDK 자동 재시도를 끔. API 전 root 전용 journal에 attempt를 기록하고 응답 유실 시 동일 tag로 찾음. 불명확한 결과에서 추가 create를 반복하지 않음. 확인된 권한/요청 rate 거절과 실제 수락 여부 미상은 구별함.
 - snapshot 완료 대기에는 강제 종료 마감이 없음. 새 native 시작, 활성 SSM, 승인된 연장/작업, admission·중지 상태 변화가 있으면 protection을 유지하고 홈/서비스 복구 경로로 돌아감. journal은 `/var/lib/spot-schedule-guard/backup.json`이므로 홈이 내려가도 기록 가능함.
 - 성공한 cold/encrypted/completed 일반 백업만 최신 3개 보존. Protected=true와 AMI 참조본은 제외하고 deprecated/disabled AMI도 조회함. 삭제 직전 owner/tag/상태/AMI와 새 성공 anchor를 재확인하며 최종 보존 수까지 관찰해야 완료함. 미확인/실패 orphan은 새 성공본이 있고 24시간 지난 경우에만 정리하며 pending은 지우지 않음.
@@ -201,6 +201,19 @@ sudo /run/spot-work status
 - 최신 canary 성공본에서 새 encrypted EBS를 복원해 exact NVMe serial/UUID 확인, pinned e2fsprogs 1.47.4의 read-only fsck, private ro,noload mount와 UID1001/캐시 metadata를 검증함. 개인 파일 내용·인증을 출력하거나 앱/모델을 시작하지 않음. 테스트용 복원 EBS·6개 snapshot(보존 동작 중 삭제한 1개 포함)·AMI·role·임시 AssumeRole 허가는 정리했으며 원래 보호 백업은 건드리지 않음.
 - 최종 **217개 단위 + 14개 실제 Linux = 231개 ARM 사례를 skip 없이 실행**함. 실제 API normal path 이후 추가한 엄격한 read-only 보존/AMI 모순 검사는 단위 회귀에 포함하며, 최종 운영 ID로의 백업/복원 재검증은 여전히 필요함.
 - 준비 소스 `/home/persist/nixos-backup-build`, 빌드 결과 `/home/persist/build-results/nixos-backup-prepared`. source 기본 armed=false이며 운영 앱/홈/AMI/LT나 mutating backup IAM을 전환하지 않음. 기존 runtime observer만 계속 동작함. **실제 운영 daily 백업/보존 활성화, 최종 image/home rollout과 전체 작업 추적이 완료된 상태는 아님.**
+
+## 모든 filesystem namespace를 배제하는 kernel cold custody (준비)
+
+소스: `spot_cold.py`, `test-spot-cold.py`, `test-spot-cold-linux.py`, guard 연결.
+
+- 실행 중인 Linux 6.18.38의 block-device claim 코드를 확인하고 실제 커널에서 검증함. 정확한 EBS serial/UUID alias로 찾은 block device를 **O_RDONLY|O_EXCL|O_NOFOLLOW|O_CLOEXEC**로 열어 실제 kernel claim을 유지함. 다른 namespace, lazy-unmount의 open file/cwd, overlay upper/work가 filesystem을 참조하면 EBUSY이며 재시도·freeze·강제 unmount로 성공을 만들지 않음.
+- descriptor의 block identity/diskseq/readonly/CLOEXEC/소유 PID와 ext4 superblock UUID/clean+journal 상태를 확인함. user 파일·인증은 읽지 않으며 device readonly flag, 포맷, fsck repair, 기존 mount를 변경하지 않음. 추가 raw writable descriptor 관측도 수행하고 권한 오류/불완전한 process view는 통과시키지 않음.
+- **O_EXCL은 모든 privileged raw write를 막는 잠금이 아님.** 실제 canary에서도 O_WRONLY open 자체가 가능함을 확인하고 observer가 이를 거절하는지 검사함. io_uring/privileged raw-I/O와 모든 producer의 새 작업 admission은 별도 미완료 조건이며, 이 claim을 whole-server idle 또는 raw-write atomic fencing으로 표현하지 않음.
+- 단발 check 후 descriptor를 닫지 않음. snapshot 생성/응답 확인/cold tag/완료 polling/최종 release lock+API 재검사까지 **같은 claim을 보유**함. 실패 시 context가 먼저 descriptor를 닫은 뒤 보호/홈 복구를 수행하므로 자기 claim 때문에 rollback mount를 막지 않음. coordinator 종료 시 커널이 FD를 회수하며 exec child로 누출하지 않음.
+- 실제 private mount/network namespace에서 자기 32MiB loop disk만 포맷/사용한 **8개 Linux 사례**를 모두 실행함: remount race, 다른 namespace mount, detached open file/cwd, detached overlay, raw writer 관측, 잘못된 UUID 후 mount 복구, coordinator SIGKILL 후 claim 회수, exec child 비상속. 빈 namespace-local findmnt와 전/후 동일 mount 성공을 대조하고 skip/resource warning이 없음. 원본 EBS는 테스트 장치로 사용하지 않음.
+- 별도로 **기존 encrypted 후보 `vol-0b529abe51df1eca1`만** 임시 attach하여 실제 NVMe serial/UUID/diskseq/ext4 상태와 read-only claim을 검증하고 실제 API attachment/암호화/보호를 claim 보유 중 다시 읽음. filesystem mount/포맷/repair/user 파일 읽기/앱·모델·snapshot 생성은 없었으며 정상 detach해 다시 available임. production home switch나 운영 backup rollout 증거는 아님.
+- 최신 ARM 회귀 **293개 단위 + 29개 실제 root Linux = 322개**, 모두 실행/skip 없음. scope와 완전한 suite 결과는 `/home/persist/manifests/cold-ARM-tests-20261027.json`, kernel 8개는 `cold-kernel-tests-20261027.json`, 실제 후보 EBS는 `cold-encrypted-candidate-readonly-verification-20261027.json`에 기록함.
+- 준비 소스 `/home/persist/nixos-cold-build`, 결과 `/home/persist/build-results/nixos-cold-prepared`는 **빌드 전용**. 운영 runtime/앱/홈/AMI/LT/백업 IAM은 전환하지 않았고 `work_tracking_verified`/`armed`는 계속 false. 전체 producer/raw-I/O, 실제 boot/production backup·복구·종료/예약 wake, 최종 image/encrypted-home 전환과 로컬 도구 정리는 계속 필요함.
 
 ## 프로필 복구와 부팅 의존성
 

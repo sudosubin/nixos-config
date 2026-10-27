@@ -37,8 +37,9 @@ class DrainSandboxMixin:
                 current_owner={'boot_id':'test','pid':os.getpid(),'pid_start':1,'pid_namespace':'unit-test'})
         for name,kwargs in [('drain_transaction',{'side_effect':transaction}),
                             ('capture_services',{'side_effect':lambda cfg:{'user@%d.service'%cfg['uid']:'active','docker.service':'active'}}),
-                            ('verify_recovery_home',{}),('verify_recovery_services',{})]:
+                            ('verify_recovery_home',{}),('verify_recovery_services',{}),('backup_cold_check',{})]:
             patcher=patch.object(guard,name,**kwargs);patcher.start();self.addCleanup(patcher.stop)
+        patcher=patch.object(guard.spot_cold,'configured');patcher.start();self.addCleanup(patcher.stop)
 
 
 class ScheduleTests(unittest.TestCase):
@@ -399,6 +400,32 @@ class AdmissionDrainTests(DrainSandboxMixin, unittest.TestCase):
         with self.assertRaises(subprocess.CalledProcessError):guard.drain(self.cfg)
         self.assertEqual(self.protocol.state(),'draining')
 
+    def test_kernel_claim_is_held_through_backup_and_release(self):
+        held=[False]
+        class Claim:
+            def __enter__(self):held[0]=True;return self
+            def __exit__(self,*args):held[0]=False
+        def capture():
+            self.assertTrue(held[0]);return {'Encrypted':True,'State':'completed','SnapshotId':'snap-test'}
+        self.backup.capture.side_effect=capture
+        self.protection.side_effect=lambda cfg,value:self.assertTrue(held[0]) if value is False else None
+        with patch.object(guard.spot_cold,'configured',return_value=Claim()):guard.drain(self.cfg)
+        self.assertFalse(held[0]);self.assertEqual(self.protocol.state(),'released')
+
+    def test_failed_backup_releases_kernel_claim_before_mount_rollback(self):
+        from types import SimpleNamespace
+        held=[False]
+        class Claim:
+            def __enter__(self):held[0]=True;return self
+            def __exit__(self,*args):held[0]=False
+        self.backup.capture.side_effect=RuntimeError('test-only snapshot failure')
+        def run(args,**kwargs):
+            if args[:3]==['systemctl','start','home.mount']:self.assertFalse(held[0])
+            return SimpleNamespace(returncode=1)
+        self.run.side_effect=run
+        with patch.object(guard.spot_cold,'configured',return_value=Claim()),self.assertRaises(RuntimeError):guard.drain(self.cfg)
+        self.assertFalse(held[0]);self.assertEqual(self.protocol.state(),'open')
+
     def test_status_failure_after_release_cannot_admit_new_work(self):
         self.status.side_effect=OSError('log full')
         with self.assertRaises(OSError):guard.drain(self.cfg)
@@ -408,23 +435,38 @@ class AdmissionDrainTests(DrainSandboxMixin, unittest.TestCase):
 
 
 class ColdBackupChecks(unittest.TestCase):
+    def setUp(self):
+        from unittest.mock import Mock
+        self.claim=Mock()
+
+    def test_missing_real_kernel_claim_cannot_be_a_cold_success(self):
+        with patch.object(guard,'aws') as aws,patch.object(guard.subprocess,'run') as run,self.assertRaises(RuntimeError):
+            guard.backup_cold_check({'home_uuid':'uuid'})
+        aws.assert_not_called();run.assert_not_called()
+
+    def test_lost_kernel_claim_cannot_be_a_cold_success(self):
+        self.claim.check.side_effect=RuntimeError('claim lost')
+        with patch.object(guard,'aws') as aws,patch.object(guard.subprocess,'run') as run,self.assertRaises(RuntimeError):
+            guard.backup_cold_check({'home_uuid':'uuid'},self.claim)
+        aws.assert_not_called();run.assert_not_called()
+
     def test_any_mount_of_home_UUID_blocks_cold_claim(self):
         from types import SimpleNamespace
         with patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout=b'/elsewhere')),patch.object(guard,'aws') as aws:
-            with self.assertRaises(RuntimeError):guard.backup_cold_check({'home_uuid':'uuid'})
+            with self.assertRaises(RuntimeError):guard.backup_cold_check({'home_uuid':'uuid'},self.claim)
             aws.assert_not_called()
 
     def test_unknown_mount_query_not_unmounted(self):
         from types import SimpleNamespace
         with patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=2,stdout=b'')):
-            with self.assertRaises(RuntimeError):guard.backup_cold_check({'home_uuid':'uuid'})
+            with self.assertRaises(RuntimeError):guard.backup_cold_check({'home_uuid':'uuid'},self.claim)
 
     def test_cold_source_must_still_be_exact_protected_attachment(self):
         from types import SimpleNamespace
         cfg={'home_uuid':'uuid','home_volume':'vol-test','instance_id':'i-test'}
         for change in [{'InstanceId':'other','State':'attached','DeleteOnTermination':False},{'InstanceId':'i-test','State':'attached','DeleteOnTermination':True}]:
             with self.subTest(change=change),patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=1,stdout=b'')),patch.object(guard,'aws',return_value={'Volumes':[{'VolumeId':'vol-test','Encrypted':True,'Attachments':[change]}]}):
-                with self.assertRaises(RuntimeError):guard.backup_cold_check(cfg)
+                with self.assertRaises(RuntimeError):guard.backup_cold_check(cfg,self.claim)
 
     def test_shutdown_superseded_cancels_backup_polling(self):
         from unittest.mock import MagicMock

@@ -10,6 +10,7 @@ import argparse
 from contextlib import nullcontext
 import spot_gateway
 import spot_backup
+import spot_cold
 import spot_drain
 from datetime import datetime, time, timezone
 import fcntl
@@ -245,8 +246,12 @@ def shutdown_request_current(config):
         raise RuntimeError("shutdown superseded")
 
 
-def backup_cold_check(config):
-    # Check ALL mounts of the configured filesystem, not only /home's target.
+def backup_cold_check(config, claim=None):
+    # A namespace-local empty findmnt is not cold authority. The real block
+    # claim excludes filesystem holders in every namespace until we release it.
+    if claim is None:
+        raise RuntimeError('kernel filesystem cold custody is required')
+    claim.check()
     result = subprocess.run(['findmnt', '-rn', '-S', 'UUID='+config['home_uuid'], '-o', 'TARGET'], capture_output=True, timeout=5)
     if result.returncode != 1 or result.stdout.strip():
         raise RuntimeError('home filesystem mounted elsewhere or query unknown')
@@ -260,6 +265,7 @@ def backup_cold_check(config):
             or attachments[0].get('State') != 'attached'
             or attachments[0].get('DeleteOnTermination') is not False):
         raise RuntimeError('cold source attachment changed')
+    claim.check()  # Retain the same real claim across the API observation.
 
 
 def backup_wait_checkpoint(config, protocol, gateway):
@@ -374,11 +380,12 @@ def drain(config):
     services_stopped = False
     released = False
     gateway = None
+    cold_claim = None
     try:
         transaction.begin(capture_services(config))
         shutdown_request_current(config)
         backup = spot_backup.configured(config, lambda *args: aws(config, *args),
-            lambda: backup_cold_check(config), lambda: backup_wait_checkpoint(config, protocol, gateway))
+            lambda: backup_cold_check(config, cold_claim), lambda: backup_wait_checkpoint(config, protocol, gateway))
         backup.prepare()
         gateway = spot_gateway.configured(config, protocol, publish=transaction.gateway)
         if gateway is not None:
@@ -400,20 +407,25 @@ def drain(config):
             raise RuntimeError("home still mounted or mount query failed")
         transaction.update('home_unmounted')
         command("sync", timeout=20)
-        transaction.update('backing_up')
-        snapshot = backup.capture()
-        if snapshot.get('Encrypted') is not True or snapshot.get('State') != 'completed':
-            raise RuntimeError('cold backup completion/encryption not verified')
-        transaction.update('backup_completed', snapshot_id=snapshot['SnapshotId'])
-        with protocol.commit():
-            shutdown_request_current(config)
-            backup.successful(snapshot['SnapshotId'])
-            # No extension acknowledged before this lock can be missed. Never
-            # call EC2 Stop/Terminate; ASG owns the irreversible transition.
-            transaction.update('release_requested')
-            protection(config, False)
-            released = True
-            transaction.update('released')
+        # Hold the actual kernel claim, not a check-then-close probe. A hidden
+        # namespace/overlay/detached filesystem cannot pass or remount during
+        # capture, cold tagging, completion polling or final release checks.
+        with spot_cold.configured(config) as cold_claim:
+            transaction.update('backing_up')
+            snapshot = backup.capture()
+            if snapshot.get('Encrypted') is not True or snapshot.get('State') != 'completed':
+                raise RuntimeError('cold backup completion/encryption not verified')
+            transaction.update('backup_completed', snapshot_id=snapshot['SnapshotId'])
+            with protocol.commit():
+                shutdown_request_current(config)
+                backup.successful(snapshot['SnapshotId'])
+                backup_cold_check(config, cold_claim)
+                # No extension acknowledged before this lock can be missed.
+                # Never call EC2 Stop/Terminate; ASG owns the transition.
+                transaction.update('release_requested')
+                protection(config, False)
+                released = True
+                transaction.update('released')
         status({"state":"scale_in_released","snapshot_id":snapshot["SnapshotId"]})
     except Exception:
         if released:

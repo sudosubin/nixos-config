@@ -15,6 +15,7 @@ let
     cp ${./spot_gateway.py} "$out/spot_gateway.py"
     cp ${./spot-gateway-rpc.mjs} "$out/spot-gateway-rpc.mjs"
     cp ${./spot_backup.py} "$out/spot_backup.py"
+    cp ${./spot_cold.py} "$out/spot_cold.py"
     cp ${./spot_drain.py} "$out/spot_drain.py"
   '';
   guard = pkgs.writeShellApplication {
