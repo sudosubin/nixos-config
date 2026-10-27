@@ -101,6 +101,10 @@
       deepwiki-cli = final.callPackage ./programs/deepwiki-cli { };
       deskpad = final.callPackage ./programs/deskpad { };
       figma-agent = final.callPackage ./programs/figma-agent { };
+      firefox-addons = prev.firefox-addons // {
+        always-in-container = final.callPackage ./programs/firefox-addons/always-in-container { };
+        trancyfordesktop = final.callPackage ./programs/firefox-addons/trancyfordesktop { };
+      };
       gh-attach = final.callPackage ./programs/gh-attach { };
       git-spr = final.callPackage ./programs/git-spr { };
       grep-app-cli = final.callPackage ./programs/grep-app-cli { };

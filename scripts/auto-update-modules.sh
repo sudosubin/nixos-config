@@ -10,13 +10,15 @@ trap 'rm -f "$ROOT_DIR/default.nix" "$ROOT_DIR/shell.nix" "$LOG_FILE"' EXIT
 nixpkgs="$(REPO_ROOT="$ROOT_DIR" nix eval --raw --impure --expr '(builtins.getFlake (builtins.getEnv "REPO_ROOT")).inputs.nixpkgs.outPath')"
 export NIX_PATH="nixpkgs=$nixpkgs${NIX_PATH:+:$NIX_PATH}"
 
+firefoxAddons="$(REPO_ROOT="$ROOT_DIR" nix eval --raw --impure --expr '(builtins.getFlake (builtins.getEnv "REPO_ROOT")).inputs.firefox-addons.outPath')"
+
 cat > "$ROOT_DIR/default.nix" <<EOF
 {}:
 let
   overlay = final: prev:
     let
       localPackages = {
-        $(for dir in "$PACKAGES_DIR"/*/default.nix "$PACKAGES_DIR"/pi-extensions/*/default.nix; do
+        $(for dir in "$PACKAGES_DIR"/*/default.nix "$PACKAGES_DIR"/pi-extensions/*/default.nix "$PACKAGES_DIR"/firefox-addons/*/default.nix; do
           [ -f "$dir" ] || continue
           pkg="${dir#"$PACKAGES_DIR"/}"
           pkg="${pkg%/default.nix}"
@@ -26,6 +28,8 @@ let
       };
     in
     localPackages // {
+      # the local firefox addons are built with its buildFirefoxXpiAddon
+      inherit (import $firefoxAddons/../.. { pkgs = prev; }) firefox-addons;
       inherit (final.callPackages $ROOT_DIR/libraries/nixpkgs/build-support/swift { })
         buildSwiftPackage fetchSwiftpmDeps swiftAppBundleHook swiftpmSetupHook;
       __localUpdates = localPackages // { recurseForDerivations = true; };

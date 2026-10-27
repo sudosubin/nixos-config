@@ -4,26 +4,6 @@
   ...
 }:
 
-let
-  always-in-container = pkgs.firefox-addons.buildFirefoxXpiAddon rec {
-    pname = "always-in-container";
-    version = "1.0.7";
-    addonId = "{a1e9543e-5f73-4763-b376-04e53fd12cbd}";
-    url = "https://addons.mozilla.org/firefox/downloads/file/4032840/always_in_container-${version}.xpi";
-    sha256 = "sha256-bLxjL2P6Sd06q98MSHYRTNigtcjGwn/C2r4ANWCqKrw=";
-    meta = { };
-  };
-
-  trancyfordesktop = pkgs.firefox-addons.buildFirefoxXpiAddon rec {
-    pname = "trancyfordesktop";
-    version = "7.8.1";
-    addonId = "{29f42579-9618-4dc7-8647-eaad7cd3343e}";
-    url = "https://addons.mozilla.org/firefox/downloads/file/4727684/trancyfordesktop-${version}.xpi";
-    sha256 = "sha256-fTXVBQnmtFWy9UU3EgDkBVPjb9FzwAZuWdIY+YIunc4=";
-    meta = { };
-  };
-
-in
 {
   programs.firefox = {
     enable = true;
