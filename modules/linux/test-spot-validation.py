@@ -19,7 +19,7 @@ GROUP=LEAF+'/'+UNIT
 
 class ValidationBudgetTests(unittest.TestCase):
     def owner(self):
-        return {'schema':1,'id':IDENT,'slice':SLICE,'driver':UNIT,'boot_id':'fixture-boot'}
+        return {'schema':2,'purpose':'verify','id':IDENT,'slice':SLICE,'driver':UNIT,'boot_id':'fixture-boot'}
 
     def files(self):
         return {'/proc/self/cgroup':'0::'+GROUP+'\n','/proc/sys/kernel/random/boot_id':'fixture-boot\n',
@@ -104,7 +104,7 @@ class ValidationBudgetTests(unittest.TestCase):
     def test_fixture_cannot_select_production_slice_by_environment(self):
         with patch.dict(os.environ,{'SPOT_VALIDATION_SLICE':'system.slice'}),patch.object(validation,'current',return_value=None):
             with self.assertRaises(validation.Unsafe):validation.fixture_directives()
-        with patch.object(validation,'current',return_value={'slice':SLICE}):
+        with patch.object(validation,'current',return_value={'slice':SLICE,'purpose':'verify'}):
             data=validation.fixture_directives()
         self.assertIn('Slice='+SLICE,data);self.assertIn('OOMScoreAdjust=1000',data)
         self.assertIn('MemorySwapMax=0',data);self.assertNotIn('RuntimeMaxSec',data)
@@ -187,6 +187,28 @@ class ValidationBudgetTests(unittest.TestCase):
             files,write,leaf=self.initializer(stack,extra=True)
             with self.assertRaisesRegex(validation.Unsafe,'unknown participants'):validation.configure_slice(IDENT)
             write.assert_not_called()
+
+    def test_build_profile_is_bounded_and_cannot_authorize_test_fixtures(self):
+        self.assertEqual(validation.policy('build'),(2*1024**3,4*1024**3))
+        with patch.object(validation,'current',return_value={'slice':SLICE,'purpose':'build'}):
+            with self.assertRaises(validation.Unsafe):validation.fixture_properties()
+        with self.assertRaises(validation.Unsafe):validation.limits(str(2*1024**3),'0','1','100000 100000','1000')
+
+    def test_build_headroom_is_stricter_without_relaxing_verification(self):
+        with patch.object(Path,'read_text',return_value='MemAvailable: 3145728 kB\n'):
+            self.assertEqual(validation.memory_gate('verify'),3*1024**3)
+            with self.assertRaises(validation.Unsafe):validation.memory_gate('build')
+        with self.assertRaises(validation.Unsafe):validation.policy('unbounded')
+
+    def test_kernel_limits_must_match_the_recorded_purpose(self):
+        files=self.files();files[str(validation.CGROUP/LEAF.lstrip('/')/'memory.max')]=str(2*1024**3)
+        with patch.object(Path,'read_text',autospec=True,side_effect=lambda p:files[str(p)]), \
+                patch.object(validation,'trusted_json',return_value=self.owner()):
+            with self.assertRaises(validation.Unsafe):validation.current()
+        with patch.object(Path,'read_text',autospec=True,side_effect=lambda p:files[str(p)]), \
+                patch.object(validation,'trusted_json',return_value={**self.owner(),'purpose':'build'}):
+            budget=validation.current();self.assertEqual(budget['memory_max'],2*1024**3)
+            self.assertEqual(budget['purpose'],'build');self.assertEqual(budget['minimum_available'],4*1024**3)
 
     def test_definition_cleanup_does_not_stop_or_kill_running_tasks(self):
         with tempfile.TemporaryDirectory() as tmp:

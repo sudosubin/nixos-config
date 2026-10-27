@@ -18,6 +18,7 @@ import uuid
 
 MEMORY_MAX = 1024**3
 MIN_AVAILABLE = 2*1024**3
+POLICIES = {'verify':(MEMORY_MAX,MIN_AVAILABLE),'build':(2*1024**3,4*1024**3)}
 RUNTIME = Path('/run/spot-validation')
 UNITS = Path('/run/systemd/system')
 CGROUP = Path('/sys/fs/cgroup')
@@ -35,9 +36,14 @@ def available_memory(text):
     return int(rows[0])*1024
 
 
-def memory_gate():
+def policy(purpose):
+    if not isinstance(purpose,str) or purpose not in POLICIES:raise Unsafe('unknown resource purpose; no admission')
+    return POLICIES[purpose]
+
+
+def memory_gate(purpose='verify'):
     available=available_memory(Path('/proc/meminfo').read_text())
-    if available<MIN_AVAILABLE:raise Unsafe('insufficient memory headroom; validation deferred, not skipped or passed')
+    if available<policy(purpose)[1]:raise Unsafe('insufficient memory headroom; validation deferred, not skipped or passed')
     return available
 
 
@@ -61,8 +67,8 @@ def own_group(text):
     return ident,path,'/'+'/'.join(parts[:index+1]),unit
 
 
-def limits(memory,swap,oom_group,cpu,score):
-    if memory.strip()!=str(MEMORY_MAX) or swap.strip()!='0' or oom_group.strip()!='1' or score.strip()!='1000':
+def limits(memory,swap,oom_group,cpu,score,purpose='verify'):
+    if memory.strip()!=str(policy(purpose)[0]) or swap.strip()!='0' or oom_group.strip()!='1' or score.strip()!='1000':
         raise Unsafe('kernel validation memory/swap/OOM isolation not applied')
     fields=cpu.split()
     if (len(fields)!=2 or not all(v.isdecimal() for v in fields)
@@ -86,23 +92,24 @@ def current():
     if group is None:return None
     ident,path,slice_path,unit=group
     owner=trusted_json(RUNTIME/ident/'owner.json')
-    if (type(owner.get('schema')) is not int or owner['schema']!=1 or owner.get('id')!=ident or owner.get('slice')!='spotvalidation'+ident+'.slice'
+    if (type(owner.get('schema')) is not int or owner['schema']!=2 or owner.get('id')!=ident or owner.get('slice')!='spotvalidation'+ident+'.slice'
             or owner.get('driver')!='spot-validation-'+ident+'.service'
             or owner.get('boot_id')!=Path('/proc/sys/kernel/random/boot_id').read_text().strip()):
         raise Unsafe('validation owner identity does not match kernel cgroup')
+    purpose=owner.get('purpose');maximum,minimum=policy(purpose)
     leaf=CGROUP/slice_path.lstrip('/')
     limits((leaf/'memory.max').read_text(),(leaf/'memory.swap.max').read_text(),
-           (leaf/'memory.oom.group').read_text(),(leaf/'cpu.max').read_text(),Path('/proc/self/oom_score_adj').read_text())
+           (leaf/'memory.oom.group').read_text(),(leaf/'cpu.max').read_text(),Path('/proc/self/oom_score_adj').read_text(),purpose)
     if str(os.getpid()) not in (CGROUP/path.lstrip('/')/'cgroup.procs').read_text().split():
         raise Unsafe('current process membership not confirmed')
     return {'id':ident,'slice':owner['slice'],'driver':owner['driver'],'cgroup':path,'slice_cgroup':slice_path,
-            'memory_max':MEMORY_MAX,'swap_max':0,'oom_group':True,'oom_score_adjust':1000,'cpu_quota_max_cpus':1,
+            'purpose':purpose,'memory_max':maximum,'minimum_available':minimum,'swap_max':0,'oom_group':True,'oom_score_adjust':1000,'cpu_quota_max_cpus':1,
             'external_Nix_daemon_builds_covered':False,'production_memory_or_idle_verified':False}
 
 
 def fixture_properties():
     budget=current()
-    if budget is None:raise Unsafe('fixture must run inside the verified validation slice')
+    if budget is None or budget['purpose']!='verify':raise Unsafe('fixture requires the verification budget, never a larger build scope')
     return {'Slice':budget['slice'],'Nice':'19','OOMScoreAdjust':'1000','OOMPolicy':'stop','ProtectControlGroups':'yes',
             'MemoryMax':str(MEMORY_MAX),'MemorySwapMax':'0'}
 
@@ -136,9 +143,10 @@ def configure_slice(ident):
     if not re.fullmatch('[0-9a-f]{32}',ident):raise Unsafe('invalid resource initializer identity')
     owner=trusted_json(RUNTIME/ident/'owner.json')
     name='spotvalidation'+ident+'.slice';driver='spot-validation-'+ident+'.service'
-    if (owner.get('id')!=ident or owner.get('slice')!=name or owner.get('driver')!=driver
+    if (type(owner.get('schema')) is not int or owner['schema']!=2 or owner.get('id')!=ident or owner.get('slice')!=name or owner.get('driver')!=driver
             or owner.get('boot_id')!=Path('/proc/sys/kernel/random/boot_id').read_text().strip()):
         raise Unsafe('resource initializer owner is unknown')
+    purpose=owner.get('purpose');policy(purpose)
     actual=subprocess.run(['systemctl','show',name,'--property=ControlGroup','--value'],check=True,capture_output=True,text=True).stdout.strip()
     if actual!='/'+name:raise Unsafe('resource initializer must not touch a foreign cgroup')
     pid=subprocess.run(['systemctl','show',driver,'--property=MainPID','--value'],check=True,capture_output=True,text=True).stdout.strip()
@@ -153,13 +161,13 @@ def configure_slice(ident):
     # fresh, UUID-owned, gated scope; never the SSM/production/parent cgroup.
     (leaf/'memory.oom.group').write_text('1')
     limits((leaf/'memory.max').read_text(),(leaf/'memory.swap.max').read_text(),
-           (leaf/'memory.oom.group').read_text(),(leaf/'cpu.max').read_text(),Path('/proc/'+pid+'/oom_score_adj').read_text())
+           (leaf/'memory.oom.group').read_text(),(leaf/'cpu.max').read_text(),Path('/proc/'+pid+'/oom_score_adj').read_text(),purpose)
 
 
-def launch(argv,output):
+def launch(argv,output,purpose='verify'):
     if sys.platform!='linux' or os.geteuid()!=0:raise Unsafe('root Linux required for validation resource isolation')
     if current() is not None:raise Unsafe('nested validation launch refused')
-    memory_gate()
+    maximum,minimum=policy(purpose);memory_gate(purpose)
     output=Path(output)
     if output.exists() or output.is_symlink():raise Unsafe('choose a fresh validation output; previous evidence is never overwritten')
     parent=output.parent.lstat()
@@ -171,10 +179,10 @@ def launch(argv,output):
     ident=uuid.uuid4().hex;folder=RUNTIME/ident;folder.mkdir(mode=0o700)
     slice_name='spotvalidation'+ident+'.slice';driver='spot-validation-'+ident+'.service'
     definition=('[Unit]\nDescription=Disposable isolated verification budget\nStopWhenUnneeded=yes\n'
-                '[Slice]\nMemoryAccounting=yes\nMemoryMax='+str(MEMORY_MAX)+
+                '[Slice]\nMemoryAccounting=yes\nMemoryMax='+str(maximum)+
                 '\nMemorySwapMax=0\nCPUQuota=100%\nIOWeight=10\n').encode()
     unitfile=UNITS/slice_name;write_new(unitfile,definition)
-    owner={'schema':1,'id':ident,'slice':slice_name,'driver':driver,'created_at':time.time(),
+    owner={'schema':2,'purpose':purpose,'id':ident,'slice':slice_name,'driver':driver,'created_at':time.time(),
            'boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
            'definition_sha256':hashlib.sha256(definition).hexdigest(),'output':str(output)}
     write_new(folder/'owner.json',json.dumps(owner,sort_keys=True).encode())
@@ -193,7 +201,7 @@ def launch(argv,output):
     configure_slice(ident)
     write_new(folder/'ready',ident.encode())  # only now may the requested verification execute
     return {'verification_started':True,'all_passed':False,'run_id':ident,'unit':driver,'slice':slice_name,
-            'result':str(output),'log':str(log),'memory_max':MEMORY_MAX,'swap_max':0,'cpu_quota_max_cpus':1,
+            'result':str(output),'log':str(log),'purpose':purpose,'memory_max':maximum,'minimum_available':minimum,'swap_max':0,'cpu_quota_max_cpus':1,
             'launch_receipt_is_test_success':False,'production_rollout':False}
 
 
