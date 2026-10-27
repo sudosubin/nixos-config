@@ -204,6 +204,7 @@ def cleanup_definition():
     if hashlib.sha256(path.read_bytes()).hexdigest()!=owner['definition_sha256']:
         raise Unsafe('validation definition changed; preserve unknown state')
     path.unlink()
-    subprocess.run(['systemctl','daemon-reload'],check=True,capture_output=True,text=True)
-    # The live cgroup budget stays in force. StopWhenUnneeded/--collect dispose
-    # of this slice only after its private services exit. No running task killed.
+    # Do NOT daemon-reload here: reloading a deleted active definition drops
+    # StopWhenUnneeded (and may reset limits). Keep the in-memory policy until
+    # --collect releases its last private service; PID1 then disposes the slice.
+    # No running task is stopped and no production unit is reloaded/restarted.

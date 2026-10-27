@@ -195,7 +195,7 @@ class ValidationBudgetTests(unittest.TestCase):
             with patch.object(validation,'UNITS',units),patch.object(validation,'current',return_value={'id':IDENT,'slice':SLICE}), \
                     patch.object(validation,'trusted_json',return_value=owner),patch.object(validation.subprocess,'run') as run:
                 validation.cleanup_definition()
-            self.assertFalse(p.exists());self.assertEqual(run.call_args.args[0],['systemctl','daemon-reload'])
+            self.assertFalse(p.exists());run.assert_not_called()  # preserve the active slice policy until last service exits
 
 
 if __name__=='__main__':unittest.main()
