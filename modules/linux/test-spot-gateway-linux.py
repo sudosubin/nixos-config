@@ -77,6 +77,14 @@ class GatewayCanaryTests(unittest.TestCase):
         # This fixture exercises the core suspension protocol, not real
         # providers/tools/MCP/plugins. Do not auto-load unrelated capabilities
         # (or their native runtimes) from an otherwise empty configuration.
+        # A private mutation-only fixture uses the same pinned vendor RPC wire,
+        # not the heavyweight interactive CLI. Production's control allowlist
+        # stays unchanged; this file is removed with this exact empty fixture.
+        mutation=(Path(__file__).with_name('spot-gateway-rpc.mjs')).read_text()
+        needle="const allowed = new Set(['status', 'system.info', 'gateway.suspend.prepare',"
+        self.assertEqual(mutation.count(needle),1)
+        mutation=mutation.replace(needle,"const allowed = new Set(['sessions.patch', 'status', 'system.info', 'gateway.suspend.prepare',")
+        self.mutation=public_source/'spot-gateway-test-mutation.mjs';self.mutation.write_text(mutation);self.mutation.chmod(0o644)
         config=self.home/'openclaw.json'
         config.write_text(json.dumps({'gateway':{'mode':'local','port':18791,'bind':'loopback','auth':{'mode':'none'}},'channels':{},'plugins':{'enabled':False}}))
         os.chown(config,1001,self.user.pw_gid);config.chmod(0o600)
@@ -130,8 +138,8 @@ class GatewayCanaryTests(unittest.TestCase):
                 time.sleep(0.5)
 
     def mutate_session(self):
-        return self.rpc.namespace_command([self.node,str(self.mount/'openclaw.mjs'),'gateway','call','sessions.patch',
-            '--params',json.dumps({'key':'agent:main:spot-control-canary','label':'model-free-control-canary'}),'--json','--timeout','8000'],timeout=20)
+        return self.rpc.namespace_command([self.node,str(self.mutation),str(self.mount/'dist'),'sessions.patch',
+            json.dumps({'key':'agent:main:spot-control-canary','label':'model-free-control-canary'}),self.rpc.boot_id or ''],timeout=20)
 
     def interrupted_controller(self, mode):
         # Actual child death + actual vendor RPC/systemd; the AWS and EBS
