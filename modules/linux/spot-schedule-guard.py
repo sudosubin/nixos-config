@@ -32,6 +32,9 @@ REQUIRED = ("replacement_verified", "closure_restore_verified", "work_tracking_v
 _work_spec = importlib.util.spec_from_file_location("spot_work", Path(__file__).with_name("spot_work.py"))
 work = importlib.util.module_from_spec(_work_spec)
 _work_spec.loader.exec_module(work)
+_cache_spec = importlib.util.spec_from_file_location('spot_profile_cache', Path(__file__).with_name('spot-profile-cache.py'))
+profile_cache = importlib.util.module_from_spec(_cache_spec)
+_cache_spec.loader.exec_module(profile_cache)
 
 
 def work_protocol(config):
@@ -148,7 +151,10 @@ def reasons(config, now, group, node, sessions, volume):
         result.append("profile_drift")
     if config.get("profile_cache_manifest"):
         cache = node.get("profile_cache", {})
-        if (type(cache.get("schema")) is not int or cache["schema"] != 1
+        if (type(cache.get("schema")) is not int or cache["schema"] != 2
+                or cache.get('state') != 'verified'
+                or not isinstance(cache.get('inventory'),str) or not re.fullmatch(r'[0-9a-f]{32}',cache['inventory'])
+                or not isinstance(cache.get('inventory_sha256'),str) or not re.fullmatch(r'[0-9a-f]{64}',cache['inventory_sha256'])
                 or cache.get("system") != node["system"]
                 or cache.get("user_profile") != node["profile"]
                 or not isinstance(cache.get("roots"), list)
@@ -280,6 +286,20 @@ def backup_wait_checkpoint(config, protocol, gateway):
         raise RuntimeError('workload stop state changed during backup')
 
 
+def verify_profile_cache(config):
+    # The caller ALREADY holds the shared cache/drain lock. Import the same
+    # verifier directly instead of invoking a CLI that would reacquire it.
+    if not config.get('profile_cache_config') or not config.get('profile_cache_manifest'):
+        raise RuntimeError('cache payload verification is not configured')
+    settings = root_json(os.path.realpath(config['profile_cache_config']))
+    if (settings.get('manifest') != config['profile_cache_manifest']
+            or settings.get('home_uuid') != config['home_uuid']
+            or settings.get('system_profile','/run/current-system') != '/run/current-system'):
+        raise RuntimeError('cache verification identity differs from guard')
+    profile_cache.check_home(settings)
+    return profile_cache.verify(settings)
+
+
 def drain_transaction(config, protocol):
     return spot_drain.Transaction(config, protocol,
         config.get('drain_journal', '/var/lib/spot-schedule-guard/drain.json'))
@@ -382,8 +402,15 @@ def drain(config):
     gateway = None
     cold_claim = None
     try:
+        shutdown_request_current(config)
         transaction.begin(capture_services(config))
         shutdown_request_current(config)
+        # Verify the FULL generation roster after the atomic fresh seal. A
+        # completed job could otherwise add a retained generation between a
+        # pre-seal cache check and sealing, without changing the active profile.
+        verify_profile_cache(config)
+        if protocol.blockers():
+            raise RuntimeError('work or extension appeared during cache verification')
         backup = spot_backup.configured(config, lambda *args: aws(config, *args),
             lambda: backup_cold_check(config, cold_claim), lambda: backup_wait_checkpoint(config, protocol, gateway))
         backup.prepare()

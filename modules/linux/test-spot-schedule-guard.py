@@ -13,6 +13,11 @@ guard = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(guard)
 
 
+def verified_cache(node):
+    return {'schema':2,'state':'verified','inventory':'a'*32,'inventory_sha256':'b'*64,
+            'system':node['system'],'user_profile':node['profile'],'roots':[node['system'],node['profile']]}
+
+
 def at(text):
     return datetime.fromisoformat(text + "+09:00")
 
@@ -30,6 +35,7 @@ class DrainSandboxMixin:
             from unittest.mock import Mock
             if isinstance(protocol, Mock):
                 protocol.state.return_value = 'open'
+                protocol.blockers.return_value = []
                 protocol.seal.side_effect = lambda attempt: setattr(protocol.state, 'return_value', 'draining')
             counter[0] += 1
             return guard.spot_drain.Transaction(config, protocol,
@@ -37,7 +43,7 @@ class DrainSandboxMixin:
                 current_owner={'boot_id':'test','pid':os.getpid(),'pid_start':1,'pid_namespace':'unit-test'})
         for name,kwargs in [('drain_transaction',{'side_effect':transaction}),
                             ('capture_services',{'side_effect':lambda cfg:{'user@%d.service'%cfg['uid']:'active','docker.service':'active'}}),
-                            ('verify_recovery_home',{}),('verify_recovery_services',{}),('backup_cold_check',{})]:
+                            ('verify_recovery_home',{}),('verify_recovery_services',{}),('backup_cold_check',{}),('verify_profile_cache',{})]:
             patcher=patch.object(guard,name,**kwargs);patcher.start();self.addCleanup(patcher.stop)
         patcher=patch.object(guard.spot_cold,'configured');patcher.start();self.addCleanup(patcher.stop)
 
@@ -128,20 +134,20 @@ class SafetyTests(DrainSandboxMixin, unittest.TestCase):
         self.config["profile_cache_manifest"] = "cache.json"
         self.node["profile"] = "/nix/store/new-profile"
         self.assertIn("profile_cache_not_current", self.reasons())
-        self.node["profile_cache"] = {"schema":1,"system":self.node["system"],"user_profile":self.node["profile"],"roots":[self.node["system"],self.node["profile"]]}
+        self.node['profile_cache'] = verified_cache(self.node)
         self.assertEqual(self.reasons(), [])
 
     def test_cache_cannot_approve_an_unverified_system(self):
         self.config["profile_cache_manifest"] = "cache.json"
         self.node["system"] = "/nix/store/new-system"
-        self.node["profile_cache"] = {"schema":1,"system":self.node["system"],"user_profile":self.node["profile"],"roots":[self.node["system"],self.node["profile"]]}
+        self.node['profile_cache'] = verified_cache(self.node)
         self.assertIn("profile_drift", self.reasons())
 
     def test_invalid_profile_cache_schema_and_roots_block(self):
         self.config["profile_cache_manifest"] = "cache.json"
-        for change in [{"schema":True},{"schema":"1"},{"roots":[]},{"roots":None},{"system":"other"},{"user_profile":"other"}]:
+        for change in [{'schema':True},{'schema':1},{'state':'unverified'},{'inventory':'../bad'},{'inventory_sha256':'bad'},{'roots':[]},{'roots':None},{'system':'other'},{'user_profile':'other'}]:
             with self.subTest(change=change):
-                self.node["profile_cache"] = {"schema":1,"system":self.node["system"],"user_profile":self.node["profile"],"roots":[self.node["system"],self.node["profile"]],**change}
+                self.node['profile_cache'] = {**verified_cache(self.node),**change}
                 self.assertIn("profile_cache_not_current", self.reasons())
 
     def test_jobs_and_maintenance_block(self):
@@ -240,6 +246,29 @@ class GatewayDrainTests(DrainSandboxMixin, unittest.TestCase):
         self.assertIn('gateway_status_unknown',test.reasons())
         test.node['gateway']={'observable':True,'maintenance_busy':True}
         self.assertIn('gateway_maintenance_busy',test.reasons())
+
+
+class CachePreflightTests(unittest.TestCase):
+    def test_absent_verifier_config_cannot_release(self):
+        with self.assertRaisesRegex(RuntimeError,'not configured'):guard.verify_profile_cache({})
+
+    def test_wrong_cache_identity_rejected_before_reading_keys_or_payload(self):
+        config={'profile_cache_config':'/etc/fixture.json','profile_cache_manifest':'/home/cache.json','home_uuid':'expected'}
+        valid={'manifest':'/home/cache.json','home_uuid':'expected'}
+        for change in [{'manifest':'other'},{'home_uuid':'other'},{'system_profile':'/tmp/fixture'}]:
+            with self.subTest(change=change),patch.object(guard,'root_json',return_value={**valid,**change}), \
+                    patch.object(guard.profile_cache,'check_home') as home,patch.object(guard.profile_cache,'verify') as verify:
+                with self.assertRaisesRegex(RuntimeError,'identity differs'):guard.verify_profile_cache(config)
+                home.assert_not_called();verify.assert_not_called()
+
+    def test_bound_verifier_checks_home_then_full_payload(self):
+        config={'profile_cache_config':'/etc/fixture.json','profile_cache_manifest':'/home/cache.json','home_uuid':'expected'}
+        settings={'manifest':'/home/cache.json','home_uuid':'expected'};order=[]
+        with patch.object(guard,'root_json',return_value=settings), \
+                patch.object(guard.profile_cache,'check_home',side_effect=lambda cfg:order.append('home')), \
+                patch.object(guard.profile_cache,'verify',side_effect=lambda cfg:order.append('full-payload')):
+            guard.verify_profile_cache(config)
+        self.assertEqual(order,['home','full-payload'])
 
 
 class StartupTests(unittest.TestCase):
@@ -386,6 +415,35 @@ class AdmissionDrainTests(DrainSandboxMixin, unittest.TestCase):
         with self.assertRaises(RuntimeError):guard.drain(self.cfg)
         self.command.assert_not_called();self.run.assert_not_called()
         self.assertEqual(self.protocol.state(),'open');self.assertTrue((self.protocol.leases/lease['id']).exists())
+
+    def test_cache_validation_is_after_fresh_seal_and_before_any_workload_action(self):
+        def verify(config):
+            self.assertEqual(self.protocol.state(),'draining')
+            with self.assertRaises(RuntimeError):self.protocol.create('job')
+            raise RuntimeError('private fixture cache body invalid')
+        with patch.object(guard,'verify_profile_cache',side_effect=verify) as verify, \
+                patch.object(guard.spot_gateway,'configured') as gateway:
+            with self.assertRaisesRegex(RuntimeError,'cache body invalid'):guard.drain(self.cfg)
+        verify.assert_called_once();gateway.assert_not_called()
+        self.command.assert_not_called();self.run.assert_not_called();self.aws.assert_not_called()
+        self.assertEqual(self.protocol.state(),'open');self.protection.assert_called_once_with(self.cfg,True)
+
+    def test_extension_during_cache_verification_cancels_before_gateway_or_backup(self):
+        extensions=[]
+        def verify(config):extensions.append(self.protocol.create('manual',100))
+        with patch.object(guard,'verify_profile_cache',side_effect=verify), \
+                patch.object(guard.spot_gateway,'configured') as gateway, \
+                patch.object(guard.spot_backup,'configured') as backup:
+            with self.assertRaisesRegex(RuntimeError,'extension appeared'):guard.drain(self.cfg)
+        gateway.assert_not_called();backup.assert_not_called();self.command.assert_not_called();self.run.assert_not_called()
+        self.assertEqual(self.protocol.state(),'open');self.assertTrue((self.protocol.leases/extensions[0]['id']).exists())
+
+    def test_busy_fresh_seal_never_starts_cache_IO(self):
+        with patch.object(guard.work,'process_start',return_value=123):self.protocol.create('job')
+        with patch.object(guard,'verify_profile_cache') as verify:
+            with self.assertRaises(guard.work.SealBlocked):guard.drain(self.cfg)
+        verify.assert_not_called();self.command.assert_not_called();self.run.assert_not_called()
+        self.assertEqual(self.protocol.state(),'open')
 
     def test_extension_after_snapshot_cancels_before_release(self):
         def snapshot(*args):

@@ -246,7 +246,7 @@ sudo /run/spot-work status
 
 ## 프로필 복구와 부팅 의존성
 
-소스: `modules/linux/spot-profile-cache.py`, `spot-profile-cache.nix`.
+소스: `modules/linux/spot-profile-cache.py`, `spot_cache.py`, `spot-profile-cache.nix`.
 
 준비된 새 시스템의 순서:
 
@@ -263,6 +263,17 @@ network → InService/종료 보호 확인 → 지정 EBS 연결 + serial/UUID �
 - 새 루트의 GC가 복원된 프로필을 지우지 않도록 `/nix/var/nix/gcroots/spot-profile-cache`에 Nix 자체 API로 명시적인 root를 등록·갱신. 단순히 홈 심볼릭 링크 체인이 보호될 것이라고 가정하지 않음.
 - 현재 운영 OS에 설치한 timer/path는 runtime unit이다. 새 AMI로 영구 제공하기 전에는 재부팅 시 유지된다고 취급하지 않음.
 - OpenClaw의 비강제 idle admission lease 및 Herdr agent 상태 API는 실제 확인했으나, 가드의 최종 작업 판정에는 아직 연결 전. 프로세스가 있다는 이유만으로 active 작업이라고 단정하거나 그 반대로 유휴라 단정하지 않음.
+
+## 서명 캐시의 무결성·용량·복구·정리
+
+- schema 2 완료 manifest는 root 전용 immutable inventory의 SHA256과 연결됨. 서명 이름의 prefix만 보지 않고 OpenSSL Ed25519로 지정 public key의 실제 서명을 검증하며, 압축 파일의 FileHash/크기와 Nix가 압축 해제한 NAR hash를 모두 검사함. 캐시 activation script는 실행하지 않음.
+- 종료 직전 본문 검증은 공통 cache/drain lock을 보유한 채 **원자적인 fresh seal 뒤, Gateway/사용자/Docker/홈을 정지하기 전** 실행함. seal 전에 끝난 job이 active profile을 바꾸지 않고 보존 세대를 추가한 경우도 전체 roster 비교로 거절함. 검증 중 승인한 연장도 서비스 정지 전에 취소시킴.
+- 두 설정 디렉터리(`~/.local/state/nix/profiles`, `/nix/var/nix/profiles/per-user/sudosubin`)의 기본·named profile/channel alias와 모든 보존 세대를 포함함. 임의의 다른 디렉터리까지 모두 발견했다고 주장하지 않으며 향후 모든 Nix 생산자의 등록/소유권 검증은 별도 과제임. 사용자 세대 링크 자체는 삭제하지 않음.
+- 최신 완료 checkpoint 2개와 마지막 참조 후 기본 24시간 이내 객체를 보호함. legacy adoption은 정리 소유권 증거이지 영원히 남기는 profile checkpoint가 아님. 모든 남은 narinfo(다른 signer 포함)의 URL을 보호하고, 동일 store path의 이전 압축본도 객체 단위로 판단함. 모르는 파일은 보존하고 불명확한 inventory/객체는 삭제하지 않음.
+- 손상된 현재 캐시의 readiness를 먼저 unverified로 무효화한 뒤 durable intent로 원본 바이트를 격리함. 새 완료본의 전체 본문 검증 후 정확히 자기 격리 파일만 정리하며, 완료 manifest 게시 직후 controller가 죽은 경우의 후속 noop에서도 잔여 정리를 시도함. 실패한 복사를 완료본으로 게시하지 않음. 기본 8 GiB 여유와 필요한 NAR 상한/압축 overhead를 확보하지 못하면 보류함.
+- signer/public key 쌍을 확인하고 기존 캐시의 key가 없을 때 암묵적으로 새 key를 만들지 않음. public key만 없으면 root 소유의 기존 manifest 또는 보호된 signer로부터 복구할 수 있음. signer를 잃어도 public metadata가 남으면 서명된 패키지의 읽기 전용 import는 가능하지만, 다음 종료 승인은 signer 손실/불일치로 거절함. private key 바이트는 argv/환경/로그/임시 파일로 복사하지 않음.
+- 검증기는 `test-spot-cache.py`, `test-spot-profile-cache.py`, `test-spot-cache-linux.py`임. Linux 검증은 빈 홈/개인 PID·mount·network namespace/NoNewPrivileges와 별도 Nix store·fixture key를 사용하며 실제 import·GC·서명 위조 거절·손상 복구·retention을 검사함. 실제 OS boot/최종 encrypted home/AMI 전환/운영 backup·종료/wake의 증거가 아님.
+- 준비 소스 `/home/persist/nixos-cache-build`, 결과 `/home/persist/build-results/nixos-cache-prepared`와 전체 실행 결과 `/home/persist/manifests/cache-ARM-tests-20261027.json`은 운영 runtime 적용과 구별함. 기존 운영 캐시는 schema 1이며 이번 변경을 설치하지 않음. 모든 `participant_unverified`, `work_tracking_verified=false`, `armed=false`, `goal_complete=false` 제약을 유지함.
 
 ## 데이터와 이미지의 계약
 
@@ -288,6 +299,7 @@ network → InService/종료 보호 확인 → 지정 EBS 연결 + serial/UUID �
 ```sh
 python3 modules/linux/test-spot-schedule-guard.py -v
 python3 modules/linux/test-spot-profile-cache.py -v
+python3 modules/linux/test-spot-cache.py -v
 python3 modules/linux/test-spot-work.py -v
 python3 modules/linux/test-spot-acp.py -v
 python3 modules/linux/test-spot-gateway.py -v
@@ -296,6 +308,8 @@ python3 modules/linux/test-spot-backup.py -v
 python3 modules/linux/test-spot-work-linux.py -v
 python3 modules/linux/test-spot-acp-linux.py -v
 python3 modules/linux/test-spot-gateway-linux.py -v
+# root Linux 필수; skip으로 성공을 대신하지 않는 private Nix store 검증:
+python3 modules/linux/test-spot-cache-linux.py
 nix-instantiate --parse modules/linux/spot-schedule-guard.nix
 nix-instantiate --parse modules/linux/spot-profile-cache.nix
 nix-instantiate --parse modules/linux/spot-home-volume.nix

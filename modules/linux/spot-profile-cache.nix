@@ -7,15 +7,21 @@
 }:
 let
   cfg = config.services.spotProfileCache;
+  sources = pkgs.runCommand "spot-profile-cache-sources" { } ''
+    mkdir -p "$out"
+    cp ${./spot-profile-cache.py} "$out/spot-profile-cache.py"
+    cp ${./spot_cache.py} "$out/spot_cache.py"
+  '';
   tool = pkgs.writeShellApplication {
     name = "spot-profile-cache";
     runtimeInputs = [
       pkgs.nix
+      pkgs.openssl
       pkgs.util-linux
     ];
     text = ''
       export NIX_CONFIG='experimental-features = nix-command flakes'
-      exec ${pkgs.python3}/bin/python3 ${./spot-profile-cache.py} "$@"
+      exec ${pkgs.python3}/bin/python3 ${sources}/spot-profile-cache.py "$@"
     '';
   };
   settings = {
@@ -29,6 +35,13 @@ let
     manifest = "/home/persist/manifests/profile-cache.json";
     gc_roots = "/nix/var/nix/gcroots/spot-profile-cache";
     reserve_bytes = cfg.reserveBytes;
+    uid = 1001;
+    generation_directories = [
+      "/home/sudosubin/.local/state/nix/profiles"
+      "/nix/var/nix/profiles/per-user/sudosubin"
+    ];
+    keep_checkpoints = cfg.keepCheckpoints;
+    prune_grace_seconds = cfg.pruneGraceSeconds;
   };
   common = {
     requires = [ "home.mount" ];
@@ -51,6 +64,16 @@ in
 {
   options.services.spotProfileCache = {
     enable = lib.mkEnableOption "persistent signed Nix profile cache and boot restoration";
+    keepCheckpoints = lib.mkOption {
+      type = lib.types.ints.between 2 100;
+      default = 2;
+      description = "Retain verified checkpoints as well as EVERY retained user profile generation.";
+    };
+    pruneGraceSeconds = lib.mkOption {
+      type = lib.types.ints.unsigned;
+      default = 86400;
+      description = "Minimum age before inventory-attested obsolete cache objects may be pruned.";
+    };
     reserveBytes = lib.mkOption {
       type = lib.types.ints.unsigned;
       default = 8 * 1024 * 1024 * 1024;

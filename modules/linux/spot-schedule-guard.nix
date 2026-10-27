@@ -17,12 +17,16 @@ let
     cp ${./spot_backup.py} "$out/spot_backup.py"
     cp ${./spot_cold.py} "$out/spot_cold.py"
     cp ${./spot_drain.py} "$out/spot_drain.py"
+    cp ${./spot-profile-cache.py} "$out/spot-profile-cache.py"
+    cp ${./spot_cache.py} "$out/spot_cache.py"
   '';
   guard = pkgs.writeShellApplication {
     name = "spot-schedule-guard";
     runtimeInputs = with pkgs; [
       awscli2
       coreutils
+      nix
+      openssl
       systemd
       util-linux
     ];
@@ -59,6 +63,7 @@ let
   }
   // lib.optionalAttrs config.services.spotProfileCache.enable {
     profile_cache_manifest = "/home/persist/manifests/profile-cache.json";
+    profile_cache_config = "/etc/spot-profile-cache.json";
   }
   // lib.optionalAttrs config.services.spotGateway.enable {
     gateway = {

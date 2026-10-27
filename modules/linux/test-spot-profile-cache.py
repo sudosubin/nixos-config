@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 spec = importlib.util.spec_from_file_location("cache", Path(__file__).with_name("spot-profile-cache.py"))
 cache = importlib.util.module_from_spec(spec)
@@ -91,6 +91,7 @@ class ValidationTests(unittest.TestCase):
 class RestoreTests(unittest.TestCase):
     def setUp(self):
         self.config = {"cache": "/home/persist/nix-closure-cache", "public_key": "/home/persist/key"}
+        verifier=patch.object(cache,'verify_missing_cache');self.verifier=verifier.start();self.addCleanup(verifier.stop)
         roots = patch.object(cache, "register_roots")
         roots.start()
         self.addCleanup(roots.stop)
@@ -133,57 +134,61 @@ class RestoreTests(unittest.TestCase):
 
 
 class RefreshTests(unittest.TestCase):
+    """Wrapper sequencing only. Real crypto/NAR/retention tests are separate."""
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.base = Path(self.tmp.name)
-        self.config = {"cache": str(self.base), "secret_key": "secret", "manifest": str(self.base / "manifest.json"), "reserve_bytes": 8192}
-        self.row = {"path": PROFILE, "narSize": 100}
-        self.patches = [
-            patch.object(cache, "secure_directory", return_value=self.base),
-            patch.object(cache, "ensure_keys", return_value=KEY),
-            patch.object(cache, "roots", return_value=(PROFILE, [SYSTEM, PROFILE])),
-            patch.object(cache.os, "statvfs", return_value=SimpleNamespace(f_bavail=100000, f_frsize=4096)),
-            patch.object(cache, "command", side_effect=[json.dumps([self.row]), ""]),
-            patch.object(cache, "trusted_text", return_value="Sig: cache:signature\n"),
-            patch.object(cache, "register_roots"),
-            patch.object(cache.os.path, "realpath", return_value=SYSTEM),
-            patch.object(cache, "publish"),
-        ]
-        self.mocks = [p.start() for p in self.patches]
-        for p in self.patches:
-            self.addCleanup(p.stop)
+        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+        self.base=Path(self.tmp.name)
+        self.config={'cache':str(self.base),'secret_key':'secret','manifest':str(self.base/'manifest.json'),'reserve_bytes':8192}
+        self.rows=[{'path':p,'narSize':100,'narHash':'sha256:'+('0'*52)} for p in [SYSTEM,PROFILE]]
+        self.manager=Mock()
+        self.manager.previous.return_value=None;self.manager.adopt.return_value=None
+        self.manager.verify_current.side_effect=cache.spot_cache.Unsafe('not current')
+        self.manager.entry.side_effect=FileNotFoundError('private missing fixture')
+        self.manager.checkpoint.return_value={'id':'a'*32}
+        self.manager.cleanup_repairs.return_value=0;self.manager.garbage_pending.return_value=False
+        self.patches=[patch.object(cache,'secure_directory',return_value=self.base),
+                      patch.object(cache,'ensure_keys',return_value=KEY),
+                      patch.object(cache,'roots',return_value=(PROFILE,[SYSTEM,PROFILE])),
+                      patch.object(cache.os,'statvfs',return_value=SimpleNamespace(f_bavail=100000,f_frsize=4096)),
+                      patch.object(cache,'command',side_effect=[json.dumps(self.rows),'']),
+                      patch.object(cache,'register_roots'),
+                      patch.object(cache.spot_cache,'Cache',return_value=self.manager)]
+        self.mocks=[p.start() for p in self.patches]
+        for p in self.patches:self.addCleanup(p.stop)
 
-    def test_complete_signed_export_publishes(self):
-        result = cache.refresh(self.config)
-        self.assertEqual(result["paths"], 1)
-        manifest = self.mocks[-1].call_args.args[1]
-        self.assertEqual(manifest["schema"], 1)
-        self.assertEqual(manifest["user_profile"], PROFILE)
+    def test_core_verified_export_publishes(self):
+        result=cache.refresh(self.config)
+        self.assertEqual(result['paths'],2);self.assertEqual(result['inventory'],'a'*32)
+        self.manager.checkpoint.assert_called_once_with(PROFILE,[SYSTEM,PROFILE],self.rows,parent=None)
 
-    def test_low_space_never_publishes(self):
-        self.mocks[3].return_value = SimpleNamespace(f_bavail=1, f_frsize=1)
-        with self.assertRaises(RuntimeError):
-            cache.refresh(self.config)
-        self.mocks[-1].assert_not_called()
+    def test_warm_noop_reconciles_repair_left_after_published_checkpoint(self):
+        self.manager.verify_current.side_effect=None
+        self.manager.verify_current.return_value={'entries':{SYSTEM:{},PROFILE:{}}}
+        self.manager.cleanup_repairs.return_value=2
+        out=cache.refresh(self.config)
+        self.assertEqual(out['state'],'current');self.assertEqual(out['repair_files_removed'],2)
+        self.mocks[4].assert_not_called();self.manager.checkpoint.assert_not_called()
+        self.manager.cleanup_repairs.assert_called_once()
 
-    def test_copy_failure_never_publishes(self):
-        self.mocks[4].side_effect = [json.dumps([self.row]), RuntimeError("copy failed")]
-        with self.assertRaises(RuntimeError):
-            cache.refresh(self.config)
-        self.mocks[-1].assert_not_called()
+    def test_low_space_never_completes(self):
+        self.mocks[3].return_value=SimpleNamespace(f_bavail=1,f_frsize=1)
+        with self.assertRaises(RuntimeError):cache.refresh(self.config)
+        self.manager.checkpoint.assert_not_called();self.manager.invalidate.assert_called_once()
 
-    def test_missing_signature_never_publishes(self):
-        self.mocks[5].return_value = "Sig: another:signature\n"
-        with self.assertRaises(ValueError):
-            cache.refresh(self.config)
-        self.mocks[-1].assert_not_called()
+    def test_copy_failure_never_completes(self):
+        self.mocks[4].side_effect=[json.dumps(self.rows),RuntimeError('copy failed')]
+        with self.assertRaises(RuntimeError):cache.refresh(self.config)
+        self.manager.checkpoint.assert_not_called();self.manager.invalidate.assert_called()
 
-    def test_profile_change_never_publishes(self):
-        self.mocks[2].side_effect = [(PROFILE, [SYSTEM, PROFILE]), (OTHER, [SYSTEM, OTHER])]
-        with self.assertRaises(RuntimeError):
-            cache.refresh(self.config)
-        self.mocks[-1].assert_not_called()
+    def test_invalid_signature_propagates(self):
+        self.manager.checkpoint.side_effect=cache.spot_cache.Unsafe('configured signature invalid')
+        with self.assertRaises(cache.spot_cache.Unsafe):cache.refresh(self.config)
+        self.manager.cleanup_repairs.assert_not_called()
+
+    def test_profile_change_never_cleans_evidence(self):
+        self.manager.checkpoint.side_effect=RuntimeError('profile generations changed')
+        with self.assertRaises(RuntimeError):cache.refresh(self.config)
+        self.manager.cleanup_repairs.assert_not_called()
 
 
 class GCRootTests(unittest.TestCase):
