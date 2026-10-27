@@ -231,6 +231,12 @@ class ValidationBudgetTests(unittest.TestCase):
         with patch.object(validation,'current',return_value={'slice':SLICE,'purpose':'canary-build'}):
             with self.assertRaises(validation.Unsafe):validation.fixture_properties()
 
+    def test_network_access_is_only_for_attested_canary_artifact_fetches(self):
+        self.assertEqual(validation.private_network('verify'),'yes')
+        self.assertEqual(validation.private_network('build'),'yes')
+        self.assertEqual(validation.private_network('canary-build'),'no')
+        with self.assertRaises(validation.Unsafe):validation.private_network('unverified')
+
     def test_exact_disposable_identity_requires_native_expiry(self):
         proof=validation.disposable_identity(*self.disposable(),now=1000)
         self.assertFalse(proof['production']);self.assertEqual(proof['expires'],4600)

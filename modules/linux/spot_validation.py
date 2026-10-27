@@ -46,6 +46,13 @@ def policy(purpose):
     return POLICIES[purpose]
 
 
+def private_network(purpose):
+    policy(purpose)
+    # Only the independently attested, disposable artifact builder may fetch
+    # public pinned sources/signed substitutes. Verification is always offline.
+    return 'no' if purpose=='canary-build' else 'yes'
+
+
 def memory_gate(purpose='verify'):
     available=available_memory(Path('/proc/meminfo').read_text())
     if available<policy(purpose)[1]:raise Unsafe('insufficient memory headroom; validation deferred, not skipped or passed')
@@ -293,7 +300,7 @@ def launch(argv,output,purpose='verify'):
     subprocess.run(['systemctl','daemon-reload'],check=True,capture_output=True,text=True)
     command=['systemd-run','--unit='+driver,'--slice='+slice_name,'--collect','--property=Type=exec',
              '--property=Nice=19','--property=OOMScoreAdjust=1000','--property=OOMPolicy=stop',
-             '--property=NoNewPrivileges=yes','--property=PrivateNetwork=yes','--property=ProtectControlGroups=yes',
+             '--property=NoNewPrivileges=yes','--property=PrivateNetwork='+private_network(purpose),'--property=ProtectControlGroups=yes',
              '--property=StandardOutput=append:'+str(log),'--property=StandardError=inherit',
              '--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty',
              '--setenv=PYTHONDONTWRITEBYTECODE=1','--setenv=PYTHONWARNINGS=error::ResourceWarning',
