@@ -54,6 +54,7 @@ class ResourceLinuxTests(unittest.TestCase):
             ident2,path,leaf,member=validation.own_group(child['cgroup'])
             self.assertEqual(ident2,budget['id']);self.assertEqual(leaf,budget['slice_cgroup']);self.assertEqual(member,unit)
             actual=systemctl('show',unit,'--property=ControlGroup','--value').strip();self.assertEqual(actual,path)
+            self.assertEqual(validation.current(),budget)  # child creation must not reset the shared OOM fence
             release.touch()
             while True:
                 fields=dict(row.split('=',1) for row in systemctl('show',unit,'-p','SubState','-p','Result','-p','ExecMainCode','-p','ExecMainStatus','-p','MainPID').splitlines())

@@ -7,6 +7,7 @@ import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
+from contextlib import ExitStack
 import spot_validation as validation
 
 IDENT='a'*32
@@ -141,13 +142,47 @@ class ValidationBudgetTests(unittest.TestCase):
                     patch.object(validation,'current',return_value=None),patch.object(validation,'memory_gate',return_value=2**32), \
                     patch.object(Path,'lstat',autospec=True,side_effect=root_owned), \
                     patch.object(Path,'read_text',return_value='fixture-boot'), \
-                    patch.object(validation.subprocess,'run') as run:
+                    patch.object(validation.subprocess,'run') as run,patch.object(validation,'configure_slice') as configure:
                 receipt=validation.launch(['/nix/store/fixture-python','fixture.py'],root/'result.json')
+            configure.assert_called_once_with(receipt['run_id'])
+            self.assertEqual((runtime/receipt['run_id']/'ready').read_text(),receipt['run_id'])
             self.assertTrue(receipt['verification_started']);self.assertFalse(receipt['all_passed'])
             self.assertFalse(receipt['launch_receipt_is_test_success']);self.assertFalse(receipt['production_rollout'])
             argv=run.call_args.args[0];self.assertIn('--property=PrivateNetwork=yes',argv)
             self.assertIn('--property=OOMScoreAdjust=1000',argv);self.assertIn('--collect',argv)
             self.assertFalse((root/'result.json').exists())
+
+    def initializer(self,stack,foreign=False,extra=False):
+        files=self.files();leaf=validation.CGROUP/LEAF.lstrip('/');pid=str(os.getpid())
+        files[str(leaf/'cgroup.procs')]='';files['/proc/'+pid+'/cgroup']='0::'+GROUP
+        files['/proc/'+pid+'/oom_score_adj']='1000';files[str(leaf/'memory.oom.group')]='0'
+        if extra:files[str(leaf/UNIT/'cgroup.procs')]+='\n999999999'
+        stack.enter_context(patch.object(validation,'trusted_json',return_value=self.owner()))
+        stack.enter_context(patch.object(Path,'read_text',autospec=True,side_effect=lambda p:files[str(p)]))
+        stack.enter_context(patch.object(Path,'iterdir',return_value=iter([leaf/UNIT])))
+        stack.enter_context(patch.object(Path,'is_dir',return_value=True))
+        stack.enter_context(patch.object(validation.subprocess,'run',side_effect=[SimpleNamespace(stdout='/system.slice' if foreign else LEAF),SimpleNamespace(stdout=pid)]))
+        write=stack.enter_context(patch.object(Path,'write_text',autospec=True,side_effect=lambda p,text:files.__setitem__(str(p),text)))
+        return files,write,leaf
+
+    def test_initializer_writes_only_its_fresh_gated_slice_and_reads_back(self):
+        with ExitStack() as stack:
+            files,write,leaf=self.initializer(stack)
+            validation.configure_slice(IDENT)
+            write.assert_called_once_with(leaf/'memory.oom.group','1')
+            self.assertEqual(files[str(leaf/'memory.oom.group')],'1')
+
+    def test_initializer_cannot_write_a_foreign_or_production_cgroup(self):
+        with ExitStack() as stack:
+            files,write,leaf=self.initializer(stack,foreign=True)
+            with self.assertRaisesRegex(validation.Unsafe,'foreign'):validation.configure_slice(IDENT)
+            write.assert_not_called()
+
+    def test_initializer_will_not_publish_over_unknown_scope_participants(self):
+        with ExitStack() as stack:
+            files,write,leaf=self.initializer(stack,extra=True)
+            with self.assertRaisesRegex(validation.Unsafe,'unknown participants'):validation.configure_slice(IDENT)
+            write.assert_not_called()
 
     def test_definition_cleanup_does_not_stop_or_kill_running_tasks(self):
         with tempfile.TemporaryDirectory() as tmp:

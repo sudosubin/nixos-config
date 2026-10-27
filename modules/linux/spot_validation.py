@@ -120,6 +120,42 @@ def write_new(path,data,mode=0o600):
     finally:os.close(fd)
 
 
+GATE = '''import os,stat,sys,time
+from pathlib import Path
+p=Path(sys.argv[1]);deadline=time.monotonic()+30
+while not p.exists():
+ if time.monotonic()>deadline:raise RuntimeError("budget initialization incomplete; no verification admitted")
+ time.sleep(.02)
+s=p.lstat()
+if not stat.S_ISREG(s.st_mode) or s.st_uid!=0 or s.st_mode&0o077 or p.read_text()!=sys.argv[2]:raise RuntimeError("budget initializer identity unknown")
+os.execv(sys.argv[3],sys.argv[3:])
+'''
+
+
+def configure_slice(ident):
+    if not re.fullmatch('[0-9a-f]{32}',ident):raise Unsafe('invalid resource initializer identity')
+    owner=trusted_json(RUNTIME/ident/'owner.json')
+    name='spotvalidation'+ident+'.slice';driver='spot-validation-'+ident+'.service'
+    if (owner.get('id')!=ident or owner.get('slice')!=name or owner.get('driver')!=driver
+            or owner.get('boot_id')!=Path('/proc/sys/kernel/random/boot_id').read_text().strip()):
+        raise Unsafe('resource initializer owner is unknown')
+    actual=subprocess.run(['systemctl','show',name,'--property=ControlGroup','--value'],check=True,capture_output=True,text=True).stdout.strip()
+    if actual!='/'+name:raise Unsafe('resource initializer must not touch a foreign cgroup')
+    pid=subprocess.run(['systemctl','show',driver,'--property=MainPID','--value'],check=True,capture_output=True,text=True).stdout.strip()
+    if not pid.isdecimal() or int(pid)<=1:raise Unsafe('gated initializer process unknown')
+    leaf=CGROUP/name
+    if (sorted(p.name for p in leaf.iterdir() if p.is_dir())!=[driver]
+            or (leaf/'cgroup.procs').read_text().strip()
+            or (leaf/driver/'cgroup.procs').read_text().split()!=[pid]
+            or own_group(Path('/proc/'+pid+'/cgroup').read_text())!=(ident,'/'+name+'/'+driver,'/'+name,driver)):
+        raise Unsafe('resource initializer contains unknown participants; no admission')
+    # systemd 260 has NO MemoryOOMGroup= slice directive. Configure only this
+    # fresh, UUID-owned, gated scope; never the SSM/production/parent cgroup.
+    (leaf/'memory.oom.group').write_text('1')
+    limits((leaf/'memory.max').read_text(),(leaf/'memory.swap.max').read_text(),
+           (leaf/'memory.oom.group').read_text(),(leaf/'cpu.max').read_text(),Path('/proc/'+pid+'/oom_score_adj').read_text())
+
+
 def launch(argv,output):
     if sys.platform!='linux' or os.geteuid()!=0:raise Unsafe('root Linux required for validation resource isolation')
     if current() is not None:raise Unsafe('nested validation launch refused')
@@ -136,7 +172,7 @@ def launch(argv,output):
     slice_name='spotvalidation'+ident+'.slice';driver='spot-validation-'+ident+'.service'
     definition=('[Unit]\nDescription=Disposable isolated verification budget\nStopWhenUnneeded=yes\n'
                 '[Slice]\nMemoryAccounting=yes\nMemoryMax='+str(MEMORY_MAX)+
-                '\nMemorySwapMax=0\nMemoryOOMGroup=yes\nCPUAccounting=yes\nCPUQuota=100%\nIOWeight=10\n').encode()
+                '\nMemorySwapMax=0\nCPUQuota=100%\nIOWeight=10\n').encode()
     unitfile=UNITS/slice_name;write_new(unitfile,definition)
     owner={'schema':1,'id':ident,'slice':slice_name,'driver':driver,'created_at':time.time(),
            'boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
@@ -150,10 +186,12 @@ def launch(argv,output):
              '--property=StandardOutput=append:'+str(log),'--property=StandardError=inherit',
              '--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty',
              '--setenv=PYTHONDONTWRITEBYTECODE=1','--setenv=PYTHONWARNINGS=error::ResourceWarning',
-             '--setenv=AWS_EC2_METADATA_DISABLED=true',*argv]
+             '--setenv=AWS_EC2_METADATA_DISABLED=true',sys.executable,'-I','-c',GATE,str(folder/'ready'),ident,*argv]
     # Lost launch replies retain the exact owner/definition/log. Never stop an
     # uncertain unit or mistake systemd's acceptance for executed test counts.
     subprocess.run(command,check=True,capture_output=True,text=True)
+    configure_slice(ident)
+    write_new(folder/'ready',ident.encode())  # only now may the requested verification execute
     return {'verification_started':True,'all_passed':False,'run_id':ident,'unit':driver,'slice':slice_name,
             'result':str(output),'log':str(log),'memory_max':MEMORY_MAX,'swap_max':0,'cpu_quota_max_cpus':1,
             'launch_receipt_is_test_success':False,'production_rollout':False}
