@@ -299,15 +299,22 @@ network → InService/종료 보호 확인 → 지정 EBS 연결 + serial/UUID �
 
 ## Linux 변경 검증
 
+새 canonical `modules/linux/verify-spot-linux.py`는 고유한 **root-level validation slice**와 one-shot service로 재실행한다. 기존 SSM/앱 cgroup을 수정하지 않으며 parent와 별도 Gateway fixture가 같은 1GiB MemoryMax/SwapMax0/OOM group, 최대1 CPU 예산을 공유한다. 자기 검증 프로세스만 OOMScoreAdjust1000/Nice19로 설정하며 서비스는 private network/NoNewPrivileges/readonly cgroup view를 사용한다. 시작·각 suite 전에 실제 cgroup membership/커널 한도와 MemAvailable≥2GiB를 검사한다. 이는 자원 수용 조건이지 서버 유휴 판정이 아니다. 부족·불명확한 예산은 실패/보류이며 skip이나 통과로 바꾸지 않는다.
+
+CLI가 반환하는 `verification_started`/unit/log receipt는 **실행 완료가 아니다**. 완전한 result JSON의 실제 count/소스·immutable bytes/모든 suite와 cleanup 결과를 확인해야 한다. 기존 증거를 덮어쓰지 않도록 새 `--output` 경로가 필수이다. `spot_validation.py`, `test-spot-validation.py`, `test-spot-validation-linux.py`가 정책·실제 한도/상속을 검사한다. 고의 OOM/전체 production 메모리 안전/외부 Nix daemon·distributed build까지 검증했다고 확대하지 않는다. 큰 build는 별도 한정된 canary/workspace가 필요하며 이 리소스 격리 코드는 현재 소스 검증 단계이다.
+
 ```sh
 python3 modules/linux/test-spot-schedule-guard.py -v
 python3 modules/linux/test-spot-profile-cache.py -v
 python3 modules/linux/test-spot-cache.py -v
+python3 modules/linux/test-spot-validation.py -v
 python3 modules/linux/test-spot-work.py -v
 python3 modules/linux/test-spot-acp.py -v
 python3 modules/linux/test-spot-gateway.py -v
 python3 modules/linux/test-spot-backup.py -v
-# root Linux sandbox에서 실행 (Mac에서는 skip됨):
+# 실제 Linux 회귀는 canonical bounded driver로 실행한다.
+# 아래 개별 Linux 검증 예시는 해당 resource cage 안에서만 실행:
+# root Linux sandbox (Mac의 skip은 실행 증거가 아님):
 python3 modules/linux/test-spot-work-linux.py -v --tool /absolute/prepared-system/sw/bin/spot-work
 python3 modules/linux/test-spot-acp-linux.py -v
 python3 modules/linux/test-spot-gateway-linux.py -v

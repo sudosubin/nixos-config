@@ -18,6 +18,7 @@ import tempfile
 import time
 import unittest
 import uuid
+import spot_validation
 
 spec=importlib.util.spec_from_file_location('gateway',Path(__file__).with_name('spot_gateway.py'))
 gw=importlib.util.module_from_spec(spec);spec.loader.exec_module(gw)
@@ -59,6 +60,7 @@ class CanaryRPC(gw.LocalRPC):
 @unittest.skipUnless(sys.platform=='linux' and os.geteuid()==0, 'requires root Linux')
 class GatewayCanaryTests(unittest.TestCase):
     def setUp(self):
+        self.resources=spot_validation.fixture_directives()  # fail before creating/spawning an unbounded fixture
         self.assertTrue(VENDOR.is_dir(), 'real vendor code is required, not a skipped proof')
         self.user=pwd.getpwuid(1001)
         self.base=Path(tempfile.mkdtemp(prefix='spot-gateway-validation-',dir='/run'));self.base.chmod(0o755)
@@ -84,7 +86,7 @@ class GatewayCanaryTests(unittest.TestCase):
         self.assertTrue(node.is_file(), 'the supported persisted Node runtime is required, not a skipped proof')
         runtime_mount=self.base/'node-runtime';runtime_mount.mkdir()
         self.node=str(runtime_mount/'bin/node')
-        self.unitfile.write_text('[Unit]\nDescription=Disposable model-free gateway admission validation\n[Service]\nType=exec\nUser='+self.user.pw_name+'\nGroup='+str(self.user.pw_gid)+'\nEnvironment=HOME='+str(self.home)+'\nEnvironment=OPENCLAW_CONFIG_PATH='+str(config)+'\nEnvironment=OPENCLAW_STATE_DIR='+str(self.home/'state')+'\nEnvironment=OPENCLAW_NO_RESPAWN=1\nWorkingDirectory='+str(self.home)+'\nExecCondition='+str(self.check)+' check-service-open '+self.unit+'\nExecStart='+self.node+' '+str(self.mount/'openclaw.mjs')+' gateway run --allow-unconfigured --bind loopback --port 18791 --auth none\nRestart=on-failure\nTimeoutStopSec=infinity\nSendSIGKILL=no\nNoNewPrivileges=yes\nCapabilityBoundingSet=\nPrivateNetwork=yes\nPrivateMounts=yes\nPrivateTmp=yes\nProtectHome=yes\nProtectSystem=strict\nBindReadOnlyPaths='+str(VENDOR)+':'+str(self.mount)+' '+str(node.parent.parent)+':'+str(runtime_mount)+'\nReadWritePaths='+str(self.home)+' '+str(self.protocol.runtime)+'\n')
+        self.unitfile.write_text('[Unit]\nDescription=Disposable model-free gateway admission validation\n[Service]\n'+self.resources+'Type=exec\nUser='+self.user.pw_name+'\nGroup='+str(self.user.pw_gid)+'\nEnvironment=HOME='+str(self.home)+'\nEnvironment=OPENCLAW_CONFIG_PATH='+str(config)+'\nEnvironment=OPENCLAW_STATE_DIR='+str(self.home/'state')+'\nEnvironment=OPENCLAW_NO_RESPAWN=1\nWorkingDirectory='+str(self.home)+'\nExecCondition='+str(self.check)+' check-service-open '+self.unit+'\nExecStart='+self.node+' '+str(self.mount/'openclaw.mjs')+' gateway run --allow-unconfigured --bind loopback --port 18791 --auth none\nRestart=on-failure\nTimeoutStopSec=infinity\nSendSIGKILL=no\nNoNewPrivileges=yes\nCapabilityBoundingSet=\nPrivateNetwork=yes\nPrivateMounts=yes\nPrivateTmp=yes\nProtectHome=yes\nProtectSystem=strict\nBindReadOnlyPaths='+str(VENDOR)+':'+str(self.mount)+' '+str(node.parent.parent)+':'+str(runtime_mount)+'\nReadWritePaths='+str(self.home)+' '+str(self.protocol.runtime)+'\n')
         systemctl('daemon-reload');systemctl('start',self.unit)
         self.rpc=CanaryRPC({'node':self.node,'vendor_dir':str(self.mount/'dist')},1001,self.base,self.unit)
         self.manager=gw.UserService(self.rpc,self.unit,str(self.check))

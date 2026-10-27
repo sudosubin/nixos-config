@@ -8,6 +8,7 @@ AWS resources. Mock/model-free tests are not provider/OS-boot/rollout evidence.
 """
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -19,11 +20,16 @@ import sys
 import time
 
 
+VALIDATION=None
+CLEANED=False
+
+
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def main():
+    global VALIDATION,CLEANED
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source',type=Path,required=True)
     parser.add_argument('--prepared',type=Path,required=True)
@@ -32,6 +38,10 @@ def main():
     args=parser.parse_args()
     if sys.platform!='linux' or platform.machine() not in ('aarch64','arm64') or os.geteuid()!=0:
         raise RuntimeError('root ARM Linux required; no skip-as-proof')
+    # This verifier process only, never its SSM parent or a production PID.
+    Path('/proc/self/oom_score_adj').write_text('1000')
+    if Path('/proc/self/oom_score_adj').read_text().strip()!='1000':
+        raise RuntimeError('own validation OOM preference was not applied')
     root=args.source.resolve(strict=True);prepared=args.prepared.resolve(strict=True)
     if not re.fullmatch(r'/nix/store/[0-9a-df-np-sv-z]{32}-nixos-system-[^/]+',str(prepared)):
         raise RuntimeError('prepared target is not an immutable NixOS build')
@@ -51,6 +61,17 @@ def main():
     if actual!=expected:raise RuntimeError('canonical source bytes changed')
     if Path(__file__).read_bytes()!=(root/'modules/linux/verify-spot-linux.py').read_bytes():
         raise RuntimeError('executed verification driver is not the pinned source')
+    resource_name='modules/linux/spot_validation.py'
+    if resource_name not in expected:raise RuntimeError('resource cage is not part of pinned source')
+    sys.dont_write_bytecode=True
+    spec=importlib.util.spec_from_file_location('spot_validation',root/resource_name)
+    validation=importlib.util.module_from_spec(spec);spec.loader.exec_module(validation);VALIDATION=validation
+    budget=validation.current()
+    if budget is None:
+        receipt=validation.launch([sys.executable,str(root/'modules/linux/verify-spot-linux.py'),*sys.argv[1:]],args.output)
+        print(json.dumps(receipt),flush=True)
+        return  # launch acknowledgement is NEVER an executed/successful regression
+    initial_memory=validation.memory_gate()
     os.environ['PATH']='/run/current-system/sw/bin'
     requirements=subprocess.run(['nix-store','--query','--requisites',str(prepared)],check=True,capture_output=True,text=True).stdout.splitlines()
     guard_config=json.loads((prepared/'etc/spot-schedule-guard.json').read_text())
@@ -85,7 +106,7 @@ def main():
         raise RuntimeError('generic CLI must start directly in isolated Python, without shell/env startup hooks')
     launchers={str(launcher):sha(launcher)}
     state={'schema':1,'timestamp':time.time(),'prepared_system':str(prepared),'source_root':str(root),
-           'source_sha256':actual,'compiled_source_sha256':compiled,'compiled_launcher_sha256':launchers,'suites':[],'executed':0,'unit_cases':0,
+           'source_sha256':actual,'resource_budget':budget,'host_available_memory_before':initial_memory,'compiled_source_sha256':compiled,'compiled_launcher_sha256':launchers,'suites':[],'executed':0,'unit_cases':0,
            'root_linux_cases':0,'all_passed':False,'production_armed':False,'full_work_tracking_verified':False,
            'production_rollout':False,'OS_boot_verified':False,'prepared_guard_armed_false_verified':True,
            'scope':'generic job uncertain-spawn/bound-retirement/all-child waits and configured-profile cache plus previous isolated regressions; '
@@ -99,9 +120,9 @@ def main():
         fd=os.open(args.output.parent,os.O_RDONLY|os.O_DIRECTORY)
         try:os.fsync(fd)
         finally:os.close(fd)
-    base=[('work',59),('schedule-guard',82),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
+    base=[('validation',20),('work',59),('schedule-guard',82),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
           ('drain',29),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',12),('acp-linux',9),
-          ('gateway-linux',7),('cold-linux',8)]
+          ('gateway-linux',7),('cold-linux',8),('validation-linux',2)]
     commands=[(name,count,[sys.executable,'-W','error::ResourceWarning',str(root/'modules/linux'/('test-spot-'+name+'.py')),'-v']) for name,count in base]
     for name,count,command in commands:
         if name=='work-linux':command.extend(['--tool',str(prepared/'sw/bin/spot-work')])
@@ -124,6 +145,12 @@ def main():
             if path.is_absolute() and path.is_relative_to(root) and path.suffix in ('.py','.mjs'):
                 relative=str(path.relative_to(root))
                 if relative not in expected or sha(path)!=expected[relative]:raise RuntimeError('executed test source is not pinned')
+        try:
+            current_budget=validation.current()
+            if current_budget!=budget:raise validation.Unsafe('validation cgroup identity changed')
+            available=validation.memory_gate()
+        except Exception as error:
+            state['resource_failure']=str(error);save();raise
         result=subprocess.run(command,capture_output=True,text=True,
                               env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1','PYTHONWARNINGS':'error::ResourceWarning'})
         counts=re.findall(r'^# tests (\d+)$',result.stdout,re.M) if name=='frontend-JS' else re.findall(r'^Ran (\d+) tests? in ',result.stderr,re.M)
@@ -132,8 +159,8 @@ def main():
         success=all(token in result.stdout for token in ['# fail 0','# skipped 0','# cancelled 0','# todo 0']) if name=='frontend-JS' else '\nOK\n' in result.stderr
         passed=result.returncode==0 and executed==count and clean and success
         row={'suite':name,'command':command,'expected':count,'executed':executed,'returncode':result.returncode,
-             'stdout':result.stdout,'stderr':result.stderr,'no_skips_or_resource_warnings':clean,'passed':passed}
-        if name in ('native-kiro-linux','cache-linux','work-linux'):
+             'stdout':result.stdout,'stderr':result.stderr,'host_available_memory_before':available,'no_skips_or_resource_warnings':clean,'passed':passed}
+        if name in ('native-kiro-linux','cache-linux','work-linux','validation-linux'):
             scope=json.loads(result.stdout.strip().splitlines()[-1]);row['scope']=scope
             passed=passed and scope['skipped']==0 and scope['failures']==0 and scope['errors']==0
             passed=passed and scope['native_integration_cases' if name=='native-kiro-linux' else 'tests']==count
@@ -142,15 +169,21 @@ def main():
         state['root_linux_cases' if name.endswith('-linux') else 'unit_cases']+=max(0,executed)
         save();print(json.dumps({'suite':name,'executed':executed,'passed':passed}),flush=True)
         if not passed:raise RuntimeError('suite failed; COMPLETE stdout/stderr preserved: '+name)
-    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(482,426,56):
+    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(504,446,58):
         raise RuntimeError('executed counts do not match the complete scope')
     if {name:sha(root/name) for name in expected}!=actual:raise RuntimeError('source changed during verification')
     for name,value in compiled.items():
         if sha(Path(name))!=value:raise RuntimeError('immutable source changed during verification')
     for name,value in launchers.items():
         if sha(Path(name))!=value:raise RuntimeError('immutable launcher changed during verification')
+    validation.cleanup_definition();CLEANED=True
+    state['resource_definition_cleanup_requested']=True
     state['all_passed']=True;state['finished_at']=time.time();save()
     print(json.dumps({k:v for k,v in state.items() if k not in ['suites','source_sha256','compiled_source_sha256']}),flush=True)
 
 
-if __name__=='__main__':main()
+if __name__=='__main__':
+    try:main()
+    finally:
+        if VALIDATION is not None and not CLEANED and VALIDATION.current() is not None:
+            VALIDATION.cleanup_definition()
