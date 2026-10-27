@@ -39,14 +39,17 @@ class ResourceLinuxTests(unittest.TestCase):
               +'(p/"ready.json").write_text(json.dumps({"cgroup":Path("/proc/self/cgroup").read_text(),"oom":Path("/proc/self/oom_score_adj").read_text()}))\n'
               +'limit=time.monotonic()+15\n'
               +'while not (p/"release").exists():\n if time.monotonic()>limit:raise RuntimeError("private fixture release missing")\n time.sleep(.01)\n')
-        command=['systemd-run','--unit='+unit,'--slice='+budget['slice'],'--collect','--property=Type=exec',
-                 '--property=RemainAfterExit=yes','--property=NoNewPrivileges=yes','--property=PrivateNetwork=yes',
-                 '--property=PrivateTmp=yes','--property=ProtectHome=yes','--property=ProtectSystem=strict',
-                 '--property=ReadWritePaths='+str(base),'--property=StandardOutput=null','--property=StandardError=null']
-        for key,value in validation.fixture_properties().items():
-            if key!='Slice':command.append('--property='+key+'='+value)
+        script=base/'probe.py';script.write_text(body);script.chmod(0o600)
+        unitfile=Path('/run/systemd/system')/unit;self.assertFalse(unitfile.exists())
+        props={**validation.fixture_properties(),'Type':'exec','RemainAfterExit':'yes','NoNewPrivileges':'yes',
+               'PrivateNetwork':'yes','PrivateTmp':'yes','ProtectHome':'yes','ProtectSystem':'strict',
+               'ReadWritePaths':str(base),'StandardOutput':'null','StandardError':'null',
+               'ExecStart':sys.executable+' -I '+str(script)}
+        unitfile.write_text('[Service]\n'+''.join(k+'='+v+'\n' for k,v in props.items()));unitfile.chmod(0o600)
         try:
-            subprocess.run([*command,sys.executable,'-I','-c',body],check=True,capture_output=True,text=True)
+            # Fresh UUID files are loaded on StartUnit; never daemon-reload a
+            # live slice whose kernel-only OOM-group fence must stay intact.
+            systemctl('start',unit)
             limit=time.monotonic()+8
             while not ready.exists():
                 self.assertLess(time.monotonic(),limit,'private service never became ready');time.sleep(.02)
@@ -69,6 +72,9 @@ class ResourceLinuxTests(unittest.TestCase):
             state=systemctl('show',unit,'--property=LoadState','--value').strip()
             if state=='loaded':systemctl('stop',unit)
             elif state!='not-found':raise RuntimeError('private fixture cleanup state unknown')
+            unitfile.unlink()
+            subprocess.run(['systemctl','reset-failed',unit],capture_output=True,text=True,check=False)
+            self.assertEqual(validation.current(),budget)
             shutil.rmtree(base)
 
 

@@ -167,7 +167,7 @@ def own_group(text):
 
 def limits(memory,swap,oom_group,cpu,score,purpose='verify'):
     if memory.strip()!=str(policy(purpose)[0]) or swap.strip()!='0' or oom_group.strip()!='1' or score.strip()!='1000':
-        raise Unsafe('kernel validation memory/swap/OOM isolation not applied')
+        raise Unsafe('kernel validation memory/swap/OOM isolation not applied: '+repr((memory.strip(),swap.strip(),oom_group.strip(),score.strip())))
     fields=cpu.split()
     if (len(fields)!=2 or not all(v.isdecimal() for v in fields)
             or int(fields[0])<=0 or int(fields[1])<=0 or int(fields[0])>int(fields[1])):

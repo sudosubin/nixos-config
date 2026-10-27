@@ -37,7 +37,8 @@ class CanaryRPC(gw.LocalRPC):
         return {'HOME':str(self.base/'home'),'USER':self.user.pw_name,'LOGNAME':self.user.pw_name,
                 'OPENCLAW_CONFIG_PATH':str(self.base/'home/openclaw.json'),
                 'OPENCLAW_STATE_DIR':str(self.base/'home/state'),
-                'PATH':'/run/current-system/sw/bin','OPENCLAW_NO_RESPAWN':'1'}
+                'PATH':'/run/current-system/sw/bin','OPENCLAW_NO_RESPAWN':'1',
+                'NODE_OPTIONS':'--max-old-space-size=256'}
     def namespace_command(self,argv,timeout=20):
         pid=systemctl('show',self.unit,'--property=MainPID','--value').strip()
         if not pid.isdigit() or int(pid)==0:raise gw.Unsafe('private canary is not running')
@@ -53,7 +54,7 @@ class CanaryRPC(gw.LocalRPC):
         if len(argv)>1 and argv[1]==str(Path(gw.__file__).with_name('spot-gateway-rpc.mjs')):
             argv[1]=str(self.base/'source/spot-gateway-rpc.mjs')
         result=self.namespace_command(argv,timeout)
-        if result.returncode:raise gw.Unsafe('private canary control failed')
+        if result.returncode:raise gw.Unsafe('private model-free canary control failed (exit '+str(result.returncode)+'): '+result.stderr[-4000:])
         return result.stdout
 
 
@@ -86,8 +87,11 @@ class GatewayCanaryTests(unittest.TestCase):
         self.assertTrue(node.is_file(), 'the supported persisted Node runtime is required, not a skipped proof')
         runtime_mount=self.base/'node-runtime';runtime_mount.mkdir()
         self.node=str(runtime_mount/'bin/node')
-        self.unitfile.write_text('[Unit]\nDescription=Disposable model-free gateway admission validation\n[Service]\n'+self.resources+'Type=exec\nUser='+self.user.pw_name+'\nGroup='+str(self.user.pw_gid)+'\nEnvironment=HOME='+str(self.home)+'\nEnvironment=OPENCLAW_CONFIG_PATH='+str(config)+'\nEnvironment=OPENCLAW_STATE_DIR='+str(self.home/'state')+'\nEnvironment=OPENCLAW_NO_RESPAWN=1\nWorkingDirectory='+str(self.home)+'\nExecCondition='+str(self.check)+' check-service-open '+self.unit+'\nExecStart='+self.node+' '+str(self.mount/'openclaw.mjs')+' gateway run --allow-unconfigured --bind loopback --port 18791 --auth none\nRestart=on-failure\nTimeoutStopSec=infinity\nSendSIGKILL=no\nNoNewPrivileges=yes\nCapabilityBoundingSet=\nPrivateNetwork=yes\nPrivateMounts=yes\nPrivateTmp=yes\nProtectHome=yes\nProtectSystem=strict\nBindReadOnlyPaths='+str(VENDOR)+':'+str(self.mount)+' '+str(node.parent.parent)+':'+str(runtime_mount)+'\nReadWritePaths='+str(self.home)+' '+str(self.protocol.runtime)+'\n')
-        systemctl('daemon-reload');systemctl('start',self.unit)
+        self.unitfile.write_text('[Unit]\nDescription=Disposable model-free gateway admission validation\n[Service]\n'+self.resources+'Type=exec\nUser='+self.user.pw_name+'\nGroup='+str(self.user.pw_gid)+'\nEnvironment=HOME='+str(self.home)+'\nEnvironment=OPENCLAW_CONFIG_PATH='+str(config)+'\nEnvironment=OPENCLAW_STATE_DIR='+str(self.home/'state')+'\nEnvironment=OPENCLAW_NO_RESPAWN=1\nEnvironment=NODE_OPTIONS=--max-old-space-size=256\nWorkingDirectory='+str(self.home)+'\nExecCondition='+str(self.check)+' check-service-open '+self.unit+'\nExecStart='+self.node+' '+str(self.mount/'openclaw.mjs')+' gateway run --allow-unconfigured --bind loopback --port 18791 --auth none\nRestart=on-failure\nTimeoutStopSec=infinity\nSendSIGKILL=no\nNoNewPrivileges=yes\nCapabilityBoundingSet=\nPrivateNetwork=yes\nPrivateMounts=yes\nPrivateTmp=yes\nProtectHome=yes\nProtectSystem=strict\nBindReadOnlyPaths='+str(VENDOR)+':'+str(self.mount)+' '+str(node.parent.parent)+':'+str(runtime_mount)+'\nReadWritePaths='+str(self.home)+' '+str(self.protocol.runtime)+'\n')
+        # A fresh, never-loaded UUID unit is loaded by StartUnit directly.
+        # daemon-reload resets the slice's manually held kernel OOM group.
+        systemctl('start',self.unit)
+        self.assertEqual(spot_validation.current()['memory_max'],1024**3)
         self.rpc=CanaryRPC({'node':self.node,'vendor_dir':str(self.mount/'dist')},1001,self.base,self.unit)
         self.manager=gw.UserService(self.rpc,self.unit,str(self.check))
         self.gateway=gw.Gateway(self.rpc,self.manager,lambda:self.protocol.state()=='draining')
@@ -109,7 +113,7 @@ class GatewayCanaryTests(unittest.TestCase):
                 assert self.unit.startswith('spot-gateway-validation-')
                 systemctl('kill','--signal=KILL','--kill-whom=all',self.unit,check=False)
                 systemctl('stop',self.unit,timeout=10,check=False)
-            self.unitfile.unlink();systemctl('daemon-reload');systemctl('reset-failed',self.unit,check=False)
+            self.unitfile.unlink();systemctl('reset-failed',self.unit,check=False)
         shutil.rmtree(self.base)
 
     def acquire_when_idle(self):
