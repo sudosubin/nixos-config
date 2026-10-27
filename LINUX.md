@@ -234,6 +234,16 @@ sudo /run/spot-work status
 - 기존 '이미 닫힌 fence에서 출력/취소/새 입력 거절' 회귀는 **private fixture에만 명시적으로 fault fence를 주입**함. 정상 fresh seal이 busy job 또는 unverified participant를 무시할 수 있다는 증거로 취급하지 않으며 production force/bypass 옵션은 추가하지 않음.
 - 준비 소스 `/home/persist/nixos-seal-build`, 결과 `/home/persist/build-results/nixos-seal-prepared`는 빌드 전용. 이것은 프로토콜 사용자의 admission race 보강이지 TUI 내부 queue/전체 producer·raw-I/O fencing 완료가 아님. `work_tracking_verified=false`, `armed=false` 및 전체 전환·실제 종료/wake·로컬 정리 gate는 그대로 유지함.
 
+## ACP 이전 실제 TUI local queue/draft custody (준비)
+
+- `spot_frontend.py`와 `spot-kiro-frontend.mjs`가 명시적 `spot-kiro`의 native 시작 전 bootstrap lease, 실제 Bun PID/start-bound frontend epoch와 unverified participant를 연결함. 단일 admission lock 안에서 bootstrap·epoch·participant를 겹쳐 handoff하며 native spawn/게시/IPC/종료가 불확실하면 sticky custody를 남김. 기존 운영 세션에는 주입하지 않음.
+- native launcher는 추가 FD를 실제로 닫으므로 inherited-socket 가정을 버림. Bun은 짧은 동기 CLI로 **승인 ACK 이전**에 작업 epoch를 게시함. bootstrap ancestry/UID/boot/PID-start/sequence/epoch owner를 검사하고 메타데이터는 primitive counter와 opaque ID만 전달함. prompt/command/session ID/파일·이미지 내용은 전달·기록하지 않음. backend에 bootstrap 환경을 넘기지 않음.
+- 실제 public vendor bundle SHA256를 확인한 같은 bytes에만 Bun loader의 **인메모리 instrumentation**을 적용함. vendor 파일 원본/전역 auth·test-mode/GET_STORE IPC는 바꾸지 않음. store factory/setState 및 이미 승인된 processQueue handoff의 정확한 형태가 바뀌면 fallback 없이 거절함. React effect/polling으로 idle을 추정하지 않고 상태 변경 경계에서 승인하며, functional updater는 한 번만 실행하고 동일 primitive 상태의 model chunk마다 CLI를 만들지 않음.
+- local queuedMessages/pendingSteerContent, draft/attachment, processing/cancel/approval 및 진행 중 producer promise가 epoch를 유지함. queue pop→send 사이와 async yield에서 잠깐 idle을 게시하지 않음. 새 submit은 기존 epoch가 있어도 fence를 재확인하고 거절 UI/counter를 남기며 ACP로 전달하지 않음. 예외/알 수 없는 state는 기존 출력 전달을 계속하지만 healthy/idle로 승격하지 않음.
+- 실제 UID1001/private PID1/mount/network/NoNewPrivileges/빈 HOME·비기능 key·tools/hooks/MCP 없는 native TUI에서 (1) backend가 멈춘 동안 두 번째 입력이 **frontend queue에만** 있고 자기 Bun epoch가 유지됨, (2) fresh seal 거절 후 두 mock turn의 실제 출력 보존, (3) 이미 닫힌 private fault fence에서 새 submit을 store/ACP 이전에 거절하고 기존 turn 보존, (4) bundle 변경 시 untracked fallback 거절을 검사함. 3개 canary case와 기존 8개 native 회귀를 모두 실행함. SIGSTOP은 wire-inflight fixture이며 실제 provider 지연/완료 증거가 아님.
+- Python epoch 20개 + JavaScript 15개 단위도 ARM에서 실제 실행함. Node test reporter를 명시하고 실제 count/no skips를 확인함. 전체 회귀/소스·immutable bytes/완전한 stderr는 `/home/persist/manifests/frontend-ARM-tests-20261027.json`을 기준으로 함. 진단의 failed FD/partial-frame 시도나 별도 store-schema probe는 이 회귀 수에 합산하지 않음.
+- source `/home/persist/nixos-frontend-build`, result `/home/persist/build-results/nixos-frontend-prepared`는 **빌드 전용**. 모든 frontend/ACP participant는 여전히 `participant_unverified`임. 이 증거는 pinned TUI의 검증한 local queue/draft 경계에 한정되며 모든 frontend action/client callback/async tool/MCP/subagent/SSM/Herdr/PTY 소유권, 실제 provider·frontend crash output custody, 모든 raw-I/O·복구·실제 종료/wake·최종 마이그레이션을 증명하지 않음. `work_tracking_verified`, `armed`, `goal_complete`는 계속 false임.
+
 ## 프로필 복구와 부팅 의존성
 
 소스: `modules/linux/spot-profile-cache.py`, `spot-profile-cache.nix`.

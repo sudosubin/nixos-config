@@ -159,9 +159,15 @@ class NativeKiroTests(unittest.TestCase):
                 os._exit(125)
         return child_setup
 
-    def records(self):
+    def all_records(self):
         with self.protocol.locked():
             return [json.loads(path.read_text()) for path in (self.protocol.runtime / 'participants').iterdir()]
+
+    def records(self):
+        return [r for r in self.all_records() if r.get('kind') == 'acp']
+
+    def frontend_records(self):
+        return [r for r in self.all_records() if r.get('kind') == 'kiro_frontend']
 
     def await_condition(self, condition, timeout=35):
         deadline = time.monotonic() + timeout
@@ -393,6 +399,8 @@ class NativeKiroTests(unittest.TestCase):
         self.assertEqual(work.process_start(backend), record['backend_start'])
         self.assertEqual(work.process_uid(backend), USER.pw_uid)
         rejections = record['admission_rejections']
+        self.await_condition(lambda: len(self.frontend_records()) == 1 and self.frontend_records()[0]['initialized'])
+        frontend_rejections = self.frontend_records()[0]['admission_rejections']
         self.paused = (backend, record['backend_start'])
         os.kill(backend, signal.SIGSTOP)
         try:
@@ -407,22 +415,21 @@ class NativeKiroTests(unittest.TestCase):
             # admitted request is still outstanding. Do not cancel that work.
             os.write(master, b'This second fixture must not reach the model.\r')
             self.await_condition(lambda: (read_console() is not None
-                                         and any(r['active_requests'] > 0
-                                                 and r['admission_rejections'] == rejections + 1
-                                                 for r in self.records())))
+                                         and any(r['active_requests'] > 0 for r in self.records())
+                                         and self.frontend_records()[0]['admission_rejections'] == frontend_rejections + 1))
         finally:
             os.kill(backend, signal.SIGCONT)
             self.paused = None
         self.await_condition(lambda: b'MODEL_FREE_NATIVE_TUI_CANARY' in read_console() and self.idle())
-        self.assert_still_unverified()
-        # Busy steering masks the server error in this vendor frontend. Check
-        # both its actual rejection UI and the proxy's pre-forward counter.
-        self.await_condition(lambda: b'Failed to queue message' in read_console())
+        self.assertTrue(self.protocol.blockers())  # frontend draft/participants remain unverified
+        # Admission is now earlier than ACP: inspect the actual UI and frontend
+        # counter, while proving the proxy never received a rejected request.
+        self.await_condition(lambda: b'Shutdown admission closed; input not accepted' in read_console())
         os.write(master, b'The idle fixture must also be rejected.\r')
-        self.await_condition(lambda: b'Shutdown admission closed; request not started' in read_console())
-        self.await_condition(lambda: self.idle() and self.records()[0]['admission_rejections'] == rejections + 2)
+        self.await_condition(lambda: self.idle() and self.frontend_records()[0]['admission_rejections'] == frontend_rejections + 2)
+        self.assertEqual(self.records()[0]['admission_rejections'], rejections)
         self.assertNotIn(b'MUST_NOT_REACH_SECOND_MODEL', read_console())
-        self.assert_still_unverified()
+        self.assertTrue(self.protocol.blockers())
 
 
 def main():

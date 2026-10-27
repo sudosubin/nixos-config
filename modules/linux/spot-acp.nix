@@ -12,7 +12,14 @@ let
     mkdir -p "$out"
     cp ${./spot_acp.py} "$out/spot_acp.py"
     cp ${./spot_work.py} "$out/spot_work.py"
+    cp ${./spot_frontend.py} "$out/spot_frontend.py"
   '';
+  frontend = pkgs.writeShellApplication {
+    name = "spot-kiro-front";
+    text = ''
+      exec ${pkgs.python3}/bin/python3 ${sources}/spot_frontend.py "$@"
+    '';
+  };
   tool = pkgs.writeShellApplication {
     name = "spot-acp-proxy";
     text = ''
@@ -23,6 +30,7 @@ let
   entry = pkgs.writeText "spot-kiro-entry.mjs" ''
     import { isAbsolute, join } from 'node:path';
     import { pathToFileURL } from 'node:url';
+    import { installFrontend } from '${./spot-kiro-frontend.mjs}';
     const original = process.env.KIRO_CHAT_CLI_BIN;
     const proxy = '${tool}/bin/spot-acp-proxy';
     if (!original || !isAbsolute(original) || original === proxy) {
@@ -31,6 +39,7 @@ let
     if (!process.env.HOME) throw new Error('Kiro home identity unavailable');
     process.env.SPOT_ACP_REAL_BACKEND = original;
     process.env.KIRO_CHAT_CLI_BIN = proxy;
+    installFrontend('${frontend}/bin/spot-kiro-front');
     const tui = join(process.env.HOME, '.local/share/kiro-cli/tui.js');
     process.argv[1] = tui;
     await import(pathToFileURL(tui).href);
@@ -59,7 +68,7 @@ let
       fi
       export PATH="$runtime:$PATH"
       export KIRO_TEST_TUI_JS_PATH=${entry}
-      exec ${cfg.nativePackage}/bin/kiro-cli chat --tui --agent-engine v2 "$@"
+      exec ${frontend}/bin/spot-kiro-front launch -- ${cfg.nativePackage}/bin/kiro-cli chat --tui --agent-engine v2 "$@"
     '';
   };
 in
@@ -77,6 +86,12 @@ in
       readOnly = true;
       internal = true;
     };
+    frontendPackage = lib.mkOption {
+      type = lib.types.package;
+      default = frontend;
+      readOnly = true;
+      internal = true;
+    };
     entryFile = lib.mkOption {
       type = lib.types.str;
       default = toString entry;
@@ -88,6 +103,7 @@ in
     services.spotWork.enable = true;
     environment.systemPackages = [
       tool
+      frontend
       launcher
     ];
     # Existing/native/legacy launchers stay unverified blockers. Do not impose
