@@ -47,8 +47,11 @@ class ACPTests(unittest.TestCase):
         self.assertEqual(self.t.state()['admission_rejections'],1)
         self.assertEqual(self.protocol.blockers(),[])
 
-    def test_existing_request_blocks_commit_then_completes_behind_fence(self):
-        self.initialize();self.t.client(request(1));self.protocol.seal()
+    def test_existing_request_blocks_commit_then_completes_behind_fault_fence(self):
+        self.initialize();self.t.client(request(1))
+        # Fault injection into this private fixture only. A fresh production
+        # seal must now REFUSE this existing custody, not close admission.
+        with self.protocol.locked():self.protocol.write_state('draining')
         with self.assertRaises(RuntimeError):
             with self.protocol.commit():self.fail('must not release active model turn')
         self.t.backend(response(1,{'stopReason':'end_turn'}))
@@ -70,7 +73,8 @@ class ACPTests(unittest.TestCase):
         self.assertFalse(self.t.healthy);self.assertTrue(self.protocol.blockers())
 
     def test_cancel_does_not_release_prompt_lease(self):
-        self.initialize();self.t.client(request(1));self.protocol.seal()
+        self.initialize();self.t.client(request(1))
+        with self.protocol.locked():self.protocol.write_state('draining')  # private fault fence
         self.assertEqual(self.t.client({'jsonrpc':'2.0','method':'session/cancel','params':{'sessionId':'private'}}),(True,None))
         self.assertTrue(self.protocol.blockers())
         self.t.backend(response(1,{'stopReason':'cancelled'}));self.assertEqual(self.protocol.blockers(),[])

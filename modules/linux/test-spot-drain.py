@@ -198,14 +198,74 @@ class DrainTests(unittest.TestCase):
         self.assertEqual(self.protocol.attempt_id(), 'drain-'+'f'*32)
         self.assertNotIn('home', self.ops.events)
 
-    def test_pre_fence_controller_death_can_recover_without_stopping_work(self):
+    def test_pre_fence_controller_death_can_recover_without_fencing_or_workload_IO(self):
         self.protocol.unseal()
         self.tx.update('created')
+        lease = self.protocol.create('job')
         self.tx.close()
         t = self.transaction(self.new)
-        t.recover(self.ops)
-        self.assertNotIn('services', self.ops.events)
+        with patch.object(self.protocol,'write_state',wraps=self.protocol.write_state) as write:
+            t.recover(self.ops)
+        write.assert_not_called()
+        self.assertEqual(self.ops.events, ['group','protect'])
         self.assertEqual(self.protocol.state(), 'open')
+        self.assertTrue((self.protocol.leases/lease['id']).exists())
+        self.assertEqual(t.read()['recovery_outcome'],'no_actions_started')
+
+    def test_busy_seal_after_durable_intent_never_interrupts_admitted_job(self):
+        self.protocol.unseal();self.tx.update('recovered')
+        lease=self.protocol.create('job')
+        with self.assertRaises(d.work.SealBlocked):self.tx.begin(self.before)
+        self.assertEqual(self.tx.read()['phase'],'created')
+        self.assertEqual(self.protocol.state(),'open')
+        with patch.object(self.protocol,'write_state',wraps=self.protocol.write_state) as write:
+            self.assertTrue(self.tx.cancel_unstarted(protected=True))
+        write.assert_not_called();self.assertEqual(self.tx.read()['phase'],'recovered')
+        self.assertTrue((self.protocol.leases/lease['id']).exists())
+
+    def test_lost_seal_reply_reopens_only_owned_fence_without_home_or_service_IO(self):
+        self.tx.update('created')  # Fence exists, but begin's post-seal write was lost.
+        extension=self.protocol.create('manual',100)
+        self.tx.close();t=self.transaction(self.new)
+        self.assertEqual(t.recover(self.ops),'recovered')
+        self.assertEqual(self.ops.events,['group','protect'])
+        self.assertEqual(self.protocol.state(),'open')
+        self.assertTrue((self.protocol.leases/extension['id']).exists())
+
+    def test_failed_preaction_settlement_can_retry_without_refencing_existing_work(self):
+        self.protocol.unseal();self.tx.update('created');lease=self.protocol.create('job')
+        with patch.object(self.tx,'update',side_effect=OSError('fixture journal fsync failure')):
+            with self.assertRaises(OSError):self.tx.cancel_unstarted(protected=True)
+        self.assertEqual(self.protocol.state(),'open');self.assertEqual(self.tx.read()['phase'],'created')
+        self.tx.close();t=self.transaction(self.new)
+        with patch.object(self.protocol,'write_state',wraps=self.protocol.write_state) as write:
+            self.assertEqual(t.recover(self.ops),'recovered')
+        write.assert_not_called();self.assertEqual(self.ops.events,['group','protect'])
+        self.assertTrue((self.protocol.leases/lease['id']).exists())
+
+    def test_preaction_intent_cannot_hide_side_effects(self):
+        for delta in [{'services_may_be_stopped':True},{'gateway':{}},{'snapshot_id':'snap-test'},
+                      {'service_authority':{**self.old,'units':['user@1001.service'],'id':'a'*32}}]:
+            with self.subTest(delta=delta),self.assertRaises(d.Unsafe):self.tx.update('created',**delta)
+        self.assertEqual(self.tx.read()['phase'],'fenced')
+
+    def test_preaction_recovery_does_not_steal_other_fence_or_undo_release(self):
+        self.tx.update('created')
+        for state,attempt in [('draining','drain-'+'f'*32),('releasing',self.tx.record['id']),('released',self.tx.record['id'])]:
+            with self.subTest(state=state):
+                with self.protocol.locked():self.protocol.write_state(state,attempt)
+                self.tx.close();t=self.transaction(self.new)
+                with self.assertRaises(RuntimeError):t.recover(self.ops)
+                self.assertEqual(self.protocol.state(),state)
+                self.assertNotIn('home',self.ops.events);t.close()
+
+    def test_preaction_old_boot_still_requires_full_startup_and_storage_verification(self):
+        self.protocol.unseal();self.tx.update('created');self.tx.close()
+        self.protocol._boot_id='new-boot'
+        t=self.transaction({**self.new,'boot_id':'new-boot','pid_namespace':'new-pidns'})
+        self.assertEqual(t.recover(self.ops),'recovered')
+        self.assertTrue(self.ops.boot_changed)
+        self.assertEqual(self.ops.events,['group','protect','home','services','gateway','verify'])
 
     def test_new_boot_does_not_trust_old_release_or_pid_numbers(self):
         self.release('released').close()

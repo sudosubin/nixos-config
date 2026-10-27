@@ -332,6 +332,61 @@ class AdmissionDrainTests(DrainSandboxMixin, unittest.TestCase):
         self.aws=self.backup.capture
         self.protection=mock('protection');self.status=mock('status')
 
+    def test_existing_job_refuses_fresh_seal_without_recovery_fence_or_workload_IO(self):
+        with patch.object(guard.work,'process_start',return_value=123):lease=self.protocol.create('job')
+        with patch.object(self.protocol,'write_state',wraps=self.protocol.write_state) as write, \
+                patch.object(guard.spot_gateway,'configured') as gateway, \
+                patch.object(guard.spot_backup,'configured') as backup, \
+                patch.object(guard,'verify_recovery_services') as verify:
+            with self.assertRaises(guard.work.SealBlocked):guard.drain(self.cfg)
+        write.assert_not_called();gateway.assert_not_called();backup.assert_not_called();verify.assert_not_called()
+        self.command.assert_not_called();self.run.assert_not_called()
+        self.assertEqual(self.protocol.state(),'open');self.assertTrue((self.protocol.leases/lease['id']).exists())
+        self.protection.assert_called_once_with(self.cfg,True)
+
+    def test_job_admitted_after_durable_intent_still_wins_before_seal(self):
+        original=self.protocol.publish;leases=[]
+        def publish(path,record,**kwargs):
+            original(path,record,**kwargs)
+            if path.name=='drain.json' and record['phase']=='created' and not leases:
+                with patch.object(guard.work,'process_start',return_value=123):leases.append(self.protocol.create('job'))
+        with patch.object(self.protocol,'publish',side_effect=publish), \
+                patch.object(self.protocol,'write_state',wraps=self.protocol.write_state) as write:
+            with self.assertRaises(guard.work.SealBlocked):guard.drain(self.cfg)
+        write.assert_not_called();self.command.assert_not_called();self.run.assert_not_called()
+        self.assertEqual(self.protocol.state(),'open');self.assertEqual(len(leases),1)
+        self.assertTrue((self.protocol.leases/leases[0]['id']).exists())
+
+    def test_lost_seal_reply_only_reopens_owned_fence_without_workload_IO(self):
+        original=self.protocol.seal;extensions=[]
+        def seal(attempt):
+            original(attempt);extensions.append(self.protocol.create('manual',100))
+            raise OSError('fixture lost seal reply')
+        with patch.object(self.protocol,'seal',side_effect=seal), \
+                patch.object(guard.spot_gateway,'configured') as gateway, \
+                patch.object(guard.spot_backup,'configured') as backup:
+            with self.assertRaises(OSError):guard.drain(self.cfg)
+        gateway.assert_not_called();backup.assert_not_called();self.command.assert_not_called();self.run.assert_not_called()
+        self.assertEqual(self.protocol.state(),'open')
+        self.assertTrue((self.protocol.leases/extensions[0]['id']).exists())
+
+    def test_failed_post_seal_journal_write_cancels_without_stopping_work(self):
+        original=self.protocol.publish
+        def publish(path,record,**kwargs):
+            if path.name=='drain.json' and record['phase']=='fenced':raise OSError('fixture journal write failure')
+            return original(path,record,**kwargs)
+        with patch.object(self.protocol,'publish',side_effect=publish):
+            with self.assertRaises(OSError):guard.drain(self.cfg)
+        self.command.assert_not_called();self.run.assert_not_called()
+        self.assertEqual(self.protocol.state(),'open')
+
+    def test_busy_seal_and_uncertain_protection_never_close_already_open_work(self):
+        with patch.object(guard.work,'process_start',return_value=123):lease=self.protocol.create('job')
+        self.protection.side_effect=RuntimeError('fixture protection unavailable')
+        with self.assertRaises(RuntimeError):guard.drain(self.cfg)
+        self.command.assert_not_called();self.run.assert_not_called()
+        self.assertEqual(self.protocol.state(),'open');self.assertTrue((self.protocol.leases/lease['id']).exists())
+
     def test_extension_after_snapshot_cancels_before_release(self):
         def snapshot(*args):
             self.protocol.create('manual',100)

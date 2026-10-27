@@ -227,9 +227,44 @@ class NativeKiroTests(unittest.TestCase):
         params = {'sessionId': session, 'prompt': [{'type': 'text', 'text': 'model-free fixture only'}]}
         self.assertEqual(wire.rpc(2, 'session/prompt', params)['result']['stopReason'], 'end_turn')
         self.await_condition(self.idle)
-        self.protocol.seal()
+        # A normal seal cannot exempt this unverified participant. Inject a
+        # private fault fence to test refusal under an ALREADY closed boundary.
+        with self.protocol.locked():self.protocol.write_state('draining')
         self.assertEqual(wire.rpc(3, 'session/prompt', params)['error']['code'], -32074)
         self.await_condition(self.idle)
+        self.assert_still_unverified()
+
+    def test_actual_native_custody_refuses_fresh_seal_and_preserves_admitted_and_new_work(self):
+        self.mock.write_text(json.dumps([['MODEL_FREE_ALREADY_ADMITTED'],['MODEL_FREE_AFTER_REFUSED_SEAL']]))
+        wire, session = self.backend_wire()
+        with self.assertRaises(work.SealBlocked):self.protocol.seal()
+        self.assertEqual(self.protocol.state(),'open')
+        record = self.records()[0]
+        backend = record['backend_pid']
+        self.assertEqual(work.process_start(backend), record['backend_start'])
+        self.paused = (backend, record['backend_start'])
+        os.kill(backend, signal.SIGSTOP)
+        params = {'sessionId':session,'prompt':[{'type':'text','text':'model-free admitted fixture'}]}
+        try:
+            wire.send(2,'session/prompt',params)
+            self.await_condition(lambda:self.records()[0]['active_requests']==1)
+            with self.assertRaises(work.SealBlocked):self.protocol.seal()
+            self.assertEqual(self.protocol.state(),'open')
+        finally:
+            os.kill(backend,signal.SIGCONT)
+            self.paused = None
+        deadline = time.monotonic()+35
+        while time.monotonic()<deadline:
+            message = wire.read(max(.01,deadline-time.monotonic()))
+            if 'method' not in message and message.get('id')==2:
+                self.assertEqual(message['result']['stopReason'],'end_turn');break
+        else:self.fail('previously admitted native turn did not finish')
+        self.await_condition(self.idle)
+        self.assertEqual(wire.rpc(3,'session/prompt',params)['result']['stopReason'],'end_turn')
+        self.await_condition(self.idle)
+        self.assertTrue(any(m.get('params',{}).get('update',{}).get('content',{}).get('text')
+                            == 'MODEL_FREE_AFTER_REFUSED_SEAL' for m in wire.messages))
+        self.assertEqual(self.records()[0]['admission_rejections'],0)
         self.assert_still_unverified()
 
     def test_actual_compiled_proxy_refuses_native_startup_behind_fence(self):
@@ -365,7 +400,9 @@ class NativeKiroTests(unittest.TestCase):
             self.await_condition(lambda: (read_console() is not None
                                          and any(r['active_requests'] > 0 for r in self.records())))
             self.assertTrue([b for b in self.protocol.blockers() if b['reason'] != 'participant_unverified'])
-            self.protocol.seal()
+            # Deliberate private fault injection, not evidence that a fresh
+            # production seal can ignore existing/unverified native custody.
+            with self.protocol.locked():self.protocol.write_state('draining')
             # Real PTY input arrives behind the fence while the previously
             # admitted request is still outstanding. Do not cancel that work.
             os.write(master, b'This second fixture must not reach the model.\r')
@@ -431,7 +468,7 @@ def main():
                           'public_vendor_sha256': hashes, 'network_pid_mount_isolated': True,
                           'real_credentials_models_channels': False,
                           'whole_work_tracking_verified': False, 'production_rollout': False}), flush=True)
-        return 0 if result.wasSuccessful() and result.testsRun == 7 and not result.skipped else 1
+        return 0 if result.wasSuccessful() and result.testsRun == 8 and not result.skipped else 1
 
 
 if __name__ == '__main__':

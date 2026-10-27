@@ -225,6 +225,15 @@ sudo /run/spot-work status
 - native 검증기 **7개**, ACP 단위 **43개**, 교차 UID stdio **8개**를 각각 실제 실행했으며 skip/resource warning이 없음. 최신 전체 ARM 회귀의 실행 수/완전한 stderr는 `/home/persist/manifests/producer-ARM-tests-20261027.json`에서 확인함. 별도 protocol 진단 3개를 이 회귀 수에 중복 합산하지 않음.
 - 준비 소스 `/home/persist/nixos-producer-build`, 결과 `/home/persist/build-results/nixos-producer-prepared`는 **빌드 전용**. vendor Bun/TUI 원본과 운영 system/profile/앱/홈/AMI/LT/runtime observer를 바꾸지 않음. native 검증은 빈 홈, 비기능 fixture key, private PID/mount/network, NoNewPrivileges, 도구/hooks/MCP 없음으로 수행하며 실제 provider 완료나 운영 적용 증거가 아님. `participant_unverified`, `work_tracking_verified=false`, `armed=false`를 유지함.
 
+## 새 종료 fence의 원자적 blocker 검사와 pre-action 복구 (준비)
+
+- `spot_work.Protocol.seal()`은 `create()`와 **같은 admission lock 안에서** 현재의 모든 프로토콜 blocker를 다시 읽고 fence를 게시함. 먼저 승인된 job/extension, stale·malformed 기록, unverified participant 또는 registry/복구 authority 불확실성은 admission을 닫지 않고 fresh seal을 거절함. 빈 CPU/이전 probe/partial status를 권한으로 사용하지 않으며 worker/participant exemption을 추가하지 않음.
+- durable `created` intent 뒤 seal이 거절되거나 reply/post-seal 기록이 유실되어도, **같은 boot·아직 begin()이 반환하지 않아 action이 시작될 수 없었던 intent**는 보호된 InService readback 후 자기 draining fence만 되돌림. open admission에 복구 fence를 새로 만들지 않으며 홈/Gateway/user/Docker/backup을 건드리지 않음. 다른 attempt/release/미확인 startup authority는 거절하고 기존 job·extension은 삭제하지 않음.
+- `created`와 side-effect 기록이 모순되면 fail closed. 다른 boot나 action이 시작될 수 있었던 단계는 이 지름길을 사용하지 않고 기존 storage/service/Gateway 확인을 모두 수행함. cancellation journal 쓰기가 실패해도 다음 controller가 안전하게 다시 확인하며, 불확실한 결과를 완료로 승격하지 않음.
+- private root Linux에서 실제 교차 UID의 두 lock 순서와, durable intent를 쓴 controller의 실제 SIGKILL 뒤 새 controller 복구를 검사함. AWS protection 관측은 주입하며 실제 production AWS/EBS/OS reboot 복구 증거가 아님. native verifier에도 fresh seal 거절 후 기존 mock turn·후속 입력 보존 사례가 있음. 전체 실행 수/완전한 stderr/immutable package bytes는 `/home/persist/manifests/seal-ARM-tests-20261027.json`에서 확인함.
+- 기존 '이미 닫힌 fence에서 출력/취소/새 입력 거절' 회귀는 **private fixture에만 명시적으로 fault fence를 주입**함. 정상 fresh seal이 busy job 또는 unverified participant를 무시할 수 있다는 증거로 취급하지 않으며 production force/bypass 옵션은 추가하지 않음.
+- 준비 소스 `/home/persist/nixos-seal-build`, 결과 `/home/persist/build-results/nixos-seal-prepared`는 빌드 전용. 이것은 프로토콜 사용자의 admission race 보강이지 TUI 내부 queue/전체 producer·raw-I/O fencing 완료가 아님. `work_tracking_verified=false`, `armed=false` 및 전체 전환·실제 종료/wake·로컬 정리 gate는 그대로 유지함.
+
 ## 프로필 복구와 부팅 의존성
 
 소스: `modules/linux/spot-profile-cache.py`, `spot-profile-cache.nix`.

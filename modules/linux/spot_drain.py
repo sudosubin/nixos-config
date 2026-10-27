@@ -81,6 +81,10 @@ class Transaction:
                        for v in record['services_before'].values())
                 or (record.get('gateway') is not None and not isinstance(record['gateway'], dict))):
             raise Unsafe('unfinished drain record is malformed or belongs to another deployment')
+        if record['phase'] == 'created' and (record['services_may_be_stopped']
+                or record.get('gateway') is not None or record.get('service_authority') is not None
+                or record.get('snapshot_id') is not None):
+            raise Unsafe('pre-action drain intent contradicts recorded side effects')
         authority = record.get('service_authority')
         allowed = self.units + ([self.config['gateway']['unit']] if self.config.get('gateway') else [])
         if authority is not None and (not valid_owner(authority)
@@ -149,6 +153,23 @@ class Transaction:
         self.protocol.seal(self.record['id'])
         self.update('fenced')
 
+    def cancel_unstarted(self, protected=False):
+        # begin() must durably advance beyond created BEFORE returning to code
+        # that can prepare Gateway/stop services/unmount/backup/release. A same-
+        # boot created intent therefore owns no such actions, even if its seal
+        # reply or subsequent journal write was lost. Do not close open work
+        # admission merely to roll that intent back. Other boots still need the
+        # full startup/home/service verification path.
+        if (self.record is None or self.record['phase'] != 'created'
+                or self.record['origin_boot'] != self.owner['boot_id']):
+            return False
+        if self.fd is None:
+            raise Unsafe('pre-action cancellation has no exclusive controller')
+        self.validate(self.record)
+        self.protocol.reopen_unstarted(self.record['id'], protected=protected)
+        self.update('recovered', recovery_outcome='no_actions_started')
+        return True
+
     def gateway(self, value):
         self.update(gateway=value)
 
@@ -203,6 +224,8 @@ class Transaction:
             self.update('released')
             return 'released'
         operations.protect()  # Must include authoritative readback, not just ACK.
+        if self.cancel_unstarted(protected=True):
+            return 'recovered'
         self.protocol.reconcile_fence(attempt, protected=True)
         old_boot = not same_boot
         self.update('recovering')

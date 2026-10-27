@@ -122,7 +122,9 @@ class ACPStdioTests(unittest.TestCase):
         for i in range(100):
             if self.jobs():break
             time.sleep(0.01)
-        self.assertTrue(self.jobs());self.protocol.seal()
+        self.assertTrue(self.jobs())
+        # Inject an already-closed fault fence; normal seal refuses this work.
+        with self.protocol.locked():self.protocol.write_state('draining')
         self.send({'jsonrpc':'2.0','id':2,'method':'session/prompt','params':{'content':[{'text':'MUST_NOT_FORWARD'}]}})
         self.assertEqual(self.reply(2)['error']['code'],-32074)
         self.assertEqual(self.reply(1)['result']['stopReason'],'end_turn');self.wait_idle()
@@ -131,7 +133,9 @@ class ACPStdioTests(unittest.TestCase):
         self.assertEqual(self.protocol.blockers()[0]['reason'],'participant_unverified')
 
     def test_fenced_direct_bridge_cannot_start_a_second_backend(self):
-        self.protocol.seal()
+        # Existing unverified participant forbids a fresh seal. This case tests
+        # startup refusal under a deliberately injected, private fault fence.
+        with self.protocol.locked():self.protocol.write_state('draining')
         log=self.log.with_name('fenced-second-backend')
         result=subprocess.run([*self.command[:-1],str(log)],input=b'',capture_output=True,
                               preexec_fn=self.demote,cwd='/',timeout=8)
@@ -141,6 +145,14 @@ class ACPStdioTests(unittest.TestCase):
         self.assertFalse(log.with_name(log.name+'.started').exists())
         self.assertEqual(len(self.participant_records()),1)
         self.assertEqual(self.jobs(),[])
+
+    def test_unverified_participant_prevents_fresh_seal_without_blocking_new_input(self):
+        with self.assertRaises(work.SealBlocked):self.protocol.seal()
+        self.assertEqual(self.protocol.state(),'open')
+        self.send({'jsonrpc':'2.0','id':1,'method':'session/prompt','params':{}})
+        self.assertEqual(self.reply(1)['result']['stopReason'],'end_turn');self.wait_idle()
+        self.assertEqual(self.log.read_text().splitlines(),['initialize','session/prompt'])
+        self.assertEqual(self.participant_records()[0]['admission_rejections'],0)
 
     def test_fragmented_unicode_transparent_without_transcript_files(self):
         self.send({'jsonrpc':'2.0','id':'text-id','method':'session/prompt','params':{'content':[{'text':'PRIVATE_PROMPT_🙂'}]}},fragment=True)

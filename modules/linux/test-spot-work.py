@@ -91,8 +91,11 @@ class AdmissionTests(unittest.TestCase):
             work.run_job(self.p, ['not-executed'])
         spawn.assert_not_called()
 
-    def test_job_published_before_fence_blocks_commit(self):
-        self.job(); self.p.seal()
+    def test_job_published_before_fence_blocks_seal_and_commit(self):
+        self.job()
+        with self.assertRaises(work.SealBlocked):self.p.seal()
+        self.assertEqual(self.p.state(),'open')
+        self.assertFalse((self.p.runtime/'draining').exists())
         with self.assertRaises(RuntimeError):
             with self.p.commit(): self.fail('must not release')
 
@@ -217,6 +220,122 @@ class AdmissionTests(unittest.TestCase):
         with patch.object(work,'subreaper'),patch.object(work,'process_start',return_value=123),patch.object(work.subprocess,'Popen',side_effect=OSError('no binary')),self.assertRaises(OSError):
             work.run_job(self.p,['not-executed'])
         self.assertEqual(self.p.blockers(),[])
+
+    def test_seal_refuses_live_manual_extension_without_closing_admission(self):
+        self.p.create('manual',100)
+        with self.assertRaises(work.SealBlocked):self.p.seal()
+        self.assertEqual(self.p.state(),'open')
+
+    def test_seal_does_not_turn_stale_jobs_into_permission(self):
+        data=self.job();data['heartbeat_at']-=1000;self.rewrite(data)
+        with self.assertRaises(work.SealBlocked):self.p.seal()
+        self.assertEqual(self.p.state(),'open')
+        self.assertEqual(self.p.blockers()[0]['reason'],'stale_job_unknown')
+
+    def test_seal_refuses_malformed_lease_without_mutating_it(self):
+        p=self.p.leases/'unknown';p.write_text('malformed')
+        with self.assertRaises(work.SealBlocked):self.p.seal()
+        self.assertEqual(p.read_text(),'malformed');self.assertEqual(self.p.state(),'open')
+
+    def test_seal_refuses_even_apparently_idle_unverified_participant(self):
+        self.p.publish(self.p.runtime/'participants/acp-fixture',{'healthy':True,'active_requests':0})
+        with self.assertRaises(work.SealBlocked):self.p.seal()
+        self.assertEqual(self.p.state(),'open')
+
+    def test_seal_refuses_unavailable_participant_registry(self):
+        (self.p.runtime/'participants').rmdir()
+        with self.assertRaises(work.SealBlocked):self.p.seal()
+        self.assertEqual(self.p.state(),'open')
+
+    def test_seal_refuses_unknown_recovery_authority(self):
+        (self.p.runtime/'recover-services').write_text('{}')
+        with self.assertRaises(work.SealBlocked):self.p.seal()
+        self.assertEqual(self.p.state(),'open')
+
+    def test_expired_valid_extension_does_not_permanently_prevent_seal(self):
+        data=self.p.create('manual',100);data['created_at']-=200;data['expires_at']-=200;self.rewrite(data)
+        self.p.seal();self.assertEqual(self.p.state(),'draining')
+        self.assertTrue((self.p.leases/data['id']).exists())
+
+    def test_nonroot_seal_cannot_read_blockers_or_publish_fence(self):
+        with patch.object(work.os,'geteuid',return_value=os.geteuid()+1),patch.object(self.p,'blockers_unlocked') as blockers:
+            with self.assertRaises(PermissionError):self.p.seal()
+        blockers.assert_not_called();self.assertEqual(self.p.state(),'open')
+
+    def test_job_admitted_under_lock_wins_over_concurrent_seal(self):
+        entered=threading.Event();release=threading.Event();result=[];original=self.p.publish
+        def publish(path,data,**kwargs):
+            if path.parent==self.p.leases:
+                entered.set()
+                if not release.wait(5):raise RuntimeError('fixture publication barrier expired')
+            return original(path,data,**kwargs)
+        def job():
+            try:self.job();result.append('job_admitted')
+            except Exception as error:result.append(type(error).__name__)
+        def seal():
+            try:self.p.seal();result.append('sealed')
+            except work.SealBlocked:result.append('seal_deferred')
+        creator=threading.Thread(target=job);sealer=threading.Thread(target=seal)
+        with patch.object(self.p,'publish',side_effect=publish):
+            try:
+                creator.start();self.assertTrue(entered.wait(2));sealer.start()
+            finally:
+                release.set();creator.join(5)
+                if sealer.ident is not None:sealer.join(5)
+        self.assertFalse(creator.is_alive());self.assertFalse(sealer.is_alive())
+        self.assertCountEqual(result,['job_admitted','seal_deferred']);self.assertEqual(self.p.state(),'open')
+
+    def test_seal_check_and_publication_cannot_be_split_by_new_job(self):
+        checked=threading.Event();release=threading.Event();result=[];original=self.p.blockers_unlocked
+        def blockers():
+            found=original();checked.set()
+            if not release.wait(5):raise RuntimeError('fixture seal barrier expired')
+            return found
+        def seal():
+            try:self.p.seal();result.append('sealed')
+            except Exception as error:result.append(type(error).__name__)
+        def job():
+            try:self.job();result.append('job_admitted')
+            except RuntimeError:result.append('job_rejected')
+        sealer=threading.Thread(target=seal);creator=threading.Thread(target=job)
+        with patch.object(self.p,'blockers_unlocked',side_effect=blockers):
+            try:
+                sealer.start();self.assertTrue(checked.wait(2));creator.start()
+            finally:
+                release.set();sealer.join(5)
+                if creator.ident is not None:creator.join(5)
+        self.assertFalse(sealer.is_alive());self.assertFalse(creator.is_alive())
+        self.assertCountEqual(result,['sealed','job_rejected']);self.assertEqual(self.p.state(),'draining')
+        self.assertEqual(self.p.blockers(),[])
+
+    def test_preaction_reopen_requires_true_confirmed_protection(self):
+        for value in [False,None,1,'true']:
+            with self.subTest(value=value),self.assertRaises(PermissionError):
+                self.p.reopen_unstarted('drain-'+'a'*32,protected=value)
+        self.assertEqual(self.p.state(),'open')
+
+    def test_preaction_recovery_never_fences_open_work_or_removes_its_lease(self):
+        data=self.job()
+        with patch.object(self.p,'write_state',wraps=self.p.write_state) as write:
+            self.p.reopen_unstarted('drain-'+'a'*32,protected=True)
+        write.assert_not_called();self.assertEqual(self.p.state(),'open')
+        self.assertTrue((self.p.leases/data['id']).exists())
+
+    def test_preaction_recovery_only_reopens_matching_draining_attempt(self):
+        attempt='drain-'+'a'*32;other='drain-'+'b'*32
+        self.p.seal(attempt);self.p.reopen_unstarted(attempt,protected=True)
+        self.assertEqual(self.p.state(),'open')
+        for state,ident in [('draining',other),('releasing',attempt),('released',attempt)]:
+            with self.subTest(state=state,ident=ident):
+                with self.p.locked():self.p.write_state(state,ident)
+                with self.assertRaises(RuntimeError):self.p.reopen_unstarted(attempt,protected=True)
+                self.assertEqual(self.p.state(),state);self.assertEqual(self.p.attempt_id(),ident)
+
+    def test_preaction_recovery_does_not_retire_unknown_startup_authority(self):
+        attempt='drain-'+'a'*32;self.p.seal(attempt)
+        path=self.p.runtime/'recover-services';path.write_text('{}')
+        with self.assertRaises(RuntimeError):self.p.reopen_unstarted(attempt,protected=True)
+        self.assertTrue(path.exists());self.assertEqual(self.p.state(),'draining')
 
     def test_no_command_or_arguments_stored_in_lease(self):
         data=self.job()

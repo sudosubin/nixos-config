@@ -436,6 +436,8 @@ def drain(config):
             raise RuntimeError("rollback protection unconfirmed; admission remains closed")
         if transaction.record is None:
             raise  # No owned intent/fence; never take over another drain.
+        if transaction.cancel_unstarted(protected=True):
+            raise  # Refused/lost pre-action seal: no new fence or workload IO.
         protocol.reconcile_fence(transaction.record['id'], protected=True)
         transaction.update('recovering')
         recovery = transaction.authority([gateway.manager.unit]) if gateway is not None else nullcontext()

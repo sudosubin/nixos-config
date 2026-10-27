@@ -25,6 +25,10 @@ RUNTIME = Path('/run/spot-schedule-guard')
 NAME = re.compile(r'^(job|manual)-[0-9a-f]{32}$')
 
 
+class SealBlocked(RuntimeError):
+    """Fresh drain refused under the admission lock; no fence was published."""
+
+
 def finite(value):
     return type(value) in (int, float) and math.isfinite(value)
 
@@ -167,13 +171,34 @@ class Protocol:
 
     def seal(self, attempt_id=None):
         with self.locked():
+            if os.geteuid() != self.root_uid:
+                raise PermissionError('only root may fence admission')
             if self.state() != 'open':
                 raise RuntimeError('previous drain needs reconciliation')
+            # The old probe is not authority: work may have been admitted since
+            # it ran. Inspect EVERY blocker and publish the fence under the same
+            # lock as create(). Existing custody wins without briefly rejecting
+            # continuation/input for an already accepted frontend queue.
+            if self.blockers_unlocked():
+                raise SealBlocked('shutdown deferred by existing or unknown work; admission stays open')
             self.write_state('draining', attempt_id)
 
+    def reopen_unstarted(self, attempt_id, protected=False):
+        """Rollback a proved pre-action intent; NEVER create a recovery fence."""
+        with self.locked():
+            if os.geteuid() != self.root_uid or protected is not True:
+                raise PermissionError('confirmed protection required before pre-action recovery')
+            if not isinstance(attempt_id, str) or not re.fullmatch(r'drain-[0-9a-f]{32}', attempt_id):
+                raise ValueError('invalid drain attempt')
+            state = self.state()
+            if state != 'open' and (state != 'draining' or self.attempt_id() != attempt_id):
+                raise RuntimeError('pre-action recovery cannot undo another fence or a release')
+            self._unseal_unlocked(attempt_id if state != 'open' else None)
+
     def reconcile_fence(self, attempt_id, protected=False, released=False):
-        # Closing an open admission is always safe. Reversing a release is not:
-        # the caller must first confirm protected InService membership.
+        # Only recovery of an action-bearing journal may close open admission.
+        # Pre-action intents use reopen_unstarted(), preserving accepted work.
+        # Reversing a release requires confirmed protected InService membership.
         with self.locked():
             if os.geteuid() != self.root_uid:
                 raise PermissionError('only root reconciles drain admission')
@@ -189,20 +214,23 @@ class Protocol:
             elif state in {'releasing', 'released'}:
                 raise RuntimeError('release needs confirmed protection before recovery')
 
+    def _unseal_unlocked(self, attempt_id=None):
+        if os.geteuid() != self.root_uid:
+            raise PermissionError('only root may reopen admission')
+        if os.path.lexists(self.runtime / 'recover-services'):
+            raise RuntimeError('service recovery must finish before admission reopens')
+        if attempt_id is not None and self.attempt_id() != attempt_id:
+            raise RuntimeError('drain fence changed before reopening')
+        (self.runtime / 'draining').unlink(missing_ok=True)
+        directory = os.open(self.runtime, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+
     def unseal(self, attempt_id=None):
         with self.locked():
-            if os.geteuid() != self.root_uid:
-                raise PermissionError('only root may reopen admission')
-            if os.path.lexists(self.runtime / 'recover-services'):
-                raise RuntimeError('service recovery must finish before admission reopens')
-            if attempt_id is not None and self.attempt_id() != attempt_id:
-                raise RuntimeError('drain fence changed before reopening')
-            (self.runtime / 'draining').unlink(missing_ok=True)
-            directory = os.open(self.runtime, os.O_RDONLY | os.O_DIRECTORY)
-            try:
-                os.fsync(directory)
-            finally:
-                os.close(directory)
+            self._unseal_unlocked(attempt_id)
 
     def service_start_allowed(self, unit):
         with self.locked():
