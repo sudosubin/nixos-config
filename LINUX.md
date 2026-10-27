@@ -170,6 +170,20 @@ sudo /run/spot-work status
 - 최신 가드와 admission 초기화만 runtime unit으로 갱신해 실제 운영 Gateway를 읽기 전용으로 관찰함. `/run/spot-schedule-guard/observation-gateway.json`은 armed=false이며 실제 현재 캐시 manifest도 검사함. 운영 prepare/stop/resume는 호출하지 않았고, 앱/OS 재시작이나 재부팅 영속성 검증과는 구별함.
 - 기존 WORKERS/participant blocker를 완화하지 않음. Herdr/PTY/모든 프로세스·생산자, 실제 Kiro frontend, 중단된 drain의 자동 reconcile, 성공 백업 3개 보존, 최신 이미지·홈 전환·운영 종료/깨우기 검증과 남은 임시 도구 정리는 아직 필요함. `work_tracking_verified`와 `armed`는 승인하지 않음.
 
+## 완료된 cold 백업과 최근 성공본 3개 보존 (준비, 운영 미활성)
+
+소스: `spot_backup.py`, `spot-backup-iam.py`, `verify-spot-backup-aws.py`, `verify-spot-backup-restore.py`.
+
+- 가드는 홈을 내린 뒤 해당 UUID의 **모든 mount가 없는지**, 정확한 encrypted EBS가 현재 인스턴스에 attached/DeleteOnTermination=false인지 검사함. create 응답의 pending/암호화 표시는 성공 증거가 아님. 완료 상태·소유 계정·source volume·고정 schema/set/attempt·cold 확인 tag를 다시 읽고, 마지막 release lock 안에서도 성공본을 재검사함.
+- `CreateSnapshot`에는 ClientToken이 없으므로 SDK 자동 재시도를 끔. API 전 root 전용 journal에 attempt를 기록하고 응답 유실 시 동일 tag로 찾음. 불명확한 결과에서 추가 create를 반복하지 않음. 확인된 권한/요청 rate 거절과 실제 수락 여부 미상은 구별함.
+- snapshot 완료 대기에는 강제 종료 마감이 없음. 새 native 시작, 활성 SSM, 승인된 연장/작업, admission·중지 상태 변화가 있으면 protection을 유지하고 홈/서비스 복구 경로로 돌아감. journal은 `/var/lib/spot-schedule-guard/backup.json`이므로 홈이 내려가도 기록 가능함.
+- 성공한 cold/encrypted/completed 일반 백업만 최신 3개 보존. Protected=true와 AMI 참조본은 제외하고 deprecated/disabled AMI도 조회함. 삭제 직전 owner/tag/상태/AMI와 새 성공 anchor를 재확인하며 최종 보존 수까지 관찰해야 완료함. 미확인/실패 orphan은 새 성공본이 있고 24시간 지난 경우에만 정리하며 pending은 지우지 않음.
+- `spot-backup-policy`는 정확한 source volume/set과 필수 tag, 생성 시 tag, 제한된 상태 tag 전이, Protected=false 삭제 조건을 가진 IAM JSON을 **출력만** 함. snapshot ARN의 account 부분은 EC2 규격대로 비어 있음. 운영 IAM에는 아직 설치하지 않았으며 최종 encrypted home ID와 맞춰야 함.
+- 실제 cloud-only worker가 별도 제한 role로 **사용 중이지 않은 encrypted 후보 홈**에서 4개를 생성·완료하고 3개만 남김을 검증함. 같은 set의 protected fixture/실제 AMI 참조 fixture는 보존했고, 기존 production volume create/보호본 delete/보호 tag 변경은 DryRun으로 거절됨을 확인함. production instance/ASG/EIP 제어 권한도 허용되지 않음.
+- 최신 canary 성공본에서 새 encrypted EBS를 복원해 exact NVMe serial/UUID 확인, pinned e2fsprogs 1.47.4의 read-only fsck, private ro,noload mount와 UID1001/캐시 metadata를 검증함. 개인 파일 내용·인증을 출력하거나 앱/모델을 시작하지 않음. 테스트용 복원 EBS·6개 snapshot(보존 동작 중 삭제한 1개 포함)·AMI·role·임시 AssumeRole 허가는 정리했으며 원래 보호 백업은 건드리지 않음.
+- 최종 **217개 단위 + 14개 실제 Linux = 231개 ARM 사례를 skip 없이 실행**함. 실제 API normal path 이후 추가한 엄격한 read-only 보존/AMI 모순 검사는 단위 회귀에 포함하며, 최종 운영 ID로의 백업/복원 재검증은 여전히 필요함.
+- 준비 소스 `/home/persist/nixos-backup-build`, 빌드 결과 `/home/persist/build-results/nixos-backup-prepared`. source 기본 armed=false이며 운영 앱/홈/AMI/LT나 mutating backup IAM을 전환하지 않음. 기존 runtime observer만 계속 동작함. **실제 운영 daily 백업/보존 활성화, 최종 image/home rollout과 전체 작업 추적이 완료된 상태는 아님.**
+
 ## 프로필 복구와 부팅 의존성
 
 소스: `modules/linux/spot-profile-cache.py`, `spot-profile-cache.nix`.
@@ -217,6 +231,7 @@ python3 modules/linux/test-spot-profile-cache.py -v
 python3 modules/linux/test-spot-work.py -v
 python3 modules/linux/test-spot-acp.py -v
 python3 modules/linux/test-spot-gateway.py -v
+python3 modules/linux/test-spot-backup.py -v
 # root Linux sandbox에서 실행 (Mac에서는 skip됨):
 python3 modules/linux/test-spot-work-linux.py -v
 python3 modules/linux/test-spot-acp-linux.py -v
@@ -236,5 +251,5 @@ nix eval --no-write-lock-file --raw \
 
 - EIP는 연결 중에도, 미연결 보유 중에도 public IPv4 요금이 발생함.
 - 스냅샷은 EBS 볼륨과 별도 과금되며 볼륨 삭제 시 자동 삭제되지 않음.
-- 정상 운영용 홈 백업은 cold snapshot과 최근 성공본 3개 보존을 검증한 뒤 활성화. 보호 스냅샷/AMI 참조 스냅샷은 일반 정리 대상에서 제외.
+- 정상 운영용 홈 백업은 최종 운영 encrypted home ID에 맞는 cold snapshot·성공본 3개 보존·복원 및 최소 권한을 검증한 뒤 활성화. 보호 스냅샷/AMI 참조 스냅샷은 일반 정리 대상에서 제외.
 - 안전장치가 종료를 보류하면 EC2 실행료는 계속됨. 별도 스케줄링 요금 0원과 전체 청구액 0원은 다른 개념.

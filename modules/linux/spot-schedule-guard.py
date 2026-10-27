@@ -9,11 +9,13 @@ from __future__ import annotations
 import argparse
 from contextlib import nullcontext
 import spot_gateway
+import spot_backup
 from datetime import datetime, time, timezone
 import fcntl
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import stat
 import subprocess
@@ -60,8 +62,15 @@ def aws(config, service, action, *args):
     for name in ("AWS_PROFILE", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
         env.pop(name, None)
     env.update(AWS_CONFIG_FILE="/dev/null", AWS_SHARED_CREDENTIALS_FILE="/dev/null", AWS_PAGER="", AWS_MAX_ATTEMPTS="3")
-    raw = subprocess.check_output(["aws", service, action, "--region", config["region"], "--output", "json", *args], text=True, timeout=30, env=env)
-    return json.loads(raw) if raw.strip() else {}
+    if service == 'ec2' and action == 'create-snapshot':
+        # EC2 has no ClientToken here. A transport retry could create a second
+        # charged copy; recover the tagged attempt instead of blind SDK retry.
+        env['AWS_MAX_ATTEMPTS'] = '1'
+    result = subprocess.run(["aws", service, action, "--region", config["region"], "--output", "json", *args], capture_output=True, text=True, timeout=30, env=env)
+    if result.returncode:
+        code = re.search(r'An error occurred \(([A-Za-z0-9_.-]+)\)', result.stderr)
+        raise spot_backup.AWSFailure(service, action, code.group(1) if code else 'UnknownTransportOrCliError')
+    return json.loads(result.stdout) if result.stdout.strip() else {}
 
 
 def identity():
@@ -235,6 +244,35 @@ def shutdown_request_current(config):
         raise RuntimeError("shutdown superseded")
 
 
+def backup_cold_check(config):
+    # Check ALL mounts of the configured filesystem, not only /home's target.
+    result = subprocess.run(['findmnt', '-rn', '-S', 'UUID='+config['home_uuid'], '-o', 'TARGET'], capture_output=True, timeout=5)
+    if result.returncode != 1 or result.stdout.strip():
+        raise RuntimeError('home filesystem mounted elsewhere or query unknown')
+    volumes = aws(config, 'ec2', 'describe-volumes', '--volume-ids', config['home_volume']).get('Volumes')
+    if (not isinstance(volumes, list) or len(volumes) != 1
+            or volumes[0].get('VolumeId') != config['home_volume'] or volumes[0].get('Encrypted') is not True):
+        raise RuntimeError('cold source identity/encryption changed')
+    attachments = volumes[0].get('Attachments')
+    if (not isinstance(attachments, list) or len(attachments) != 1
+            or attachments[0].get('InstanceId') != config['instance_id']
+            or attachments[0].get('State') != 'attached'
+            or attachments[0].get('DeleteOnTermination') is not False):
+        raise RuntimeError('cold source attachment changed')
+
+
+def backup_wait_checkpoint(config, protocol, gateway):
+    shutdown_request_current(config)
+    with protocol.locked():
+        if protocol.state() != 'draining' or protocol.blockers_unlocked():
+            raise RuntimeError('backup wait cancelled by work or extension')
+    if gateway is not None:
+        gateway.manager.assert_stopped()
+    states = command('systemctl', 'show', 'user@%d.service' % config['uid'], 'docker.service', '--property=ActiveState', '--value').split()
+    if states != ['inactive', 'inactive']:
+        raise RuntimeError('workload stop state changed during backup')
+
+
 def drain(config):
     """Only reachable after explicit arming, verified replacement, and idle checks."""
     protocol = work_protocol(config)
@@ -244,6 +282,9 @@ def drain(config):
     gateway = None
     try:
         shutdown_request_current(config)
+        backup = spot_backup.configured(config, lambda *args: aws(config, *args),
+            lambda: backup_cold_check(config), lambda: backup_wait_checkpoint(config, protocol, gateway))
+        backup.prepare()
         gateway = spot_gateway.configured(config, protocol)
         if gateway is not None:
             gateway.acquire()
@@ -260,11 +301,12 @@ def drain(config):
         if check.returncode != 1:
             raise RuntimeError("home still mounted or mount query failed")
         command("sync", timeout=20)
-        snapshot = aws(config, "ec2", "create-snapshot", "--volume-id", config["home_volume"], "--description", "Cold persistent home before scheduled ASG scale-in", "--tag-specifications", json.dumps([{"ResourceType":"snapshot","Tags":[{"Key":"ManagedBy","Value":"nixos-spot-schedule"},{"Key":"Purpose","Value":"daily-home"},{"Key":"Protected","Value":"false"}]}]))
-        if not snapshot.get("Encrypted"):
-            raise RuntimeError("snapshot encryption not verified")
+        snapshot = backup.capture()
+        if snapshot.get('Encrypted') is not True or snapshot.get('State') != 'completed':
+            raise RuntimeError('cold backup completion/encryption not verified')
         with protocol.commit():
             shutdown_request_current(config)
+            backup.successful(snapshot['SnapshotId'])
             # No extension acknowledged before this lock can be missed. Never
             # call EC2 Stop/Terminate; ASG owns the irreversible transition.
             protection(config, False)

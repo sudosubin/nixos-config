@@ -160,7 +160,21 @@ class SafetyTests(unittest.TestCase):
             protection.assert_called_once_with(self.config, True)
 
 
+def completed_backup():
+    # These tests cover the guard transition, not the snapshot API. The actual
+    # lifecycle/ownership/retention contracts are tested in test-spot-backup.py.
+    from unittest.mock import MagicMock
+    result=MagicMock()
+    result.capture.return_value={'Encrypted':True,'State':'completed','SnapshotId':'snap-test'}
+    return result
+
+
 class GatewayDrainTests(unittest.TestCase):
+    def setUp(self):
+        self.backup=completed_backup()
+        patcher=patch.object(guard.spot_backup,'configured',return_value=self.backup)
+        patcher.start();self.addCleanup(patcher.stop)
+
     def test_busy_gateway_rolls_back_before_other_services_stop(self):
         from unittest.mock import MagicMock
         cfg={'uid':1001,'instance_id':'i-test'};gateway=MagicMock();gateway.acquire.side_effect=RuntimeError('busy')
@@ -225,6 +239,11 @@ class StartupTests(unittest.TestCase):
 
 
 class FailureTests(unittest.TestCase):
+    def setUp(self):
+        self.backup=completed_backup()
+        patcher=patch.object(guard.spot_backup,'configured',return_value=self.backup)
+        patcher.start();self.addCleanup(patcher.stop)
+
     def test_api_failure_after_protection_never_releases(self):
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:
@@ -245,6 +264,7 @@ class FailureTests(unittest.TestCase):
     def test_snapshot_failure_restores_services_and_keeps_protection(self):
         from types import SimpleNamespace
         cfg = {"uid":1001,"home_volume":"vol-test","instance_id":"i-test"}
+        self.backup.capture.side_effect=RuntimeError('snapshot failed')
         with patch.object(guard, "work_protocol"), patch.object(guard, "drain_recheck"), patch.object(guard, "RUNTIME"), patch.object(guard, "running_window", return_value=False), patch.object(guard, "group_state", return_value={"DesiredCapacity":0,"Instances":[{"InstanceId":"i-test","ProtectedFromScaleIn":True}]}), patch.object(guard, "sessions", return_value=[]), patch.object(guard, "command"), patch.object(guard.subprocess, "run", return_value=SimpleNamespace(returncode=1)) as run, patch.object(guard, "aws", side_effect=RuntimeError("snapshot failed")), patch.object(guard, "protection") as protection:
             with self.assertRaises(RuntimeError):
                 guard.drain(cfg)
@@ -276,13 +296,15 @@ class AdmissionDrainTests(unittest.TestCase):
         self.group_mock=mock('group_state',return_value=self.group);mock('sessions',return_value=[])
         self.recheck=mock('drain_recheck');self.command=mock('command')
         self.run=self.stack.enter_context(patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=1)))
-        self.aws=mock('aws',return_value={'Encrypted':True,'SnapshotId':'snap-test'})
+        self.backup=completed_backup()
+        self.stack.enter_context(patch.object(guard.spot_backup,'configured',return_value=self.backup))
+        self.aws=self.backup.capture
         self.protection=mock('protection');self.status=mock('status')
 
     def test_extension_after_snapshot_cancels_before_release(self):
         def snapshot(*args):
             self.protocol.create('manual',100)
-            return {'Encrypted':True,'SnapshotId':'snap-test'}
+            return {'Encrypted':True,'State':'completed','SnapshotId':'snap-test'}
         self.aws.side_effect=snapshot
         with self.assertRaises(RuntimeError):guard.drain(self.cfg)
         self.protection.assert_called_once_with(self.cfg,True)
@@ -299,6 +321,25 @@ class AdmissionDrainTests(unittest.TestCase):
         self.recheck.side_effect=[None,RuntimeError('new session')]
         with self.assertRaises(RuntimeError):guard.drain(self.cfg)
         self.aws.assert_not_called();self.assertEqual(self.run.call_count,2)
+        self.assertEqual(self.protocol.state(),'open')
+
+    def test_acknowledged_extension_cancels_long_backup_poll(self):
+        self.protocol.seal();self.protocol.create('manual',100)
+        with patch.object(guard,'shutdown_request_current'),patch.object(guard,'command') as command:
+            with self.assertRaises(RuntimeError):guard.backup_wait_checkpoint(self.cfg,self.protocol,None)
+            command.assert_not_called()
+        self.assertTrue(self.protocol.blockers())
+
+    def test_pending_create_reply_cannot_release_protection(self):
+        self.backup.capture.return_value={'Encrypted':True,'State':'pending','SnapshotId':'snap-test'}
+        with self.assertRaises(RuntimeError):guard.drain(self.cfg)
+        self.protection.assert_called_once_with(self.cfg,True)
+        self.assertEqual(self.protocol.state(),'open')
+
+    def test_completed_backup_is_revalidated_inside_final_release_lock(self):
+        self.backup.successful.side_effect=RuntimeError('snapshot disappeared')
+        with self.assertRaises(RuntimeError):guard.drain(self.cfg)
+        self.protection.assert_called_once_with(self.cfg,True)
         self.assertEqual(self.protocol.state(),'open')
 
     def test_success_keeps_admission_closed_and_releases_only_last(self):
@@ -334,6 +375,46 @@ class AdmissionDrainTests(unittest.TestCase):
         self.protection.assert_called_once_with(self.cfg,False)
         self.assertEqual(self.protocol.state(),'released')
         self.assertEqual(self.run.call_count,1)
+
+
+class ColdBackupChecks(unittest.TestCase):
+    def test_any_mount_of_home_UUID_blocks_cold_claim(self):
+        from types import SimpleNamespace
+        with patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout=b'/elsewhere')),patch.object(guard,'aws') as aws:
+            with self.assertRaises(RuntimeError):guard.backup_cold_check({'home_uuid':'uuid'})
+            aws.assert_not_called()
+
+    def test_unknown_mount_query_not_unmounted(self):
+        from types import SimpleNamespace
+        with patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=2,stdout=b'')):
+            with self.assertRaises(RuntimeError):guard.backup_cold_check({'home_uuid':'uuid'})
+
+    def test_cold_source_must_still_be_exact_protected_attachment(self):
+        from types import SimpleNamespace
+        cfg={'home_uuid':'uuid','home_volume':'vol-test','instance_id':'i-test'}
+        for change in [{'InstanceId':'other','State':'attached','DeleteOnTermination':False},{'InstanceId':'i-test','State':'attached','DeleteOnTermination':True}]:
+            with self.subTest(change=change),patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=1,stdout=b'')),patch.object(guard,'aws',return_value={'Volumes':[{'VolumeId':'vol-test','Encrypted':True,'Attachments':[change]}]}):
+                with self.assertRaises(RuntimeError):guard.backup_cold_check(cfg)
+
+    def test_shutdown_superseded_cancels_backup_polling(self):
+        from unittest.mock import MagicMock
+        with patch.object(guard,'shutdown_request_current',side_effect=RuntimeError('new native start')),patch.object(guard,'command') as command:
+            with self.assertRaises(RuntimeError):guard.backup_wait_checkpoint({},MagicMock(),None)
+            command.assert_not_called()
+
+    def test_new_service_activity_during_backup_is_unknown_not_idle(self):
+        from unittest.mock import MagicMock
+        protocol=MagicMock();protocol.state.return_value='draining';protocol.blockers_unlocked.return_value=[]
+        with patch.object(guard,'shutdown_request_current'),patch.object(guard,'command',return_value='active inactive'):
+            with self.assertRaises(RuntimeError):guard.backup_wait_checkpoint({'uid':1001},protocol,None)
+
+    def test_non_idempotent_create_disables_sdk_retry_and_scrubs_operator_credentials(self):
+        from types import SimpleNamespace
+        import os
+        with patch.dict(os.environ,{'AWS_PROFILE':'operator','AWS_ACCESS_KEY_ID':'not-forwarded'}),patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=1,stdout='',stderr='An error occurred (UnauthorizedOperation) PRIVATE_DIAGNOSTIC')) as run:
+            with self.assertRaises(guard.spot_backup.AWSFailure) as error:guard.aws({'region':'ap-northeast-2'},'ec2','create-snapshot')
+            env=run.call_args.kwargs['env'];self.assertEqual(env['AWS_MAX_ATTEMPTS'],'1');self.assertNotIn('AWS_ACCESS_KEY_ID',env);self.assertNotIn('AWS_PROFILE',env)
+            self.assertNotIn('PRIVATE_DIAGNOSTIC',str(error.exception))
 
 
 class MaintenanceTests(unittest.TestCase):

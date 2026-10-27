@@ -14,6 +14,7 @@ let
     cp ${./spot_work.py} "$out/spot_work.py"
     cp ${./spot_gateway.py} "$out/spot_gateway.py"
     cp ${./spot-gateway-rpc.mjs} "$out/spot-gateway-rpc.mjs"
+    cp ${./spot_backup.py} "$out/spot_backup.py"
   '';
   guard = pkgs.writeShellApplication {
     name = "spot-schedule-guard";
@@ -25,6 +26,14 @@ let
     ];
     text = ''
       exec ${pkgs.python3}/bin/python3 ${sources}/spot-schedule-guard.py "$@"
+    '';
+  };
+  backupPolicy = pkgs.writeShellApplication {
+    name = "spot-backup-policy";
+    text = ''
+      exec ${pkgs.python3}/bin/python3 ${./spot-backup-iam.py} \
+        --account ${lib.escapeShellArg cfg.account} --region ${lib.escapeShellArg cfg.region} \
+        --volume ${lib.escapeShellArg cfg.homeVolume} --set ${lib.escapeShellArg cfg.backupSet}
     '';
   };
   settings = {
@@ -39,6 +48,11 @@ let
     uid = 1001;
     gid = 100;
     manifest = "/home/persist/manifests/active.json";
+    backup = {
+      set = cfg.backupSet;
+      keep = 3;
+      journal = "/var/lib/spot-schedule-guard/backup.json";
+    };
   }
   // lib.optionalAttrs config.services.spotProfileCache.enable {
     profile_cache_manifest = "/home/persist/manifests/profile-cache.json";
@@ -71,6 +85,10 @@ in
       type = lib.types.str;
       default = "nixos-ec2-asg";
     };
+    backupSet = lib.mkOption {
+      type = lib.types.strMatching "[a-zA-Z0-9_.-]{1,100}";
+      default = "${cfg.asg}-home";
+    };
     homeVolume = lib.mkOption {
       type = lib.types.str;
       default = "vol-09fea2ff4615b1088";
@@ -82,7 +100,10 @@ in
   };
   config = lib.mkIf cfg.enable {
     services.spotWork.enable = true;
-    environment.systemPackages = [ guard ];
+    environment.systemPackages = [
+      guard
+      backupPolicy
+    ];
     environment.etc."spot-schedule-guard.json".text = builtins.toJSON settings;
     systemd.services.spot-scale-in-protection-ready = {
       description = "Confirm protected InService membership before attaching production data";
@@ -116,6 +137,8 @@ in
         # A timeout must not kill the coordinator during cold backup/recovery.
         # Individual API observations remain bounded and fail closed.
         TimeoutStartSec = "infinity";
+        StateDirectory = "spot-schedule-guard";
+        StateDirectoryMode = "0700";
         UMask = "0077";
         Nice = 10;
         WorkingDirectory = "/run/spot-schedule-guard";
