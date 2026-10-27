@@ -22,10 +22,6 @@
   "workbench.colorTheme": "GitHub Dark Default",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.productIconTheme": "material-product-icons",
-  "material-icon-theme.hidesExplorerArrows": true,
-  "material-icon-theme.files.associations": {
-    "*.gotmpl": "template"
-  },
   "workbench.colorCustomizations": {
     "errorLens.errorBackground": "#ff7b721a",
     "errorLens.errorForeground": "#ff7b72",

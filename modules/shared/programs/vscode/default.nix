@@ -50,16 +50,10 @@ let
 
         echo "${toCss stylesheet}" >> $resources/app/out/vs/workbench/workbench.desktop.main.css
         recalculateChecksum "vs/workbench/workbench.desktop.main.css"
-      '';
-    });
 
-    pkief.material-icon-theme = pkgs.open-vsx.pkief.material-icon-theme.overrideAttrs (attrs: {
-      nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
-
-      preInstall = ''
-        ${attrs.preInstall or ""}
-
-        node ${./scripts/patch-material-icon-theme.js} "${./files/settings.json}"
+        # Cursor realpaths extension resources before its root check, so nix store icon fonts are refused
+        grep -q '".otf",".ttf"' $resources/app/out/main.js
+        sed -i 's/".otf",".ttf"/".otf",".ttf",".woff",".woff2"/' $resources/app/out/main.js
       '';
     });
   };
@@ -118,7 +112,12 @@ in
           typescriptteam.native-preview
         ])
         ++ [
-          overlays.pkief.material-icon-theme
+          (pkgs.open-vsx.pkief.material-icon-theme.override {
+            settings = {
+              hidesExplorerArrows = true;
+              files.associations."*.gotmpl" = "template";
+            };
+          })
         ];
       userSettings = ./files/settings.json;
     };

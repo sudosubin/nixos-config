@@ -10,13 +10,6 @@
     inputs.firefox-addons.overlays.default
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
-      python3Packages = prev.python3Packages.overrideScope (
-        f: p: {
-          toml-fmt-common = f.callPackage ./programs/python/toml-fmt-common { };
-        }
-      );
-    })
-    (final: prev: {
       bash-language-server = prev.bash-language-server.overrideAttrs (attrs: {
         postInstall = (attrs.postInstall or "") + ''
           wrapProgram $out/bin/bash-language-server \
@@ -40,23 +33,22 @@
         else
           prev.firefox-gnome-theme;
     })
-    # Fix: https://github.com/asmvik/yabai/issues/2799
-    (
-      final: prev:
-      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
-        yabai = prev.yabai.overrideAttrs (oldAttrs: {
-          version = "7.1.25-unstable-2026-06-14";
-          src = prev.fetchFromGitHub {
-            owner = "asmvik";
-            repo = "yabai";
-            rev = "dd845723416f5fe92af49fad5ebab00369e07edd";
-            hash = "sha256-RPiGAuJS+tGsexekIzwgKYf/v+kA3lVn0+qMVIMC2Vk=";
+    (final: prev: {
+      open-vsx = prev.open-vsx // {
+        pkief = prev.open-vsx.pkief // {
+          material-icon-theme = final.callPackage ./programs/open-vsx/pkief/material-icon-theme {
+            inherit (prev) open-vsx;
           };
-          postPatch = builtins.replaceStrings [ " -Wl,-no_uuid" ] [ "" ] oldAttrs.postPatch;
-          doInstallCheck = false;
-        });
-      }
-    )
+        };
+      };
+    })
+    (final: prev: {
+      python3Packages = prev.python3Packages.overrideScope (
+        f: p: {
+          toml-fmt-common = f.callPackage ./programs/python/toml-fmt-common { };
+        }
+      );
+    })
     (final: prev: {
       sqlit-tui = prev.sqlit-tui.overridePythonAttrs (attrs: {
         patches = (attrs.patches or [ ]) ++ [ ./patches/sqlit-tui-sort-connections.patch ];
@@ -76,6 +68,23 @@
         '';
       });
     })
+    # Fix: https://github.com/asmvik/yabai/issues/2799
+    (
+      final: prev:
+      lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
+        yabai = prev.yabai.overrideAttrs (oldAttrs: {
+          version = "7.1.25-unstable-2026-06-14";
+          src = prev.fetchFromGitHub {
+            owner = "asmvik";
+            repo = "yabai";
+            rev = "dd845723416f5fe92af49fad5ebab00369e07edd";
+            hash = "sha256-RPiGAuJS+tGsexekIzwgKYf/v+kA3lVn0+qMVIMC2Vk=";
+          };
+          postPatch = builtins.replaceStrings [ " -Wl,-no_uuid" ] [ "" ] oldAttrs.postPatch;
+          doInstallCheck = false;
+        });
+      }
+    )
     (final: prev: {
       inherit (final.callPackages ./build-support/swift { })
         buildSwiftPackage
@@ -93,7 +102,6 @@
       deskpad = final.callPackage ./programs/deskpad { };
       figma-agent = final.callPackage ./programs/figma-agent { };
       gh-attach = final.callPackage ./programs/gh-attach { };
-
       git-spr = final.callPackage ./programs/git-spr { };
       grep-app-cli = final.callPackage ./programs/grep-app-cli { };
       grok-bot = final.callPackage ./programs/grok-bot { };
@@ -102,6 +110,7 @@
       kotlin-lsp-wrapper = final.callPackage ./programs/kotlin-lsp-wrapper { };
       kt-speed-client = final.callPackage ./programs/kt-speed-client { };
       linear-cli = final.callPackage ./programs/linear-cli { };
+      material-icon-theme = final.callPackage ./programs/material-icon-theme { };
       music-decoy = final.callPackage ./programs/music-decoy { };
       nanum-square = final.callPackage ./programs/fonts/nanum-square { };
       nanum-square-round = final.callPackage ./programs/fonts/nanum-square-round { };
@@ -112,9 +121,9 @@
       pyproject-fmt = final.callPackage ./programs/pyproject-fmt { };
       querypie-cli = final.callPackage ./programs/querypie-cli { };
       redisinsight = final.callPackage ./programs/redisinsight { };
+      s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
       sentry = final.callPackage ./programs/sentry { };
       snapzy = final.callPackage ./programs/snapzy { };
-      s-core-dream = final.callPackage ./programs/fonts/s-core-dream { };
       sqlitx = final.callPackage ./programs/sqlitx { };
       zpl-open = final.callPackage ./programs/zpl-open { };
     })
