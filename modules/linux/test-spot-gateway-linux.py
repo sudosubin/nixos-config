@@ -74,8 +74,11 @@ class GatewayCanaryTests(unittest.TestCase):
         public_source=self.base/'source';public_source.mkdir();public_source.chmod(0o755)
         for name in ['spot_work.py','spot_gateway.py','spot-gateway-rpc.mjs']:
             p=public_source/name;shutil.copyfile(Path(__file__).with_name(name),p);p.chmod(0o644)
+        # This fixture exercises the core suspension protocol, not real
+        # providers/tools/MCP/plugins. Do not auto-load unrelated capabilities
+        # (or their native runtimes) from an otherwise empty configuration.
         config=self.home/'openclaw.json'
-        config.write_text(json.dumps({'gateway':{'mode':'local','port':18791,'bind':'loopback','auth':{'mode':'none'}},'channels':{}}))
+        config.write_text(json.dumps({'gateway':{'mode':'local','port':18791,'bind':'loopback','auth':{'mode':'none'}},'channels':{},'plugins':{'enabled':False}}))
         os.chown(config,1001,self.user.pw_gid);config.chmod(0o600)
         self.protocol=gw.work.Protocol(self.base/'runtime',uid=1001,gid=self.user.pw_gid);self.protocol.initialize()
         self.check=self.base/'service-check'
