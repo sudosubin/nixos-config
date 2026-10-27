@@ -65,13 +65,19 @@ def main():
     if resource_name not in expected:raise RuntimeError('resource cage is not part of pinned source')
     sys.dont_write_bytecode=True
     spec=importlib.util.spec_from_file_location('spot_validation',root/resource_name)
-    validation=importlib.util.module_from_spec(spec);spec.loader.exec_module(validation);VALIDATION=validation
+    validation=importlib.util.module_from_spec(spec)
+    resource_bytes=(root/resource_name).read_bytes()
+    if hashlib.sha256(resource_bytes).hexdigest()!=expected[resource_name]:raise RuntimeError('resource code changed before execution')
+    exec(compile(resource_bytes,str(root/resource_name),'exec'),validation.__dict__)  # never an old mutable .pyc
+    VALIDATION=validation
     budget=validation.current()
     if budget is None:
         receipt=validation.launch([sys.executable,str(root/'modules/linux/verify-spot-linux.py'),*sys.argv[1:]],args.output)
         print(json.dumps(receipt),flush=True)
         return  # launch acknowledgement is NEVER an executed/successful regression
     initial_memory=validation.memory_gate()
+    cache_prefix=validation.RUNTIME/budget['id']/'pycache';cache_prefix.mkdir(mode=0o700)
+    sys.pycache_prefix=str(cache_prefix);os.environ['PYTHONPYCACHEPREFIX']=str(cache_prefix)
     os.environ['PATH']='/run/current-system/sw/bin'
     requirements=subprocess.run(['nix-store','--query','--requisites',str(prepared)],check=True,capture_output=True,text=True).stdout.splitlines()
     guard_config=json.loads((prepared/'etc/spot-schedule-guard.json').read_text())

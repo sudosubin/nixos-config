@@ -144,7 +144,11 @@ class ValidationBudgetTests(unittest.TestCase):
                     patch.object(Path,'read_text',return_value='fixture-boot'), \
                     patch.object(validation.subprocess,'run') as run,patch.object(validation,'configure_slice') as configure:
                 receipt=validation.launch(['/nix/store/fixture-python','fixture.py'],root/'result.json')
-            configure.assert_called_once_with(receipt['run_id'])
+                configure.side_effect=validation.Unsafe('injected kernel initialization failure')
+                with self.assertRaises(validation.Unsafe):validation.launch(['/nix/store/fixture-python','never.py'],root/'failed.json')
+                failed=[p for p in runtime.iterdir() if p.name!=receipt['run_id']]
+                self.assertEqual(len(failed),1);self.assertFalse((failed[0]/'ready').exists())
+            self.assertEqual(configure.call_args_list[0].args,(receipt['run_id'],))
             self.assertEqual((runtime/receipt['run_id']/'ready').read_text(),receipt['run_id'])
             self.assertTrue(receipt['verification_started']);self.assertFalse(receipt['all_passed'])
             self.assertFalse(receipt['launch_receipt_is_test_success']);self.assertFalse(receipt['production_rollout'])
