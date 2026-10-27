@@ -6,6 +6,8 @@ network settings or lifecycle operations are applied to the production agent,
 apps, Nix daemon, root/home devices or ASG. A launch receipt is NOT test success.
 """
 import hashlib
+from datetime import datetime,timezone
+import urllib.request
 import json
 import os
 from pathlib import Path
@@ -18,7 +20,10 @@ import uuid
 
 MEMORY_MAX = 1024**3
 MIN_AVAILABLE = 2*1024**3
-POLICIES = {'verify':(MEMORY_MAX,MIN_AVAILABLE),'build':(2*1024**3,4*1024**3)}
+POLICIES = {'verify':(MEMORY_MAX,MIN_AVAILABLE),'build':(2*1024**3,4*1024**3),
+            'canary-build':(6*1024**3,10*1024**3)}
+PRODUCTION_INSTANCE = 'i-0c39eff85c4286b38'
+PROTECTED_VOLUMES = {'vol-065729ef75553a7ec','vol-09fea2ff4615b1088','vol-0b529abe51df1eca1'}
 RUNTIME = Path('/run/spot-validation')
 UNITS = Path('/run/systemd/system')
 CGROUP = Path('/sys/fs/cgroup')
@@ -45,6 +50,92 @@ def memory_gate(purpose='verify'):
     available=available_memory(Path('/proc/meminfo').read_text())
     if available<policy(purpose)[1]:raise Unsafe('insufficient memory headroom; validation deferred, not skipped or passed')
     return available
+
+
+def disposable_identity(document,instance,caller,scheduled,member,now=None):
+    """A larger build budget is ONLY for a tagged, expiring, empty Spot canary.
+
+    API/IMDS failures refuse. No environment/CLI attestation or production
+    instance, role, ASG, source/home volume is a valid substitute.
+    """
+    now=time.time() if now is None else now
+    ident=document.get('instanceId');account='537112465379';region='ap-northeast-2'
+    if (ident==PRODUCTION_INSTANCE or not isinstance(ident,str) or not re.fullmatch('i-[0-9a-f]{17}',ident)
+            or document.get('accountId')!=account or document.get('region')!=region
+            or document.get('imageId')!='ami-0d44956a8229b0dad' or instance.get('InstanceId')!=ident
+            or instance.get('ImageId')!=document['imageId'] or instance.get('State',{}).get('Name')!='running'
+            or instance.get('InstanceLifecycle')!='spot'):
+        raise Unsafe('larger build budget refused outside exact disposable Spot identity')
+    tags={}
+    for row in instance.get('Tags',[]):
+        if row.get('Key') in tags:raise Unsafe('ambiguous disposable tags')
+        tags[row.get('Key')]=row.get('Value')
+    scope=tags.get('ScopeId','')
+    if (not re.fullmatch('[0-9a-f]{12}',scope) or tags.get('ManagedBy')!='nixos-spot-validation'
+            or tags.get('Purpose')!='artifact-test' or tags.get('Disposable')!='true'
+            or tags.get('aws:autoscaling:groupName')!='nixos-spot-proof-'+scope
+            or caller.get('Account')!=account
+            or not caller.get('Arn','').startswith('arn:aws:sts::'+account+':assumed-role/nixos-spot-proof-'+scope+'/')):
+        raise Unsafe('disposable scope, role or ASG not confirmed')
+    try:
+        deadline=datetime.fromisoformat(tags['DisposableUntil'])
+        if deadline.utcoffset() is None:raise ValueError('timezone required')
+        expires=deadline.timestamp()
+    except (KeyError,TypeError,ValueError):raise Unsafe('disposable deadline unknown') from None
+    if not 0<expires-now<=7200:raise Unsafe('disposable build deadline expired or unbounded')
+    group='nixos-spot-proof-'+scope
+    if (member.get('InstanceId')!=ident or member.get('AutoScalingGroupName')!=group
+            or member.get('ProtectedFromScaleIn') is not False or member.get('LifecycleState')!='InService'):
+        raise Unsafe('disposable ASG membership or automatic expiry protection is unknown')
+    valid=[]
+    for action in scheduled:
+        try:
+            when=datetime.fromisoformat(action['StartTime'])
+            if when.utcoffset() is None:continue
+            valid.append(action.get('AutoScalingGroupName')==group and action.get('ScheduledActionName')==group+'-off'
+                         and action.get('Recurrence') in (None,'') and now<when.timestamp()<=expires
+                         and all(type(action.get(key)) is int and action[key]==0 for key in ('MinSize','MaxSize','DesiredCapacity')))
+        except (KeyError,TypeError,ValueError):continue
+    if not any(valid):raise Unsafe('native one-shot canary expiry is not installed')
+    devices=instance.get('BlockDeviceMappings',[])
+    if len(devices)!=1:raise Unsafe('disposable host has unknown attached storage')
+    ebs=devices[0].get('Ebs',{});volume=ebs.get('VolumeId','')
+    if (devices[0].get('DeviceName')!='/dev/xvda' or volume in PROTECTED_VOLUMES
+            or not re.fullmatch('vol-[0-9a-f]{17}',volume) or ebs.get('DeleteOnTermination') is not True):
+        raise Unsafe('disposable root is not isolated from retained storage')
+    return {'account':account,'region':region,'instance':ident,'scope':scope,'expires':expires,
+            'root_volume':volume,'image':document['imageId'],'production':False}
+
+
+def attest_disposable():
+    # Explicit IMDSv2, no proxy; never read or print instance-role credentials.
+    opener=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    request=urllib.request.Request('http://169.254.169.254/latest/api/token',method='PUT',
+                                   headers={'X-aws-ec2-metadata-token-ttl-seconds':'60'})
+    with opener.open(request,timeout=3) as reply:token=reply.read(4096).decode()
+    request=urllib.request.Request('http://169.254.169.254/latest/dynamic/instance-identity/document',
+                                   headers={'X-aws-ec2-metadata-token':token})
+    with opener.open(request,timeout=3) as reply:document=json.loads(reply.read(16384))
+    if document.get('instanceId')==PRODUCTION_INSTANCE:raise Unsafe('production cannot obtain the canary build budget')
+    env={k:v for k,v in os.environ.items() if not k.startswith(('AWS_','AMAZON_'))}
+    env.update({'AWS_DEFAULT_REGION':'ap-northeast-2','AWS_CONFIG_FILE':'/dev/null',
+                'AWS_SHARED_CREDENTIALS_FILE':'/dev/null','AWS_EC2_METADATA_DISABLED':'false'})
+    def query(service,operation,*args):
+        result=subprocess.run(['aws',service,operation,*args,'--region','ap-northeast-2','--output','json'],
+                              env=env,capture_output=True,text=True,timeout=20)
+        if result.returncode:raise Unsafe('disposable API attestation unavailable')
+        return json.loads(result.stdout)
+    caller=query('sts','get-caller-identity')
+    result=query('ec2','describe-instances','--instance-ids',document['instanceId'])
+    rows=[row for reservation in result.get('Reservations',[]) for row in reservation.get('Instances',[])]
+    if len(rows)!=1:raise Unsafe('disposable instance result ambiguous')
+    tags={row['Key']:row['Value'] for row in rows[0].get('Tags',[])}
+    group=tags.get('aws:autoscaling:groupName','')
+    if not re.fullmatch('nixos-spot-proof-[0-9a-f]{12}',group):raise Unsafe('disposable group unknown')
+    scheduled=query('autoscaling','describe-scheduled-actions','--auto-scaling-group-name',group)['ScheduledUpdateGroupActions']
+    members=query('autoscaling','describe-auto-scaling-instances','--instance-ids',document['instanceId'])['AutoScalingInstances']
+    if len(members)!=1:raise Unsafe('disposable ASG instance result ambiguous')
+    return disposable_identity(document,rows[0],caller,scheduled,members[0])
 
 
 def own_group(text):
@@ -97,6 +188,16 @@ def current():
             or owner.get('boot_id')!=Path('/proc/sys/kernel/random/boot_id').read_text().strip()):
         raise Unsafe('validation owner identity does not match kernel cgroup')
     purpose=owner.get('purpose');maximum,minimum=policy(purpose)
+    if purpose=='canary-build':
+        identity=owner.get('disposable',{})
+        if (identity.get('instance')==PRODUCTION_INSTANCE or identity.get('production') is not False
+                or not re.fullmatch('i-[0-9a-f]{17}',identity.get('instance',''))
+                or identity.get('account')!='537112465379' or identity.get('region')!='ap-northeast-2'
+                or identity.get('image')!='ami-0d44956a8229b0dad' or not re.fullmatch('[0-9a-f]{12}',identity.get('scope',''))
+                or identity.get('root_volume') in PROTECTED_VOLUMES
+                or not re.fullmatch('vol-[0-9a-f]{17}',identity.get('root_volume',''))
+                or not 0<identity.get('expires',0)-time.time()<=7200):
+            raise Unsafe('disposable build authority expired or changed')
     leaf=CGROUP/slice_path.lstrip('/')
     limits((leaf/'memory.max').read_text(),(leaf/'memory.swap.max').read_text(),
            (leaf/'memory.oom.group').read_text(),(leaf/'cpu.max').read_text(),Path('/proc/self/oom_score_adj').read_text(),purpose)
@@ -168,6 +269,7 @@ def launch(argv,output,purpose='verify'):
     if sys.platform!='linux' or os.geteuid()!=0:raise Unsafe('root Linux required for validation resource isolation')
     if current() is not None:raise Unsafe('nested validation launch refused')
     maximum,minimum=policy(purpose);memory_gate(purpose)
+    disposable=attest_disposable() if purpose=='canary-build' else None
     output=Path(output)
     if output.exists() or output.is_symlink():raise Unsafe('choose a fresh validation output; previous evidence is never overwritten')
     parent=output.parent.lstat()
@@ -185,6 +287,7 @@ def launch(argv,output,purpose='verify'):
     owner={'schema':2,'purpose':purpose,'id':ident,'slice':slice_name,'driver':driver,'created_at':time.time(),
            'boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
            'definition_sha256':hashlib.sha256(definition).hexdigest(),'output':str(output)}
+    if disposable is not None:owner['disposable']=disposable
     write_new(folder/'owner.json',json.dumps(owner,sort_keys=True).encode())
     log=output.parent/(output.stem+'-'+ident+'.log');write_new(log,b'')
     subprocess.run(['systemctl','daemon-reload'],check=True,capture_output=True,text=True)

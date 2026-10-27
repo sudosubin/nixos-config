@@ -1,5 +1,8 @@
 """Offline validation-budget policy tests. No systemd/AWS/process control."""
 import hashlib
+import io
+import json
+from datetime import datetime,timezone
 import os
 from pathlib import Path
 import sys
@@ -209,6 +212,92 @@ class ValidationBudgetTests(unittest.TestCase):
                 patch.object(validation,'trusted_json',return_value={**self.owner(),'purpose':'build'}):
             budget=validation.current();self.assertEqual(budget['memory_max'],2*1024**3)
             self.assertEqual(budget['purpose'],'build');self.assertEqual(budget['minimum_available'],4*1024**3)
+
+    def disposable(self):
+        scope='b'*12;ident='i-'+'b'*17;group='nixos-spot-proof-'+scope
+        document={'instanceId':ident,'accountId':'537112465379','region':'ap-northeast-2','imageId':'ami-0d44956a8229b0dad'}
+        instance={'InstanceId':ident,'ImageId':document['imageId'],'State':{'Name':'running'},'InstanceLifecycle':'spot',
+                  'BlockDeviceMappings':[{'DeviceName':'/dev/xvda','Ebs':{'VolumeId':'vol-'+'b'*17,'DeleteOnTermination':True}}],
+                  'Tags':[{'Key':k,'Value':v} for k,v in {'ScopeId':scope,'ManagedBy':'nixos-spot-validation','Purpose':'artifact-test',
+                          'Disposable':'true','DisposableUntil':datetime.fromtimestamp(4600,timezone.utc).isoformat(),
+                          'aws:autoscaling:groupName':group}.items()]}
+        caller={'Account':'537112465379','Arn':'arn:aws:sts::537112465379:assumed-role/'+group+'/private-session'}
+        scheduled=[{'AutoScalingGroupName':group,'ScheduledActionName':group+'-off','StartTime':datetime.fromtimestamp(4500,timezone.utc).isoformat(),'MinSize':0,'MaxSize':0,'DesiredCapacity':0}]
+        member={'InstanceId':ident,'AutoScalingGroupName':group,'ProtectedFromScaleIn':False,'LifecycleState':'InService'}
+        return document,instance,caller,scheduled,member
+
+    def test_canary_build_profile_cannot_authorize_fixtures(self):
+        self.assertEqual(validation.policy('canary-build'),(6*1024**3,10*1024**3))
+        with patch.object(validation,'current',return_value={'slice':SLICE,'purpose':'canary-build'}):
+            with self.assertRaises(validation.Unsafe):validation.fixture_properties()
+
+    def test_exact_disposable_identity_requires_native_expiry(self):
+        proof=validation.disposable_identity(*self.disposable(),now=1000)
+        self.assertFalse(proof['production']);self.assertEqual(proof['expires'],4600)
+        self.assertNotIn('credentials',proof)
+
+    def test_production_instance_never_obtains_larger_canary_budget(self):
+        args=list(self.disposable());args[0]['instanceId']=validation.PRODUCTION_INSTANCE
+        with self.assertRaises(validation.Unsafe):validation.disposable_identity(*args,now=1000)
+
+    def test_foreign_account_region_AMI_or_nonspot_identity_refused(self):
+        for where,key,value in [(0,'accountId','other'),(0,'region','other'),(0,'imageId','other'),(1,'InstanceLifecycle','on-demand'),(1,'State',{'Name':'stopped'})]:
+            args=list(self.disposable());args[where][key]=value
+            with self.subTest(key=key),self.assertRaises(validation.Unsafe):validation.disposable_identity(*args,now=1000)
+
+    def test_canary_scope_role_and_unique_tags_are_bound(self):
+        for change in ['role','scope','duplicate']:
+            args=list(self.disposable())
+            if change=='role':args[2]['Arn']='arn:aws:sts::537112465379:assumed-role/nixos-ec2-ssm-role/session'
+            elif change=='scope':args[1]['Tags'][0]['Value']='untrusted'
+            else:args[1]['Tags'].append(args[1]['Tags'][0])
+            with self.subTest(change=change),self.assertRaises(validation.Unsafe):validation.disposable_identity(*args,now=1000)
+
+    def test_disposable_expiry_cannot_be_missing_naive_expired_or_unbounded(self):
+        for stamp in ['missing','1970-01-01T01:00:00',datetime.fromtimestamp(900,timezone.utc).isoformat(),datetime.fromtimestamp(9000,timezone.utc).isoformat()]:
+            args=list(self.disposable());next(row for row in args[1]['Tags'] if row['Key']=='DisposableUntil')['Value']=stamp
+            with self.subTest(stamp=stamp),self.assertRaises(validation.Unsafe):validation.disposable_identity(*args,now=1000)
+
+    def test_retained_or_extra_storage_is_not_a_disposable_root(self):
+        for volume in validation.PROTECTED_VOLUMES:
+            args=list(self.disposable());args[1]['BlockDeviceMappings'][0]['Ebs']['VolumeId']=volume
+            with self.subTest(volume=volume),self.assertRaises(validation.Unsafe):validation.disposable_identity(*args,now=1000)
+        args=list(self.disposable());args[1]['BlockDeviceMappings']*=2
+        with self.assertRaises(validation.Unsafe):validation.disposable_identity(*args,now=1000)
+
+    def test_protected_or_unknown_ASG_membership_cannot_bypass_expiry(self):
+        for key,value in [('ProtectedFromScaleIn',True),('AutoScalingGroupName','nixos-ec2-asg'),('LifecycleState','Pending')]:
+            args=list(self.disposable());args[4][key]=value
+            with self.subTest(key=key),self.assertRaises(validation.Unsafe):validation.disposable_identity(*args,now=1000)
+
+    def test_recurring_missing_or_nonzero_expiry_action_refused(self):
+        args=list(self.disposable());args[3]=[]
+        with self.assertRaises(validation.Unsafe):validation.disposable_identity(*args,now=1000)
+        for key,value in [('DesiredCapacity',1),('MaxSize',1),('MinSize',False),('Recurrence','0 * * * *'),('StartTime',datetime.fromtimestamp(4700,timezone.utc).isoformat())]:
+            args=list(self.disposable());args[3][0][key]=value
+            with self.subTest(key=key),self.assertRaises(validation.Unsafe):validation.disposable_identity(*args,now=1000)
+
+    def test_IMDS_production_refusal_happens_before_AWS_queries(self):
+        document=self.disposable()[0];document['instanceId']=validation.PRODUCTION_INSTANCE
+        opener=SimpleNamespace(open=unittest.mock.Mock(side_effect=[io.BytesIO(b'private-fixture-token'),io.BytesIO(json.dumps(document).encode())]))
+        with patch.object(validation.urllib.request,'build_opener',return_value=opener),patch.object(validation.subprocess,'run') as run:
+            with self.assertRaisesRegex(validation.Unsafe,'production'):validation.attest_disposable()
+        run.assert_not_called()
+
+    def test_canary_launch_attests_before_creating_any_cgroup_or_ready_file(self):
+        with patch.object(validation.sys,'platform','linux'),patch.object(validation.os,'geteuid',return_value=0), \
+                patch.object(validation,'current',return_value=None),patch.object(validation,'memory_gate') as gate, \
+                patch.object(validation,'attest_disposable',side_effect=validation.Unsafe('no authority')),patch.object(validation.subprocess,'run') as run:
+            with self.assertRaises(validation.Unsafe):validation.launch(['never-started'],Path('/no-write'),'canary-build')
+        gate.assert_called_once_with('canary-build');run.assert_not_called()
+
+    def test_canary_current_scope_rejects_expired_attestation(self):
+        files=self.files();files[str(validation.CGROUP/LEAF.lstrip('/')/'memory.max')]=str(6*1024**3)
+        proof=validation.disposable_identity(*self.disposable(),now=1000);owner={**self.owner(),'purpose':'canary-build','disposable':proof}
+        with patch.object(Path,'read_text',autospec=True,side_effect=lambda p:files[str(p)]),patch.object(validation,'trusted_json',return_value=owner),patch.object(validation.time,'time',return_value=1000):
+            self.assertEqual(validation.current()['memory_max'],6*1024**3)
+        with patch.object(Path,'read_text',autospec=True,side_effect=lambda p:files[str(p)]),patch.object(validation,'trusted_json',return_value=owner),patch.object(validation.time,'time',return_value=5000):
+            with self.assertRaises(validation.Unsafe):validation.current()
 
     def test_definition_cleanup_does_not_stop_or_kill_running_tasks(self):
         with tempfile.TemporaryDirectory() as tmp:
