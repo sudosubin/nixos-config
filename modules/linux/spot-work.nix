@@ -7,12 +7,13 @@
 }:
 let
   cfg = config.services.spotWork;
-  tool = pkgs.writeShellApplication {
-    name = "spot-work";
-    text = ''
-      exec ${pkgs.python3}/bin/python3 ${./spot_work.py} "$@"
-    '';
-  };
+  # No shell/PYTHONPATH/user-site hooks may run before the admission boundary.
+  # The target still receives its requested environment AFTER a lease exists.
+  tool = pkgs.writeScriptBin "spot-work" ''
+    #!${pkgs.python3}/bin/python3 -I
+    import runpy
+    runpy.run_path("${./spot_work.py}", run_name="__main__")
+  '';
 in
 {
   options.services.spotWork = {

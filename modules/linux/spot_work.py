@@ -377,8 +377,8 @@ class Protocol:
     def heartbeat(self, data):
         with self.locked():
             old, owner = read_record(self.leases / data['id'], {os.geteuid()})
-            if old['id'] != data['id'] or old['kind'] != 'job' or owner != data['uid']:
-                raise ValueError('job lease changed unexpectedly')
+            if old != data or old.get('kind') != 'job' or owner != data['uid']:
+                raise ValueError('job lease changed unexpectedly; heartbeat will not overwrite unknown custody')
             data['heartbeat_at'] = time.time()
             self.publish(self.leases / data['id'], data)
 
@@ -390,6 +390,29 @@ class Protocol:
             if data.get('id') != ident or (data.get('kind') != 'manual' and not job_finished):
                 raise ValueError('running/unknown job cannot be cancelled as an extension')
             (self.leases / ident).unlink()
+
+    def finish_job(self, lease):
+        """Retire ONLY this live wrapper's unchanged lease after proved completion.
+
+        This is not an administrative force-clear or a descendant/idle probe.
+        run_job supplies the kernel-wait proof; changed/unknown custody stays.
+        """
+        with self.locked():
+            if (not isinstance(lease, dict) or not isinstance(lease.get('id'), str)
+                    or not re.fullmatch(r'job-[0-9a-f]{32}', lease['id'])
+                    or lease.get('kind') != 'job' or lease.get('state') != 'running'
+                    or type(lease.get('schema')) is not int or lease['schema'] != 1
+                    or type(lease.get('uid')) is not int or lease['uid'] != os.geteuid()
+                    or lease.get('boot_id') != self.boot_id
+                    or type(lease.get('pid')) is not int or lease['pid'] != os.getpid()
+                    or type(lease.get('pid_start')) is not int or lease['pid_start'] <= 0
+                    or lease['pid_start'] != process_start(os.getpid())
+                    or not finite(lease.get('created_at')) or not finite(lease.get('heartbeat_at'))):
+                raise RuntimeError('job completion owner unknown; custody retained')
+            old, owner = read_record(self.leases / lease['id'], {os.geteuid()})
+            if owner != lease['uid'] or old != lease:
+                raise RuntimeError('job completion record changed; custody retained')
+            (self.leases / lease['id']).unlink()
 
     @contextmanager
     def commit(self):
@@ -409,6 +432,21 @@ def subreaper():
     libc = ctypes.CDLL(None, use_errno=True)
     if libc.prctl(36, 1, 0, 0, 0) != 0:
         raise OSError(ctypes.get_errno(), 'cannot enable child subreaper')
+    active = ctypes.c_int()
+    if libc.prctl(37, ctypes.byref(active), 0, 0, 0) != 0 or active.value != 1:
+        raise RuntimeError('child subreaper ownership not confirmed')
+
+
+def wait_descendants():
+    # Linux __WALL includes clone children whose exit signal is not SIGCHLD.
+    # A default waitpid/ECHILD is not a complete child-set observation for them.
+    while True:
+        try:
+            pid, status = os.waitpid(-1, 0x40000000)
+        except ChildProcessError:
+            return
+        if pid <= 0:
+            raise RuntimeError('descendant completion unknown; custody retained')
 
 
 def run_job(protocol, argv):
@@ -419,6 +457,7 @@ def run_job(protocol, argv):
     child = None
     done = threading.Event()
     completed = False
+    spawn_attempted = False
     previous = {}
     pending_signals = []
 
@@ -445,17 +484,16 @@ def run_job(protocol, argv):
         # and cancels; a drain preceding create() rejects the command entirely.
         if pending_signals:
             return 128 + pending_signals[-1]
+        # An exception is not proof that no native process was created. Mark
+        # the attempt BEFORE entering Popen; an uncertain receipt keeps custody.
+        spawn_attempted = True
         child = subprocess.Popen(argv, start_new_session=True)
         for signum in pending_signals:
             forward(signum, None)
         thread = threading.Thread(target=heartbeat, daemon=True)
         thread.start()
         result = child.wait()
-        while True:
-            try:
-                os.waitpid(-1, 0)
-            except ChildProcessError:
-                break
+        wait_descendants()
         completed = True
         return result if result >= 0 else 128 - result
     finally:
@@ -464,8 +502,8 @@ def run_job(protocol, argv):
             thread.join()
         for signum, handler in previous.items():
             signal.signal(signum, handler)
-        if completed or child is None:
-            protocol.remove(lease['id'], job_finished=True)
+        if completed or not spawn_attempted:
+            protocol.finish_job(lease)
 
 
 def main(protocol=None):

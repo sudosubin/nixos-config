@@ -80,11 +80,15 @@ def main():
     openssl=[Path(x)/'bin/openssl' for x in requirements if (Path(x)/'bin/openssl').is_file()]
     if not openssl:raise RuntimeError('compiled OpenSSL runtime missing; signature tests cannot skip')
     os.environ['PATH']=':'.join(sorted({str(p.parent) for p in openssl}))+':/run/current-system/sw/bin'
+    launcher=(prepared/'sw/bin/spot-work').resolve(strict=True)
+    if not launcher.read_text().splitlines()[0].endswith('/bin/python3 -I'):
+        raise RuntimeError('generic CLI must start directly in isolated Python, without shell/env startup hooks')
+    launchers={str(launcher):sha(launcher)}
     state={'schema':1,'timestamp':time.time(),'prepared_system':str(prepared),'source_root':str(root),
-           'source_sha256':actual,'compiled_source_sha256':compiled,'suites':[],'executed':0,'unit_cases':0,
+           'source_sha256':actual,'compiled_source_sha256':compiled,'compiled_launcher_sha256':launchers,'suites':[],'executed':0,'unit_cases':0,
            'root_linux_cases':0,'all_passed':False,'production_armed':False,'full_work_tracking_verified':False,
            'production_rollout':False,'OS_boot_verified':False,'prepared_guard_armed_false_verified':True,
-           'scope':'configured-profile signed cache integrity/repair/retention and previous isolated regressions; '
+           'scope':'generic job uncertain-spawn/bound-retirement/all-child waits and configured-profile cache plus previous isolated regressions; '
                    'NOT all producers, real provider/crash output, raw-I/O fencing, boot, migration or actual shutdown/wake'}
     def save():
         tmp=args.output.with_suffix('.tmp')
@@ -95,10 +99,12 @@ def main():
         fd=os.open(args.output.parent,os.O_RDONLY|os.O_DIRECTORY)
         try:os.fsync(fd)
         finally:os.close(fd)
-    base=[('work',50),('schedule-guard',82),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
-          ('drain',29),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',7),('acp-linux',9),
+    base=[('work',59),('schedule-guard',82),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
+          ('drain',29),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',12),('acp-linux',9),
           ('gateway-linux',7),('cold-linux',8)]
     commands=[(name,count,[sys.executable,'-W','error::ResourceWarning',str(root/'modules/linux'/('test-spot-'+name+'.py')),'-v']) for name,count in base]
+    for name,count,command in commands:
+        if name=='work-linux':command.extend(['--tool',str(prepared/'sw/bin/spot-work')])
     commands.append(('cache-linux',9,[sys.executable,'-W','error::ResourceWarning',str(root/'modules/linux/test-spot-cache-linux.py')]))
     native=['--frontend','/nix/store/bn6yjl0rgrd0yqxk3cbkkamjcxg9h47x-kiro-cli-2.10.0/bin/kiro-cli',
             '--backend','/nix/store/bn6yjl0rgrd0yqxk3cbkkamjcxg9h47x-kiro-cli-2.10.0/bin/kiro-cli-chat',
@@ -127,7 +133,7 @@ def main():
         passed=result.returncode==0 and executed==count and clean and success
         row={'suite':name,'command':command,'expected':count,'executed':executed,'returncode':result.returncode,
              'stdout':result.stdout,'stderr':result.stderr,'no_skips_or_resource_warnings':clean,'passed':passed}
-        if name in ('native-kiro-linux','cache-linux'):
+        if name in ('native-kiro-linux','cache-linux','work-linux'):
             scope=json.loads(result.stdout.strip().splitlines()[-1]);row['scope']=scope
             passed=passed and scope['skipped']==0 and scope['failures']==0 and scope['errors']==0
             passed=passed and scope['native_integration_cases' if name=='native-kiro-linux' else 'tests']==count
@@ -136,11 +142,13 @@ def main():
         state['root_linux_cases' if name.endswith('-linux') else 'unit_cases']+=max(0,executed)
         save();print(json.dumps({'suite':name,'executed':executed,'passed':passed}),flush=True)
         if not passed:raise RuntimeError('suite failed; COMPLETE stdout/stderr preserved: '+name)
-    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(468,417,51):
+    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(482,426,56):
         raise RuntimeError('executed counts do not match the complete scope')
     if {name:sha(root/name) for name in expected}!=actual:raise RuntimeError('source changed during verification')
     for name,value in compiled.items():
         if sha(Path(name))!=value:raise RuntimeError('immutable source changed during verification')
+    for name,value in launchers.items():
+        if sha(Path(name))!=value:raise RuntimeError('immutable launcher changed during verification')
     state['all_passed']=True;state['finished_at']=time.time();save()
     print(json.dumps({k:v for k,v in state.items() if k not in ['suites','source_sha256','compiled_source_sha256']}),flush=True)
 

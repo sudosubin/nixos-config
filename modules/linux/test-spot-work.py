@@ -109,13 +109,21 @@ class AdmissionTests(unittest.TestCase):
         self.p.heartbeat(data)
         self.assertEqual(self.p.blockers()[0]['reason'], 'running_job')
 
+    def test_heartbeat_cannot_heal_changed_unknown_ownership(self):
+        data=self.job();changed={**data,'boot_id':'other'};self.rewrite(changed)
+        with self.assertRaisesRegex(ValueError,'will not overwrite'):self.p.heartbeat(data)
+        saved,_=work.read_record(self.p.leases/data['id'],{os.geteuid()})
+        self.assertEqual(saved,changed);self.assertEqual(self.p.blockers()[0]['reason'],'invalid_lease_unknown')
+
     def test_job_cannot_be_cancelled_as_an_extension(self):
         data=self.job()
         with self.assertRaises(ValueError): self.p.remove(data['id'])
         self.assertTrue(self.p.blockers())
 
-    def test_completed_wrapper_can_remove_own_job(self):
-        data=self.job(); self.p.remove(data['id'], job_finished=True); self.assertEqual(self.p.blockers(), [])
+    def test_completed_wrapper_can_remove_own_unchanged_bound_job(self):
+        data=self.job()
+        with patch.object(work,'process_start',return_value=123):self.p.finish_job(data)
+        self.assertEqual(self.p.blockers(), [])
 
     def test_cancel_manual(self):
         data=self.p.create('manual', 100); self.p.remove(data['id']); self.assertEqual(self.p.blockers(), [])
@@ -216,10 +224,71 @@ class AdmissionTests(unittest.TestCase):
             work.run_job(self.p,['not-executed'])
         self.assertTrue(self.p.blockers())
 
-    def test_spawn_failure_releases_only_unstarted_job(self):
-        with patch.object(work,'subreaper'),patch.object(work,'process_start',return_value=123),patch.object(work.subprocess,'Popen',side_effect=OSError('no binary')),self.assertRaises(OSError):
+    def test_spawn_exception_is_not_proof_no_process_was_started(self):
+        with patch.object(work,'subreaper'),patch.object(work,'process_start',return_value=123),patch.object(work.subprocess,'Popen',side_effect=OSError('uncertain constructor result')),self.assertRaises(OSError):
             work.run_job(self.p,['not-executed'])
-        self.assertEqual(self.p.blockers(),[])
+        self.assertTrue(self.p.blockers())
+        with self.assertRaises(work.SealBlocked):self.p.seal()
+        self.assertEqual(self.p.state(),'open')
+
+    def test_signal_before_any_spawn_is_proved_unstarted_and_can_retire(self):
+        delivered=[]
+        def install(signum,handler):
+            if callable(handler) and not delivered:
+                delivered.append(signum);handler(work.signal.SIGTERM,None)
+            return work.signal.SIG_DFL
+        with patch.object(work,'subreaper'),patch.object(work,'process_start',return_value=123), \
+                patch.object(work.signal,'signal',side_effect=install),patch.object(work.subprocess,'Popen') as spawn:
+            self.assertEqual(work.run_job(self.p,['not-executed']),128+work.signal.SIGTERM)
+        spawn.assert_not_called();self.assertEqual(self.p.blockers(),[])
+
+    def test_signal_setup_failure_before_spawn_can_retire_only_own_unstarted_lease(self):
+        with patch.object(work,'subreaper'),patch.object(work,'process_start',return_value=123), \
+                patch.object(work.signal,'signal',side_effect=OSError('private handler setup failure')), \
+                patch.object(work.subprocess,'Popen') as spawn:
+            with self.assertRaises(OSError):work.run_job(self.p,['not-executed'])
+        spawn.assert_not_called();self.assertEqual(self.p.blockers(),[])
+
+    def test_descendant_wait_includes_non_SIGCHLD_clone_children(self):
+        with patch.object(work.os,'waitpid',side_effect=[(456,0),ChildProcessError]) as wait:
+            work.wait_descendants()
+        self.assertEqual([call.args for call in wait.call_args_list],[(-1,0x40000000),(-1,0x40000000)])
+
+    def test_unknown_kernel_wait_result_does_not_retire_job(self):
+        class Child:
+            pid=123
+            def wait(self):return 0
+        with patch.object(work,'subreaper'),patch.object(work,'process_start',return_value=123), \
+                patch.object(work.subprocess,'Popen',return_value=Child()),patch.object(work.os,'waitpid',return_value=(0,0)):
+            with self.assertRaisesRegex(RuntimeError,'completion unknown'):work.run_job(self.p,['not-executed'])
+        self.assertTrue(self.p.blockers())
+
+    def test_finished_process_cannot_erase_a_changed_custody_record(self):
+        data=self.job()
+        for change in [{'boot_id':'other'},{'heartbeat_at':data['heartbeat_at']+1},{'unexpected':'unknown'}]:
+            self.rewrite({**data,**change})
+            with self.subTest(change=change),patch.object(work,'process_start',return_value=123):
+                with self.assertRaisesRegex(RuntimeError,'record changed'):self.p.finish_job(data)
+            self.assertTrue((self.p.leases/data['id']).exists())
+
+    def test_same_uid_different_process_cannot_finish_other_job(self):
+        data=self.job();data['pid']+=1;self.rewrite(data)
+        with patch.object(work,'process_start',return_value=123):
+            with self.assertRaisesRegex(RuntimeError,'owner unknown'):self.p.finish_job(data)
+        self.assertTrue((self.p.leases/data['id']).exists())
+
+    def test_pid_generation_change_cannot_finish_old_job(self):
+        data=self.job()
+        with patch.object(work,'process_start',return_value=124):
+            with self.assertRaisesRegex(RuntimeError,'owner unknown'):self.p.finish_job(data)
+        self.assertTrue((self.p.leases/data['id']).exists())
+
+    def test_malformed_completion_identity_has_no_force_clear_path(self):
+        data=self.job()
+        for change in [{'id':None},{'id':'manual-'+'a'*32},{'pid':True},{'uid':True},{'pid_start':0},{'heartbeat_at':float('nan')}]:
+            with self.subTest(change=change),patch.object(work,'process_start',return_value=123):
+                with self.assertRaisesRegex(RuntimeError,'owner unknown'):self.p.finish_job({**data,**change})
+            self.assertTrue((self.p.leases/data['id']).exists())
 
     def test_seal_refuses_live_manual_extension_without_closing_admission(self):
         self.p.create('manual',100)

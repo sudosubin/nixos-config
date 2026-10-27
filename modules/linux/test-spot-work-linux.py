@@ -1,8 +1,12 @@
 """Root-only Linux integration tests, using an isolated /run directory.
 
 Never changes real admission, services, AWS state, home, or user configuration.
-Only tiny test-owned commands run as UID 1001; all have finite sleep durations.
+Only tiny test-owned commands run as UID 1001; all have finite waits. The CLI
+entry creates private PID/mount/network namespaces and empty homes/run before
+executing cases. No production process/service/config/credential is inherited.
 """
+import argparse
+import ctypes
 import importlib.util
 import json
 import os
@@ -26,13 +30,15 @@ work=importlib.util.module_from_spec(spec);spec.loader.exec_module(work)
 class LinuxAdmissionTests(unittest.TestCase):
     def setUp(self):
         try:self.user=pwd.getpwuid(1001)
-        except KeyError:self.skipTest('test UID 1001 not present')
+        except KeyError:self.fail('test UID 1001 required; no skip-as-proof')
         self.base=Path(tempfile.mkdtemp(prefix='spot-work-validation-',dir='/run'));self.base.chmod(0o755)
         self.module=self.base/'spot_work.py'
         for name in ['spot_work.py','spot_drain.py']:
             target=self.base/name;shutil.copyfile(Path(__file__).with_name(name),target);target.chmod(0o644)
         self.protocol=work.Protocol(self.base/'runtime',uid=1001,gid=self.user.pw_gid);self.protocol.initialize()
         self.clients=[]
+        self.home=self.base/'home';self.home.mkdir();os.chown(self.home,1001,self.user.pw_gid);self.home.chmod(0o700)
+        self.data=self.base/'data';self.data.mkdir();os.chown(self.data,1001,self.user.pw_gid);self.data.chmod(0o700)
 
     def tearDown(self):
         for child in self.clients:
@@ -40,16 +46,28 @@ class LinuxAdmissionTests(unittest.TestCase):
             child.wait(timeout=5)
             for stream in [child.stdout,child.stderr]:
                 if stream is not None and not stream.closed:stream.close()
-        # Background descendants in these fixtures sleep at most 1.5 seconds.
+        # Non-barrier descendants sleep at most 1.5s; private barriers are released in finally.
         time.sleep(1.6)
         shutil.rmtree(self.base)
 
-    def client(self,*args):
-        code="import importlib.util,sys;spec=importlib.util.spec_from_file_location('work',sys.argv[1]);w=importlib.util.module_from_spec(spec);spec.loader.exec_module(w);p=w.Protocol(sys.argv[2],uid=1001,gid=int(sys.argv[3]));sys.argv=['spot-work']+sys.argv[4:];sys.exit(w.main(p))"
-        def user():os.initgroups(self.user.pw_name,self.user.pw_gid);os.setgid(self.user.pw_gid);os.setuid(1001)
-        env=os.environ.copy();env.update(HOME=self.user.pw_dir,BASH_ENV='/dev/null',ENV='/dev/null')
-        child=subprocess.Popen([sys.executable,'-c',code,str(self.module),str(self.protocol.runtime),str(self.user.pw_gid),*args],env=env,cwd='/',preexec_fn=user,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,start_new_session=True)
+    def user_command(self,argv):
+        # Do not fork a Python preexec_fn while a seal/barrier thread is live.
+        return ['setpriv','--reuid=1001','--regid='+str(self.user.pw_gid),'--init-groups','--no-new-privs',*argv]
+
+    def environment(self):
+        return {'PATH':'/run/current-system/sw/bin','HOME':str(self.home),'USER':self.user.pw_name,
+                'LOGNAME':self.user.pw_name,'BASH_ENV':'/dev/null','ENV':'/dev/null',
+                'PYTHONDONTWRITEBYTECODE':'1','PYTHONWARNINGS':'error::ResourceWarning'}
+
+    def client(self,*args,inject=''):
+        code="import ctypes,importlib.util,json,os,sys,time\nfrom pathlib import Path\nspec=importlib.util.spec_from_file_location('work',sys.argv[1]);w=importlib.util.module_from_spec(spec);spec.loader.exec_module(w);p=w.Protocol(sys.argv[2],uid=1001,gid=int(sys.argv[3]))\n"+inject+"\nsys.argv=['spot-work']+sys.argv[4:];sys.exit(w.main(p))"
+        child=subprocess.Popen(self.user_command([sys.executable,'-I','-c',code,str(self.module),str(self.protocol.runtime),str(self.user.pw_gid),*args]),env=self.environment(),cwd='/',stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,start_new_session=True)
         self.clients.append(child);return child
+
+    def wait_file(self,path):
+        deadline=time.monotonic()+5
+        while not path.exists():
+            self.assertLess(time.monotonic(),deadline,'private fixture marker missing');time.sleep(.01)
 
     def wait_lease(self):
         for i in range(100):
@@ -151,6 +169,95 @@ class LinuxAdmissionTests(unittest.TestCase):
         self.assertGreaterEqual(time.monotonic()-started,1.1)
         self.assertEqual(self.protocol.blockers(),[])
 
+    def barrier_body(self,started,release,finished):
+        return ('import os,time\nfrom pathlib import Path\n'
+                +f'Path({str(started)!r}).write_text(str(os.getpid()))\n'
+                +'limit=time.monotonic()+10\n'
+                +f'while not Path({str(release)!r}).exists():\n'
+                +' if time.monotonic()>limit:raise RuntimeError("private fixture release missing")\n time.sleep(.01)\n'
+                +f'Path({str(finished)!r}).write_text("finished")\n')
+
+    def test_uncertain_spawn_receipt_preserves_actual_live_work_and_sticky_custody(self):
+        started=self.data/'started';release=self.data/'release';finished=self.data/'finished'
+        inject='''
+def uncertain_spawn(argv,**kwargs):
+ pid=os.fork()
+ if pid==0:
+  os.setsid();os.execv(argv[0],argv)
+ raise OSError('private fixture receipt lost AFTER real fork')
+w.subprocess.Popen=uncertain_spawn
+'''
+        child=self.client('run','--',sys.executable,'-I','-c',self.barrier_body(started,release,finished),inject=inject)
+        try:
+            self.wait_file(started);child.wait(timeout=5);self.assertNotEqual(child.returncode,0)
+            self.assertFalse(finished.exists());self.assertTrue(self.protocol.blockers())
+            with self.assertRaises(work.SealBlocked):self.protocol.seal()
+            self.assertEqual(self.protocol.state(),'open')
+            self.assertEqual(self.protocol.blockers(now=time.time()+1000)[0]['reason'],'stale_job_unknown')
+        finally:release.touch()
+        out,err=child.communicate(timeout=5);self.wait_file(finished)
+        self.assertIn('receipt lost AFTER real fork',err);self.assertNotIn('ResourceWarning',err)
+        self.assertTrue(self.protocol.blockers())  # dead wrapper is never retrospectively trusted
+
+    def test_missing_executable_is_not_an_automatic_unknown_lease_clear(self):
+        child=self.client('run','--','/does-not-exist/spot-private-job-fixture')
+        out,err=child.communicate(timeout=5);self.assertNotEqual(child.returncode,0)
+        self.assertTrue(self.protocol.blockers())
+        with self.assertRaises(work.SealBlocked):self.protocol.seal()
+        self.assertEqual(self.protocol.state(),'open')
+
+    def test_real_non_SIGCHLD_clone_child_is_waited_before_job_retirement(self):
+        started=self.data/'clone-started';release=self.data/'clone-release';finished=self.data/'clone-finished'
+        body=self.barrier_body(started,release,finished)
+        inject='''
+original=w.subprocess.Popen
+def extra_clone(argv,**kwargs):
+ child=original(argv,**kwargs)
+ machine=os.uname().machine
+ number={'aarch64':220,'x86_64':56}.get(machine)
+ if number is None:raise RuntimeError('native clone ABI required; not a skipped proof')
+ libc=ctypes.CDLL(None,use_errno=True);pid=libc.syscall(number,0,0,0,0,0)
+ if pid<0:raise OSError(ctypes.get_errno(),'fixture clone failed')
+ if pid==0:os.execv(sys.executable,[sys.executable,'-I','-c',BODY])
+ return child
+w.subprocess.Popen=extra_clone
+'''.replace('BODY',repr(body))
+        child=self.client('run','--',sys.executable,'-I','-c','pass',inject=inject)
+        try:
+            self.wait_file(started);time.sleep(.15)
+            self.assertIsNone(child.poll());self.assertTrue(self.protocol.blockers());self.assertFalse(finished.exists())
+            with self.assertRaises(work.SealBlocked):self.protocol.seal()
+        finally:release.touch()
+        out,err=child.communicate(timeout=5);self.assertEqual(child.returncode,0,err)
+        self.assertTrue(finished.exists());self.assertEqual(self.protocol.blockers(),[])
+
+    def test_finished_job_does_not_delete_changed_boot_bound_custody(self):
+        started=self.data/'bound-started';release=self.data/'bound-release';finished=self.data/'bound-finished'
+        child=self.client('run','--',sys.executable,'-I','-c',self.barrier_body(started,release,finished))
+        try:
+            self.wait_file(started);records=self.wait_lease();ident=records[0]['id']
+            data,_=work.read_record(self.protocol.leases/ident,{1001});data['boot_id']='private-fixture-other-boot'
+            self.protocol.publish(self.protocol.leases/ident,data);os.chown(self.protocol.leases/ident,1001,self.user.pw_gid)
+        finally:release.touch()
+        out,err=child.communicate(timeout=5);self.assertNotEqual(child.returncode,0)
+        self.assertTrue(finished.exists());self.assertIn('record changed',err)
+        self.assertEqual(self.protocol.blockers()[0]['reason'],'invalid_lease_unknown')
+
+    def test_actual_immutable_CLI_ignores_shell_and_python_startup_hooks_before_fenced_acceptance(self):
+        self.assertIsNotNone(TOOL,'compiled CLI is required, not a skipped proof')
+        default=work.Protocol();subprocess.run([str(TOOL),'initialize'],env=self.environment(),check=True,capture_output=True)
+        default.seal()
+        startup=self.data/'startup-marker';payload=self.data/'payload-marker';module=self.data/'sitecustomize.py'
+        module.write_text('from pathlib import Path\nPath('+repr(str(startup))+').write_text("MUST_NOT_RUN")\n')
+        bash=self.data/'bash-hook';bash.write_text('printf forbidden > '+str(startup)+'\n')
+        env=self.environment();env.update(PYTHONPATH=str(self.data),BASH_ENV=str(bash))
+        child=subprocess.Popen(self.user_command([str(TOOL),'run','--','/bin/sh','-c','printf forbidden > '+str(payload)]),env=env,
+                               cwd='/',stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+        self.clients.append(child);out,err=child.communicate(timeout=5)
+        self.assertEqual(child.returncode,75,err);self.assertIn('admission closed',err)
+        self.assertFalse(startup.exists());self.assertFalse(payload.exists());self.assertEqual(default.blockers(),[])
+        default.unseal()
+
     def test_manual_extension_during_drain_acknowledged_and_cancels_commit(self):
         self.protocol.seal();child=self.client('extend','--seconds','60')
         out,err=child.communicate(timeout=5);self.assertEqual(child.returncode,0,err)
@@ -171,4 +278,38 @@ class LinuxAdmissionTests(unittest.TestCase):
         time.sleep(1.6);self.assertTrue(self.protocol.blockers())
 
 
-if __name__=='__main__':unittest.main()
+TOOL=None
+
+
+def main():
+    global TOOL
+    parser=argparse.ArgumentParser();parser.add_argument('--inside',action='store_true')
+    parser.add_argument('--tool',type=Path,required=True);parser.add_argument('-v',action='store_true')
+    args=parser.parse_args()
+    if sys.platform!='linux' or os.geteuid()!=0:raise RuntimeError('root Linux required; no skip-as-proof')
+    TOOL=args.tool.resolve(strict=True)
+    if not str(TOOL).startswith('/nix/store/'):raise RuntimeError('immutable compiled CLI required')
+    here=Path(__file__).parent
+    names=[Path(__file__).name,'spot_work.py','spot_drain.py']
+    if not args.inside:
+        with tempfile.TemporaryDirectory(prefix='spot-work-public-',dir='/run') as tmp:
+            target=Path(tmp)
+            for name in names:shutil.copyfile(here/name,target/name)
+            env={'PATH':'/run/current-system/sw/bin','HOME':'/root','PYTHONDONTWRITEBYTECODE':'1','PYTHONWARNINGS':'error::ResourceWarning'}
+            result=subprocess.run(['unshare','--mount','--pid','--fork','--mount-proc','--net',sys.executable,
+                                   str(target/Path(__file__).name),'--inside','--tool',str(TOOL)],env=env,cwd='/run')
+            raise SystemExit(result.returncode)
+    sources={name:(here/name).read_bytes() for name in names};system=Path('/run/current-system').resolve(strict=True)
+    subprocess.run(['mount','--make-rprivate','/'],check=True)
+    for path,mode in [('/home','0700'),('/root','0700'),('/tmp','1777'),('/run','0755')]:
+        subprocess.run(['mount','-t','tmpfs','-o','mode='+mode+',size=128M','tmpfs',path],check=True)
+    Path('/run/current-system').symlink_to(system);here.mkdir(parents=True,mode=0o755)
+    for name,data in sources.items():(here/name).write_bytes(data)
+    if ctypes.CDLL(None,use_errno=True).prctl(38,1,0,0,0)!=0:raise RuntimeError('NoNewPrivileges failed')
+    result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(LinuxAdmissionTests))
+    print(json.dumps({'tests':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'skipped':len(result.skipped),
+                      'private_PID_mount_network_and_empty_homes':True,'production_rollout':False,'all_producers_verified':False}))
+    raise SystemExit(0 if result.wasSuccessful() and not result.skipped and result.testsRun==12 else 1)
+
+
+if __name__=='__main__':main()

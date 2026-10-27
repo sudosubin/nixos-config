@@ -135,6 +135,9 @@ sudo /run/spot-work status
 ```
 
 - 작업 lease를 만든 후에만 명령을 시작하며 명령 인수/프롬프트는 기록하지 않음. 메인 명령이 종료되어도 background/double-fork/setsid 자손이 남으면 Linux subreaper가 작업 lease를 유지함.
+- 후속 generic-job 개선은 **소스/검증 준비 단계이며 운영 미적용**임. Popen 호출 전에 spawn attempt를 표시해 constructor가 예외를 던져도 `child is None`을 미시작 증거로 사용하지 않음. executable 부재를 포함한 불확실한 spawn은 자동으로 lease를 지우지 않으며, trusted reconciliation은 여전히 필요함. 명백히 호출 전 취소된 경우만 미시작으로 정산함.
+- subreaper 설정을 GET으로 확인하고 Linux `__WALL` wait로 비-SIGCHLD clone child까지 기다림. 정상 종료 뒤에도 이 wrapper의 boot/PID/start/UID 및 원본 lease와 정확히 일치할 때만 정산하며, heartbeat도 바뀐 unknown record를 덮어쓰지 않음. 이 process-tree 정산은 IPC로 다른 서비스에 위임한 작업/출력의 완료나 전체 서버 유휴 증거가 아님.
+- 선언한 generic `spot-work`는 shell wrapper 없이 immutable Python `-I`로 직접 시작하도록 구성함. admission 전 BASH_ENV/PYTHONPATH/user-site hook을 실행하지 않되, 실제 target의 요청 환경은 lease 뒤에 유지함. 다른 모든 launcher·서비스나 dynamic-loader 환경까지 이 보장을 확대하지 않음. 이 변경의 새 Linux/compiled-CLI 검증은 SSM 복구 후 실행해야 하며, 기존 468개 cloud 증거를 새 변경의 검증으로 재사용하지 않음.
 - wrapper가 죽거나 heartbeat가 낡아도 lease는 유휴 판정으로 만료되지 않음. 불명확한 작업은 계속 보류하며 일반 연장 취소 명령으로 작업 lease를 제거하지 못함.
 - 종료 준비와 작업 시작은 root 소유 admission lock으로 경합을 제어. 준비 후 새 작업은 실행하지 않으며, 마지막 release 이전에 승인된 수동 연장은 종료를 취소함. release 중/이후의 늦은 요청은 성공했다고 응답하지 않음.
 - 서비스 중지 전/후에 안전 조건을 재검사함. rollback은 종료 보호 재확인 → 홈/앱 복구 성공 후에만 admission을 다시 열며, 이미 release한 뒤에는 로깅 실패로 앱을 다시 열지 않음.
@@ -305,7 +308,7 @@ python3 modules/linux/test-spot-acp.py -v
 python3 modules/linux/test-spot-gateway.py -v
 python3 modules/linux/test-spot-backup.py -v
 # root Linux sandbox에서 실행 (Mac에서는 skip됨):
-python3 modules/linux/test-spot-work-linux.py -v
+python3 modules/linux/test-spot-work-linux.py -v --tool /absolute/prepared-system/sw/bin/spot-work
 python3 modules/linux/test-spot-acp-linux.py -v
 python3 modules/linux/test-spot-gateway-linux.py -v
 # root Linux 필수; skip으로 성공을 대신하지 않는 private Nix store 검증:
