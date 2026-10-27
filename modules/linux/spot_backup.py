@@ -70,7 +70,7 @@ class Journal:
         if (not self.path.parent.is_dir() or self.path.parent.is_symlink()
                 or info.st_uid != self.owner or info.st_mode & 0o077):
             raise Unsafe('backup journal directory is untrusted')
-        work.Protocol().publish(self.path, value)
+        work.Protocol().publish(self.path, value, durable=True)
 
 
 class Backup:

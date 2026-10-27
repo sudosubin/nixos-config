@@ -6,10 +6,12 @@ unique service is started/stopped. No additional EC2/EBS/controller is created.
 """
 import importlib.util
 import json
+import multiprocessing
 import os
 from pathlib import Path
 import pwd
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -20,6 +22,8 @@ import uuid
 spec=importlib.util.spec_from_file_location('gateway',Path(__file__).with_name('spot_gateway.py'))
 gw=importlib.util.module_from_spec(spec);spec.loader.exec_module(gw)
 VENDOR=Path('/home/sudosubin/.local/share/openclaw-npm/lib/node_modules/openclaw')
+_dspec=importlib.util.spec_from_file_location('drain',Path(__file__).with_name('spot_drain.py'))
+drain=importlib.util.module_from_spec(_dspec);_dspec.loader.exec_module(drain)
 
 
 def systemctl(*args,timeout=20,check=True):
@@ -119,6 +123,125 @@ class GatewayCanaryTests(unittest.TestCase):
     def mutate_session(self):
         return self.rpc.namespace_command([self.node,str(self.mount/'openclaw.mjs'),'gateway','call','sessions.patch',
             '--params',json.dumps({'key':'agent:main:spot-control-canary','label':'model-free-control-canary'}),'--json','--timeout','8000'],timeout=20)
+
+    def interrupted_controller(self, mode):
+        # Actual child death + actual vendor RPC/systemd; the AWS and EBS
+        # observations alone are injected. This is NOT a production API test.
+        config={'account':'537112465379','region':'ap-northeast-2','asg':'isolated-test-only',
+                'instance_id':'i-0123456789abcdef0','home_volume':'vol-0123456789abcdef0',
+                'home_uuid':'00000000-0000-0000-0000-000000000000','uid':1001,
+                'gateway':{'unit':self.unit,'node':self.node,'vendor_dir':str(self.mount/'dist'),
+                           'startup_check':str(self.check)}}
+        journal=self.base/'journal/drain.json';ready=self.base/'controller-ready'
+        before={'user@1001.service':'inactive','docker.service':'inactive'}
+        unit=self.unit
+        class DroppingRPC(CanaryRPC):
+            dropped=False
+            def __call__(rpc,method,params):
+                value=super().__call__(method,params)
+                wanted='gateway.suspend.prepare' if mode=='lost_prepare' else 'gateway.suspend.handoff'
+                if mode in {'lost_prepare','lost_commit'} and method==wanted and not rpc.dropped:
+                    rpc.dropped=True
+                    raise TimeoutError('test-only lost reply AFTER real vendor dispatch')
+                return value
+        def coordinator():
+            try:
+                tx=drain.Transaction(config,self.protocol,journal)
+                tx.begin(before)
+                self.rpc.__class__=DroppingRPC
+                gateway=gw.Gateway(self.rpc,self.manager,lambda:self.protocol.state()=='draining',tx.gateway)
+                deadline=time.monotonic()+45
+                while True:
+                    try:gateway.acquire();break
+                    except gw.Busy:
+                        if time.monotonic()>=deadline:raise
+                        time.sleep(0.3)
+                    except TimeoutError:
+                        if mode!='lost_prepare':raise
+                        break
+                if mode in {'lost_commit','committed_permit'}:
+                    try:gateway.stop()
+                    except TimeoutError:
+                        if mode!='lost_commit':raise
+                def waiting():
+                    ready.write_text('ready')
+                    while True:time.sleep(1)
+                if mode=='committed_permit':
+                    authority={**tx.owner,'units':[unit],'id':uuid.uuid4().hex}
+                    tx.update(service_authority=authority)
+                    with self.protocol.recover_services([unit],authority_id=authority['id']):waiting()
+                else:waiting()
+            except BaseException as error:
+                ready.write_text('failed:'+type(error).__name__)
+                raise
+        child=multiprocessing.get_context('fork').Process(target=coordinator)
+        child.start()
+        try:
+            deadline=time.monotonic()+60
+            while not ready.exists():
+                self.assertTrue(child.is_alive(),'isolated coordinator exited before the crash checkpoint')
+                self.assertLess(time.monotonic(),deadline,'isolated crash checkpoint was not reached')
+                time.sleep(0.05)
+            self.assertEqual(ready.read_text(),'ready')
+            saved=json.loads(journal.read_text())
+            self.assertEqual(saved['owner']['pid'],child.pid)
+            self.assertEqual(gw.work.process_start(child.pid),saved['owner']['pid_start'])
+            os.kill(child.pid,signal.SIGKILL)
+            child.join(timeout=5)
+            self.assertEqual(child.exitcode,-signal.SIGKILL)
+            if mode=='committed_permit':
+                self.assertTrue((self.protocol.runtime/'recover-services').exists())
+                systemctl('start',unit,check=False)
+                self.assertEqual(systemctl('show',unit,'--property=MainPID','--value').strip(),'0')
+            # A NEW controller, reconstructed exclusively from its durable
+            # journal, never from the dead Python object's in-memory flags.
+            events=[];protected=[False];outer=self
+            class Operations:
+                def group(ops):return {'DesiredCapacity':0,'Instances':[{'InstanceId':config['instance_id'],'LifecycleState':'InService','ProtectedFromScaleIn':protected[0]}]}
+                def request_current(ops,group):return False
+                def protect(ops):protected[0]=True;events.append('protection_readback')
+                def home(ops):
+                    if not protected[0]:raise AssertionError('home before protection')
+                    outer.assertTrue(outer.home.is_dir());events.append('home_observed')
+                def services(ops,units):raise AssertionError('must not control production user/Docker units')
+                def gateway(ops,snapshot,boot_changed,authority,publish):
+                    if not protected[0]:raise AssertionError('gateway before protection')
+                    gateway=gw.Gateway(outer.rpc,outer.manager,lambda:outer.protocol.state()=='draining',publish)
+                    gateway.restore_snapshot(snapshot,boot_changed=boot_changed,authority=authority)
+                    events.append('gateway_verified')
+                def verified(ops,before):
+                    outer.assertEqual(outer.protocol.state(),'draining')
+                    outer.assertTrue(outer.manager.current()['pid']>0)
+                    events.append('restored')
+            recovered=drain.Transaction(config,self.protocol,journal)
+            try:
+                deadline=time.monotonic()+100
+                while True:
+                    try:outcome=recovered.recover(Operations());break
+                    except (gw.Unsafe,subprocess.SubprocessError):
+                        if time.monotonic()>=deadline:raise
+                        recovered.close();time.sleep(0.5)
+                self.assertEqual(outcome,'recovered')
+                self.assertEqual(self.protocol.state(),'open')
+                self.assertEqual(recovered.read()['phase'],'recovered')
+                self.assertFalse((self.protocol.runtime/'recover-services').exists())
+                self.assertLess(events.index('protection_readback'),events.index('gateway_verified'))
+                self.assertEqual(self.mutate_session().returncode,0)
+            finally:recovered.close()
+        finally:
+            if child.is_alive():child.kill();child.join(timeout=5)
+
+    def test_killed_held_controller_recovers_from_durable_owner(self):
+        self.interrupted_controller('held')
+
+    def test_killed_controller_lost_prepare_reply_resumes_same_owned_lease(self):
+        self.interrupted_controller('lost_prepare')
+
+    def test_killed_controller_lost_commit_reply_never_blindly_stops(self):
+        self.interrupted_controller('lost_commit')
+
+    def test_killed_committed_controller_retires_exact_dead_startup_permit(self):
+        self.interrupted_controller('committed_permit')
 
     def test_vendor_busy_expiry_and_scheduler_recovery_fail_closed(self):
         # A separate process imports the exact installed vendor coordinator;

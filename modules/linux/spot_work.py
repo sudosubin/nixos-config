@@ -118,7 +118,7 @@ class Protocol:
             raise ValueError('unknown admission state')
         return data['state']
 
-    def publish(self, path, record):
+    def publish(self, path, record, durable=False):
         temp = path.parent / ('.pending-' + uuid.uuid4().hex)
         fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
         try:
@@ -127,30 +127,82 @@ class Protocol:
                 stream.flush()
                 os.fsync(stream.fileno())
             os.replace(temp, path)
+            # Runtime lease/participant dirs deliberately deny user listing
+            # (1733). Only root-private persistent journals request dir fsync;
+            # never weaken that privacy mode to make unprivileged fsync work.
+            if durable:
+                directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+                try:
+                    os.fsync(directory)
+                finally:
+                    os.close(directory)
         finally:
             temp.unlink(missing_ok=True)
 
-    def write_state(self, state):
+    def write_state(self, state, attempt_id=None):
         if os.geteuid() != self.root_uid:
             raise PermissionError('only root may fence admission')
-        self.publish(self.runtime / 'draining', {'schema': 1, 'state': state, 'boot_id': self.boot_id})
+        if attempt_id is None and (self.runtime / 'draining').exists():
+            attempt_id = self.attempt_id()
+        value = {'schema': 1, 'state': state, 'boot_id': self.boot_id}
+        if attempt_id is not None:
+            if not isinstance(attempt_id, str) or not re.fullmatch(r'drain-[0-9a-f]{32}', attempt_id):
+                raise ValueError('invalid drain attempt')
+            value['attempt_id'] = attempt_id
+        self.publish(self.runtime / 'draining', value)
         # Clients may read the fence but cannot replace/write it. This happens
         # under the admission lock, before another client can inspect the state.
         os.chmod(self.runtime / 'draining', 0o644)
 
-    def seal(self):
+    def attempt_id(self):
+        try:
+            data, _ = read_record(self.runtime / 'draining', {self.root_uid})
+        except FileNotFoundError:
+            return None
+        attempt = data.get('attempt_id')
+        if attempt is not None and (not isinstance(attempt, str)
+                                    or not re.fullmatch(r'drain-[0-9a-f]{32}', attempt)):
+            raise ValueError('unknown drain attempt')
+        return attempt
+
+    def seal(self, attempt_id=None):
         with self.locked():
             if self.state() != 'open':
                 raise RuntimeError('previous drain needs reconciliation')
-            self.write_state('draining')
+            self.write_state('draining', attempt_id)
 
-    def unseal(self):
+    def reconcile_fence(self, attempt_id, protected=False, released=False):
+        # Closing an open admission is always safe. Reversing a release is not:
+        # the caller must first confirm protected InService membership.
+        with self.locked():
+            if os.geteuid() != self.root_uid:
+                raise PermissionError('only root reconciles drain admission')
+            state = self.state()
+            if state != 'open' and self.attempt_id() != attempt_id:
+                raise RuntimeError('drain fence belongs to another attempt')
+            if state == 'open':
+                self.write_state('draining', attempt_id)
+            if released:
+                self.write_state('released', attempt_id)
+            elif protected:
+                self.write_state('draining', attempt_id)
+            elif state in {'releasing', 'released'}:
+                raise RuntimeError('release needs confirmed protection before recovery')
+
+    def unseal(self, attempt_id=None):
         with self.locked():
             if os.geteuid() != self.root_uid:
                 raise PermissionError('only root may reopen admission')
             if os.path.lexists(self.runtime / 'recover-services'):
                 raise RuntimeError('service recovery must finish before admission reopens')
+            if attempt_id is not None and self.attempt_id() != attempt_id:
+                raise RuntimeError('drain fence changed before reopening')
             (self.runtime / 'draining').unlink(missing_ok=True)
+            directory = os.open(self.runtime, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
 
     def service_start_allowed(self, unit):
         with self.locked():
@@ -172,15 +224,43 @@ class Protocol:
             except (OSError, ValueError, TypeError):
                 return False
 
+    def retire_recovery(self, authority):
+        """Remove ONLY the exact dead recovery permit in a durable drain record."""
+        if os.geteuid() != self.root_uid:
+            raise PermissionError('only root retires recovery authority')
+        with self.locked():
+            path = self.runtime / 'recover-services'
+            if not os.path.lexists(path):
+                return
+            data, _ = read_record(path, {self.root_uid})
+            if (not isinstance(authority, dict) or data.get('schema') != 1
+                    or type(data.get('schema')) is not int
+                    or type(data.get('pid')) is not int or data['pid'] <= 0
+                    or type(data.get('pid_start')) is not int or data['pid_start'] <= 0
+                    or not isinstance(data.get('id'), str) or not re.fullmatch(r'[0-9a-f]{32}', data['id'])
+                    or not isinstance(data.get('units'), list) or not data['units']
+                    or any(not isinstance(unit, str) for unit in data['units'])
+                    or any(data.get(key) != authority.get(key) for key in ('id', 'boot_id', 'pid', 'pid_start', 'units'))
+                    or data.get('boot_id') != self.boot_id):
+                raise RuntimeError('unowned recovery authority')
+            try:
+                if process_start(data['pid']) == data['pid_start']:
+                    raise RuntimeError('recovery authority is still alive')
+            except (FileNotFoundError, ProcessLookupError):
+                pass
+            path.unlink()
+
     @contextmanager
-    def recover_services(self, units):
+    def recover_services(self, units, authority_id=None):
         # Caller must first reconfirm ASG protection. This grants only service
         # startup during rollback, NEVER admission for new jobs or extensions
         # after release. A dead recovery controller cannot authorize startup.
         if os.geteuid() != self.root_uid or not units or any(not isinstance(x, str) for x in units):
             raise PermissionError('root recovery service allowlist required')
         path = self.runtime / 'recover-services'
-        recovery_id = uuid.uuid4().hex
+        recovery_id = authority_id or uuid.uuid4().hex
+        if not isinstance(recovery_id, str) or not re.fullmatch(r'[0-9a-f]{32}', recovery_id):
+            raise ValueError('invalid recovery authority identity')
         with self.locked():
             if self.state() != 'draining' or os.path.lexists(path):
                 raise RuntimeError('unknown recovery state')

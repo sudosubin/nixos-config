@@ -150,7 +150,7 @@ class Gateway:
         self.publish({'schema': 1, 'request_id': self.request_id, 'target': self.target,
                       'suspension_id': self.lease_id, 'expires_at_ms': self.expires,
                       'effect': self.effect, 'committed': self.committed, 'stopped': self.stopped,
-                      'unknown': self.failed})
+                      'unknown': self.failed, 'connection_boot_id': self.rpc.boot_id})
 
     def bind(self):
         local = self.manager.current()
@@ -282,6 +282,136 @@ class Gateway:
         self.done.set()
         if self.thread is not None: self.thread.join()
 
+    def restore_snapshot(self, snapshot, boot_changed=False, authority=None):
+        """Recover a dead controller, without treating an unknown commit as stop.
+
+        Exact retired handoff commits are idempotent in the pinned vendor ABI.
+        They are retried ONLY after lifecycle status proves that same lease is
+        already retiring, never against a live prepared lease. Otherwise resume
+        our own lease, observe running, or wait for an owned process to exit.
+        """
+        self.close()
+        if not self.fence() or not self.manager.fence_verified():
+            raise Unsafe('protected recovery requires the enforced startup fence')
+        if snapshot is not None:
+            if (not isinstance(snapshot, dict) or type(snapshot.get('schema')) is not int
+                    or snapshot['schema'] != 1 or not isinstance(snapshot.get('request_id'), str)
+                    or not re.fullmatch(r'spot-[0-9a-f]{32}', snapshot['request_id'])
+                    or not isinstance(snapshot.get('effect'), str)
+                    or snapshot['effect'] not in {'uncertain', 'busy', 'held', 'commit_uncertain',
+                                                       'restored', 'resumed'}
+                    or any(type(snapshot.get(k)) is not bool for k in ('committed', 'stopped', 'unknown'))):
+                raise Unsafe('Gateway recovery record unknown')
+            target = snapshot.get('target')
+            if (not isinstance(target, dict) or type(target.get('pid')) is not int or target['pid'] <= 0
+                    or type(target.get('pid_start')) is not int or target['pid_start'] <= 0
+                    or not isinstance(target.get('processInstanceId'), str) or not target['processInstanceId']
+                    or not isinstance(snapshot.get('connection_boot_id'), str)
+                    or not snapshot['connection_boot_id']):
+                raise Unsafe('Gateway recovery process/connection identity unknown')
+            lease = snapshot.get('suspension_id')
+            if ((lease is not None and (not isinstance(lease, str) or not 0 < len(lease) <= 128))
+                    or (snapshot['effect'] in {'held', 'commit_uncertain'} and lease is None)):
+                raise Unsafe('Gateway recovery lease identity unknown')
+            self.request_id, self.target, self.lease_id = snapshot['request_id'], target, lease
+            self.expires, self.effect = snapshot.get('expires_at_ms'), snapshot['effect']
+            self.committed, self.stopped = snapshot['committed'], snapshot['stopped']
+            self.rpc.boot_id = snapshot['connection_boot_id']
+        data = self.manager.show()
+        state, pid = data.get('ActiveState'), data.get('MainPID')
+        old_target = self.target
+        def old_alive():
+            if boot_changed or old_target is None:
+                return False
+            try:
+                return work.process_start(old_target['pid']) == old_target['pid_start']
+            except (FileNotFoundError, ProcessLookupError):
+                return False
+        def running():
+            self.observe()
+            result = self.rpc('gateway.suspend.status', {'suspensionId': self.lease_id or self.request_id,
+                                                        'includeLifecycle': True})
+            if result != {'status': 'running'}:
+                raise Unsafe('Gateway scheduling/admission has not recovered')
+            self.committed = self.stopped = self.failed = False
+            self.lease_id = self.expires = None
+            self.effect = 'restored'
+            self.journal()
+        def start():
+            if authority is None:
+                raise Unsafe('Gateway startup recovery authority unavailable')
+            with authority([self.manager.unit]):
+                self.manager.start()
+                self.rpc.boot_id = None
+                deadline = self.monotonic() + 90
+                while True:
+                    try:
+                        running()
+                        break
+                    except Exception:
+                        if self.monotonic() >= deadline:
+                            raise
+                        time.sleep(1)
+        if state in {'inactive', 'failed'} and pid == '0':
+            if old_alive():
+                raise Unsafe('old Gateway still exists outside the inactive service')
+            if not (boot_changed or self.committed or self.effect in {'held', 'commit_uncertain', 'restored'}):
+                raise Unsafe('no owned idle/commit transition authorizes a new Gateway')
+            start()
+            return
+        if state != 'active':
+            raise Unsafe('Gateway is transitioning; retry without forcing a stop')
+        local = self.manager.current()
+        if boot_changed or old_target is None or local != {k: old_target[k] for k in ('pid', 'pid_start')}:
+            if old_alive():
+                raise Unsafe('refusing to replace a still-live original Gateway')
+            self.rpc.boot_id = None
+            running()  # Observe a replacement; never stop/restart it.
+            return
+        # A held vendor fence intentionally rejects system.info. The persisted
+        # connection boot ID is checked by the RPC helper BEFORE dispatch, in
+        # addition to this local PID/start check. Rebind system.info only AFTER
+        # confirmed resume; handoff additionally checks processInstanceId itself.
+        self.assert_current()
+        if self.lease_id is None:
+            if self.effect in {'busy', 'restored', 'resumed'}:
+                running()
+                return
+            data = self.rpc('gateway.suspend.prepare', {'requestId': self.request_id,
+                            'terminalPolicy': 'preserve', 'drain': False})
+            if busy(data):
+                running()
+                return
+            self.accept(data, self.monotonic(), initial=True)
+        data = self.rpc('gateway.suspend.status', {'suspensionId': self.lease_id, 'includeLifecycle': True})
+        if data == {'status': 'running'}:
+            running()
+            return
+        if data.get('ownerId') != self.request_id:
+            raise Unsafe('Gateway recovery must not take over another suspension')
+        phase = data.get('phase')
+        if data.get('status') == 'draining' and phase in {'interrupting', 'exiting'}:
+            if not (self.committed or self.effect == 'commit_uncertain'):
+                raise Unsafe('external Gateway teardown; do not manufacture a stop')
+            result = self.rpc('gateway.suspend.handoff', {'suspensionId': self.lease_id, 'commit': True,
+                          'target': {k: old_target[k] for k in ('pid', 'processInstanceId')}})
+            if (result.get('status') != 'committed' or result.get('suspensionId') != self.lease_id
+                    or result.get('expiresAtMs') != self.expires):
+                raise Unsafe('retired Gateway commitment still unknown')
+            self.committed = True
+            self.journal()
+            self.manager.stop(old_target)  # Only after the exact idempotent ACK.
+            self.stopped = True
+            self.journal()
+            start()
+            return
+        if data.get('status') not in {'ready', 'draining'} or phase not in {None, 'draining'}:
+            raise Unsafe('Gateway recovery lifecycle unknown')
+        result = self.rpc('gateway.suspend.resume', {'suspensionId': self.lease_id})
+        if result.get('ok') is not True or result.get('status') != 'running':
+            raise Unsafe('Gateway scheduler recovery unconfirmed')
+        running()
+
     def rollback(self):
         self.close()
         with self.lock:
@@ -322,7 +452,7 @@ class Gateway:
             self.effect = 'resumed'; self.journal()
 
 
-def configured(config, protocol):
+def configured(config, protocol, publish=None):
     cfg = config.get('gateway')
     if cfg is None:
         return None
@@ -331,4 +461,4 @@ def configured(config, protocol):
     rpc = LocalRPC(cfg, config['uid'])
     manager = UserService(rpc, cfg['unit'], cfg['startup_check'])
     return Gateway(rpc, manager, lambda: protocol.state() == 'draining',
-                   lambda value: protocol.publish(protocol.runtime / 'gateway-control.json', value))
+                   publish or (lambda value: protocol.publish(protocol.runtime / 'gateway-control.json', value)))

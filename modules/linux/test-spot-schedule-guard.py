@@ -1,5 +1,7 @@
 """Offline tests. Never invoke AWS or change the running machine."""
 import copy
+import os
+import tempfile
 from datetime import datetime
 import importlib.util
 from pathlib import Path
@@ -13,6 +15,30 @@ spec.loader.exec_module(guard)
 
 def at(text):
     return datetime.fromisoformat(text + "+09:00")
+
+
+class DrainSandboxMixin:
+    def setUp(self):
+        super().setUp()
+        self.drain_temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.drain_temp.cleanup)
+        counter = [0]
+        def transaction(config, protocol):
+            for key,value in {'account':'537112465379','region':'ap-northeast-2','asg':'test-asg',
+                              'home_volume':'vol-test','home_uuid':'test-uuid'}.items():
+                config.setdefault(key,value)
+            from unittest.mock import Mock
+            if isinstance(protocol, Mock):
+                protocol.state.return_value = 'open'
+                protocol.seal.side_effect = lambda attempt: setattr(protocol.state, 'return_value', 'draining')
+            counter[0] += 1
+            return guard.spot_drain.Transaction(config, protocol,
+                Path(self.drain_temp.name)/str(counter[0])/'drain.json', owner_uid=os.geteuid(),
+                current_owner={'boot_id':'test','pid':os.getpid(),'pid_start':1,'pid_namespace':'unit-test'})
+        for name,kwargs in [('drain_transaction',{'side_effect':transaction}),
+                            ('capture_services',{'side_effect':lambda cfg:{'user@%d.service'%cfg['uid']:'active','docker.service':'active'}}),
+                            ('verify_recovery_home',{}),('verify_recovery_services',{})]:
+            patcher=patch.object(guard,name,**kwargs);patcher.start();self.addCleanup(patcher.stop)
 
 
 class ScheduleTests(unittest.TestCase):
@@ -36,8 +62,9 @@ class ScheduleTests(unittest.TestCase):
             guard.running_window(datetime(2026, 10, 26, 2))
 
 
-class SafetyTests(unittest.TestCase):
+class SafetyTests(DrainSandboxMixin, unittest.TestCase):
     def setUp(self):
+        super().setUp()
         self.config = {"armed": True, "home_uuid": "uuid", "instance_id": "i-test"}
         self.group = {"DesiredCapacity": 0}
         self.now = at("2026-10-26T02:15:00")
@@ -169,22 +196,23 @@ def completed_backup():
     return result
 
 
-class GatewayDrainTests(unittest.TestCase):
+class GatewayDrainTests(DrainSandboxMixin, unittest.TestCase):
     def setUp(self):
+        super().setUp()
         self.backup=completed_backup()
         patcher=patch.object(guard.spot_backup,'configured',return_value=self.backup)
         patcher.start();self.addCleanup(patcher.stop)
 
     def test_busy_gateway_rolls_back_before_other_services_stop(self):
         from unittest.mock import MagicMock
-        cfg={'uid':1001,'instance_id':'i-test'};gateway=MagicMock();gateway.acquire.side_effect=RuntimeError('busy')
+        cfg={'uid':1001,'instance_id':'i-test','gateway':{'unit':'test-gateway.service'}};gateway=MagicMock();gateway.manager.unit='test-gateway.service';gateway.acquire.side_effect=RuntimeError('busy')
         with patch.object(guard,'work_protocol') as protocol, patch.object(guard.spot_gateway,'configured',return_value=gateway), patch.object(guard,'shutdown_request_current'), patch.object(guard,'protection'), patch.object(guard,'group_state',return_value={'Instances':[{'InstanceId':'i-test','ProtectedFromScaleIn':True}]}), patch.object(guard,'command') as command:
             with self.assertRaises(RuntimeError):guard.drain(cfg)
             command.assert_not_called();gateway.rollback.assert_called_once();protocol.return_value.unseal.assert_called_once()
 
     def test_gateway_recovery_failure_cannot_reopen_admission(self):
         from unittest.mock import MagicMock
-        cfg={'uid':1001,'instance_id':'i-test'};gateway=MagicMock();gateway.acquire.side_effect=RuntimeError('busy');gateway.rollback.side_effect=RuntimeError('recovery unknown')
+        cfg={'uid':1001,'instance_id':'i-test','gateway':{'unit':'test-gateway.service'}};gateway=MagicMock();gateway.manager.unit='test-gateway.service';gateway.acquire.side_effect=RuntimeError('busy');gateway.rollback.side_effect=RuntimeError('recovery unknown')
         with patch.object(guard,'work_protocol') as protocol, patch.object(guard.spot_gateway,'configured',return_value=gateway), patch.object(guard,'shutdown_request_current'), patch.object(guard,'protection'), patch.object(guard,'group_state',return_value={'Instances':[{'InstanceId':'i-test','ProtectedFromScaleIn':True}]}):
             with self.assertRaises(RuntimeError):guard.drain(cfg)
             protocol.return_value.unseal.assert_not_called()
@@ -207,7 +235,7 @@ class GatewayDrainTests(unittest.TestCase):
             probe.assert_not_called()
 
     def test_readonly_gateway_projection_is_mandatory_when_configured(self):
-        test=SafetyTests();test.setUp();test.config['gateway']={'enabled':True}
+        test=SafetyTests();test.setUp();self.addCleanup(test.doCleanups);test.config['gateway']={'enabled':True}
         self.assertIn('gateway_status_unknown',test.reasons())
         test.node['gateway']={'observable':True,'maintenance_busy':True}
         self.assertIn('gateway_maintenance_busy',test.reasons())
@@ -238,8 +266,9 @@ class StartupTests(unittest.TestCase):
         status.assert_not_called()
 
 
-class FailureTests(unittest.TestCase):
+class FailureTests(DrainSandboxMixin, unittest.TestCase):
     def setUp(self):
+        super().setUp()
         self.backup=completed_backup()
         patcher=patch.object(guard.spot_backup,'configured',return_value=self.backup)
         patcher.start();self.addCleanup(patcher.stop)
@@ -273,15 +302,16 @@ class FailureTests(unittest.TestCase):
 
     def test_truthy_non_boolean_arming_does_not_arm(self):
         case = SafetyTests()
-        case.setUp()
+        case.setUp();self.addCleanup(case.doCleanups)
         for value in ["true", "false", 1, None]:
             with self.subTest(value=value):
                 case.config["armed"] = value
                 self.assertIn("observation_mode", case.reasons())
 
 
-class AdmissionDrainTests(unittest.TestCase):
+class AdmissionDrainTests(DrainSandboxMixin, unittest.TestCase):
     def setUp(self):
+        super().setUp()
         import os,tempfile
         from contextlib import ExitStack
         from types import SimpleNamespace
@@ -415,6 +445,98 @@ class ColdBackupChecks(unittest.TestCase):
             with self.assertRaises(guard.spot_backup.AWSFailure) as error:guard.aws({'region':'ap-northeast-2'},'ec2','create-snapshot')
             env=run.call_args.kwargs['env'];self.assertEqual(env['AWS_MAX_ATTEMPTS'],'1');self.assertNotIn('AWS_ACCESS_KEY_ID',env);self.assertNotIn('AWS_PROFILE',env)
             self.assertNotIn('PRIVATE_DIAGNOSTIC',str(error.exception))
+
+
+class RecoveryRoutingTests(unittest.TestCase):
+    def test_recover_only_without_journal_never_starts_a_new_shutdown(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cfg={'account':'account','region':'region','drain_journal':str(Path(directory)/'missing.json')}
+            with patch('sys.argv',['guard','--recover-only']),patch.object(guard,'RUNTIME',Path(directory)),patch.object(guard,'root_json',return_value=cfg),patch.object(guard,'identity',return_value={'accountId':'account','region':'region','instanceId':'i-test'}),patch.object(guard,'startup_protection') as protect,patch.object(guard,'probe') as probe,patch.object(guard,'drain') as drain,patch.object(guard,'status'):
+                guard.main();protect.assert_called_once_with(cfg);probe.assert_not_called();drain.assert_not_called()
+
+    def test_pending_drain_is_reconciled_before_any_mounted_home_probe(self):
+        from unittest.mock import MagicMock
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'drain.json';path.write_text('{}')
+            cfg={'account':'account','region':'region','uid':1001,'drain_journal':str(path)}
+            transaction=MagicMock();transaction.read.return_value={'phase':'home_unmounted'}
+            with patch('sys.argv',['guard']),patch.object(guard,'RUNTIME',Path(directory)),patch.object(guard,'root_json',return_value=cfg),patch.object(guard,'identity',return_value={'accountId':'account','region':'region','instanceId':'i-test'}),patch.object(guard,'drain_transaction',return_value=transaction),patch.object(guard,'reconcile_drain',return_value='recovered') as recover,patch.object(guard,'probe') as probe,patch.object(guard,'drain') as drain,patch.object(guard,'status'):
+                guard.main();recover.assert_called_once();probe.assert_not_called();drain.assert_not_called()
+
+
+class RecoveryIOTests(unittest.TestCase):
+    def setUp(self):
+        from contextlib import ExitStack
+        from types import SimpleNamespace
+        from unittest.mock import MagicMock
+        self.stack=ExitStack();self.addCleanup(self.stack.close)
+        self.cfg={'uid':1001,'instance_id':'i-test','home_volume':'vol-0123456789abcdef0','home_uuid':'test-uuid'}
+        self.volume={'VolumeId':self.cfg['home_volume'],'Attachments':[{'InstanceId':'i-test','State':'attached','DeleteOnTermination':False}]}
+        self.serial=MagicMock();self.serial.read_text.return_value=self.cfg['home_volume'].replace('-','');self.serial.parent.parent.name='nvme127n1'
+        self.serials=[self.serial];self.alias=Path('/dev/nvme127n1');self.targets='/home';self.mount_code=0
+        self.mounted='test-uuid rw,relatime / /dev/nvme127n1';self.started=[]
+        def path(value,*args):
+            real=Path(value,*args)
+            if str(real)=='/sys/class/block':return SimpleNamespace(glob=lambda pattern:self.serials)
+            if str(real)=='/dev/disk/by-uuid/test-uuid':return SimpleNamespace(resolve=lambda:self.alias)
+            return real
+        def command(*args,**kwargs):
+            if args[0]=='blkid':return 'test-uuid'
+            if args[0]=='findmnt':return self.mounted
+            if args[:2]==('systemctl','show'):return 'active'
+            raise AssertionError(args)
+        def run(args,**kwargs):
+            if args[0]=='findmnt':return SimpleNamespace(returncode=self.mount_code,stdout=self.targets)
+            if args[:3]==['systemctl','start','home.mount']:
+                self.started.append(args);self.mount_code=0;self.targets='/home'
+                return SimpleNamespace(returncode=0)
+            raise AssertionError(args)
+        self.stack.enter_context(patch.object(guard,'Path',side_effect=path))
+        self.api=self.stack.enter_context(patch.object(guard,'aws',return_value={'Volumes':[self.volume]}))
+        self.stack.enter_context(patch.object(guard,'command',side_effect=command))
+        self.stack.enter_context(patch.object(guard.subprocess,'run',side_effect=run))
+
+    def test_exact_current_writable_home_is_observed_without_restart(self):
+        guard.verify_recovery_home(self.cfg,allow_mount=True);self.assertEqual(self.started,[])
+
+    def test_unmounted_home_is_started_only_after_exact_device_validation(self):
+        self.mount_code=1;self.targets=''
+        guard.verify_recovery_home(self.cfg,allow_mount=True)
+        self.assertEqual(self.started,[['systemctl','start','home.mount']])
+
+    def test_wrong_attachment_delete_flag_or_volume_never_mounts(self):
+        for field,value in [('InstanceId','other'),('State','detaching'),('DeleteOnTermination',True)]:
+            saved=self.volume['Attachments'][0][field];self.volume['Attachments'][0][field]=value
+            with self.subTest(field=field),self.assertRaises(RuntimeError):guard.verify_recovery_home(self.cfg,allow_mount=True)
+            self.volume['Attachments'][0][field]=saved
+        self.assertEqual(self.started,[])
+
+    def test_missing_duplicate_serial_or_wrong_uuid_alias_never_mounts(self):
+        for devices in [[],[self.serial,self.serial]]:
+            self.serials=devices
+            with self.assertRaises(RuntimeError):guard.verify_recovery_home(self.cfg,allow_mount=True)
+        self.serials=[self.serial];self.alias=Path('/dev/other')
+        with self.assertRaises(RuntimeError):guard.verify_recovery_home(self.cfg,allow_mount=True)
+        self.assertEqual(self.started,[])
+
+    def test_other_mounts_or_unknown_query_never_become_a_recovery_home(self):
+        for code,targets in [(0,'/elsewhere'),(0,'/home /alias'),(2,''),(1,'unexpected')]:
+            self.mount_code,self.targets=code,targets
+            with self.subTest(code=code,targets=targets),self.assertRaises(RuntimeError):guard.verify_recovery_home(self.cfg,allow_mount=True)
+        self.assertEqual(self.started,[])
+
+    def test_readonly_subdirectory_bind_or_duplicate_uuid_device_is_not_the_home(self):
+        for mounted in ['test-uuid ro,relatime / /dev/nvme127n1',
+                        'test-uuid rw /subdir /dev/nvme127n1',
+                        'test-uuid rw / /dev/nvme128n1','other rw / /dev/nvme127n1']:
+            self.mounted=mounted
+            with self.subTest(mounted=mounted),self.assertRaises(RuntimeError):guard.verify_recovery_home(self.cfg)
+
+    def test_protection_ack_without_authoritative_readback_never_restores(self):
+        with patch.object(guard,'protection') as protect,patch.object(guard,'group_state',return_value={'Instances':[{'InstanceId':'i-test','ProtectedFromScaleIn':False}]}):
+            with self.assertRaises(RuntimeError):guard.RecoveryOperations(self.cfg,None).protect()
+            protect.assert_called_once_with(self.cfg,True)
+        self.assertEqual(self.started,[])
 
 
 class MaintenanceTests(unittest.TestCase):

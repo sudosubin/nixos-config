@@ -15,6 +15,7 @@ let
     cp ${./spot_gateway.py} "$out/spot_gateway.py"
     cp ${./spot-gateway-rpc.mjs} "$out/spot-gateway-rpc.mjs"
     cp ${./spot_backup.py} "$out/spot_backup.py"
+    cp ${./spot_drain.py} "$out/spot_drain.py"
   '';
   guard = pkgs.writeShellApplication {
     name = "spot-schedule-guard";
@@ -48,6 +49,7 @@ let
     uid = 1001;
     gid = 100;
     manifest = "/home/persist/manifests/active.json";
+    drain_journal = "/var/lib/spot-schedule-guard/drain.json";
     backup = {
       set = cfg.backupSet;
       keep = 3;

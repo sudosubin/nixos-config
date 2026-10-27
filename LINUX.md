@@ -155,7 +155,7 @@ sudo /run/spot-work status
 - native test-entry 경로는 일반 bundled 경로와 달리 PATH의 `bun`을 사용한다는 실제 ENOENT를 찾아 수정함. 준비된 명시적 `spot-kiro [chat options]`만 vendor runtime PATH와 entry 환경을 설정하고 native CLI를 그대로 실행함. 전역 `KIRO_TEST_TUI_JS_PATH`를 주입하지 않으며 legacy/v3/noninteractive 우회, runtime 부재, 이미 닫힌 admission은 fallback 없이 거절함. 기존 plain native launcher는 검증된 경로로 자동 승격하지 않음.
 - 실제 TUI boot의 readonly settings/session-list RPC와 제한된 metadata schema를 확인함. 비어 있지 않은 subagent/pending-stage/tool/MCP inventory와 새 schema는 여전히 unknown. metadata/metric은 idle 권한이 아니며 기존 작업 lease를 해제하지 않음. 거절 횟수만 기록하고 프롬프트·세션/RPC ID는 기록하지 않음.
 - 실제 PTY에서 먼저 승인된 요청을 유지한 채 fence 이후 busy steering을 거절하고, 원래 native mock turn의 최종 응답/화면 출력까지 보존함. 이어 idle 상태의 새 prompt도 거절함. busy UI가 wire 오류를 `Failed to queue message`로 감추므로 **실제 UI 오류 + 전달 전 admission 거절 counter + 기존 요청 custody + 후속 모델 출력 부재**를 함께 검사함. busy는 자기 canary backend를 일시 정지한 wire-inflight 조건이며 실제 모델 지연으로 표현하지 않음.
-- 최신 ARM 회귀 **221개 단위 + 17개 root Linux = 238개**, 전부 실행/skip 없음. 새 Linux 3개는 실제 native ACP, 실제 native/vendor TUI, 컴파일된 launcher의 거절 경로임. 실제 vendor TUI의 detached ACP process group도 namespace 안에서 식별/정리하며 생산 프로세스를 신호하거나 재시작하지 않음.
+- native 단계 ARM 회귀 **221개 단위 + 17개 root Linux = 238개**, 전부 실행/skip 없음. 새 Linux 3개는 실제 native ACP, 실제 native/vendor TUI, 컴파일된 launcher의 거절 경로임. 실제 vendor TUI의 detached ACP process group도 namespace 안에서 식별/정리하며 생산 프로세스를 신호하거나 재시작하지 않음.
 - `services.spotAcp.enable`은 기본 false이며 운영 앱/환경에는 반영하지 않음. `/run/spot-schedule-guard/participants`의 레코드는 coordinator가 프로세스·프로토콜·fence 범위를 검증하기 전까지 **모두 unverified blocker**임. 기존 worker 검사를 완화하지 않음.
 - 최신 준비 소스 `/home/persist/nixos-kiro-build`, 빌드 결과 `/home/persist/build-results/nixos-kiro-prepared`는 **빌드 전용**. 이전 ACP 준비본은 역사적 증거이며 현재 v2 AMI에는 최신 통합이 없음. `work_tracking_verified`/`armed`는 승인하지 않음. open 상태의 async steering/queue, 실제 도구/MCP/subagent와 frontend crash/output custody, Herdr/일반 생산자/전체 프로세스 범위 및 중단된 coordinator 복구를 계속 검증해야 함.
 
@@ -174,11 +174,25 @@ sudo /run/spot-work status
 - 최신 가드와 admission 초기화만 runtime unit으로 갱신해 실제 운영 Gateway를 읽기 전용으로 관찰함. `/run/spot-schedule-guard/observation-gateway.json`은 armed=false이며 실제 현재 캐시 manifest도 검사함. 운영 prepare/stop/resume는 호출하지 않았고, 앱/OS 재시작이나 재부팅 영속성 검증과는 구별함.
 - 기존 WORKERS/participant blocker를 완화하지 않음. Herdr/PTY/모든 프로세스·생산자, 실제 Kiro frontend, 중단된 drain의 자동 reconcile, 성공 백업 3개 보존, 최신 이미지·홈 전환·운영 종료/깨우기 검증과 남은 임시 도구 정리는 아직 필요함. `work_tracking_verified`와 `armed`는 승인하지 않음.
 
+## 중단된 drain의 소유권·보호 복구 (준비, 운영 미활성)
+
+소스: `spot_drain.py`, guard/Gateway/work 모듈, `test-spot-drain.py`, `test-spot-gateway-recovery.py`, 실제 Linux Gateway 테스트.
+
+- `/var/lib/spot-schedule-guard/drain.json`에 root 전용 intent/attempt/배포 identity/boot/PID-start/PID namespace/서비스 baseline/단계를 기록함. journal은 홈 밖에 있고 file+directory fsync/atomic rename하며 별도 flock으로 controller를 직렬화함. 살아 있는 controller나 다른 PID namespace의 소유권을 가로채지 않음.
+- fence/서비스 stop/home unmount/backup/release보다 먼저 해당 intent를 기록함. 새 guard는 mounted-home probe보다 **먼저** 미완료 journal을 조정하므로 홈이 내려간 상태를 영구적인 probe 실패로 남기지 않음. 이전 backup을 새 shutdown 성공으로 재사용하거나 불명확한 CreateSnapshot을 재발행하지 않음.
+- 복구는 보호된 InService 상태 readback → 정확한 EBS serial/UUID/source/FS root/writable mount → 원래 active였던 서비스의 idempotent start → Gateway/서비스 확인 → 같은 attempt의 admission 재개 순서임. 다른 mount/alias/복제 UUID device, 다른 attachment, 보호 미확인은 막음. 새 PID/일반 작업 lease를 삭제하거나 유휴로 바꾸지 않으며, 원래 inactive 서비스나 정상 replacement Gateway를 강제로 재시작하지 않음.
+- startup 권한은 durable authority ID/boot/살아 있는 root PID-start/명시된 unit에만 묶임. 죽은 controller의 **정확히 일치하는** permit만 제거하고 ID/소유권/범위가 바뀌면 닫힌 상태를 유지함. 이 권한은 일반 job admission을 열지 않음.
+- prepare reply 유실은 동일 request ID로 소유 lease를 복구해 resume함. commit 유실은 같은 PID/start/connection boot와 retired lifecycle을 확인한 경우에만 vendor의 idempotent handoff ACK로 해소함. 일반 `systemctl stop` fallback은 없음. held 상태의 `system.info`가 실제 vendor fence에 막힌다는 실패를 발견해, 저장된 hello boot ID를 dispatch 전에 확인하고 suspend-control RPC만 사용하도록 수정함.
+- 이미 발행한 release와 일치하는 닫힌 fence는 로깅 실패만으로 되돌리지 않음. wake/SSM/window가 supersede하면 보호를 다시 확인한 뒤 복구함. `spot-schedule-guard --recover-only`는 새 shutdown을 시작하지 않음. 이것은 off-instance wake 자체를 대체하는 명령이 아니며 cloud-only wake UX는 계속 필요함.
+- 실제 별도 Gateway에서 **controller SIGKILL 4개**(held, prepare reply 유실, commit reply 유실, committed/dead permit)를 실행해 새 controller가 durable journal만으로 복구하고 실제 새/기존 Gateway RPC와 mutation을 확인함. 기존 3개와 합쳐 Gateway Linux **7개**가 실제 실행됨. private network/mount/tmp/빈 홈/읽기 전용 vendor runtime/NoNewPrivileges를 유지하며 **AWS/EBS 관측만 주입**함. 운영 API·실제 EBS remount·OS reboot 복구나 모델 작업 보존의 증거로 확대하지 않음.
+- 최신 ARM 회귀 **272개 단위 + 21개 실제 root Linux = 293개**, 전부 실행/skip 없음. parent fsync를 위해 UID1001 runtime 디렉터리(1733)의 읽기 권한을 넓히지 않음. directory fsync는 root-private persistent journal에서만 요청하며 기존 cross-UID work/ACP/실제 TUI 사례도 다시 통과함.
+- 준비 소스 `/home/persist/nixos-recovery-build`, 결과 `/home/persist/build-results/nixos-recovery-prepared`는 빌드 전용임. 기존 runtime observer/운영 앱/서비스/홈/AMI/LT를 전환하지 않았고 `armed`/`work_tracking_verified`는 계속 false. 실제 boot/API/storage 중단 복구, 전체 producer/custody, final image/home 전환 및 실제 종료/깨우기 검증은 남아 있음.
+
 ## 완료된 cold 백업과 최근 성공본 3개 보존 (준비, 운영 미활성)
 
 소스: `spot_backup.py`, `spot-backup-iam.py`, `verify-spot-backup-aws.py`, `verify-spot-backup-restore.py`.
 
-- 가드는 홈을 내린 뒤 해당 UUID의 **모든 mount가 없는지**, 정확한 encrypted EBS가 현재 인스턴스에 attached/DeleteOnTermination=false인지 검사함. create 응답의 pending/암호화 표시는 성공 증거가 아님. 완료 상태·소유 계정·source volume·고정 schema/set/attempt·cold 확인 tag를 다시 읽고, 마지막 release lock 안에서도 성공본을 재검사함.
+- 가드는 홈을 내린 뒤 **현재 mount namespace에서** 해당 UUID의 mount가 없는지, 정확한 encrypted EBS가 현재 인스턴스에 attached/DeleteOnTermination=false인지 검사함. 다른 namespace/container/live-restore의 잔여 mount·write custody까지 확인하는 최종 cold predicate는 전체 producer 검증과 함께 아직 보강해야 함. create 응답의 pending/암호화 표시는 성공 증거가 아님. 완료 상태·소유 계정·source volume·고정 schema/set/attempt·cold 확인 tag를 다시 읽고, 마지막 release lock 안에서도 성공본을 재검사함.
 - `CreateSnapshot`에는 ClientToken이 없으므로 SDK 자동 재시도를 끔. API 전 root 전용 journal에 attempt를 기록하고 응답 유실 시 동일 tag로 찾음. 불명확한 결과에서 추가 create를 반복하지 않음. 확인된 권한/요청 rate 거절과 실제 수락 여부 미상은 구별함.
 - snapshot 완료 대기에는 강제 종료 마감이 없음. 새 native 시작, 활성 SSM, 승인된 연장/작업, admission·중지 상태 변화가 있으면 protection을 유지하고 홈/서비스 복구 경로로 돌아감. journal은 `/var/lib/spot-schedule-guard/backup.json`이므로 홈이 내려가도 기록 가능함.
 - 성공한 cold/encrypted/completed 일반 백업만 최신 3개 보존. Protected=true와 AMI 참조본은 제외하고 deprecated/disabled AMI도 조회함. 삭제 직전 owner/tag/상태/AMI와 새 성공 anchor를 재확인하며 최종 보존 수까지 관찰해야 완료함. 미확인/실패 orphan은 새 성공본이 있고 24시간 지난 경우에만 정리하며 pending은 지우지 않음.

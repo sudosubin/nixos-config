@@ -10,6 +10,7 @@ import argparse
 from contextlib import nullcontext
 import spot_gateway
 import spot_backup
+import spot_drain
 from datetime import datetime, time, timezone
 import fcntl
 import importlib.util
@@ -273,19 +274,113 @@ def backup_wait_checkpoint(config, protocol, gateway):
         raise RuntimeError('workload stop state changed during backup')
 
 
+def drain_transaction(config, protocol):
+    return spot_drain.Transaction(config, protocol,
+        config.get('drain_journal', '/var/lib/spot-schedule-guard/drain.json'))
+
+
+def capture_services(config):
+    units = ['user@%d.service' % config['uid'], 'docker.service']
+    result = {unit: command('systemctl', 'show', unit, '--property=ActiveState', '--value') for unit in units}
+    if any(state not in {'active', 'inactive'} for state in result.values()):
+        raise RuntimeError('workload baseline is transitioning or unknown')
+    return result
+
+
+def verify_recovery_home(config, allow_mount=False):
+    # Recheck the real block identity, not a successful old mount command. This
+    # restores only the same attached data; never detach, format, or switch it.
+    rows = aws(config, 'ec2', 'describe-volumes', '--volume-ids', config['home_volume']).get('Volumes')
+    if not isinstance(rows, list) or len(rows) != 1 or rows[0].get('VolumeId') != config['home_volume']:
+        raise RuntimeError('recovery source volume unknown')
+    attachments = rows[0].get('Attachments')
+    if (not isinstance(attachments, list) or len(attachments) != 1
+            or attachments[0].get('InstanceId') != config['instance_id']
+            or attachments[0].get('State') != 'attached'
+            or attachments[0].get('DeleteOnTermination') is not False):
+        raise RuntimeError('recovery home attachment changed')
+    serial = config['home_volume'].replace('-', '')
+    devices = [Path('/dev') / p.parent.parent.name for p in Path('/sys/class/block').glob('nvme*n1/device/serial')
+               if p.read_text().strip() == serial]
+    if (len(devices) != 1 or Path('/dev/disk/by-uuid', config['home_uuid']).resolve() != devices[0]
+            or command('blkid', '-c', '/dev/null', '-s', 'UUID', '-o', 'value', str(devices[0])) != config['home_uuid']):
+        raise RuntimeError('recovery EBS serial/filesystem identity changed')
+    mounted = subprocess.run(['findmnt', '-rn', '-S', 'UUID='+config['home_uuid'], '-o', 'TARGET'],
+                             capture_output=True, text=True, timeout=5)
+    if mounted.returncode == 1 and not mounted.stdout.strip() and allow_mount:
+        subprocess.run(['systemctl', 'start', 'home.mount'], check=True, timeout=60)
+        return verify_recovery_home(config, allow_mount=False)
+    if mounted.returncode != 0 or mounted.stdout.split() != ['/home']:
+        raise RuntimeError('recovery home is absent, aliased or mounted elsewhere')
+    mounted_identity = command('findmnt', '-n', '-o', 'UUID,OPTIONS,FSROOT,SOURCE', '--mountpoint', '/home').split()
+    if (len(mounted_identity) != 4 or mounted_identity[0] != config['home_uuid']
+            or mounted_identity[2] != '/' or Path(mounted_identity[3]).resolve() != devices[0]
+            or 'rw' not in mounted_identity[1].split(',') or 'ro' in mounted_identity[1].split(',')):
+        raise RuntimeError('recovery home is not the verified writable filesystem')
+
+
+def verify_recovery_services(config, before):
+    verify_recovery_home(config)
+    for unit, state in before.items():
+        # Never stop an originally inactive service that someone else started.
+        if state == 'active' and command('systemctl', 'show', unit, '--property=ActiveState', '--value') != 'active':
+            raise RuntimeError('workload restoration is not confirmed')
+
+
+class RecoveryOperations:
+    def __init__(self, config, protocol):
+        self.config, self.protocol = config, protocol
+
+    def group(self):
+        return group_state(self.config)
+
+    def request_current(self, group):
+        return (not running_window(datetime.now(timezone.utc)) and group['DesiredCapacity'] == 0
+                and not sessions(self.config))
+
+    def protect(self):
+        protection(self.config, True)
+        group = self.group()
+        if not any(i['InstanceId'] == self.config['instance_id'] and i.get('ProtectedFromScaleIn') is True
+                   for i in group['Instances']):
+            raise RuntimeError('recovery protection unconfirmed; admission remains closed')
+
+    def home(self):
+        verify_recovery_home(self.config, allow_mount=True)
+
+    def services(self, units):
+        subprocess.run(['systemctl', 'start', *units], check=True, timeout=100)
+
+    def gateway(self, snapshot, boot_changed, authority, publish):
+        gateway = spot_gateway.configured(self.config, self.protocol, publish=publish)
+        if gateway is not None:
+            gateway.restore_snapshot(snapshot, boot_changed=boot_changed, authority=authority)
+
+    def verified(self, before):
+        verify_recovery_services(self.config, before)
+
+
+def reconcile_drain(config, protocol, transaction):
+    try:
+        return transaction.recover(RecoveryOperations(config, protocol))
+    finally:
+        transaction.close()
+
+
 def drain(config):
     """Only reachable after explicit arming, verified replacement, and idle checks."""
     protocol = work_protocol(config)
-    protocol.seal()
+    transaction = drain_transaction(config, protocol)
     services_stopped = False
     released = False
     gateway = None
     try:
+        transaction.begin(capture_services(config))
         shutdown_request_current(config)
         backup = spot_backup.configured(config, lambda *args: aws(config, *args),
             lambda: backup_cold_check(config), lambda: backup_wait_checkpoint(config, protocol, gateway))
         backup.prepare()
-        gateway = spot_gateway.configured(config, protocol)
+        gateway = spot_gateway.configured(config, protocol, publish=transaction.gateway)
         if gateway is not None:
             gateway.acquire()
         drain_recheck(config, gateway)
@@ -294,23 +389,31 @@ def drain(config):
         # Mark before issuing stop: a timed-out client does not prove no service
         # was stopped. Rollback must restore any partial transition as well.
         services_stopped = True
+        transaction.update('services_stop_requested', services_may_be_stopped=True)
         command("systemctl", "stop", "user@%d.service" % config["uid"], "docker.service", timeout=60)
+        transaction.update('services_stopped')
         drain_recheck(config, gateway)
+        transaction.update('home_unmount_requested')
         command("systemctl", "stop", "home.mount", timeout=40)
         check = subprocess.run(["findmnt", "--mountpoint", "/home"], capture_output=True, timeout=5)
         if check.returncode != 1:
             raise RuntimeError("home still mounted or mount query failed")
+        transaction.update('home_unmounted')
         command("sync", timeout=20)
+        transaction.update('backing_up')
         snapshot = backup.capture()
         if snapshot.get('Encrypted') is not True or snapshot.get('State') != 'completed':
             raise RuntimeError('cold backup completion/encryption not verified')
+        transaction.update('backup_completed', snapshot_id=snapshot['SnapshotId'])
         with protocol.commit():
             shutdown_request_current(config)
             backup.successful(snapshot['SnapshotId'])
             # No extension acknowledged before this lock can be missed. Never
             # call EC2 Stop/Terminate; ASG owns the irreversible transition.
+            transaction.update('release_requested')
             protection(config, False)
             released = True
+            transaction.update('released')
         status({"state":"scale_in_released","snapshot_id":snapshot["SnapshotId"]})
     except Exception:
         if released:
@@ -319,24 +422,36 @@ def drain(config):
         group = group_state(config)
         if not any(i["InstanceId"] == config["instance_id"] and i.get("ProtectedFromScaleIn") is True for i in group["Instances"]):
             raise RuntimeError("rollback protection unconfirmed; admission remains closed")
-        recovery = protocol.recover_services([gateway.manager.unit]) if gateway is not None else nullcontext()
+        if transaction.record is None:
+            raise  # No owned intent/fence; never take over another drain.
+        protocol.reconcile_fence(transaction.record['id'], protected=True)
+        transaction.update('recovering')
+        recovery = transaction.authority([gateway.manager.unit]) if gateway is not None else nullcontext()
         with recovery:
             if services_stopped:
                 subprocess.run(["systemctl", "start", "home.mount"], check=True, timeout=60)
-                subprocess.run(["systemctl", "start", "docker.service", "user@%d.service" % config["uid"]], check=True, timeout=60)
+                verify_recovery_home(config)
+                restore = [u for u, state in transaction.record['services_before'].items() if state == 'active']
+                if restore:
+                    subprocess.run(["systemctl", "start", *restore], check=True, timeout=60)
             if gateway is not None:
                 gateway.rollback()
-        protocol.unseal()
+        verify_recovery_services(config, transaction.record['services_before'])
+        protocol.unseal(transaction.record['id'])
+        transaction.update('recovered')
         raise
     finally:
         if gateway is not None:
             gateway.close()
+        transaction.close()
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="/etc/spot-schedule-guard.json")
-    parser.add_argument("--protect-only", action="store_true", help="wait for protected InService membership before workloads start")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--protect-only", action="store_true", help="wait for protected InService membership before workloads start")
+    mode.add_argument("--recover-only", action="store_true", help="reconcile an owned drain without starting a new shutdown")
     args = parser.parse_args()
     config = root_json(os.path.realpath(args.config))
     RUNTIME.mkdir(mode=0o755, exist_ok=True)
@@ -354,6 +469,23 @@ def main():
             config["instance_id"] = doc["instanceId"]
             if args.protect_only:
                 startup_protection(config)
+                return
+            journal = Path(config.get('drain_journal', '/var/lib/spot-schedule-guard/drain.json'))
+            if os.path.lexists(journal):
+                protocol = work_protocol(config)
+                transaction = drain_transaction(config, protocol)
+                try:
+                    record = transaction.read()
+                except Exception:
+                    protection(config, True)
+                    raise
+                if record is not None and record['phase'] != 'recovered':
+                    outcome = reconcile_drain(config, protocol, transaction)
+                    status({'state': 'recovery_'+outcome, 'instance_id': config['instance_id']})
+                    return  # A restored old drain is never a fresh shutdown approval.
+            if args.recover_only:
+                startup_protection(config)
+                status({'state': 'no_owned_pending_drain', 'instance_id': config['instance_id']})
                 return
             group = group_state(config)
             protection(config, True)  # Fail closed before all further checks.
