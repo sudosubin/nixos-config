@@ -107,7 +107,7 @@ class ValidationBudgetTests(unittest.TestCase):
     def test_fixture_cannot_select_production_slice_by_environment(self):
         with patch.dict(os.environ,{'SPOT_VALIDATION_SLICE':'system.slice'}),patch.object(validation,'current',return_value=None):
             with self.assertRaises(validation.Unsafe):validation.fixture_directives()
-        with patch.object(validation,'current',return_value={'slice':SLICE,'purpose':'verify'}):
+        with patch.object(validation,'current',return_value={'slice':SLICE,'purpose':'verify','memory_max':validation.MEMORY_MAX}):
             data=validation.fixture_directives()
         self.assertIn('Slice='+SLICE,data);self.assertIn('OOMScoreAdjust=1000',data)
         self.assertIn('MemorySwapMax=0',data);self.assertNotIn('RuntimeMaxSec',data)
@@ -236,6 +236,28 @@ class ValidationBudgetTests(unittest.TestCase):
         self.assertEqual(validation.private_network('build'),'yes')
         self.assertEqual(validation.private_network('canary-build'),'no')
         with self.assertRaises(validation.Unsafe):validation.private_network('unverified')
+
+    def test_disposable_verification_is_fixed_bounded_and_always_private(self):
+        self.assertEqual(validation.policy('verify'),(1024**3,2*1024**3))
+        self.assertEqual(validation.policy('canary-verify'),(2*1024**3,10*1024**3))
+        self.assertEqual(validation.private_network('canary-verify'),'yes')
+        with patch.object(validation,'current',return_value={'slice':SLICE,'purpose':'canary-verify','memory_max':2*1024**3}):
+            self.assertEqual(validation.fixture_properties()['MemoryMax'],str(2*1024**3))
+
+    def test_disposable_verification_refuses_without_actual_attestation(self):
+        with patch.object(validation.sys,'platform','linux'),patch.object(validation.os,'geteuid',return_value=0), \
+                patch.object(validation,'current',return_value=None),patch.object(validation,'memory_gate'), \
+                patch.object(validation,'attest_disposable',side_effect=validation.Unsafe('no authority')) as attest,patch.object(validation.subprocess,'run') as run:
+            with self.assertRaises(validation.Unsafe):validation.launch(['never-started'],Path('/no-write'),'canary-verify')
+        attest.assert_called_once();run.assert_not_called()
+
+    def test_canary_verify_owner_proof_and_kernel_limit_are_both_required(self):
+        files=self.files();files[str(validation.CGROUP/LEAF.lstrip('/')/'memory.max')]=str(2*1024**3)
+        proof=validation.disposable_identity(*self.disposable(),now=1000);owner={**self.owner(),'purpose':'canary-verify','disposable':proof}
+        with patch.object(Path,'read_text',autospec=True,side_effect=lambda p:files[str(p)]),patch.object(validation,'trusted_json',return_value=owner),patch.object(validation.time,'time',return_value=1000):
+            self.assertEqual(validation.current()['purpose'],'canary-verify')
+        with patch.object(Path,'read_text',autospec=True,side_effect=lambda p:files[str(p)]),patch.object(validation,'trusted_json',return_value={**owner,'disposable':{}}):
+            with self.assertRaises(validation.Unsafe):validation.current()
 
     def test_exact_disposable_identity_requires_native_expiry(self):
         proof=validation.disposable_identity(*self.disposable(),now=1000)

@@ -35,6 +35,7 @@ def main():
     parser.add_argument('--prepared',type=Path,required=True)
     parser.add_argument('--expected-source',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--disposable-verify',action='store_true',help='2GiB only after actual expiring Spot canary API attestation')
     args=parser.parse_args()
     if sys.platform!='linux' or platform.machine() not in ('aarch64','arm64') or os.geteuid()!=0:
         raise RuntimeError('root ARM Linux required; no skip-as-proof')
@@ -70,13 +71,13 @@ def main():
     if hashlib.sha256(resource_bytes).hexdigest()!=expected[resource_name]:raise RuntimeError('resource code changed before execution')
     exec(compile(resource_bytes,str(root/resource_name),'exec'),validation.__dict__)  # never an old mutable .pyc
     VALIDATION=validation
-    budget=validation.current()
+    budget=validation.current();purpose='canary-verify' if args.disposable_verify else 'verify'
     if budget is None:
-        receipt=validation.launch([sys.executable,str(root/'modules/linux/verify-spot-linux.py'),*sys.argv[1:]],args.output)
+        receipt=validation.launch([sys.executable,str(root/'modules/linux/verify-spot-linux.py'),*sys.argv[1:]],args.output,purpose=purpose)
         print(json.dumps(receipt),flush=True)
         return  # launch acknowledgement is NEVER an executed/successful regression
-    if budget['purpose']!='verify':raise RuntimeError('a larger build budget is not verification authority')
-    initial_memory=validation.memory_gate('verify')
+    if budget['purpose']!=purpose:raise RuntimeError('a build or different verification budget is not authority for this request')
+    initial_memory=validation.memory_gate(purpose)
     cache_prefix=validation.RUNTIME/budget['id']/'pycache';cache_prefix.mkdir(mode=0o700)
     sys.pycache_prefix=str(cache_prefix);os.environ['PYTHONPYCACHEPREFIX']=str(cache_prefix)
     os.environ['PATH']='/run/current-system/sw/bin'
@@ -127,7 +128,7 @@ def main():
         fd=os.open(args.output.parent,os.O_RDONLY|os.O_DIRECTORY)
         try:os.fsync(fd)
         finally:os.close(fd)
-    base=[('validation',39),('work',59),('schedule-guard',82),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
+    base=[('validation',42),('work',59),('schedule-guard',82),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
           ('drain',29),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',12),('acp-linux',9),
           ('gateway-linux',7),('cold-linux',8),('validation-linux',2)]
     commands=[(name,count,[sys.executable,'-W','error::ResourceWarning',str(root/'modules/linux'/('test-spot-'+name+'.py')),'-v']) for name,count in base]
@@ -155,7 +156,7 @@ def main():
         try:
             current_budget=validation.current()
             if current_budget!=budget:raise validation.Unsafe('validation cgroup identity changed')
-            available=validation.memory_gate()
+            available=validation.memory_gate(purpose)
         except Exception as error:
             state['resource_failure']=str(error);save();raise
         result=subprocess.run(command,capture_output=True,text=True,
@@ -176,7 +177,7 @@ def main():
         state['root_linux_cases' if name.endswith('-linux') else 'unit_cases']+=max(0,executed)
         save();print(json.dumps({'suite':name,'executed':executed,'passed':passed}),flush=True)
         if not passed:raise RuntimeError('suite failed; COMPLETE stdout/stderr preserved: '+name)
-    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(523,465,58):
+    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(526,468,58):
         raise RuntimeError('executed counts do not match the complete scope')
     if {name:sha(root/name) for name in expected}!=actual:raise RuntimeError('source changed during verification')
     for name,value in compiled.items():

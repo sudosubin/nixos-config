@@ -62,6 +62,7 @@ class CanaryRPC(gw.LocalRPC):
 class GatewayCanaryTests(unittest.TestCase):
     def setUp(self):
         self.resources=spot_validation.fixture_directives()  # fail before creating/spawning an unbounded fixture
+        self.budget=spot_validation.current()
         self.assertTrue(VENDOR.is_dir(), 'real vendor code is required, not a skipped proof')
         self.user=pwd.getpwuid(1001)
         self.base=Path(tempfile.mkdtemp(prefix='spot-gateway-validation-',dir='/run'));self.base.chmod(0o755)
@@ -102,7 +103,7 @@ class GatewayCanaryTests(unittest.TestCase):
         # A fresh, never-loaded UUID unit is loaded by StartUnit directly.
         # daemon-reload resets the slice's manually held kernel OOM group.
         systemctl('start',self.unit)
-        self.assertEqual(spot_validation.current()['memory_max'],1024**3)
+        self.assertEqual(spot_validation.current(),self.budget)
         self.rpc=CanaryRPC({'node':self.node,'vendor_dir':str(self.mount/'dist')},1001,self.base,self.unit)
         self.manager=gw.UserService(self.rpc,self.unit,str(self.check))
         self.gateway=gw.Gateway(self.rpc,self.manager,lambda:self.protocol.state()=='draining')

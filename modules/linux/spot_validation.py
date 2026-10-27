@@ -21,7 +21,7 @@ import uuid
 MEMORY_MAX = 1024**3
 MIN_AVAILABLE = 2*1024**3
 POLICIES = {'verify':(MEMORY_MAX,MIN_AVAILABLE),'build':(2*1024**3,4*1024**3),
-            'canary-build':(6*1024**3,10*1024**3)}
+            'canary-build':(6*1024**3,10*1024**3),'canary-verify':(2*1024**3,10*1024**3)}
 PRODUCTION_INSTANCE = 'i-0c39eff85c4286b38'
 PROTECTED_VOLUMES = {'vol-065729ef75553a7ec','vol-09fea2ff4615b1088','vol-0b529abe51df1eca1'}
 RUNTIME = Path('/run/spot-validation')
@@ -195,7 +195,7 @@ def current():
             or owner.get('boot_id')!=Path('/proc/sys/kernel/random/boot_id').read_text().strip()):
         raise Unsafe('validation owner identity does not match kernel cgroup')
     purpose=owner.get('purpose');maximum,minimum=policy(purpose)
-    if purpose=='canary-build':
+    if purpose in ('canary-build','canary-verify'):
         identity=owner.get('disposable',{})
         if (identity.get('instance')==PRODUCTION_INSTANCE or identity.get('production') is not False
                 or not re.fullmatch('i-[0-9a-f]{17}',identity.get('instance',''))
@@ -217,9 +217,9 @@ def current():
 
 def fixture_properties():
     budget=current()
-    if budget is None or budget['purpose']!='verify':raise Unsafe('fixture requires the verification budget, never a larger build scope')
+    if budget is None or budget['purpose'] not in ('verify','canary-verify'):raise Unsafe('fixture requires a verified test budget, never a build scope')
     return {'Slice':budget['slice'],'Nice':'19','OOMScoreAdjust':'1000','OOMPolicy':'stop','ProtectControlGroups':'yes',
-            'MemoryMax':str(MEMORY_MAX),'MemorySwapMax':'0'}
+            'MemoryMax':str(budget['memory_max']),'MemorySwapMax':'0'}
 
 
 def fixture_directives():
@@ -276,7 +276,7 @@ def launch(argv,output,purpose='verify'):
     if sys.platform!='linux' or os.geteuid()!=0:raise Unsafe('root Linux required for validation resource isolation')
     if current() is not None:raise Unsafe('nested validation launch refused')
     maximum,minimum=policy(purpose);memory_gate(purpose)
-    disposable=attest_disposable() if purpose=='canary-build' else None
+    disposable=attest_disposable() if purpose in ('canary-build','canary-verify') else None
     output=Path(output)
     if output.exists() or output.is_symlink():raise Unsafe('choose a fresh validation output; previous evidence is never overwritten')
     parent=output.parent.lstat()

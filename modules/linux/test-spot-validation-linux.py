@@ -27,7 +27,7 @@ class ResourceLinuxTests(unittest.TestCase):
                               env={'PATH':'/run/current-system/sw/bin','HOME':'/var/empty','AWS_EC2_METADATA_DISABLED':'true'})
         child=json.loads(result.stdout);self.assertEqual(child['oom'].strip(),'1000')
         self.assertEqual(validation.own_group(child['cgroup'])[2],budget['slice_cgroup'])
-        self.assertEqual(budget['memory_max'],1024**3);self.assertEqual(budget['swap_max'],0)
+        self.assertEqual(budget['memory_max'],validation.policy(budget['purpose'])[0]);self.assertEqual(budget['swap_max'],0)
 
     def test_actual_systemd_fixture_joins_shared_budget_without_restarting_any_production_service(self):
         budget=validation.current();self.assertIsNotNone(budget);validation.memory_gate()
