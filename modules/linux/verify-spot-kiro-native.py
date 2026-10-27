@@ -35,6 +35,42 @@ PUBLIC = None
 USER = None
 
 
+class ACPWire:
+    """Fixture-only wire memory; no transcripts or request/session IDs on disk."""
+    def __init__(self, case, child):
+        self.case, self.child = case, child
+        self.buffer = b''
+        self.messages = []
+
+    def send(self, ident, method, params):
+        self.child.stdin.write((json.dumps({'jsonrpc': '2.0', 'id': ident, 'method': method,
+                                           'params': params}) + '\n').encode())
+
+    def read(self, timeout=35):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if b'\n' in self.buffer:
+                line, self.buffer = self.buffer.split(b'\n', 1)
+                message = json.loads(line)
+                self.messages.append(message)
+                return message
+            if select.select([self.child.stdout], [], [], 0.05)[0]:
+                data = os.read(self.child.stdout.fileno(), 65536)
+                self.case.assertTrue(data, 'actual proxy unexpectedly closed')
+                self.buffer += data
+                self.case.assertLess(len(self.buffer), 2 * 1024 * 1024)
+        self.case.fail('actual native ACP frame missing')
+
+    def rpc(self, ident, method, params):
+        self.send(ident, method, params)
+        deadline = time.monotonic() + 35
+        while time.monotonic() < deadline:
+            message = self.read(max(0.01, deadline - time.monotonic()))
+            if 'method' not in message and message.get('id') == ident:
+                return message
+        self.case.fail('actual native ACP response missing')
+
+
 class NativeKiroTests(unittest.TestCase):
     def setUp(self):
         self.base = Path(tempfile.mkdtemp(prefix='spot-real-kiro-', dir='/run'))
@@ -97,15 +133,15 @@ class NativeKiroTests(unittest.TestCase):
         # Reap only its PID/start-bound test participant, never a host process.
         for record in self.records():
             pid = record['pid']
-            if work.process_start(pid) == record['pid_start'] and os.getpgid(pid) == pid:
-                try:
+            try:
+                if work.process_start(pid) == record['pid_start'] and os.getpgid(pid) == pid:
                     os.killpg(pid, signal.SIGCONT)
                     os.killpg(pid, signal.SIGTERM)
                     time.sleep(0.1)
                     if work.process_start(pid) == record['pid_start']:
                         os.killpg(pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
+            except (FileNotFoundError, ProcessLookupError):
+                pass  # A sticky unknown participant can outlive its TEST process.
         for master in self.masters:
             os.close(master)
         subprocess.run(['umount', '/run/spot-schedule-guard'], check=True)
@@ -168,41 +204,107 @@ class NativeKiroTests(unittest.TestCase):
         self.assertEqual(self.records(), [])
         self.assertEqual(self.protocol.blockers(), [])
 
-    def test_actual_native_backend_mock_turn_and_fenced_denial(self):
+    def backend_wire(self):
         child = subprocess.Popen([OPTIONS.proxy, 'acp', '--agent', 'spot-canary'],
                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                                  env=self.env, cwd=self.home, preexec_fn=self.demote(), bufsize=0)
         self.children.append(child)
-        buffer = b''
-
-        def rpc(ident, method, params):
-            nonlocal buffer
-            child.stdin.write((json.dumps({'jsonrpc': '2.0', 'id': ident, 'method': method,
-                                          'params': params}) + '\n').encode())
-            deadline = time.monotonic() + 35
-            while time.monotonic() < deadline:
-                while b'\n' in buffer:
-                    line, buffer = buffer.split(b'\n', 1)
-                    message = json.loads(line)
-                    if 'method' not in message and message.get('id') == ident:
-                        return message
-                if select.select([child.stdout], [], [], 0.05)[0]:
-                    data = os.read(child.stdout.fileno(), 65536)
-                    self.assertTrue(data, 'actual proxy unexpectedly closed')
-                    buffer += data
-            self.fail('actual native ACP response missing')
-
-        self.assertEqual(rpc(0, 'initialize', {'protocolVersion': 1, 'clientCapabilities': {}})
+        wire = ACPWire(self, child)
+        self.assertEqual(wire.rpc(0, 'initialize', {'protocolVersion': 1, 'clientCapabilities': {}})
                          ['result']['protocolVersion'], 1)
-        session = rpc(1, 'session/new', {'cwd': str(self.home), 'mcpServers': []})['result']['sessionId']
+        session = wire.rpc(1, 'session/new', {'cwd': str(self.home), 'mcpServers': []})['result']['sessionId']
         self.await_condition(self.idle)
+        return wire, session
+
+    def assert_async_unknown(self):
+        self.await_condition(lambda: (len(self.records()) == 1 and not self.records()[0]['healthy']
+                                     and self.records()[0]['active_requests'] == 1))
+        self.assertTrue([b for b in self.protocol.blockers() if b['reason'] != 'participant_unverified'])
+        self.assertTrue(any(b['reason'] == 'participant_unverified' for b in self.protocol.blockers()))
+
+    def test_actual_native_backend_mock_turn_and_fenced_denial(self):
+        wire, session = self.backend_wire()
         params = {'sessionId': session, 'prompt': [{'type': 'text', 'text': 'model-free fixture only'}]}
-        self.assertEqual(rpc(2, 'session/prompt', params)['result']['stopReason'], 'end_turn')
+        self.assertEqual(wire.rpc(2, 'session/prompt', params)['result']['stopReason'], 'end_turn')
         self.await_condition(self.idle)
         self.protocol.seal()
-        self.assertEqual(rpc(3, 'session/prompt', params)['error']['code'], -32074)
+        self.assertEqual(wire.rpc(3, 'session/prompt', params)['error']['code'], -32074)
         self.await_condition(self.idle)
         self.assert_still_unverified()
+
+    def test_actual_compiled_proxy_refuses_native_startup_behind_fence(self):
+        before = {str(p.relative_to(self.home)) for p in self.home.rglob('*')}
+        self.protocol.seal()
+        result = subprocess.run([OPTIONS.proxy, 'acp', '--agent', 'spot-canary'],
+                                input=b'', capture_output=True, env=self.env, cwd=self.home,
+                                preexec_fn=self.demote(), timeout=8)
+        self.assertEqual(result.returncode, 75)
+        self.assertIn(b'ACP admission unavailable; request not started', result.stderr)
+        self.assertEqual(self.records(), [])
+        self.assertEqual(self.protocol.blockers(), [])
+        self.assertEqual({str(p.relative_to(self.home)) for p in self.home.rglob('*')}, before)
+
+    def test_actual_idle_native_steering_ack_is_not_completion(self):
+        wire, session = self.backend_wire()
+        result = wire.rpc(2, '_session/steer', {'sessionId': session, 'message': 'model-free queued fixture'})
+        self.assertEqual(result['result'], {'queued': True})
+        def queued_seen():
+            return any(m.get('params', {}).get('update', {}).get('sessionUpdate')
+                       == 'AgentExecutionUserMessageQueued' for m in wire.messages)
+        deadline = time.monotonic() + 35
+        while not queued_seen() and time.monotonic() < deadline:
+            wire.read(max(0.01, deadline - time.monotonic()))
+        self.assertTrue(queued_seen())
+        self.assert_async_unknown()
+
+    def test_actual_native_message_send_ack_keeps_custody_and_preserves_output(self):
+        wire, session = self.backend_wire()
+        result = wire.rpc(2, '_message/send', {'sessionId': session, 'content': 'model-free async fixture'})
+        self.assertEqual(result['result'], {'ok': True})
+        def output_seen():
+            return any(m.get('params', {}).get('update', {}).get('content', {}).get('text')
+                       == 'MODEL_FREE_NATIVE_TUI_CANARY' for m in wire.messages)
+        deadline = time.monotonic() + 35
+        while not output_seen() and time.monotonic() < deadline:
+            wire.read(max(0.01, deadline - time.monotonic()))
+        self.assertTrue(output_seen(), 'unknown async tracking must still preserve accepted output')
+        self.assert_async_unknown()
+
+    def test_actual_active_native_steering_is_not_completed_by_parent_terminal(self):
+        self.mock.write_text(json.dumps([['MODEL_FREE_STEERING_CHUNK'] * 200, ['MODEL_FREE_EXTRA_TURN']]))
+        wire, session = self.backend_wire()
+        record = self.records()[0]
+        backend = record['backend_pid']
+        self.assertEqual(work.process_start(backend), record['backend_start'])
+        self.paused = (backend, record['backend_start'])
+        os.kill(backend, signal.SIGSTOP)
+        try:
+            wire.send(2, 'session/prompt', {'sessionId': session,
+                                        'prompt': [{'type': 'text', 'text': 'model-free parent fixture'}]})
+            wire.send(3, '_session/steer', {'sessionId': session, 'message': 'model-free steering fixture'})
+            self.await_condition(lambda: self.records()[0]['active_requests'] == 2)
+        finally:
+            os.kill(backend, signal.SIGCONT)
+            self.paused = None
+        # Both proxy requests are admitted before the fixture backend resumes;
+        # this is wire custody, not simulated provider/model latency.
+        responses = {}
+        deadline = time.monotonic() + 35
+        while set(responses) != {2, 3} and time.monotonic() < deadline:
+            message = wire.read(max(0.01, deadline - time.monotonic()))
+            if 'method' not in message and message.get('id') in {2, 3}:
+                responses[message['id']] = message
+        self.assertEqual(responses[2]['result']['stopReason'], 'end_turn')
+        self.assertEqual(responses[3]['result'], {'queued': True})
+        def kinds():
+            return {m.get('params', {}).get('update', {}).get('sessionUpdate') for m in wire.messages}
+        expected = {'AgentExecutionUserMessageQueued', 'AgentExecutionSteeringInjected'}
+        while not expected <= kinds() and time.monotonic() < deadline:
+            wire.read(max(0.01, deadline - time.monotonic()))
+        self.assertTrue(expected <= kinds(), 'native steering lifecycle events not observed')
+        # Injection, parent end_turn and ACK still lack a proven independent
+        # steering lifecycle/output contract. Do not promote them to idle.
+        self.assert_async_unknown()
 
     def test_actual_outer_launcher_vendor_tui_mock_turn_and_pty_denial(self):
         master, slave = pty.openpty()
@@ -329,7 +431,7 @@ def main():
                           'public_vendor_sha256': hashes, 'network_pid_mount_isolated': True,
                           'real_credentials_models_channels': False,
                           'whole_work_tracking_verified': False, 'production_rollout': False}), flush=True)
-        return 0 if result.wasSuccessful() and result.testsRun == 3 and not result.skipped else 1
+        return 0 if result.wasSuccessful() and result.testsRun == 7 and not result.skipped else 1
 
 
 if __name__ == '__main__':

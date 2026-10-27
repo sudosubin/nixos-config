@@ -215,6 +215,16 @@ sudo /run/spot-work status
 - 최신 ARM 회귀 **293개 단위 + 29개 실제 root Linux = 322개**, 모두 실행/skip 없음. scope와 완전한 suite 결과는 `/home/persist/manifests/cold-ARM-tests-20261027.json`, kernel 8개는 `cold-kernel-tests-20261027.json`, 실제 후보 EBS는 `cold-encrypted-candidate-readonly-verification-20261027.json`에 기록함.
 - 준비 소스 `/home/persist/nixos-cold-build`, 결과 `/home/persist/build-results/nixos-cold-prepared`는 **빌드 전용**. 운영 runtime/앱/홈/AMI/LT/백업 IAM은 전환하지 않았고 `work_tracking_verified`/`armed`는 계속 false. 전체 producer/raw-I/O, 실제 boot/production backup·복구·종료/예약 wake, 최종 image/encrypted-home 전환과 로컬 도구 정리는 계속 필요함.
 
+## ACP startup custody와 실제 async producer의 남은 경계 (준비)
+
+- ACP backend의 `Popen` **이전**에 admission lock을 거쳐 startup job lease를 게시함. 닫힌 admission에서는 native 프로세스 자체를 시작하지 않으며 spawn/publication 결과가 불확실하면 lease를 남김. 초기 participant가 실제 게시된 뒤에만 bootstrap lease를 제거함. 그 participant는 아직 uninitialized/unverified blocker이므로 vendor startup helper나 전체 앱이 idle이라는 뜻이 아님.
+- 실제 UID1001 교차 UID 검사에서 fence 뒤 두 번째 backend의 startup side effect 자체가 없음을 확인함. immutable proxy + 실제 native backend 경로도 exit75, participant/홈 변경 없음으로 검사함. publication 실패 시 backend를 죽이거나 예외를 완료로 취급하지 않음.
+- 실제 native 2.10.0의 메서드는 `_message/send`, `_session/steer`임. model-free private namespace에서 전자는 `{ok:true}` 응답 뒤 실제 mock stream이 계속되고, 후자는 idle에서도 `{queued:true}` 및 `AgentExecutionUserMessageQueued`를 보낼 수 있음을 확인함. ACK를 terminal response로 승격하지 않으며 async lease/unknown blocker를 유지하면서 기존 출력을 계속 전달함.
+- parent prompt와 steering을 모두 admission한 실제 native 사례에서 queued/injected event, parent `end_turn`, steering ACK가 모두 관측되어도 별도의 steering 완료/output 계약은 미검증으로 유지함. 자기 fixture backend를 잠시 SIGSTOP한 wire-inflight 시험이며 provider/model 지연 증거가 아님. 벤더 notification은 ACK보다 늦게 올 수 있어 실제 event를 확인하고, 죽은 TEST process의 sticky participant cleanup도 PID/start-bound로 처리함.
+- 실제 vendor TUI의 `queuedMessages`/`pendingSteerContent`는 ACP 전송 **이전**에 메모리 안에 존재할 수 있음. 따라서 ACP만으로 frontend queue 전체를 추적했다고 주장하지 않음. frontend producer admission/custody와 seal 직전의 원자적인 blocker 검사, tools/MCP/subagent/Herdr/PTY/SSM-command 소유권은 계속 필요함. `_session/steer/clear` 등 미검증 extension도 request-scoped allowlist에 추가하지 않음.
+- native 검증기 **7개**, ACP 단위 **43개**, 교차 UID stdio **8개**를 각각 실제 실행했으며 skip/resource warning이 없음. 최신 전체 ARM 회귀의 실행 수/완전한 stderr는 `/home/persist/manifests/producer-ARM-tests-20261027.json`에서 확인함. 별도 protocol 진단 3개를 이 회귀 수에 중복 합산하지 않음.
+- 준비 소스 `/home/persist/nixos-producer-build`, 결과 `/home/persist/build-results/nixos-producer-prepared`는 **빌드 전용**. vendor Bun/TUI 원본과 운영 system/profile/앱/홈/AMI/LT/runtime observer를 바꾸지 않음. native 검증은 빈 홈, 비기능 fixture key, private PID/mount/network, NoNewPrivileges, 도구/hooks/MCP 없음으로 수행하며 실제 provider 완료나 운영 적용 증거가 아님. `participant_unverified`, `work_tracking_verified=false`, `armed=false`를 유지함.
+
 ## 프로필 복구와 부팅 의존성
 
 소스: `modules/linux/spot-profile-cache.py`, `spot-profile-cache.nix`.

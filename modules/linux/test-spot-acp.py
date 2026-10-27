@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 spec=importlib.util.spec_from_file_location('acp',Path(__file__).with_name('spot_acp.py'))
 acp=importlib.util.module_from_spec(spec);spec.loader.exec_module(acp)
@@ -230,6 +230,61 @@ class ACPTests(unittest.TestCase):
             with self.subTest(params=params):self.assertFalse(acp.kiro_metadata('_kiro.dev/metadata',params))
         self.assertFalse(acp.kiro_metadata('_kiro.dev/mcp/governance_disabled',{'sessionId':'fixture','apiFailure':1}))
         self.assertFalse(acp.kiro_metadata('_kiro.dev/mcp/governance_disabled',{'sessionId':'fixture','apiFailure':False,'work':True}))
+
+    def test_closed_admission_prevents_backend_spawn(self):
+        self.protocol.seal()
+        with patch.object(acp.subprocess,'Popen') as spawn:
+            with self.assertRaisesRegex(RuntimeError,'admission closed'):
+                acp.bridge(self.protocol,['PRIVATE_STARTUP_ARGUMENT'])
+        spawn.assert_not_called()
+        self.assertEqual(self.protocol.blockers(),[])
+        self.assertEqual(list((self.protocol.runtime/'participants').iterdir()),[])
+
+    def test_startup_lease_precedes_spawn_and_uncertain_spawn_stays_blocked(self):
+        def spawn(*args,**kwargs):
+            self.assertEqual([b['reason'] for b in self.protocol.blockers()],['running_job'])
+            raise OSError('fixture spawn outcome uncertain')
+        with patch.object(acp.subprocess,'Popen',side_effect=spawn):
+            with self.assertRaises(OSError):acp.bridge(self.protocol,['PRIVATE_STARTUP_ARGUMENT'])
+        self.assertEqual([b['reason'] for b in self.protocol.blockers()],['running_job'])
+        data=''.join(p.read_text() for p in self.protocol.leases.iterdir())
+        self.assertNotIn('PRIVATE_STARTUP_ARGUMENT',data)
+        self.assertNotIn('fixture spawn outcome',data)
+
+    def test_failed_participant_publication_keeps_startup_custody_without_killing_backend(self):
+        child=Mock(pid=os.getpid())
+        with patch.object(acp.subprocess,'Popen',return_value=child), \
+                patch.object(acp.Participant,'publish',side_effect=OSError('fixture publication failure')):
+            with self.assertRaises(OSError):acp.bridge(self.protocol,['not-executed'])
+        self.assertEqual([b['reason'] for b in self.protocol.blockers()],['running_job'])
+        child.terminate.assert_not_called();child.kill.assert_not_called();child.wait.assert_not_called()
+
+    def test_startup_handoff_overlaps_uninitialized_unverified_participant(self):
+        def after_handoff():
+            self.assertEqual([b['reason'] for b in self.protocol.blockers()],['participant_unverified'])
+            records=[json.loads(p.read_text()) for p in (self.protocol.runtime/'participants').iterdir()]
+            self.assertEqual(len(records),1);self.assertFalse(records[0]['initialized'])
+            self.assertEqual(records[0]['reason'],'initializing')
+            raise RuntimeError('fixture stops before threads')
+        with patch.object(acp.subprocess,'Popen',return_value=Mock(pid=os.getpid())), \
+                patch.object(acp.threading,'Lock',side_effect=after_handoff):
+            with self.assertRaisesRegex(RuntimeError,'fixture stops before threads'):
+                acp.bridge(self.protocol,['not-executed'])
+        self.assertEqual(list(self.protocol.leases.iterdir()),[])
+        self.assertEqual([b['reason'] for b in self.protocol.blockers()],['participant_unverified'])
+
+    def test_actual_native_extension_names_and_acks_are_not_request_scoped(self):
+        self.initialize()
+        for index,(method,result) in enumerate([('_message/send',{'ok':True}),
+                                               ('_session/steer',{'queued':True}),
+                                               ('_session/steer/clear',{})],1):
+            with self.subTest(method=method):
+                self.assertNotIn(method,acp.REQUEST_SCOPED)
+                tracker=acp.Tracker(self.protocol);tracker.initialized=True
+                self.assertTrue(tracker.client(request(index,method))[0])
+                tracker.backend(response(index,result))
+                self.assertFalse(tracker.healthy);self.assertTrue(tracker.pending)
+        self.assertTrue(self.protocol.blockers())
 
     def test_read_frame_rejects_truncation_and_oversize(self):
         for data in [b'{}',b'x'*(acp.MAX_FRAME+1)]:

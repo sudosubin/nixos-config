@@ -314,10 +314,19 @@ def bridge(protocol, argv):
         info = directory.lstat()
         if directory.is_symlink() or not directory.is_dir() or info.st_uid != protocol.root_uid:
             raise ValueError('ACP participant registry is not initialized')
+    # Native startup can touch configuration or start helpers BEFORE initialize.
+    # Reject a closed admission before Popen, and cover the publication gap with
+    # a real job lease. An uncertain spawn/publication failure keeps that lease;
+    # neither process absence nor an exception proves startup work completed.
+    startup = protocol.create('job')
     child = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=None, bufsize=65536)
     participant = Participant(protocol, child)
     tracker = Tracker(protocol, participant.publish)
     participant.publish(tracker.state())
+    # Overlap, never check-then-drop: the uninitialized, unverified participant
+    # already blocks release before retiring bootstrap custody. This is NOT
+    # proof that vendor startup/background helpers or the whole app are idle.
+    protocol.remove(startup['id'], job_finished=True)
     output_lock = threading.Lock()
     input_lock = threading.Lock()
     done = threading.Event()

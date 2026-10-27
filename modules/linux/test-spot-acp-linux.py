@@ -22,6 +22,7 @@ work=importlib.util.module_from_spec(spec);spec.loader.exec_module(work)
 FAKE='''import json,os,sys,threading,time
 from pathlib import Path
 log=Path(sys.argv[1]);lock=threading.Lock()
+log.with_name(log.name+'.started').write_text('model-free-backend-started')
 def emit(out):
  b=(json.dumps(out)+'\\n').encode()
  with lock:
@@ -61,7 +62,9 @@ class ACPStdioTests(unittest.TestCase):
         self.protocol=work.Protocol(self.base/'runtime',uid=1001,gid=self.user.pw_gid);self.protocol.initialize()
         code="import sys;sys.path.insert(0,sys.argv[1]);import spot_acp,spot_work;p=spot_work.Protocol(sys.argv[2],uid=1001,gid=int(sys.argv[3]));sys.exit(spot_acp.bridge(p,[sys.executable,'-u',sys.argv[4],sys.argv[5]]))"
         def user():os.initgroups(self.user.pw_name,self.user.pw_gid);os.setgid(self.user.pw_gid);os.setuid(1001)
-        self.child=subprocess.Popen([sys.executable,'-u','-c',code,str(self.base),str(self.protocol.runtime),str(self.user.pw_gid),str(self.fake),str(self.log)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,preexec_fn=user,cwd='/',start_new_session=True,bufsize=0)
+        self.command=[sys.executable,'-u','-c',code,str(self.base),str(self.protocol.runtime),str(self.user.pw_gid),str(self.fake),str(self.log)]
+        self.demote=user
+        self.child=subprocess.Popen(self.command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,preexec_fn=user,cwd='/',start_new_session=True,bufsize=0)
         self.addCleanup(self.cleanup)
         self.buffer=b'';self.messages=[]
         self.send({'jsonrpc':'2.0','id':0,'method':'initialize','params':{}})
@@ -126,6 +129,18 @@ class ACPStdioTests(unittest.TestCase):
         self.assertEqual(self.log.read_text().splitlines(),['initialize','session/prompt'])
         # Idle metadata is not yet authority to bypass the guard's process check.
         self.assertEqual(self.protocol.blockers()[0]['reason'],'participant_unverified')
+
+    def test_fenced_direct_bridge_cannot_start_a_second_backend(self):
+        self.protocol.seal()
+        log=self.log.with_name('fenced-second-backend')
+        result=subprocess.run([*self.command[:-1],str(log)],input=b'',capture_output=True,
+                              preexec_fn=self.demote,cwd='/',timeout=8)
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn(b'shutdown admission closed',result.stderr)
+        self.assertFalse(log.exists())
+        self.assertFalse(log.with_name(log.name+'.started').exists())
+        self.assertEqual(len(self.participant_records()),1)
+        self.assertEqual(self.jobs(),[])
 
     def test_fragmented_unicode_transparent_without_transcript_files(self):
         self.send({'jsonrpc':'2.0','id':'text-id','method':'session/prompt','params':{'content':[{'text':'PRIVATE_PROMPT_🙂'}]}},fragment=True)
