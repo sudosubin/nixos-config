@@ -4,6 +4,7 @@ Root loss and EC2 termination here are simulations, NOT actual AWS/OS proof.
 The separate API verifier checks real S3 conditional semantics and terminated EC2.
 """
 import copy
+from datetime import datetime, timezone, timedelta
 import hashlib
 import importlib.util
 import json
@@ -41,18 +42,20 @@ class Cases(unittest.TestCase):
         start=patch.object(l.work,'process_start',return_value=123);start.start();self.addCleanup(start.stop)
         readlink=os.readlink
         ns=patch.object(l.os,'readlink',side_effect=lambda p: 'pid:[unit-test]' if p=='/proc/self/ns/pid' else readlink(p));ns.start();self.addCleanup(ns.stop)
-        self.cfg={'account':'537112465379','region':'ap-northeast-2','asg':'private-test','instance_id':'i-'+'1'*17,
+        self.cfg={'account':'537112465379','region':'ap-northeast-2','asg':'private-test','asg_arn':'arn:aws:autoscaling:ap-northeast-2:537112465379:autoScalingGroup:11111111-1111-1111-1111-111111111111:autoScalingGroupName/private-test','instance_id':'i-'+'1'*17,
                   'home_volume':'vol-'+'a'*17,'home_uuid':'11111111-1111-1111-1111-111111111111','uid':1001,
                   'backup':{'set':'private-test','keep':3,'journal':str(self.root/'unused.json')}}
         self.protocol=d.work.Protocol(self.root/'runtime',uid=os.geteuid(),gid=os.getegid(),root_uid=os.geteuid(),boot_id='boot')
-        self.protocol.initialize();self.backend=Backend();self.states={};self.calls=[]
+        self.protocol.initialize();self.backend=Backend();self.states={};self.calls=[];self.history={'Activities':[]}
         self.ledger=l.Ledger(self.cfg,self.protocol,self.backend,self.api)
         self.ledger.seed();self.before={'user@1001.service':'active','docker.service':'inactive'}
     def api(self,service,operation,*args):
         self.calls.append((service,operation,args))
         if (service,operation)==('ec2','describe-instances'):
             ident=args[args.index('--instance-ids')+1]
+            if self.states.get(ident)=='absent':return {'Reservations':[]}
             return {'Reservations':[{'OwnerId':self.cfg['account'],'Instances':[{'InstanceId':ident,'State':{'Name':self.states.get(ident,'running')}}]}]}
+        if (service,operation)==('autoscaling','describe-scaling-activities'):return copy.deepcopy(self.history)
         raise AssertionError('unapproved test API')
     def transaction(self,protocol=None,cfg=None,ledger=None,name='private'):
         t=d.Transaction(cfg or self.cfg,protocol or self.protocol,self.root/name/'drain.json',owner_uid=os.geteuid(),ledger=ledger or self.ledger)
@@ -171,6 +174,15 @@ class Cases(unittest.TestCase):
         ops=SimpleNamespace(group=lambda:{'Instances':[{'InstanceId':cfg['instance_id'],'LifecycleState':'InService','ProtectedFromScaleIn':True}]},protect=lambda:events.append('protect'),backup=backup,home=lambda:events.append('home'))
         with self.assertRaisesRegex(b.Unsafe,'unknown create'):new.recover(ops)
         self.assertEqual(events,['protect','backup']);self.assertNotEqual(protocol.state(),'open');self.assertEqual(self.ledger.stream('backup')['phase'],'creating')
+        new.close();events.clear()
+        # Lose another disposable root while the SAME create remains unknown.
+        # A native terminal witness changes ownership, never snapshot success.
+        third_cfg={**cfg,'instance_id':'i-'+'3'*17};self.states[cfg['instance_id']]='absent';self.history={'Activities':[self.event(cfg['instance_id'])]}
+        third_protocol=d.work.Protocol(self.root/'third-runtime',uid=os.geteuid(),gid=os.getegid(),root_uid=os.geteuid(),boot_id='third-boot');third_protocol.initialize(boot_closed=True)
+        third_ledger=l.Ledger(third_cfg,third_protocol,self.backend,self.api);third=self.transaction(third_protocol,third_cfg,third_ledger,'third-root')
+        third_ops=SimpleNamespace(group=lambda:{'Instances':[{'InstanceId':third_cfg['instance_id'],'LifecycleState':'InService','ProtectedFromScaleIn':True}]},protect=lambda:events.append('protect'),backup=backup,home=lambda:events.append('home'))
+        with self.assertRaisesRegex(b.Unsafe,'unknown create'):third.recover(third_ops)
+        self.assertEqual(events,['protect','backup']);self.assertNotEqual(third_protocol.state(),'open');self.assertEqual(third_ledger.stream('backup')['phase'],'creating');self.assertEqual(third_ledger.value['terminals'][cfg['instance_id']]['kind'],'asg-activity')
     def test_remote_transaction_never_ignores_foreign_volume_or_gateway_identity(self):
         t=self.transaction();t.begin(self.before);t.close();self.backend.value['drain']['identity']['home_volume']='vol-'+'f'*17
         with self.assertRaises(d.Unsafe):self.transaction(name='fresh').read()
@@ -209,6 +221,113 @@ class Cases(unittest.TestCase):
         guard=self.guard()
         with patch.object(guard.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout='{}')) as run:
             guard.aws(self.cfg,'s3api','get-object');self.assertEqual(run.call_args.kwargs['env']['AWS_MAX_ATTEMPTS'],'3');self.assertEqual(run.call_args.kwargs['timeout'],30)
+    def event(self,instance,**changes):
+        now=datetime.now(timezone.utc)
+        return {'ActivityId':'22222222-2222-2222-2222-222222222222','AutoScalingGroupName':self.cfg['asg'],'AutoScalingGroupARN':self.cfg['asg_arn'],
+                'Description':'Terminating EC2 instance: '+instance,'StatusCode':'Successful','Progress':100,
+                'StartTime':(now-timedelta(minutes=3)).isoformat(),'EndTime':(now-timedelta(minutes=1)).isoformat(),**changes}
+    def late(self):
+        old='i-'+'2'*17;self.other_writer(instance_id=old);self.states[old]='absent';self.history={'Activities':[self.event(old)]};return old
+    def test_missing_or_foreign_ARN_cannot_initialize_ledger(self):
+        for arn in [None,'private-test',self.cfg['asg_arn'].replace('537112465379','000000000000'),self.cfg['asg_arn'].replace('private-test','other')]:
+            with self.subTest(arn=arn),self.assertRaises((l.Unsafe,TypeError)):l.Ledger({**self.cfg,'asg_arn':arn},self.protocol,self.backend,self.api)
+    def test_current_group_name_reuse_cannot_pass_protection_preflight(self):
+        guard=self.guard();cfg={**self.cfg,'durable_journal':{'bucket':'private-test','key':'journal/private-test/state.json'}};group={'AutoScalingGroupARN':self.cfg['asg_arn'],'Instances':[{'InstanceId':cfg['instance_id'],'LifecycleState':'InService'}]}
+        with patch.object(guard,'aws',return_value={'AutoScalingGroups':[group]}):self.assertEqual(guard.group_state(cfg),group)
+        with patch.object(guard,'aws',return_value={'AutoScalingGroups':[{**group,'AutoScalingGroupARN':self.cfg['asg_arn'].replace('11111111-1111','33333333-3333')}]}),self.assertRaises(ValueError):guard.group_state(cfg)
+
+    def test_schema1_is_not_implicitly_upgraded_into_new_authority(self):
+        value=copy.deepcopy(self.backend.value);value['schema']=1;value.pop('terminals')
+        with self.assertRaises(l.Unsafe):self.ledger.validate(value)
+    def test_missing_EC2_needs_independent_native_terminal_event(self):
+        old=self.late();self.history={'Activities':[]};before=copy.deepcopy(self.backend.value)
+        with self.assertRaisesRegex(l.Unsafe,'no unique'):self.ledger.claim()
+        self.assertEqual(self.backend.value,before)
+    def test_exact_native_witness_and_writer_transfer_are_one_CAS(self):
+        old=self.late();self.ledger.claim();state=self.ledger.read();self.assertEqual(state['writer'],self.ledger.me);self.assertEqual(state['terminals'][old]['kind'],'asg-activity');self.assertEqual(self.backend.puts,2)
+        request=next(args for service,operation,args in self.calls if service=='autoscaling');self.assertIn('--no-paginate',request);self.assertIn('--include-deleted-groups',request)
+    def test_live_EC2_cannot_be_overridden_by_an_old_successful_activity(self):
+        old=self.late();self.states[old]='running'
+        with self.assertRaises(l.Unsafe):self.ledger.claim()
+        self.assertFalse(any(service=='autoscaling' for service,operation,args in self.calls))
+    def test_access_denied_and_transport_errors_do_not_select_history_fallback(self):
+        old=self.late()
+        for error in [b.AWSFailure('ec2','describe-instances','UnauthorizedOperation'),RuntimeError('unknown transport')]:
+            with self.subTest(error=error),patch.object(self.ledger,'call',side_effect=error),self.assertRaises(type(error)):self.ledger.claim()
+        self.assertEqual(self.backend.puts,1)
+    def test_exact_not_found_code_may_query_history_but_malformed_cannot(self):
+        old=self.late();original=self.api
+        def api(service,operation,*args):
+            if service=='ec2':raise b.AWSFailure(service,operation,'InvalidInstanceID.NotFound')
+            return original(service,operation,*args)
+        with patch.object(self.ledger,'call',side_effect=api):self.ledger.claim()
+        self.assertIn(old,self.ledger.read()['terminals'])
+    def test_non_notfound_error_is_not_history_permission(self):
+        self.late()
+        with patch.object(self.ledger,'call',side_effect=b.AWSFailure('ec2','describe-instances','InvalidInstanceID.Malformed')),self.assertRaises(b.AWSFailure):self.ledger.claim()
+    def test_launch_detach_substring_and_request_are_not_termination(self):
+        old=self.late()
+        for description in ['Launching a new EC2 instance: '+old,'Detaching EC2 instance: '+old,'Terminating EC2 instance: '+old+'-other','Requested termination: '+old]:
+            self.history={'Activities':[self.event(old,Description=description)]}
+            with self.subTest(description=description),self.assertRaises(l.Unsafe):self.ledger.claim()
+    def test_reused_name_other_group_ARN_or_account_is_not_our_history(self):
+        old=self.late()
+        for changes in [{'AutoScalingGroupARN':self.cfg['asg_arn'].replace('11111111-1111','33333333-3333')},{'AutoScalingGroupName':'other'},{'AutoScalingGroupARN':self.cfg['asg_arn'].replace('537112465379','000000000000')}]:
+            self.history={'Activities':[self.event(old,**changes)]}
+            with self.subTest(changes=changes),self.assertRaises(l.Unsafe):self.ledger.claim()
+    def test_failed_pending_unfinished_or_untyped_progress_is_never_complete(self):
+        old=self.late()
+        for changes in [{'StatusCode':'Failed'},{'StatusCode':'Cancelled'},{'StatusCode':'InProgress'},{'Progress':99},{'Progress':'100'},{'Progress':True},{'EndTime':None},{'ActivityId':'unknown'}]:
+            self.history={'Activities':[self.event(old,**changes)]}
+            with self.subTest(changes=changes),self.assertRaises(l.Unsafe):self.ledger.claim()
+    def test_terminal_times_are_ordered_zoned_and_not_future(self):
+        old=self.late()
+        for changes in [{'StartTime':'not-a-time'},{'EndTime':'2026-01-01T00:00:00'},{'EndTime':(datetime.now(timezone.utc)+timedelta(hours=1)).isoformat()},{'StartTime':datetime.now(timezone.utc).isoformat()}]:
+            self.history={'Activities':[self.event(old,**changes)]}
+            with self.subTest(changes=changes),self.assertRaises(l.Unsafe):self.ledger.claim()
+    def test_whole_history_is_checked_after_a_matching_first_page(self):
+        old=self.late();first={'Activities':[self.event(old)],'NextToken':'next'};second={'Activities':[self.event(old,AutoScalingGroupARN=self.cfg['asg_arn'].replace('11111111-1111','33333333-3333'))]};original=self.api
+        def api(service,operation,*args):
+            if service=='autoscaling':return second if '--next-token' in args else first
+            return original(service,operation,*args)
+        with patch.object(self.ledger,'call',side_effect=api),self.assertRaises(l.Unsafe):self.ledger.claim()
+        self.assertEqual(self.backend.puts,1)
+    def test_complete_pagination_can_confirm_late_native_termination(self):
+        old=self.late();original=self.api
+        def api(service,operation,*args):
+            if service=='autoscaling':return self.history if '--next-token' in args else {'Activities':[],'NextToken':'next'}
+            return original(service,operation,*args)
+        with patch.object(self.ledger,'call',side_effect=api):self.ledger.claim()
+        self.assertEqual(self.ledger.read()['terminals'][old]['kind'],'asg-activity')
+    def test_cyclic_excessive_or_malformed_pages_keep_original_writer(self):
+        self.late();original=self.api
+        for mode in ['cycle','excessive','bad']:
+            n=[0]
+            def api(service,operation,*args):
+                if service!='autoscaling':return original(service,operation,*args)
+                n[0]+=1
+                return {'Activities':{},'NextToken':'bad'} if mode=='bad' else {'Activities':[],'NextToken':'same' if mode=='cycle' else str(n[0])}
+            with self.subTest(mode=mode),patch.object(self.ledger,'call',side_effect=api),self.assertRaises(l.Unsafe):self.ledger.claim()
+            self.assertLessEqual(n[0],8)
+        self.assertEqual(self.backend.puts,1)
+    def test_conflicting_or_multiple_successful_events_are_not_unique_proof(self):
+        old=self.late();event=self.event(old)
+        for second in [{**event,'Progress':99},{**event,'ActivityId':'44444444-4444-4444-4444-444444444444'}]:
+            self.history={'Activities':[event,second]}
+            with self.subTest(second=second),self.assertRaises(l.Unsafe):self.ledger.claim()
+    def test_confirmed_witness_survives_root_cache_loss_and_history_expiration(self):
+        old=self.late();self.ledger.claim();fresh=l.Ledger(self.cfg,self.protocol,self.backend,lambda *args:(_ for _ in ()).throw(RuntimeError('API now unavailable')));fresh.claim();proof=fresh.confirm_terminal(old);self.assertEqual(proof['kind'],'asg-activity');self.assertEqual(self.backend.puts,2)
+    def test_cached_witness_cannot_cross_deployment_instance_or_timestamp(self):
+        old=self.late();self.ledger.claim();state=copy.deepcopy(self.backend.value)
+        for change in [{'account':'000000000000'},{'region':'us-east-1'},{'asg_arn':self.cfg['asg_arn'].replace('11111111-1111','33333333-3333')},{'instance_id':'i-'+'3'*17},{'observed_at':(datetime.now(timezone.utc)+timedelta(hours=1)).isoformat()}]:
+            value=copy.deepcopy(state);value['terminals'][old].update(change)
+            with self.subTest(change=change),self.assertRaises(l.Unsafe):self.ledger.validate(value)
+    def test_witness_history_is_bounded_without_losing_referenced_origin(self):
+        now=datetime.now(timezone.utc);origin='i-'+'0'*17;proofs={}
+        for n in range(12):
+            ident='i-'+format(n,'017x');proofs[ident]={'schema':1,'kind':'ec2','state':'terminated','instance_id':ident,'account':self.cfg['account'],'region':self.cfg['region'],'asg_arn':self.cfg['asg_arn'],'observed_at':(now-timedelta(minutes=12-n)).isoformat()}
+        state={**self.backend.value,'writer':self.ledger.me,'terminals':proofs,'drain':{'identity':{'instance_id':self.cfg['instance_id']},'origin_instance_id':origin}}
+        result=self.ledger.retained(state);self.assertIn(origin,result);self.assertLessEqual(len(result),3)
     def test_s3_client_checks_account_checksum_size_and_etag(self):
         data=l.encode(self.backend.value);digest=hashlib.sha256(data).hexdigest();calls=[]
         def api(*args):

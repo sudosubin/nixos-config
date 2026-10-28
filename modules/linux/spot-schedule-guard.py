@@ -196,7 +196,7 @@ def protection(config, enabled):
 
 def group_state(config):
     groups = aws(config, "autoscaling", "describe-auto-scaling-groups", "--auto-scaling-group-names", config["asg"])["AutoScalingGroups"]
-    if len(groups) != 1 or not any(i["InstanceId"] == config["instance_id"] and i["LifecycleState"] == "InService" for i in groups[0]["Instances"]):
+    if len(groups) != 1 or (config.get('durable_journal') and (not config.get('asg_arn') or groups[0].get('AutoScalingGroupARN') != config['asg_arn'])) or not any(i["InstanceId"] == config["instance_id"] and i["LifecycleState"] == "InService" for i in groups[0]["Instances"]):
         raise ValueError("not an InService member of expected ASG")
     return groups[0]
 

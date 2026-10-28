@@ -206,7 +206,7 @@ class Transaction:
         if replaced:
             if self.ledger is None:
                 raise Unsafe('replacement recovery requires authoritative off-root intent')
-            self.ledger.terminal(record['identity']['instance_id'])
+            self.ledger.confirm_terminal(record['identity']['instance_id'])
         old = record['owner']
         if not replaced and old != self.owner and old['boot_id'] == self.owner['boot_id']:
             if old['pid_namespace'] != self.owner['pid_namespace']:

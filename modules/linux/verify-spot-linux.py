@@ -129,7 +129,7 @@ def main():
         try:os.fsync(fd)
         finally:os.close(fd)
     base=[('validation',42),('work',74),('schedule-guard',99),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
-          ('drain',29),('ledger',38),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',14),('acp-linux',9),
+          ('drain',29),('ledger',58),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',14),('acp-linux',9),
           ('gateway-linux',7),('cold-linux',8),('validation-linux',2)]
     commands=[(name,count,[sys.executable,'-W','error::ResourceWarning',str(root/'modules/linux'/('test-spot-'+name+'.py')),'-v']) for name,count in base]
     for name,count,command in commands:
@@ -177,7 +177,7 @@ def main():
         state['root_linux_cases' if name.endswith('-linux') else 'unit_cases']+=max(0,executed)
         save();print(json.dumps({'suite':name,'executed':executed,'passed':passed}),flush=True)
         if not passed:raise RuntimeError('suite failed; COMPLETE stdout/stderr preserved: '+name)
-    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(598,538,60):
+    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(618,558,60):
         raise RuntimeError('executed counts do not match the complete scope')
     if {name:sha(root/name) for name in expected}!=actual:raise RuntimeError('source changed during verification')
     for name,value in compiled.items():

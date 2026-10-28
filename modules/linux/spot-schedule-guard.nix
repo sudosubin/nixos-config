@@ -64,6 +64,7 @@ let
   }
   // lib.optionalAttrs (cfg.durableJournal != null) {
     durable_journal = cfg.durableJournal;
+    asg_arn = cfg.asgARN;
   }
   // lib.optionalAttrs config.services.spotProfileCache.enable {
     profile_cache_manifest = "/home/persist/manifests/profile-cache.json";
@@ -97,6 +98,11 @@ in
       type = lib.types.str;
       default = "nixos-ec2-asg";
     };
+    asgARN = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Exact ASG account/region/UUID ARN; name reuse cannot authorize terminal recovery.";
+    };
     durableJournal = lib.mkOption {
       type = lib.types.nullOr (lib.types.submodule {
         options = {
@@ -121,10 +127,16 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
-    assertions = [{
-      assertion = !cfg.armed || cfg.durableJournal != null;
-      message = "spotScheduleGuard arming requires off-root authoritative drain/backup intent";
-    }];
+    assertions = [
+      {
+        assertion = !cfg.armed || cfg.durableJournal != null;
+        message = "spotScheduleGuard arming requires off-root authoritative drain/backup intent";
+      }
+      {
+        assertion = cfg.durableJournal == null || cfg.asgARN != null;
+        message = "spotScheduleGuard durable intent requires the exact ASG ARN, not just its name";
+      }
+    ];
     services.spotWork.enable = true;
     environment.systemPackages = [
       guard
