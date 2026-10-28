@@ -7,6 +7,8 @@
 }:
 let
   cfg = config.services.spotWork;
+  bootGate = lib.optional (config.services.spotScheduleGuard.enable or false
+  ) "spot-workload-startup-ready.service";
   # No shell/PYTHONPATH/user-site hooks may run before the admission boundary.
   # The target still receives its requested environment AFTER a lease exists.
   tool = pkgs.writeScriptBin "spot-work" ''
@@ -26,6 +28,12 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = config.services.spotScheduleGuard.enable or false;
+        message = "spotWork requires the protected-home startup coordinator; no standalone auto-open fallback";
+      }
+    ];
     environment.systemPackages = [ tool ];
     systemd.tmpfiles.rules = [
       "d /run/spot-schedule-guard 0755 root root -"
@@ -37,10 +45,19 @@ in
     # jobs starting afterwards fail the condition without doing maintenance.
     systemd.services =
       (lib.genAttrs [ "nix-gc" "nix-optimise" "docker-prune" ] (_: {
-        requires = [ "spot-work-admission-ready.service" ];
-        after = [ "spot-work-admission-ready.service" ];
+        requires = [ "spot-work-admission-ready.service" ] ++ bootGate;
+        after = [ "spot-work-admission-ready.service" ] ++ bootGate;
         serviceConfig.ExecCondition = "${tool}/bin/spot-work check-open";
       }))
+      // lib.optionalAttrs (bootGate != [ ]) (
+        lib.genAttrs [ "user@1001" "docker" "home-manager-sudosubin" ] (unit: {
+          requires = bootGate;
+          after = bootGate;
+          serviceConfig.ExecCondition = lib.mkAfter [
+            "${tool}/bin/spot-work check-service-open ${unit}.service"
+          ];
+        })
+      )
       // {
         spot-work-admission-ready = {
           description = "Initialize root-owned work admission before schedule guards";

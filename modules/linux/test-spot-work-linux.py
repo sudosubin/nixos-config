@@ -246,6 +246,11 @@ w.subprocess.Popen=extra_clone
     def test_actual_immutable_CLI_ignores_shell_and_python_startup_hooks_before_fenced_acceptance(self):
         self.assertIsNotNone(TOOL,'compiled CLI is required, not a skipped proof')
         default=work.Protocol();subprocess.run([str(TOOL),'initialize'],env=self.environment(),check=True,capture_output=True)
+        self.assertEqual(default.state(),'starting')
+        marker=self.data/'before-startup-must-not-run'
+        blocked=subprocess.run(self.user_command([str(TOOL),'run','--','/bin/sh','-c','printf forbidden > '+str(marker)]),env=self.environment(),capture_output=True,text=True)
+        self.assertEqual(blocked.returncode,75,blocked.stderr);self.assertFalse(marker.exists())
+        default.startup_ready()  # This exact empty private namespace only, not a production force API.
         default.seal()
         startup=self.data/'startup-marker';payload=self.data/'payload-marker';module=self.data/'sitecustomize.py'
         module.write_text('from pathlib import Path\nPath('+repr(str(startup))+').write_text("MUST_NOT_RUN")\n')
@@ -257,6 +262,28 @@ w.subprocess.Popen=extra_clone
         self.assertEqual(child.returncode,75,err);self.assertIn('admission closed',err)
         self.assertFalse(startup.exists());self.assertFalse(payload.exists());self.assertEqual(default.blockers(),[])
         default.unseal()
+
+    def test_cross_uid_boot_gate_rejects_new_work_but_preserves_extension_through_ready(self):
+        self.protocol=work.Protocol(self.base/'boot-runtime',uid=1001,gid=self.user.pw_gid);self.protocol.initialize(boot_closed=True)
+        marker=self.data/'boot-target'
+        child=self.client('run','--','/bin/sh','-c','printf accepted > '+str(marker));out,err=child.communicate(timeout=5)
+        self.assertEqual(child.returncode,75,err);self.assertFalse(marker.exists());self.assertEqual(self.protocol.state(),'starting')
+        extension=self.client('extend','--seconds','60');out,err=extension.communicate(timeout=5);self.assertEqual(extension.returncode,0,err);ident=json.loads(out)['id']
+        self.protocol.startup_ready();self.assertTrue((self.protocol.leases/ident).exists())
+        child=self.client('run','--','/bin/sh','-c','printf accepted > '+str(marker));out,err=child.communicate(timeout=5)
+        self.assertEqual(child.returncode,0,err);self.assertEqual(marker.read_text(),'accepted')
+        self.assertEqual(self.protocol.blockers()[0]['reason'],'manual_extension')
+
+    def test_cross_uid_live_recovery_permit_does_not_open_boot_job_admission(self):
+        self.protocol=work.Protocol(self.base/'boot-runtime',uid=1001,gid=self.user.pw_gid);self.protocol.initialize(boot_closed=True)
+        attempt='drain-'+'d'*32;self.protocol.reconcile_fence(attempt,protected=True)
+        with self.protocol.recover_services(['docker.service']):
+            for unit,expected in [('docker.service',0),('user@1001.service',1)]:
+                client=self.client('check-service-open',unit);out,err=client.communicate(timeout=5);self.assertEqual(client.returncode,expected,err)
+            client=self.client('run','--','/bin/sh','-c','exit 99');out,err=client.communicate(timeout=5);self.assertEqual(client.returncode,75,err)
+        self.protocol.unseal(attempt);self.assertEqual(self.protocol.state(),'starting')
+        client=self.client('check-service-open','docker.service');client.communicate(timeout=5);self.assertEqual(client.returncode,1)
+        self.protocol.startup_ready();client=self.client('check-service-open','docker.service');client.communicate(timeout=5);self.assertEqual(client.returncode,0)
 
     def test_manual_extension_during_drain_acknowledged_and_cancels_commit(self):
         self.protocol.seal();child=self.client('extend','--seconds','60')

@@ -262,6 +262,7 @@ class DrainTests(unittest.TestCase):
     def test_preaction_old_boot_still_requires_full_startup_and_storage_verification(self):
         self.protocol.unseal();self.tx.update('created');self.tx.close()
         self.protocol._boot_id='new-boot'
+        self.protocol.runtime=self.root/'new-runtime';self.protocol.initialize(boot_closed=True)
         t=self.transaction({**self.new,'boot_id':'new-boot','pid_namespace':'new-pidns'})
         self.assertEqual(t.recover(self.ops),'recovered')
         self.assertTrue(self.ops.boot_changed)
@@ -271,11 +272,13 @@ class DrainTests(unittest.TestCase):
         self.release('released').close()
         self.protocol.unseal()
         self.protocol._boot_id = 'new-boot'
+        self.protocol.runtime=self.root/'new-runtime';self.protocol.initialize(boot_closed=True)
         t = self.transaction({**self.new, 'boot_id': 'new-boot', 'pid_namespace': 'new-pidns'})
         self.pid.return_value = 10  # old PID/start happens to exist in the new boot
         self.assertEqual(t.recover(self.ops), 'recovered')
         self.assertTrue(self.ops.boot_changed)
         self.assertIn('protect', self.ops.events)
+        self.assertEqual(self.protocol.state(),'starting')  # recovery settlement is not boot readiness
 
     def test_exact_dead_service_authority_is_retired_before_new_start(self):
         authority = {**self.old, 'units': ['user@1001.service'], 'id': 'a'*32}

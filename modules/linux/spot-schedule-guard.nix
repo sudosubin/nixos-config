@@ -131,6 +131,37 @@ in
         UMask = "0077";
       };
     };
+    systemd.services.spot-workload-startup-ready = {
+      description = "Verify protected home/cache and inspect durable drain before admitting boot workloads";
+      wantedBy = [ "multi-user.target" ];
+      requires = [
+        "spot-work-admission-ready.service"
+        "spot-scale-in-protection-ready.service"
+        "home.mount"
+      ]
+      ++ lib.optional config.services.spotProfileCache.enable "spot-profile-cache-restore.service";
+      after = [
+        "spot-work-admission-ready.service"
+        "spot-scale-in-protection-ready.service"
+        "home.mount"
+      ]
+      ++ lib.optional config.services.spotProfileCache.enable "spot-profile-cache-restore.service";
+      before = [
+        "user@1001.service"
+        "docker.service"
+        "home-manager-sudosubin.service"
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${guard}/bin/spot-schedule-guard --startup-only";
+        TimeoutStartSec = "infinity";
+        StateDirectory = "spot-schedule-guard";
+        StateDirectoryMode = "0700";
+        UMask = "0077";
+        WorkingDirectory = "/run/spot-schedule-guard";
+      };
+    };
     systemd.services.spot-schedule-guard = {
       description = "Preserve ASG scale-in protection unless termination is verified safe";
       requires = [ "spot-work-admission-ready.service" ];

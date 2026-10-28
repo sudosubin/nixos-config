@@ -118,7 +118,7 @@ def main():
            'root_linux_cases':0,'all_passed':False,'production_armed':False,'full_work_tracking_verified':False,
            'production_rollout':False,'OS_boot_verified':False,'prepared_guard_armed_false_verified':True,
            'scope':'generic job uncertain-spawn/bound-retirement/all-child waits and configured-profile cache plus previous isolated regressions; '
-                   'NOT all producers, real provider/crash output, raw-I/O fencing, boot, migration or actual shutdown/wake'}
+                   'with boot admission/epoch custody (injected API/storage), NOT all producers, real provider/crash output, raw-I/O fencing, OS boot, migration or actual shutdown/wake'}
     def save():
         tmp=args.output.with_suffix('.tmp')
         fd=os.open(tmp,os.O_WRONLY|os.O_CREAT|os.O_TRUNC|os.O_NOFOLLOW,0o600)
@@ -128,8 +128,8 @@ def main():
         fd=os.open(args.output.parent,os.O_RDONLY|os.O_DIRECTORY)
         try:os.fsync(fd)
         finally:os.close(fd)
-    base=[('validation',42),('work',59),('schedule-guard',82),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
-          ('drain',29),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',12),('acp-linux',9),
+    base=[('validation',42),('work',74),('schedule-guard',98),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
+          ('drain',29),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',14),('acp-linux',9),
           ('gateway-linux',7),('cold-linux',8),('validation-linux',2)]
     commands=[(name,count,[sys.executable,'-W','error::ResourceWarning',str(root/'modules/linux'/('test-spot-'+name+'.py')),'-v']) for name,count in base]
     for name,count,command in commands:
@@ -177,7 +177,7 @@ def main():
         state['root_linux_cases' if name.endswith('-linux') else 'unit_cases']+=max(0,executed)
         save();print(json.dumps({'suite':name,'executed':executed,'passed':passed}),flush=True)
         if not passed:raise RuntimeError('suite failed; COMPLETE stdout/stderr preserved: '+name)
-    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(526,468,58):
+    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(559,499,60):
         raise RuntimeError('executed counts do not match the complete scope')
     if {name:sha(root/name) for name in expected}!=actual:raise RuntimeError('source changed during verification')
     for name,value in compiled.items():

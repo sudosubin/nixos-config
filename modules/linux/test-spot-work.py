@@ -411,4 +411,121 @@ class AdmissionTests(unittest.TestCase):
         self.assertEqual(set(data),{'schema','id','kind','uid','boot_id','created_at','state','pid','pid_start','heartbeat_at'})
 
 
+class BootAdmissionTests(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        for name,value in [('process_start',123),('process_uid',os.geteuid())]:
+            p=patch.object(work,name,return_value=value);p.start();self.addCleanup(p.stop)
+        self.p=work.Protocol(Path(self.temp.name)/'runtime',uid=os.geteuid(),gid=os.getegid(),root_uid=os.geteuid(),boot_id='private-boot')
+        self.p.initialize(boot_closed=True)
+
+    def test_empty_boot_registry_is_starting_not_idle_authority(self):
+        self.assertEqual(self.p.state(),'starting')
+        self.assertEqual(self.p.blockers(),[{'id':'startup','reason':'startup_not_ready'}])
+        with self.assertRaises(RuntimeError):self.p.seal()
+        self.assertFalse(self.p.service_start_allowed('docker.service'))
+
+    def test_starting_rejects_before_backend_spawn(self):
+        with patch.object(work,'subreaper'),patch.object(work.subprocess,'Popen') as spawn:
+            with self.assertRaisesRegex(RuntimeError,'NOT acknowledged'):work.run_job(self.p,['never-executed'])
+        spawn.assert_not_called();self.assertEqual(list(self.p.leases.iterdir()),[])
+
+    def test_extension_is_acknowledged_without_opening_boot_work(self):
+        extension=self.p.create('manual',60);self.assertEqual(self.p.state(),'starting')
+        self.p.startup_ready();self.assertEqual(self.p.state(),'open')
+        self.assertEqual(self.p.blockers()[0]['reason'],'manual_extension')
+        with self.assertRaises(work.SealBlocked):self.p.seal()
+        self.p.remove(extension['id'])
+
+    def test_initialize_is_idempotent_and_has_no_promote_flag_on_CLI(self):
+        self.p.initialize();self.assertEqual(self.p.state(),'starting')
+        with patch('sys.argv',['spot-work','initialize']):self.assertEqual(work.main(self.p),0)
+        self.assertEqual(self.p.state(),'starting')
+        with patch('sys.argv',['spot-work','check-open']):self.assertEqual(work.main(self.p),1)
+
+    def test_missing_startup_custody_does_not_mean_open(self):
+        (self.p.runtime/'startup').unlink()
+        with self.assertRaises(OSError):self.p.create('job')
+        with self.assertRaises(OSError):self.p.startup_ready()
+
+    def test_missing_startup_cannot_reinitialize_over_existing_custody(self):
+        self.p.create('manual',60);(self.p.runtime/'startup').unlink()
+        with self.assertRaisesRegex(RuntimeError,'existing work'):self.p.initialize()
+        self.assertEqual(len(list(self.p.leases.iterdir())),1)
+
+    def test_foreign_boot_malformed_and_extra_startup_fields_never_open(self):
+        original={'schema':1,'boot_id':'private-boot','state':'ready'}
+        for change in [{'schema':True},{'boot_id':'previous'},{'state':'open'},{'unexpected':True}]:
+            with self.subTest(change=change):
+                self.p.publish(self.p.runtime/'startup',{**original,**change})
+                with self.assertRaises(ValueError):self.p.create('job')
+                with self.assertRaises(ValueError):self.p.initialize()
+
+    def test_startup_symlink_never_followed(self):
+        path=self.p.runtime/'startup';path.unlink();target=Path(self.temp.name)/'target';target.write_text('{}');path.symlink_to(target)
+        with self.assertRaises(OSError):self.p.startup_ready()
+        self.assertEqual(target.read_text(),'{}')
+
+    def test_only_root_may_complete_startup(self):
+        with patch.object(work.os,'geteuid',return_value=os.geteuid()+1):
+            with self.assertRaises(PermissionError):self.p.startup_ready()
+        self.assertEqual(self.p.state(),'starting')
+
+    def test_unknown_participant_or_job_cannot_be_erased_by_startup(self):
+        path=self.p.runtime/'participants'/'unknown';path.write_text('{}')
+        with self.assertRaisesRegex(RuntimeError,'unknown startup'):self.p.startup_ready()
+        self.assertEqual(path.read_text(),'{}');self.assertEqual(self.p.state(),'starting')
+        path.unlink();path=self.p.leases/'unknown';path.write_text('{}')
+        with self.assertRaises(RuntimeError):self.p.startup_ready()
+        self.assertEqual(path.read_text(),'{}')
+
+    def test_ready_reinitialization_does_not_close_accepted_work(self):
+        self.p.startup_ready();job=self.p.create('job');self.p.initialize(boot_closed=True);self.p.startup_ready()
+        self.assertEqual(self.p.state(),'open');self.assertTrue((self.p.leases/job['id']).exists())
+
+    def test_recovery_permit_only_starts_named_units_while_boot_jobs_stay_closed(self):
+        attempt='drain-'+'a'*32;self.p.reconcile_fence(attempt,protected=True)
+        with self.p.recover_services(['docker.service']):
+            self.assertTrue(self.p.service_start_allowed('docker.service'))
+            self.assertFalse(self.p.service_start_allowed('user@1001.service'))
+            with self.assertRaises(RuntimeError):self.p.create('job')
+            with self.assertRaises(RuntimeError):self.p.startup_ready()
+        self.p.unseal(attempt);self.assertEqual(self.p.state(),'starting')
+        self.assertFalse(self.p.service_start_allowed('docker.service'))
+        self.p.startup_ready();self.assertTrue(self.p.service_start_allowed('docker.service'))
+
+    def test_dead_boot_recovery_owner_cannot_start_a_unit(self):
+        self.p.reconcile_fence('drain-'+'b'*32,protected=True)
+        with self.p.recover_services(['docker.service']):
+            with patch.object(work,'process_start',side_effect=ProcessLookupError):
+                self.assertFalse(self.p.service_start_allowed('docker.service'))
+
+    def test_lost_ready_publication_does_not_acknowledge_work(self):
+        with patch.object(self.p,'publish',side_effect=OSError('private injected write failure')):
+            with self.assertRaises(OSError):self.p.startup_ready()
+        self.assertEqual(self.p.state(),'starting')
+        with self.assertRaises(RuntimeError):self.p.create('job')
+
+    def test_atomic_ready_publication_precedes_job_acceptance(self):
+        entered=threading.Event();release=threading.Event();rows=[];original=self.p.publish
+        def publish(path,data,**kwargs):
+            if path.name=='startup':
+                entered.set()
+                if not release.wait(5):raise RuntimeError('private publication barrier expired')
+            return original(path,data,**kwargs)
+        def ready():
+            try:self.p.startup_ready();rows.append('ready')
+            except Exception as e:rows.append(type(e).__name__)
+        def job():
+            try:self.p.create('job');rows.append('accepted')
+            except Exception as e:rows.append(type(e).__name__)
+        writer=threading.Thread(target=ready);client=threading.Thread(target=job)
+        with patch.object(self.p,'publish',side_effect=publish):
+            try:writer.start();self.assertTrue(entered.wait(2));client.start()
+            finally:
+                release.set();writer.join(5)
+                if client.ident is not None:client.join(5)
+        self.assertFalse(writer.is_alive());self.assertFalse(client.is_alive());self.assertCountEqual(rows,['ready','accepted'])
+
+
 if __name__=='__main__':unittest.main()

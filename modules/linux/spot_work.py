@@ -68,7 +68,7 @@ class Protocol:
     def leases(self):
         return self.runtime / 'leases'
 
-    def initialize(self):
+    def initialize(self, *, boot_closed=False):
         if os.geteuid() != self.root_uid:
             raise PermissionError('only root initializes work admission')
         for path, mode in [(self.runtime, 0o755), (self.leases, 0o1733), (self.runtime / 'participants', 0o1733)]:
@@ -86,6 +86,47 @@ class Protocol:
             os.fchmod(fd, 0o660)
         finally:
             os.close(fd)
+        with self.locked():
+            if os.path.lexists(self.runtime / 'startup'):
+                self.startup_state()  # Never reset an existing/unknown boot gate.
+            else:
+                if (any(self.leases.iterdir()) or any((self.runtime / 'participants').iterdir())
+                        or os.path.lexists(self.runtime / 'draining')
+                        or os.path.lexists(self.runtime / 'recover-services')):
+                    raise RuntimeError('missing startup custody with existing work; initialization refused')
+                # The CLI always starts closed. Private fixtures may explicitly
+                # initialize an empty, isolated protocol ready for their test.
+                self._write_startup('starting' if boot_closed else 'ready')
+
+    def _write_startup(self, state):
+        if os.geteuid() != self.root_uid or state not in {'starting', 'ready'}:
+            raise PermissionError('only the root startup coordinator publishes readiness')
+        self.publish(self.runtime / 'startup', {'schema': 1, 'boot_id': self.boot_id, 'state': state})
+        os.chmod(self.runtime / 'startup', 0o644)
+
+    def startup_state(self):
+        data, _ = read_record(self.runtime / 'startup', {self.root_uid})
+        if (set(data) != {'schema', 'boot_id', 'state'} or type(data.get('schema')) is not int
+                or data['schema'] != 1 or data.get('boot_id') != self.boot_id
+                or data.get('state') not in {'starting', 'ready'}):
+            raise ValueError('startup custody unknown; admission remains closed')
+        return data['state']
+
+    def startup_ready(self):
+        # Internal root coordinator operation, not a CLI force/unseal API.
+        # Caller must freshly verify protection, exact home/cache restore and
+        # no pending durable drain under the guard's controller lock.
+        if os.geteuid() != self.root_uid:
+            raise PermissionError('only root completes startup verification')
+        with self.locked():
+            if self.startup_state() == 'ready':
+                return  # Idempotence must not refence already accepted work.
+            if self.state() not in {'starting', 'open'}:
+                raise RuntimeError('drain recovery must finish before startup opens')
+            blockers = self.blockers_unlocked()
+            if any(b['reason'] not in {'startup_not_ready', 'manual_extension'} for b in blockers):
+                raise RuntimeError('unknown startup work custody; admission remains closed')
+            self._write_startup('ready')
 
     @contextmanager
     def locked(self, timeout=5):
@@ -112,10 +153,11 @@ class Protocol:
             os.close(fd)
 
     def state(self):
+        startup = self.startup_state()
         try:
             data, _ = read_record(self.runtime / 'draining', {self.root_uid})
         except FileNotFoundError:
-            return 'open'
+            return 'open' if startup == 'ready' else 'starting'
         if (type(data.get('schema')) is not int or data['schema'] != 1
                 or data.get('boot_id') != self.boot_id
                 or data.get('state') not in {'draining', 'releasing', 'released'}):
@@ -191,9 +233,9 @@ class Protocol:
             if not isinstance(attempt_id, str) or not re.fullmatch(r'drain-[0-9a-f]{32}', attempt_id):
                 raise ValueError('invalid drain attempt')
             state = self.state()
-            if state != 'open' and (state != 'draining' or self.attempt_id() != attempt_id):
+            if state not in {'open', 'starting'} and (state != 'draining' or self.attempt_id() != attempt_id):
                 raise RuntimeError('pre-action recovery cannot undo another fence or a release')
-            self._unseal_unlocked(attempt_id if state != 'open' else None)
+            self._unseal_unlocked(attempt_id if state not in {'open', 'starting'} else None)
 
     def reconcile_fence(self, attempt_id, protected=False, released=False):
         # Only recovery of an action-bearing journal may close open admission.
@@ -203,9 +245,9 @@ class Protocol:
             if os.geteuid() != self.root_uid:
                 raise PermissionError('only root reconciles drain admission')
             state = self.state()
-            if state != 'open' and self.attempt_id() != attempt_id:
+            if state not in {'open', 'starting'} and self.attempt_id() != attempt_id:
                 raise RuntimeError('drain fence belongs to another attempt')
-            if state == 'open':
+            if state in {'open', 'starting'}:
                 self.write_state('draining', attempt_id)
             if released:
                 self.write_state('released', attempt_id)
@@ -307,6 +349,8 @@ class Protocol:
     def blockers_unlocked(self, now=None):
         now = time.time() if now is None else now
         blocked = []
+        if self.startup_state() != 'ready':
+            blocked.append({'id': 'startup', 'reason': 'startup_not_ready'})
         for path in self.leases.iterdir():
             try:
                 if not NAME.fullmatch(path.name):
@@ -358,7 +402,7 @@ class Protocol:
             raise PermissionError('unexpected work owner')
         with self.locked():
             state = self.state()
-            if state in {'releasing', 'released'} or (kind == 'job' and state != 'open'):
+            if state in {'releasing', 'released'} or (kind == 'job' and (state != 'open' or self.startup_state() != 'ready')):
                 raise RuntimeError('shutdown admission closed; request NOT acknowledged')
             now = time.time()
             data = {'schema': 1, 'id': kind + '-' + uuid.uuid4().hex, 'kind': kind,
@@ -519,7 +563,7 @@ def main(protocol=None):
     args = parser.parse_args()
     protocol = protocol or Protocol()
     if args.action == 'initialize':
-        protocol.initialize()
+        protocol.initialize(boot_closed=True)
     elif args.action == 'status':
         with protocol.locked():
             print(json.dumps({'state': protocol.state(), 'blockers': protocol.blockers_unlocked()}))

@@ -76,8 +76,8 @@ class SafetyTests(DrainSandboxMixin, unittest.TestCase):
         self.group = {"DesiredCapacity": 0}
         self.now = at("2026-10-26T02:15:00")
         self.node = {
-            "mounted": True, "uuid": "uuid", "system": "/nix/store/system", "profile": "/nix/store/profile",
-            "manifest": {**{key: True for key in guard.REQUIRED}, "system": "/nix/store/system", "user_profile": "/nix/store/profile"},
+            "mounted": True, "uuid": "uuid", "system": "/nix/store/system", "profile": "/nix/store/profile", "boot_id": "private-boot",
+            "manifest": {**{key: True for key in guard.REQUIRED}, "system": "/nix/store/system", "user_profile": "/nix/store/profile", "boot_id": "private-boot", "instance_id": "i-test"},
             "workers": [], "leases": [], "maintenance": False,
         }
         self.volume = {"Encrypted": True, "Attachments": [{"InstanceId": "i-test", "State": "attached", "DeleteOnTermination": False}]}
@@ -87,6 +87,18 @@ class SafetyTests(DrainSandboxMixin, unittest.TestCase):
 
     def test_verified_idle_can_be_considered(self):
         self.assertEqual(self.reasons(), [])
+
+    def test_previous_boot_cannot_reuse_work_tracking_approval(self):
+        self.node['manifest']['boot_id']='previous-boot'
+        self.assertIn('work_tracking_epoch_not_current',self.reasons())
+
+    def test_missing_epoch_or_replacement_instance_cannot_reuse_approval(self):
+        for change in [{'boot_id':None},{'instance_id':'i-previous'}]:
+            with self.subTest(change=change):
+                saved=dict(self.node['manifest']);self.node['manifest'].update(change)
+                self.assertIn('work_tracking_epoch_not_current',self.reasons());self.node['manifest']=saved
+        self.node['boot_id']=None;self.node['manifest']['boot_id']=None
+        self.assertIn('work_tracking_epoch_not_current',self.reasons())
 
     def test_observation_never_releases(self):
         self.config["armed"] = False
@@ -307,7 +319,7 @@ class FailureTests(DrainSandboxMixin, unittest.TestCase):
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:
             cfg = {"account": "account", "region": "region"}
-            with patch("sys.argv", ["guard"]), patch.object(guard, "RUNTIME", Path(tmp)), patch.object(guard, "root_json", return_value=cfg), patch.object(guard, "identity", return_value={"accountId":"account","region":"region","instanceId":"i-test"}), patch.object(guard, "group_state", return_value={"DesiredCapacity":0}), patch.object(guard, "protection") as protection, patch.object(guard, "probe", side_effect=RuntimeError("API unavailable")), patch.object(guard, "status"):
+            with patch("sys.argv", ["guard"]), patch.object(guard, "RUNTIME", Path(tmp)), patch.object(guard, "root_json", return_value=cfg), patch.object(guard, "identity", return_value={"accountId":"account","region":"region","instanceId":"i-test"}), patch.object(guard, "group_state", return_value={"DesiredCapacity":0}), patch.object(guard, "protection") as protection, patch.object(guard, "probe", side_effect=RuntimeError("API unavailable")), patch.object(guard, 'work_protocol'), patch.object(guard, "status"):
                 with self.assertRaises(RuntimeError):
                     guard.main()
                 protection.assert_called_once_with(cfg, True)
@@ -603,6 +615,12 @@ class ColdBackupChecks(unittest.TestCase):
 
 
 class RecoveryRoutingTests(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.protocol=guard.work.Protocol(Path(self.temp.name)/'runtime',uid=os.geteuid(),gid=os.getegid(),root_uid=os.geteuid(),boot_id='routing-test')
+        self.protocol.initialize()
+        p=patch.object(guard,'work_protocol',return_value=self.protocol);p.start();self.addCleanup(p.stop)
+
     def test_recover_only_without_journal_never_starts_a_new_shutdown(self):
         with tempfile.TemporaryDirectory() as directory:
             cfg={'account':'account','region':'region','drain_journal':str(Path(directory)/'missing.json')}
@@ -617,6 +635,138 @@ class RecoveryRoutingTests(unittest.TestCase):
             transaction=MagicMock();transaction.read.return_value={'phase':'home_unmounted'}
             with patch('sys.argv',['guard']),patch.object(guard,'RUNTIME',Path(directory)),patch.object(guard,'root_json',return_value=cfg),patch.object(guard,'identity',return_value={'accountId':'account','region':'region','instanceId':'i-test'}),patch.object(guard,'drain_transaction',return_value=transaction),patch.object(guard,'reconcile_drain',return_value='recovered') as recover,patch.object(guard,'probe') as probe,patch.object(guard,'drain') as drain,patch.object(guard,'status'):
                 guard.main();recover.assert_called_once();probe.assert_not_called();drain.assert_not_called()
+
+
+class BootPreflightTests(unittest.TestCase):
+    """Actual private locks/files; AWS/home/cache-service observations injected, not OS boot proof."""
+    def setUp(self):
+        from contextlib import ExitStack
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name);self.stack=ExitStack();self.addCleanup(self.stack.close)
+        self.protocol=guard.work.Protocol(self.root/'runtime',uid=os.geteuid(),gid=os.getegid(),root_uid=os.geteuid(),boot_id='new-boot')
+        self.protocol.initialize(boot_closed=True)
+        self.cfg={'uid':1001,'account':'account','region':'region','asg':'test-asg','instance_id':'i-test',
+                  'home_volume':'vol-test','home_uuid':'test-uuid','drain_journal':str(self.root/'state'/'drain.json'),
+                  'profile_cache_config':'/private-fixture/cache.json'}
+        self.events=[]
+        self.protect=self.stack.enter_context(patch.object(guard,'startup_protection',side_effect=lambda cfg:self.events.append('protected')))
+        self.home=self.stack.enter_context(patch.object(guard,'verify_recovery_home',side_effect=lambda cfg:self.events.append('home')))
+        self.cache=self.stack.enter_context(patch.object(guard,'command',return_value='ActiveState=active\nSubState=exited\nResult=success'))
+        self.stack.enter_context(patch.object(guard,'drain_transaction',side_effect=self.transaction))
+
+    def transaction(self,config,protocol):
+        return guard.spot_drain.Transaction(config,protocol,self.cfg['drain_journal'],owner_uid=os.geteuid(),
+            current_owner={'boot_id':protocol.boot_id,'pid':os.getpid(),'pid_start':1,'pid_namespace':'private-unit-test'})
+
+    def old_intent(self,phase='home_unmounted'):
+        previous=guard.work.Protocol(self.root/'previous-runtime',uid=os.geteuid(),gid=os.getegid(),root_uid=os.geteuid(),boot_id='previous-boot')
+        previous.initialize();t=self.transaction(self.cfg,previous)
+        try:
+            t.begin({'user@1001.service':'active','docker.service':'inactive'})
+            t.update(phase,services_may_be_stopped=phase!='recovered')
+        finally:t.close()
+
+    def test_verified_dependencies_open_only_boot_admission_not_tracking_or_arming(self):
+        self.assertTrue(guard.startup_workloads(self.cfg,self.protocol));self.assertEqual(self.events,['protected','home'])
+        self.cache.assert_called_once_with('systemctl','show','spot-profile-cache-restore.service','--property=ActiveState,SubState,Result')
+        self.assertEqual(self.protocol.state(),'open');self.assertNotIn('armed',self.cfg)
+        self.assertFalse((self.root/'active.json').exists())
+
+    def test_protection_failure_cannot_observe_home_or_open(self):
+        self.protect.side_effect=RuntimeError('unknown protection')
+        with self.assertRaises(RuntimeError):guard.startup_workloads(self.cfg,self.protocol)
+        self.home.assert_not_called();self.cache.assert_not_called();self.assertEqual(self.protocol.state(),'starting')
+
+    def test_wrong_home_never_opens_or_starts_cache(self):
+        self.home.side_effect=RuntimeError('wrong filesystem')
+        with self.assertRaises(RuntimeError):guard.startup_workloads(self.cfg,self.protocol)
+        self.cache.assert_not_called();self.assertEqual(self.protocol.state(),'starting')
+
+    def test_inactive_failed_non_exited_or_ambiguous_cache_restore_never_opens(self):
+        for value in ['ActiveState=inactive\nSubState=dead\nResult=success','ActiveState=failed\nSubState=failed\nResult=exit-code',
+                      'ActiveState=active\nSubState=running\nResult=success','',
+                      'ActiveState=inactive\nActiveState=active\nSubState=exited\nResult=success']:
+            with self.subTest(value=value):
+                self.cache.return_value=value
+                with self.assertRaises((RuntimeError,ValueError)):guard.startup_workloads(self.cfg,self.protocol)
+                self.assertEqual(self.protocol.state(),'starting')
+
+    def test_pending_real_durable_intent_stays_closed_without_restoring_anything(self):
+        self.old_intent()
+        with patch.object(guard,'reconcile_drain') as recover,patch.object(guard.subprocess,'run') as run:
+            self.assertFalse(guard.startup_workloads(self.cfg,self.protocol));recover.assert_not_called();run.assert_not_called()
+        self.assertEqual(self.protocol.state(),'starting');self.assertFalse(self.protocol.service_start_allowed('user@1001.service'))
+
+    def test_recovered_durable_intent_can_complete_startup(self):
+        self.old_intent('recovered');self.assertTrue(guard.startup_workloads(self.cfg,self.protocol));self.assertEqual(self.protocol.state(),'open')
+
+    def test_malformed_or_foreign_journal_is_not_no_journal(self):
+        self.old_intent();p=Path(self.cfg['drain_journal']);p.write_text('{}')
+        with self.assertRaises(guard.spot_drain.Unsafe):guard.startup_workloads(self.cfg,self.protocol)
+        self.assertEqual(self.protocol.state(),'starting');self.assertEqual(p.read_text(),'{}')
+
+    def test_live_journal_owner_is_not_stolen_by_boot_preflight(self):
+        t=self.transaction(self.cfg,self.protocol);t.acquire()
+        try:
+            self.assertFalse(guard.startup_workloads(self.cfg,self.protocol))
+            self.assertIsNotNone(t.fd);self.assertEqual(self.protocol.state(),'starting')
+        finally:t.close()
+
+    def test_ready_boot_preflight_cannot_reprotect_or_unseal_an_active_drain(self):
+        self.protocol.startup_ready();self.protocol.seal('drain-'+'c'*32)
+        self.assertTrue(guard.startup_workloads(self.cfg,self.protocol))
+        self.protect.assert_not_called();self.home.assert_not_called();self.cache.assert_not_called()
+        self.assertEqual(self.protocol.state(),'draining')
+
+    def test_startup_mode_does_not_wait_on_controller_starting_a_dependent_unit(self):
+        import fcntl,threading
+        done=threading.Event();errors=[]
+        fd=os.open(self.protocol.runtime/'lock',os.O_WRONLY|os.O_CREAT,0o600);fcntl.flock(fd,fcntl.LOCK_EX)
+        def preflight():
+            try:guard.main()
+            except Exception as e:errors.append(type(e).__name__)
+            finally:done.set()
+        thread=threading.Thread(target=preflight)
+        with patch('sys.argv',['guard','--startup-only']),patch.object(guard,'RUNTIME',self.protocol.runtime),patch.object(guard,'root_json',return_value=self.cfg), \
+                patch.object(guard,'identity',return_value={'accountId':'account','region':'region','instanceId':'i-test'}), \
+                patch.object(guard,'work_protocol',return_value=self.protocol),patch.object(guard,'status'):
+            try:thread.start();completed_while_controller_held=done.wait(2)
+            finally:os.close(fd);thread.join(5)
+        self.assertTrue(completed_while_controller_held,'preflight deadlocked on its own recovery dependency')
+        self.assertFalse(thread.is_alive());self.assertEqual(errors,[]);self.assertEqual(self.protocol.state(),'open')
+
+    def test_missing_boot_custody_reprotects_without_inventing_readiness(self):
+        (self.protocol.runtime/'startup').unlink()
+        with patch.object(guard,'protection') as protection:
+            with self.assertRaises(OSError):guard.startup_workloads(self.cfg,self.protocol)
+            protection.assert_called_once_with(self.cfg,True)
+        self.assertFalse((self.protocol.runtime/'startup').exists())
+
+    def test_lost_gate_write_keeps_closed_and_releases_only_owned_lock(self):
+        with patch.object(self.protocol,'publish',side_effect=OSError('private injected write fault')):
+            with self.assertRaises(OSError):guard.startup_workloads(self.cfg,self.protocol)
+        self.assertEqual(self.protocol.state(),'starting')
+        t=self.transaction(self.cfg,self.protocol)
+        try:t.acquire()
+        finally:t.close()
+
+    def test_startup_only_cannot_become_recovery_or_fresh_shutdown(self):
+        self.old_intent()
+        with patch('sys.argv',['guard','--startup-only']),patch.object(guard,'RUNTIME',self.protocol.runtime),patch.object(guard,'root_json',return_value=self.cfg), \
+                patch.object(guard,'identity',return_value={'accountId':'account','region':'region','instanceId':'i-test'}), \
+                patch.object(guard,'work_protocol',return_value=self.protocol),patch.object(guard,'reconcile_drain') as recover, \
+                patch.object(guard,'probe') as probe,patch.object(guard,'drain') as drain,patch.object(guard,'status') as status:
+            guard.main();recover.assert_not_called();probe.assert_not_called();drain.assert_not_called()
+            self.assertEqual(status.call_args.args[0]['state'],'startup_recovery_pending')
+        self.assertEqual(self.protocol.state(),'starting')
+
+    def test_recovery_receipt_without_durable_settlement_cannot_open_boot(self):
+        self.old_intent()
+        with patch('sys.argv',['guard','--recover-only']),patch.object(guard,'RUNTIME',self.protocol.runtime),patch.object(guard,'root_json',return_value=self.cfg), \
+                patch.object(guard,'identity',return_value={'accountId':'account','region':'region','instanceId':'i-test'}), \
+                patch.object(guard,'work_protocol',return_value=self.protocol),patch.object(guard,'reconcile_drain',return_value='recovered'),patch.object(guard,'status'):
+            with self.assertRaisesRegex(RuntimeError,'still pending'):guard.main()
+        self.assertEqual(self.protocol.state(),'starting')
 
 
 class RecoveryIOTests(unittest.TestCase):

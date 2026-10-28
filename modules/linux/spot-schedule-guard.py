@@ -124,7 +124,7 @@ def probe(config, now):
         "system": os.path.realpath("/run/current-system"),
         "profile": os.path.realpath("/home/sudosubin/.nix-profile"),
         "workers": workers, "leases": leases,
-        "maintenance": maintenance_running(),
+        "maintenance": maintenance_running(), "boot_id": work_protocol(config).boot_id,
         "gateway": spot_gateway.configured(config, work_protocol(config)).observe() if config.get("gateway") else None,
     }
 
@@ -147,6 +147,9 @@ def reasons(config, now, group, node, sessions, volume):
     for key in REQUIRED:
         if manifest.get(key) is not True:
             result.append("prerequisite:" + key)
+    if (manifest.get('boot_id') != node.get('boot_id') or not node.get('boot_id')
+            or manifest.get('instance_id') != config['instance_id']):
+        result.append('work_tracking_epoch_not_current')
     if manifest.get("system") != node["system"]:
         result.append("profile_drift")
     if config.get("profile_cache_manifest"):
@@ -345,6 +348,45 @@ def verify_recovery_home(config, allow_mount=False):
         raise RuntimeError('recovery home is not the verified writable filesystem')
 
 
+def startup_workloads(config, protocol):
+    """Boot preflight, NEVER a work-tracking/arming approval or a drain retry.
+
+    The closed boot gate and exclusive journal lock prevent a concurrent fresh
+    drain/open. Never wait for a live recovery owner: it may be starting a unit
+    which depends on this preflight. Pending/busy intent returns closed, not an
+    error or ownership takeover. Only recovery owns service restoration.
+    """
+    try:
+        ready = protocol.startup_state() == 'ready'
+    except Exception:
+        protection(config, True)
+        raise
+    if ready:
+        return True  # Re-running a boot unit cannot supersede an active drain.
+    startup_protection(config)
+    verify_recovery_home(config)
+    if config.get('profile_cache_config'):
+        raw = command('systemctl', 'show', 'spot-profile-cache-restore.service',
+                      '--property=ActiveState,SubState,Result')
+        lines = raw.splitlines()
+        values = dict(line.split('=', 1) for line in lines)
+        if len(lines) != 3 or values != {'ActiveState': 'active', 'SubState': 'exited', 'Result': 'success'}:
+            raise RuntimeError('boot package restoration is not confirmed; admission remains closed')
+    transaction = drain_transaction(config, protocol)
+    try:
+        try:
+            transaction.acquire()
+        except BlockingIOError:
+            return False  # live recovery may be waiting for this dependency
+        record = transaction.read()  # malformed/foreign intent NEVER becomes no intent
+        if record is not None and record['phase'] != 'recovered':
+            return False
+        protocol.startup_ready()  # same admission lock as all job acceptance
+        return True
+    finally:
+        transaction.close()
+
+
 def verify_recovery_services(config, before):
     verify_recovery_home(config)
     for unit, state in before.items():
@@ -493,14 +535,17 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--protect-only", action="store_true", help="wait for protected InService membership before workloads start")
     mode.add_argument("--recover-only", action="store_true", help="reconcile an owned drain without starting a new shutdown")
+    mode.add_argument('--startup-only', action='store_true', help='verify protected home/cache before opening boot admission; never restore or drain')
     args = parser.parse_args()
     config = root_json(os.path.realpath(args.config))
     RUNTIME.mkdir(mode=0o755, exist_ok=True)
     (RUNTIME / "leases").mkdir(mode=0o1733, exist_ok=True)
     os.chmod(RUNTIME / "leases", 0o1733)
-    with (RUNTIME / "lock").open("w") as lock:
+    # Startup preflight must not wait on the drain owner: recovery may be
+    # synchronously starting a unit that requires this very preflight service.
+    with (RUNTIME / ('startup.lock' if args.startup_only else 'lock')).open("w") as lock:
         try:
-            fcntl.flock(lock, fcntl.LOCK_EX | (0 if args.protect_only else fcntl.LOCK_NB))
+            fcntl.flock(lock, fcntl.LOCK_EX | (0 if args.protect_only or args.startup_only else fcntl.LOCK_NB))
         except BlockingIOError:
             return
         try:
@@ -510,6 +555,11 @@ def main():
             config["instance_id"] = doc["instanceId"]
             if args.protect_only:
                 startup_protection(config)
+                return
+            protocol = work_protocol(config)
+            if args.startup_only:
+                ready = startup_workloads(config, protocol)
+                status({'state': 'startup_ready' if ready else 'startup_recovery_pending', 'instance_id': config['instance_id']})
                 return
             journal = Path(config.get('drain_journal', '/var/lib/spot-schedule-guard/drain.json'))
             if os.path.lexists(journal):
@@ -522,8 +572,18 @@ def main():
                     raise
                 if record is not None and record['phase'] != 'recovered':
                     outcome = reconcile_drain(config, protocol, transaction)
+                    if outcome == 'recovered' and protocol.startup_state() == 'starting':
+                        if not startup_workloads(config, protocol):
+                            raise RuntimeError('startup recovery is still pending')
                     status({'state': 'recovery_'+outcome, 'instance_id': config['instance_id']})
                     return  # A restored old drain is never a fresh shutdown approval.
+            try:
+                starting = protocol.startup_state() == 'starting'
+            except Exception:
+                protection(config, True)
+                raise
+            if starting and not startup_workloads(config, protocol):
+                raise RuntimeError('startup recovery is still pending')
             if args.recover_only:
                 startup_protection(config)
                 status({'state': 'no_owned_pending_drain', 'instance_id': config['instance_id']})
