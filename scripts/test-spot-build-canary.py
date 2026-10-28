@@ -93,6 +93,16 @@ class ProvisionTests(unittest.TestCase):
         self.assertEqual(data['BlockDeviceMappings'][0]['Ebs'],{'VolumeSize':32,'VolumeType':'gp3','Encrypted':True,'DeleteOnTermination':True})
         self.assertFalse(any(e[:2] in [('ec2','attach-volume'),('ec2','associate-address')] for e in self.api.events))
 
+    def test_canary_can_read_back_only_its_own_artifacts_and_results(self):
+        rows=[s for s in c.scoped_policy(self.state)['Statement'] if s['Effect']=='Allow' and s['Action']=='s3:GetObject']
+        self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]['Resource'],['arn:aws:s3:::'+self.state['bucket']+'/artifacts/*','arn:aws:s3:::'+self.state['bucket']+'/results/*'])
+
+    def test_instance_role_explicitly_denies_storage_and_ASG_mutations(self):
+        rows=[s for s in c.scoped_policy(self.state)['Statement'] if s['Effect']=='Deny'];self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]['Resource'],'*')
+        self.assertTrue({'ec2:AttachVolume','ec2:AssociateAddress','ec2:TerminateInstances','autoscaling:SetInstanceProtection','autoscaling:SetDesiredCapacity'}<=set(rows[0]['Action']))
+
     def test_primary_permission_has_only_scope_artifacts_and_expiration(self):
         policy=c.primary_policy(self.state)
         self.assertEqual({s['Action'] for s in policy['Statement']},{'s3:GetObject','s3:PutObject'})

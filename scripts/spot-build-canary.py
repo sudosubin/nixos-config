@@ -52,8 +52,13 @@ def scoped_policy(state):
     return {'Version':'2012-10-17','Statement':[
         {'Effect':'Allow','Action':['ec2:DescribeInstances','autoscaling:DescribeAutoScalingInstances',
                                    'autoscaling:DescribeScheduledActions'],'Resource':'*'},
-        {'Effect':'Allow','Action':'s3:GetObject','Resource':'arn:aws:s3:::'+bucket+'/artifacts/*'},
-        {'Effect':'Allow','Action':'s3:PutObject','Resource':'arn:aws:s3:::'+bucket+'/results/*'}]}
+        {'Effect':'Allow','Action':'s3:GetObject','Resource':['arn:aws:s3:::'+bucket+'/artifacts/*','arn:aws:s3:::'+bucket+'/results/*']},
+        {'Effect':'Allow','Action':'s3:PutObject','Resource':'arn:aws:s3:::'+bucket+'/results/*'},
+        {'Effect':'Deny','Action':['ec2:AttachVolume','ec2:DetachVolume','ec2:AssociateAddress','ec2:DisassociateAddress',
+                                  'ec2:ReleaseAddress','ec2:TerminateInstances','ec2:DeleteVolume','ec2:CreateSnapshot',
+                                  'ec2:DeleteSnapshot','ec2:StopInstances','ec2:StartInstances','autoscaling:SetInstanceProtection',
+                                  'autoscaling:UpdateAutoScalingGroup','autoscaling:SetDesiredCapacity','autoscaling:TerminateInstanceInAutoScalingGroup'],
+         'Resource':'*'}]}
 
 
 def primary_policy(state):
