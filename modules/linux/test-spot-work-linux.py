@@ -60,7 +60,7 @@ class LinuxAdmissionTests(unittest.TestCase):
                 'PYTHONDONTWRITEBYTECODE':'1','PYTHONWARNINGS':'error::ResourceWarning'}
 
     def client(self,*args,inject=''):
-        code="import ctypes,importlib.util,json,os,sys,time\nfrom pathlib import Path\nspec=importlib.util.spec_from_file_location('work',sys.argv[1]);w=importlib.util.module_from_spec(spec);spec.loader.exec_module(w);p=w.Protocol(sys.argv[2],uid=1001,gid=int(sys.argv[3]))\n"+inject+"\nsys.argv=['spot-work']+sys.argv[4:];sys.exit(w.main(p))"
+        code="import ctypes,importlib.util,json,os,sys,time\nfrom pathlib import Path\nspec=importlib.util.spec_from_file_location('work',sys.argv[1]);w=importlib.util.module_from_spec(spec);spec.loader.exec_module(w);p=w.Protocol(sys.argv[2],uid=1001,gid=int(sys.argv[3]))\n"+inject+"\nsys.argv=['spot-work']+sys.argv[4:]\ntry:sys.exit(w.main(p))\nexcept (OSError,ValueError,RuntimeError) as error:print(str(error),file=sys.stderr);sys.exit(75)"
         child=subprocess.Popen(self.user_command([sys.executable,'-I','-c',code,str(self.module),str(self.protocol.runtime),str(self.user.pw_gid),*args]),env=self.environment(),cwd='/',stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,start_new_session=True)
         self.clients.append(child);return child
 
