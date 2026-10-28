@@ -48,6 +48,12 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(p.missing_paths([old],[new,old,new]),[new])
         for value in ['/home/sudosubin/secret','../escape','/nix/store/not-a-store-path']:
             with self.subTest(value=value),self.assertRaises(RuntimeError):p.missing_paths([], [value])
+    def test_baseline_uses_readonly_existing_nix_db_not_unsupported_query_all(self):
+        import sqlite3
+        database=self.root/'db.sqlite';connection=sqlite3.connect(database);connection.execute('CREATE TABLE ValidPaths(path TEXT NOT NULL)');path='/nix/store/'+'a'*32+'-base';connection.execute('INSERT INTO ValidPaths VALUES (?)',(path,));connection.commit();connection.close();before=p.sha(database)
+        self.assertEqual(p.baseline_inventory(database),[path]);self.assertEqual(p.sha(database),before)
+        with self.assertRaises(sqlite3.OperationalError):p.baseline_inventory(self.root/'nonexistent.sqlite')
+        self.assertFalse((self.root/'nonexistent.sqlite').exists())
     def test_atomic_publish_preserves_parseable_result(self):
         path=self.root/'result.json';p.publish(path,{'all_passed':False});p.publish(path,{'all_passed':True})
         self.assertEqual(json.loads(path.read_text()),{'all_passed':True});self.assertEqual(path.stat().st_mode&0o777,0o600)
@@ -82,7 +88,7 @@ class PipelineTests(unittest.TestCase):
         error=subprocess.CalledProcessError(1,['never-executed'],stderr='public source unavailable')
         with patch.object(p,'nix',side_effect=error),self.assertRaises(subprocess.CalledProcessError):p.build(source,folder,v,{})
         result=json.loads((folder/'build-result.json').read_text());self.assertTrue(result['completed']);self.assertEqual(result['returncode'],-1);v.cleanup_definition.assert_called_once()
-    def run_orchestrator(self,fail_final=False):
+    def run_orchestrator(self,fail_final=False,fail_baseline=False):
         from contextlib import ExitStack
         work=self.root/'work';work.mkdir();source=self.root/'source';source.mkdir();uploads=[]
         proof={'scope':'123456abcdef','instance':'i-0123456789abcdef0','expires':time.time()+1000}
@@ -107,10 +113,10 @@ class PipelineTests(unittest.TestCase):
             return {'key':key,'body_readback_verified':True}
         def path(*args):return work if args==('/home/persist/root',) else Path(*args)
         with ExitStack() as stack:
-            stack.enter_context(patch.object(p,'Path',side_effect=path));stack.enter_context(patch.object(p.subprocess,'check_output',return_value='/nix/store/'+'a'*32+'-base\n'))
+            stack.enter_context(patch.object(p,'Path',side_effect=path));stack.enter_context(patch.object(p,'baseline_inventory',side_effect=RuntimeError('baseline snapshot failed') if fail_baseline else None,return_value=['/nix/store/'+'a'*32+'-base']))
             stack.enter_context(patch.object(p.subprocess,'run',side_effect=verify));stack.enter_context(patch.object(p,'settled'));stack.enter_context(patch.object(p,'upload',side_effect=upload))
-            if fail_final:
-                with self.assertRaisesRegex(RuntimeError,'final S3'):p.orchestrate(source,self.root/'authority',v,proof,self.expected)
+            if fail_final or fail_baseline:
+                with self.assertRaisesRegex(RuntimeError,'baseline snapshot' if fail_baseline else 'final S3'):p.orchestrate(source,self.root/'authority',v,proof,self.expected)
             else:p.orchestrate(source,self.root/'authority',v,proof,self.expected)
         state=json.loads(next(work.glob('pipeline-*/pipeline.json')).read_text());return state,uploads
 
@@ -122,6 +128,10 @@ class PipelineTests(unittest.TestCase):
 
     def test_failed_final_commit_upload_cannot_leave_pipeline_success(self):
         state,uploads=self.run_orchestrator(True);self.assertFalse(state['all_requested_phase_passed']);self.assertEqual(state['error_type'],'RuntimeError')
+
+    def test_early_baseline_failure_is_durable_and_uploaded_not_outside_try(self):
+        state,uploads=self.run_orchestrator(fail_baseline=True);self.assertFalse(state['all_requested_phase_passed']);self.assertFalse(state['full_regression_verified']);self.assertEqual(state['error'],'baseline snapshot failed');self.assertNotIn('build_receipt',state)
+        self.assertTrue(any(key.endswith('/pipeline.json') for key in uploads))
 
     def test_progress_serializer_uploads_frozen_snapshot_not_growing_source(self):
         source=self.root/'progress.json';source.write_text('{"complete":false}');captured=[]

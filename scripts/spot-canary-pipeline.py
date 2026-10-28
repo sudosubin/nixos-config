@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 import tarfile
@@ -59,6 +60,17 @@ def validate_full(value,expected):
     require(value.get('source_sha256')==expected and len(value.get('compiled_source_sha256',{}))==16,'source or immutable identity mismatch')
     require(value.get('production_armed') is False and value.get('full_work_tracking_verified') is False
             and value.get('production_rollout') is False,'test result cannot grant production authority')
+
+
+def baseline_inventory(database=Path('/nix/var/nix/db/db.sqlite')):
+    # Legacy nix-store --query has no --all on Nix2.34. Read the existing DB
+    # through a read-only connection; never instantiate/build via a daemon.
+    connection=sqlite3.connect('file:'+str(database)+'?mode=ro',uri=True)
+    try:
+        rows=[row[0] for row in connection.execute('SELECT path FROM ValidPaths ORDER BY path')]
+        missing_paths(rows,[])
+        return rows
+    finally:connection.close()
 
 
 def missing_paths(baseline,requisites):
@@ -252,7 +264,6 @@ def orchestrate(source,authority,v,proof,expected):
     publish(folder/'source-map.json',expected);publish(folder/'identity.json',proof);publish(folder/'pipeline.json',state)
     # Snapshot before fetching/building. The retained clean base AMI can recreate
     # these paths; every additional runtime output is exported automatically.
-    baseline=subprocess.check_output(['nix-store','--query','--all'],text=True).splitlines();missing_paths(baseline,[]);publish(folder/'baseline.json',baseline)
     script=source/'scripts/spot-canary-pipeline.py';common=['--source',str(source),'--authority',str(authority),'--folder',str(folder)]
     try:
         require(proof['expires']-time.time()>900,'too little native lifetime for a new full run')
@@ -262,6 +273,7 @@ def orchestrate(source,authority,v,proof,expected):
                         '--property=Type=exec','--property=MemoryMax=128M','--property=MemorySwapMax=0','--property=CPUQuota=10%',
                         '--property=OOMScoreAdjust=1000','--property=Nice=19','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=yes',
                         sys.executable,'-I',str(script),'watch',*common],check=True,capture_output=True,text=True)
+        publish(folder/'baseline.json',baseline_inventory())
         receipt=v.launch([sys.executable,'-I',str(script),'build',*common],folder/'build-result.json',purpose='canary-build');state['build_receipt']=receipt;publish(folder/'pipeline.json',state)
         value=wait_file(folder/'build-result.json',proof,lambda r:r.get('completed') is True,receipt,v)
         require(value['returncode']==0 and value['prepared'],'build failed, not verification success');settled(v,receipt)

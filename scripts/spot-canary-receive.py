@@ -117,7 +117,7 @@ def main():
     require(sha(__file__)==expected.get('scripts/spot-canary-receive.py'),'executed receiver differs from expected source')
     require(sha(Path(__file__).with_name('spot-canary-pipeline.py'))==expected.get('scripts/spot-canary-pipeline.py'),'executed validator differs from expected source')
     module=Path(__file__).with_name('spot-canary-pipeline.py');spec=importlib.util.spec_from_file_location('pipeline',module);pipeline=importlib.util.module_from_spec(spec);exec(compile(module.read_bytes(),str(module),'exec'),pipeline.__dict__)
-    receive(args.scope,deadline,Path('/home/persist/root')/('canary-received-'+args.scope),pipeline,expected)
+    receive(args.scope,deadline,Path('/home/persist/root')/('canary-received-'+args.scope+'-'+uuid.uuid4().hex),pipeline,expected)
 
 
 if __name__=='__main__':main()
