@@ -195,15 +195,15 @@ def package(source,folder,v,expected):
 
 def aws(*args):
     env={k:value for k,value in os.environ.items() if not k.startswith(('AWS_','AMAZON_'))}
-    env.update(AWS_DEFAULT_REGION='ap-northeast-2',AWS_CONFIG_FILE='/dev/null',AWS_SHARED_CREDENTIALS_FILE='/dev/null',AWS_EC2_METADATA_DISABLED='false')
+    env.update(AWS_DEFAULT_REGION='ap-northeast-2',AWS_CONFIG_FILE='/dev/null',AWS_SHARED_CREDENTIALS_FILE='/dev/null',AWS_EC2_METADATA_DISABLED='false',AWS_MAX_ATTEMPTS='1' if args[:2]==('s3api','put-object') else '3')
     p=subprocess.run(['aws',*args,'--region','ap-northeast-2','--output','json'],env=env,capture_output=True,text=True,timeout=120)
     require(p.returncode==0,'scoped artifact API failed: '+args[0]+':'+args[1])
     return json.loads(p.stdout) if p.stdout.strip() else {}
 
 
-def upload(bucket,key,path,folder):
-    digest=sha(path)
-    aws('s3api','put-object','--bucket',bucket,'--key',key,'--body',str(path),'--server-side-encryption','AES256','--checksum-algorithm','SHA256','--checksum-sha256',base64.b64encode(bytes.fromhex(digest)).decode(),'--metadata','sha256='+digest)
+def upload(bucket,key,path,folder,exclusive=False):
+    digest=sha(path);conditional=['--if-none-match','*'] if exclusive else []
+    aws('s3api','put-object','--bucket',bucket,'--key',key,'--body',str(path),'--server-side-encryption','AES256','--checksum-algorithm','SHA256','--checksum-sha256',base64.b64encode(bytes.fromhex(digest)).decode(),'--metadata','sha256='+digest,*conditional)
     head=aws('s3api','head-object','--bucket',bucket,'--key',key,'--checksum-mode','ENABLED')
     require(head['Metadata']['sha256']==digest and head['ContentLength']==Path(path).stat().st_size,'artifact metadata readback differs')
     readback=folder/('readback-'+uuid.uuid4().hex)
@@ -257,12 +257,20 @@ def settled(v,receipt):
         require(time.monotonic()<limit,'previous owned stage has not exited; no next launch/reload');time.sleep(.1)
 
 
-def launch_controller(source,authority,proof):
+def final_prefix(scope,artifact_run=None):
+    require(re.fullmatch('[0-9a-f]{12}',scope) is not None,'invalid artifact scope')
+    require(artifact_run is None or re.fullmatch('[0-9a-f]{32}',artifact_run) is not None,'invalid artifact run')
+    return 'results/final/'+scope+'/'+(artifact_run+'/' if artifact_run is not None else '')
+
+
+def launch_controller(source,authority,proof,artifact_run=None):
     """Keep the coordinator bounded without making its OWN initializer read-only.
 
     Test children still always get ProtectControlGroups=yes from v.launch.
     Only the attested caller initializes its UUID-owned kernel OOM fence.
     """
+    final_prefix(proof['scope'],artifact_run)
+    extra=['--artifact-run',artifact_run] if artifact_run is not None else []
     ident=uuid.uuid4().hex;unit='spot-proof-pipeline-'+proof['scope']+'-'+ident
     log=Path('/home/persist/root')/('coordinator-'+ident+'.log')
     fd=os.open(log,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600);os.close(fd)
@@ -271,14 +279,14 @@ def launch_controller(source,authority,proof):
                     '--property=Nice=19','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=no',
                     '--property=StandardOutput=append:'+str(log),'--property=StandardError=append:'+str(log),
                     '--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty',sys.executable,'-I',
-                    str(source/'scripts/spot-canary-pipeline.py'),'run','--source',str(source),'--authority',str(authority)],check=True,capture_output=True,text=True)
+                    str(source/'scripts/spot-canary-pipeline.py'),'run','--source',str(source),'--authority',str(authority),*extra],check=True,capture_output=True,text=True)
     return {'unit':unit,'log':str(log),'started':True,'launch_receipt_is_phase_success':False,'goal_complete':False}
 
 
-def orchestrate(source,authority,v,proof,expected):
+def orchestrate(source,authority,v,proof,expected,artifact_run=None):
     require(v.current() is None,'orchestrator must not escape/relabel another cage')
-    scope=proof['scope'];bucket='nixos-spot-proof-537112465379-'+scope;folder=Path('/home/persist/root')/('pipeline-'+uuid.uuid4().hex);folder.mkdir(mode=0o700)
-    state={'scope':scope,'instance':proof['instance'],'expires':proof['expires'],'folder':str(folder),'all_requested_phase_passed':False,'full_regression_verified':False,'all_artifacts_uploaded_and_read_back':False,'actual_OS_boot_performed':False,'production_rollout':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
+    scope=proof['scope'];prefix=final_prefix(scope,artifact_run);bucket='nixos-spot-proof-537112465379-'+scope;folder=Path('/home/persist/root')/('pipeline-'+uuid.uuid4().hex);folder.mkdir(mode=0o700)
+    state={'scope':scope,'artifact_run':artifact_run,'instance':proof['instance'],'expires':proof['expires'],'folder':str(folder),'all_requested_phase_passed':False,'full_regression_verified':False,'all_artifacts_uploaded_and_read_back':False,'actual_OS_boot_performed':False,'production_rollout':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
     publish(folder/'source-map.json',expected);publish(folder/'identity.json',proof);publish(folder/'pipeline.json',state)
     # Snapshot before fetching/building. The retained clean base AMI can recreate
     # these paths; every additional runtime output is exported automatically.
@@ -303,10 +311,10 @@ def orchestrate(source,authority,v,proof,expected):
         validate_full(value,expected);settled(v,receipt);state['full_regression_verified']=True;publish(folder/'pipeline.json',state)
         receipt=v.launch([sys.executable,'-I',str(script),'package',*common],folder/'package-result.json',purpose='build');state['package_receipt']=receipt
         value=wait_file(folder/'package-result.json',proof,lambda r:r.get('completed') is True,receipt,v);require(value.get('all_packaged') is True,'packaging failed; no artifact success');settled(v,receipt)
-        state['artifacts']=[upload(bucket,'results/final/'+scope+'/'+name,folder/name,folder) for name in ['proof.tar.gz','missing-from-base.nix-export.gz','package-result.json','full-tests.json']]
+        state['artifacts']=[upload(bucket,prefix+name,folder/name,folder,exclusive=True) for name in ['proof.tar.gz','missing-from-base.nix-export.gz','package-result.json','full-tests.json']]
         state['all_artifacts_uploaded_and_read_back']=True;state['all_requested_phase_passed']=True
         publish(folder/'pipeline.json',state)
-        upload(bucket,'results/final/'+scope+'/pipeline.json',folder/'pipeline.json',folder)
+        upload(bucket,prefix+'pipeline.json',folder/'pipeline.json',folder,exclusive=True)
     except Exception as error:
         state['all_requested_phase_passed']=False
         state['error_type']=type(error).__name__;state['error']=str(error)
@@ -324,7 +332,7 @@ def orchestrate(source,authority,v,proof,expected):
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('stage',choices=['launch','run','build','package','watch']);parser.add_argument('--source',type=Path,required=True);parser.add_argument('--authority',type=Path,required=True);parser.add_argument('--folder',type=Path);args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('stage',choices=['launch','run','build','package','watch']);parser.add_argument('--source',type=Path,required=True);parser.add_argument('--authority',type=Path,required=True);parser.add_argument('--folder',type=Path);parser.add_argument('--artifact-run');args=parser.parse_args()
     require(sys.platform=='linux' and os.geteuid()==0,'root Linux required; no skip or production fallback')
     os.environ['NIX_REMOTE']='local'  # legacy nix-store export/query must not escape the resource cage via a daemon
     if args.stage not in ('launch','run'):
@@ -332,8 +340,8 @@ def main():
                 and args.folder.is_dir() and not args.folder.is_symlink() and args.folder.stat().st_uid==0 and not args.folder.stat().st_mode&0o077,'unknown stage workspace')
     source,expected,v,proof=load_source(args.source,args.authority,args.stage,args.folder)
     if args.stage=='launch':
-        require(v.current() is None,'controller launch cannot escape another cage');print(json.dumps(launch_controller(source,args.authority,proof)),flush=True)
-    elif args.stage=='run':orchestrate(source,args.authority,v,proof,expected)
+        require(v.current() is None,'controller launch cannot escape another cage');print(json.dumps(launch_controller(source,args.authority,proof,args.artifact_run)),flush=True)
+    elif args.stage=='run':orchestrate(source,args.authority,v,proof,expected,args.artifact_run)
     elif args.stage=='watch':
         require(v.current() is None,'observer cannot escape another cage');watch(args.folder,proof)
     else:

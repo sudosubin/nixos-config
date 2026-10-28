@@ -35,9 +35,10 @@ def sha(path):
     return digest.hexdigest()
 
 
-def key_for(scope):
+def key_for(scope,artifact_run=None):
     require(re.fullmatch('[0-9a-f]{12}',scope) is not None,'invalid scope')
-    return 'nixos-spot-proof-'+ACCOUNT+'-'+scope,'results/final/'+scope+'/'
+    require(artifact_run is None or re.fullmatch('[0-9a-f]{32}',artifact_run) is not None,'invalid artifact run')
+    return 'nixos-spot-proof-'+ACCOUNT+'-'+scope,'results/final/'+scope+'/'+(artifact_run+'/' if artifact_run is not None else '')
 
 
 def identity():
@@ -77,20 +78,20 @@ def validate_commit(value,scope,prefix):
     return rows
 
 
-def receive(scope,deadline,directory,pipeline_module,expected_source):
-    bucket,prefix=key_for(scope);directory.mkdir(mode=0o700,parents=False)
+def receive(scope,deadline,directory,pipeline_module,expected_source,artifact_run=None):
+    bucket,prefix=key_for(scope,artifact_run);directory.mkdir(mode=0o700,parents=False)
     last='no_final_commit'
     while time.time()<deadline:
         attempt=directory/('attempt-'+uuid.uuid4().hex);attempt.mkdir(mode=0o700)
         try:
-            commit=attempt/'pipeline.json';get(bucket,prefix+'pipeline.json',commit);value=json.loads(commit.read_text());rows=validate_commit(value,scope,prefix)
+            commit=attempt/'pipeline.json';get(bucket,prefix+'pipeline.json',commit);value=json.loads(commit.read_text());require(value.get('artifact_run')==artifact_run,'artifact run identity differs');rows=validate_commit(value,scope,prefix)
             required=sum(r['bytes'] for r in rows)+8*1024**3
             import shutil
             require(shutil.disk_usage(directory).free>=required,'insufficient retained-home reserve; no GC or overwrite')
             for row in rows:get(bucket,row['key'],attempt/row['key'].rsplit('/',1)[1],row)
             full=json.loads((attempt/'full-tests.json').read_text());pipeline_module.validate_full(full,expected_source)
             require(full['prepared_system'].startswith('/nix/store/'),'unknown prepared system identity')
-            result={'scope':scope,'received':str(attempt),'full_regression_executed':full['executed'],'source_count':len(full['source_sha256']),
+            result={'scope':scope,'artifact_run':artifact_run,'received':str(attempt),'full_regression_executed':full['executed'],'source_count':len(full['source_sha256']),
                     'files_sha256':{p.name:sha(p) for p in attempt.iterdir() if p.is_file()},'opaque_delta_not_imported':True,
                     'production_rollout':False,'OS_boot_verified':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
             target=directory/'received.json';fd=os.open(target,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
@@ -105,8 +106,8 @@ def receive(scope,deadline,directory,pipeline_module,expected_source):
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--scope',required=True);parser.add_argument('--expires',required=True);parser.add_argument('--expected-source',type=Path,required=True);parser.add_argument('--home-uuid',default='e47b82eb-22d2-4b12-9e58-92d5aabfbc65');args=parser.parse_args()
-    require(os.geteuid()==0,'root receiver required');identity();key_for(args.scope)
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--scope',required=True);parser.add_argument('--expires',required=True);parser.add_argument('--expected-source',type=Path,required=True);parser.add_argument('--artifact-run');parser.add_argument('--home-uuid',default='e47b82eb-22d2-4b12-9e58-92d5aabfbc65');args=parser.parse_args()
+    require(os.geteuid()==0,'root receiver required');identity();key_for(args.scope,args.artifact_run)
     deadline=datetime.fromisoformat(args.expires).timestamp();require(0<deadline-time.time()<=8400,'receiver lifetime expired or unbounded')
     p=subprocess.run(['findmnt','-n','-o','TARGET,UUID','--mountpoint','/home'],capture_output=True,text=True,check=True)
     require(p.stdout.split()==['/home',args.home_uuid],'retained home is not the expected mount')
@@ -117,7 +118,7 @@ def main():
     require(sha(__file__)==expected.get('scripts/spot-canary-receive.py'),'executed receiver differs from expected source')
     require(sha(Path(__file__).with_name('spot-canary-pipeline.py'))==expected.get('scripts/spot-canary-pipeline.py'),'executed validator differs from expected source')
     module=Path(__file__).with_name('spot-canary-pipeline.py');spec=importlib.util.spec_from_file_location('pipeline',module);pipeline=importlib.util.module_from_spec(spec);exec(compile(module.read_bytes(),str(module),'exec'),pipeline.__dict__)
-    receive(args.scope,deadline,Path('/home/persist/root')/('canary-received-'+args.scope+'-'+uuid.uuid4().hex),pipeline,expected)
+    receive(args.scope,deadline,Path('/home/persist/root')/('canary-received-'+args.scope+'-'+uuid.uuid4().hex),pipeline,expected,args.artifact_run)
 
 
 if __name__=='__main__':main()

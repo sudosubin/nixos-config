@@ -96,7 +96,25 @@ class PipelineTests(unittest.TestCase):
         for item in ['--property=MemoryMax=256M','--property=MemorySwapMax=0','--property=CPUQuota=25%','--property=OOMScoreAdjust=1000','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=no','--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty']:self.assertIn(item,argv)
         self.assertFalse(value['launch_receipt_is_phase_success']);self.assertFalse(value['goal_complete']);self.assertEqual(Path(value['log']).stat().st_mode&0o777,0o600)
 
-    def run_orchestrator(self,fail_final=False,fail_baseline=False):
+    def test_exact_artifact_run_namespace_cannot_alias_previous_scope_commit(self):
+        self.assertEqual(p.final_prefix('123456abcdef','a'*32),'results/final/123456abcdef/'+'a'*32+'/')
+        for bad in ['', '../escape', 'A'*32, 'a'*31]:
+            with self.subTest(bad=bad),self.assertRaises(RuntimeError):p.final_prefix('123456abcdef',bad)
+    def test_named_run_is_forwarded_by_unchanged_bounded_launcher(self):
+        def path(*args):return self.root if args==('/home/persist/root',) else Path(*args)
+        with patch.object(p,'Path',side_effect=path),patch.object(p.subprocess,'run') as run:p.launch_controller(self.root,self.root/'authority',{'scope':'123456abcdef'},'b'*32)
+        argv=run.call_args.args[0];self.assertEqual(argv[-2:],['--artifact-run','b'*32]);self.assertIn('--property=MemoryMax=256M',argv)
+    def test_final_evidence_uses_conditional_create_not_overwrite(self):
+        source=self.root/'proof';source.write_bytes(b'new public proof');calls=[]
+        def api(*args):
+            calls.append(args)
+            if args[1]=='head-object':return {'Metadata':{'sha256':p.sha(source)},'ContentLength':source.stat().st_size}
+            if args[1]=='get-object':Path(args[-1]).write_bytes(source.read_bytes())
+            return {}
+        with patch.object(p,'aws',side_effect=api):p.upload('own','results/final/proof',source,self.root,exclusive=True)
+        self.assertEqual(calls[0][-2:],('--if-none-match','*'));self.assertEqual(sum(a[:2]==('s3api','put-object') for a in calls),1)
+
+    def run_orchestrator(self,fail_final=False,fail_baseline=False,artifact_run=None):
         from contextlib import ExitStack
         work=self.root/'work';work.mkdir();source=self.root/'source';source.mkdir();uploads=[]
         proof={'scope':'123456abcdef','instance':'i-0123456789abcdef0','expires':time.time()+1000}
@@ -117,7 +135,8 @@ class PipelineTests(unittest.TestCase):
                 return SimpleNamespace(returncode=0,stdout='',stderr='')
             path=Path(argv[argv.index('--output')+1]);p.publish(path,completed())
             return SimpleNamespace(returncode=0,stdout=json.dumps({'slice':'owned-verify.slice'}),stderr='')
-        def upload(bucket,key,path,folder):
+        def upload(bucket,key,path,folder,exclusive=False):
+            if key.startswith('results/final/'):self.assertTrue(exclusive)
             uploads.append(key)
             if fail_final and key=='results/final/123456abcdef/pipeline.json':raise RuntimeError('test final S3 failure')
             return {'key':key,'body_readback_verified':True}
@@ -126,8 +145,8 @@ class PipelineTests(unittest.TestCase):
             stack.enter_context(patch.object(p,'Path',side_effect=path));stack.enter_context(patch.object(p,'baseline_inventory',side_effect=RuntimeError('baseline snapshot failed') if fail_baseline else None,return_value=['/nix/store/'+'a'*32+'-base']))
             stack.enter_context(patch.object(p.subprocess,'run',side_effect=verify));stack.enter_context(patch.object(p,'settled'));stack.enter_context(patch.object(p,'upload',side_effect=upload))
             if fail_final or fail_baseline:
-                with self.assertRaisesRegex(RuntimeError,'baseline snapshot' if fail_baseline else 'final S3'):p.orchestrate(source,self.root/'authority',v,proof,self.expected)
-            else:p.orchestrate(source,self.root/'authority',v,proof,self.expected)
+                with self.assertRaisesRegex(RuntimeError,'baseline snapshot' if fail_baseline else 'final S3'):p.orchestrate(source,self.root/'authority',v,proof,self.expected,artifact_run)
+            else:p.orchestrate(source,self.root/'authority',v,proof,self.expected,artifact_run)
         state=json.loads(next(work.glob('pipeline-*/pipeline.json')).read_text());return state,uploads
 
     def test_build_verify_package_and_body_checked_upload_chain_needs_no_operator_poll(self):
@@ -135,6 +154,10 @@ class PipelineTests(unittest.TestCase):
         for name in ['proof.tar.gz','missing-from-base.nix-export.gz','full-tests.json','package-result.json','pipeline.json']:
             self.assertIn('results/final/123456abcdef/'+name,uploads)
         self.assertFalse(state['actual_OS_boot_performed']);self.assertFalse(state['goal_complete'])
+
+    def test_named_run_autonomously_commits_under_only_its_fresh_prefix(self):
+        state,uploads=self.run_orchestrator(artifact_run='c'*32);self.assertTrue(state['all_requested_phase_passed']);self.assertEqual(state['artifact_run'],'c'*32)
+        final=[key for key in uploads if key.startswith('results/final/')];self.assertEqual(len(final),5);self.assertTrue(all(key.startswith('results/final/123456abcdef/'+'c'*32+'/') for key in final))
 
     def test_failed_final_commit_upload_cannot_leave_pipeline_success(self):
         state,uploads=self.run_orchestrator(True);self.assertFalse(state['all_requested_phase_passed']);self.assertEqual(state['error_type'],'RuntimeError')

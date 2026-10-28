@@ -59,6 +59,7 @@ let
         wantedBy
         overrideStrategy
         ;
+      default_dependencies = unit.unitConfig.DefaultDependencies or true;
       serviceConfig = builtins.intersectAttrs {
         ExecStart = null;
         ExecCondition = null;
@@ -70,7 +71,7 @@ let
       } unit.serviceConfig;
     };
   contract = {
-    schema = 1;
+    schema = 2;
     minimal_module_evaluation = true;
     actual_HM_activation_or_OS_boot_verified = false;
     production_armed = config.services.spotScheduleGuard.armed;
@@ -95,6 +96,12 @@ let
         value = service name;
       }) names
     );
+    profile_watcher =
+      let unit = config.systemd.paths.spot-profile-cache-refresh;
+      in {
+        inherit (unit) requires after before conflicts wantedBy;
+        default_dependencies = unit.unitConfig.DefaultDependencies or true;
+      };
     home = {
       inherit (config.fileSystems."/home") device fsType options;
     };

@@ -53,7 +53,7 @@ def main():
     directory=args.contract.resolve(strict=True)
     check(re.fullmatch(r'/nix/store/[0-9a-df-np-sv-z]{32}-spot-startup-contract',str(directory)) is not None,'not the declared immutable contract')
     data=json.loads((directory/'contract.json').read_text());checks=[]
-    check(data['schema']==1 and data['minimal_module_evaluation'] is True and data['actual_HM_activation_or_OS_boot_verified'] is False,'scope is not the minimal declaration proof')
+    check(data['schema']==2 and data['minimal_module_evaluation'] is True and data['actual_HM_activation_or_OS_boot_verified'] is False,'scope is not the minimal declaration proof')
     check(data['production_armed'] is False,'contract must remain disarmed')
     for name,value in data['module_sha256'].items():
         check(value==expected['modules/linux/'+name],'evaluated declaration source differs: '+name)
@@ -97,11 +97,17 @@ def main():
     checks.append('SSM_and_recovery_independent_of_workload_failure')
     check(data['home']['fsType']=='ext4' and data['home']['device'].startswith('/dev/disk/by-uuid/') and 'nofail' in data['home']['options'],'unexpected home declaration')
     checks.append('explicit_home_uuid_no_root_fallback')
-    graph={name+'.service':set() for name in services};graph['home.mount']=set()
+    watcher=data['profile_watcher']
+    check(watcher['default_dependencies'] is False and {'home.mount',gate}<=set(watcher['requires']) and {'sysinit.target','home.mount',gate}<=set(watcher['after']),'home-dependent watcher must be late, never Before=paths.target')
+    check('shutdown.target' in watcher['before'] and 'shutdown.target' in watcher['conflicts'],'late watcher lost explicit shutdown cleanup')
+    checks.append('late_profile_watcher_with_explicit_shutdown_cleanup')
+    graph={name+'.service':set() for name in services};graph.update({'home.mount':set(),'basic.target':{'paths.target','sysinit.target'},'paths.target':set(),'sysinit.target':set(),'spot-profile-cache-refresh.path':set(watcher['after'])})
     for name,unit in services.items():
         key=name+'.service';graph[key].update(x for x in unit['after']+unit['requires'] if x in graph)
+        if unit['default_dependencies']:graph[key].update(['basic.target','sysinit.target'])
         for target_name in unit['before']:
             if target_name in graph:graph[target_name].add(key)
+    if watcher['default_dependencies']:graph['paths.target'].add('spot-profile-cache-refresh.path')
     active=set();done=set()
     def visit(node):
         check(node not in active,'startup dependency cycle: '+node)
@@ -110,7 +116,16 @@ def main():
         for dependency in graph[node]:visit(dependency)
         active.remove(node);done.add(node)
     for name in graph:visit(name)
-    checks.append('selected_evaluated_startup_graph_acyclic')
+    checks.append('selected_startup_graph_with_implicit_service_and_path_defaults_acyclic')
+    # The exact real-boot regression must FAIL this expanded observation. This
+    # is still a selected graph, not a substitute for an actual cycle-free boot.
+    graph['paths.target'].add('spot-profile-cache-refresh.path');active.clear();done.clear()
+    try:
+        for name in graph:visit(name)
+    except RuntimeError as error:
+        check('startup dependency cycle:' in str(error),'negative control failed for an unrelated reason')
+    else:raise RuntimeError('original path/basic/home cycle was not detected')
+    checks.append('actual_boot_cycle_regression_negative_control')
     result={'schema':1,'checks_passed':checks,'actual_check_count':len(checks),'contract':str(directory),'contract_sha256':sha(directory/'contract.json'),
             'CLI_sha256':sha(tool),'CLI_source_sha256':sha(Path(target[0])),'declaration_sha256':data['module_sha256'],'resource_budget':budget,
             'scope':'minimal NixOS evaluation of actual startup modules plus fake HM activation, NOT full production configuration or OS/AWS/EBS boot',

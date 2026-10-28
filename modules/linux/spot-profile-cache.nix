@@ -103,8 +103,21 @@ in
     systemd.paths.spot-profile-cache-refresh = {
       description = "Checkpoint user profile generation changes";
       wantedBy = [ "multi-user.target" ];
-      requires = [ "home.mount" ];
-      after = [ "home.mount" ];
+      requires = [
+        "home.mount"
+        "spot-workload-startup-ready.service"
+      ];
+      # A normal .path has an implicit Before=paths.target; basic.target is
+      # after paths.target, while protected home attachment needs basic/network.
+      # This watcher is late maintenance, never an early-boot prerequisite.
+      unitConfig.DefaultDependencies = false;
+      after = [
+        "sysinit.target"
+        "home.mount"
+        "spot-workload-startup-ready.service"
+      ];
+      before = [ "shutdown.target" ];
+      conflicts = [ "shutdown.target" ];
       pathConfig = {
         PathChanged = "/home/sudosubin/.local/state/nix/profiles";
         Unit = "spot-profile-cache-refresh.service";

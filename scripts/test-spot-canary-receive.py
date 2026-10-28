@@ -27,6 +27,17 @@ class ReceiverTests(unittest.TestCase):
         self.assertEqual(r.key_for('123456abcdef'),('nixos-spot-proof-537112465379-123456abcdef','results/final/123456abcdef/'))
         for scope in ['../escape','nixos-ec2-asg','BAD']:
             with self.subTest(scope=scope),self.assertRaises(RuntimeError):r.key_for(scope)
+    def test_named_run_uses_only_exact_private_namespace(self):
+        self.assertEqual(r.key_for('123456abcdef','a'*32)[1],'results/final/123456abcdef/'+'a'*32+'/')
+        for bad in ['', '../escape', 'A'*32]:
+            with self.subTest(bad=bad),self.assertRaises(RuntimeError):r.key_for('123456abcdef',bad)
+    def test_other_run_commit_cannot_be_retained_or_download_its_artifacts(self):
+        calls=[]
+        def get(bucket,key,target,expected=None):calls.append(key);target.write_text(json.dumps({**commit(),'artifact_run':'b'*32}));return 'a'*64
+        with patch.object(r,'get',side_effect=get),patch.object(r.time,'time',side_effect=[0,100]),patch.object(r.time,'sleep'),self.assertRaisesRegex(RuntimeError,'artifact run identity differs'):
+            r.receive('123456abcdef',50,self.root/'wrong-run',Mock(),{},'a'*32)
+        self.assertEqual(calls,['results/final/123456abcdef/'+'a'*32+'/pipeline.json']);self.assertFalse((self.root/'wrong-run/received.json').exists())
+
     def test_all_four_artifacts_require_independent_body_readback_identity(self):
         self.assertEqual(len(r.validate_commit(commit(),'123456abcdef','results/final/123456abcdef/')),4)
         for key in ['all_requested_phase_passed','full_regression_verified','all_artifacts_uploaded_and_read_back']:
