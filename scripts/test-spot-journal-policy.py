@@ -8,8 +8,8 @@ spec=importlib.util.spec_from_file_location('policy',Path(__file__).with_name('s
 
 class Cases(unittest.TestCase):
     def make(self):return p.policies('537112465379','private-journal-test',['first','second'])
-    def test_only_exact_objects_not_bucket_or_wildcard_runtime_permission(self):
-        statements=self.make()['runtime_role']['Statement'];self.assertEqual(len(statements),1);self.assertEqual(statements[0]['Action'],['s3:GetObject','s3:PutObject']);self.assertEqual(statements[0]['Resource'],['arn:aws:s3:::private-journal-test/journal/first/state.json','arn:aws:s3:::private-journal-test/journal/second/state.json'])
+    def test_only_exact_objects_not_bucket_or_wildcard_S3_permission(self):
+        statements=self.make()['runtime_role']['Statement'];self.assertEqual(len(statements),2);self.assertEqual(statements[1],{'Effect':'Allow','Action':['ec2:DescribeInstances'],'Resource':'*','Condition':{'StringEquals':{'aws:RequestedRegion':'ap-northeast-2'}}});self.assertEqual(statements[0]['Action'],['s3:GetObject','s3:PutObject']);self.assertEqual(statements[0]['Resource'],['arn:aws:s3:::private-journal-test/journal/first/state.json','arn:aws:s3:::private-journal-test/journal/second/state.json'])
     def test_runtime_no_list_delete_create_policy_or_multipart_grants(self):
         self.assertFalse(any(action in str(self.make()['runtime_role']) for action in ['s3:Delete','s3:List','s3:CreateBucket','s3:PutBucketPolicy','s3:*']))
     def test_expected_bucket_account_is_independent_of_client(self):

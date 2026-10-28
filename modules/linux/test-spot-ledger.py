@@ -52,7 +52,7 @@ class Cases(unittest.TestCase):
         self.calls.append((service,operation,args))
         if (service,operation)==('ec2','describe-instances'):
             ident=args[args.index('--instance-ids')+1]
-            return {'Reservations':[{'Instances':[{'InstanceId':ident,'State':{'Name':self.states.get(ident,'running')}}]}]}
+            return {'Reservations':[{'OwnerId':self.cfg['account'],'Instances':[{'InstanceId':ident,'State':{'Name':self.states.get(ident,'running')}}]}]}
         raise AssertionError('unapproved test API')
     def transaction(self,protocol=None,cfg=None,ledger=None,name='private'):
         t=d.Transaction(cfg or self.cfg,protocol or self.protocol,self.root/name/'drain.json',owner_uid=os.geteuid(),ledger=ledger or self.ledger)
@@ -102,7 +102,7 @@ class Cases(unittest.TestCase):
         old='i-'+'2'*17;self.other_writer(instance_id=old);self.states[old]='terminated';self.ledger.claim()
         self.assertEqual(self.ledger.read()['writer'],self.ledger.me)
     def test_absent_or_paginated_ec2_response_is_not_termination(self):
-        for reply in [{},{'Reservations':[]},{'NextToken':'more','Reservations':[]}]:
+        for reply in [{},{'Reservations':[]},{'NextToken':'more','Reservations':[]}, {'Reservations':[{'OwnerId':'000000000000','Instances':[{'InstanceId':'i-'+'2'*17,'State':{'Name':'terminated'}}]}]}]:
             with self.subTest(reply=reply),patch.object(self.ledger,'call',return_value=reply),self.assertRaises(l.Unsafe):self.ledger.terminal('i-'+'2'*17)
     def test_ec2_api_error_retains_original_writer(self):
         self.other_writer(instance_id='i-'+'2'*17);old=copy.deepcopy(self.backend.value)

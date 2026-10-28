@@ -164,8 +164,11 @@ class Ledger:
     def terminal(self, instance):
         require(isinstance(instance, str) and INSTANCE.fullmatch(instance), 'old EC2 owner identity unknown')
         reply = self.call('ec2', 'describe-instances', '--instance-ids', instance)
-        rows = [i for r in reply.get('Reservations', []) for i in r.get('Instances', [])]
-        require(not reply.get('NextToken') and len(rows) == 1 and rows[0].get('InstanceId') == instance
+        reservations = reply.get('Reservations', [])
+        require(isinstance(reservations, list) and len(reservations) == 1
+                and reservations[0].get('OwnerId') == self.identity['account'], 'old EC2 account identity unknown')
+        rows = reservations[0].get('Instances', [])
+        require(isinstance(rows, list) and not reply.get('NextToken') and len(rows) == 1 and rows[0].get('InstanceId') == instance
                 and rows[0].get('State', {}).get('Name') == 'terminated',
                 'old EC2 writer not conclusively terminated; no takeover')
 
