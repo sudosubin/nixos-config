@@ -24,7 +24,7 @@ import types
 import urllib.parse
 import uuid
 
-EXPECTED=(559,499,60)
+EXPECTED=(598,538,60)
 
 
 def require(condition,message):
@@ -51,13 +51,13 @@ def validate_full(value,expected):
     require(value.get('all_passed') is True,'regression has no executed success')
     require((value.get('executed'),value.get('unit_cases'),value.get('root_linux_cases'))==EXPECTED,'incomplete measured regression count')
     rows=value.get('suites',[])
-    require(len(rows)==21 and all(r.get('passed') is True and r.get('returncode')==0
+    require(len(rows)==22 and all(r.get('passed') is True and r.get('returncode')==0
             and r.get('no_skips_or_resource_warnings') is True and r.get('executed')==r.get('expected') for r in rows),'failed/ambiguous regression suite')
-    require(len({r.get('suite') for r in rows})==21 and all(type(r.get('executed')) is int for r in rows)
+    require(len({r.get('suite') for r in rows})==22 and all(type(r.get('executed')) is int for r in rows)
             and sum(r['executed'] for r in rows)==EXPECTED[0]
             and sum(r['executed'] for r in rows if r['suite'].endswith('-linux'))==EXPECTED[2],
             'measured suite sums or identities do not match the header')
-    require(value.get('source_sha256')==expected and len(value.get('compiled_source_sha256',{}))==16,'source or immutable identity mismatch')
+    require(value.get('source_sha256')==expected and len(value.get('compiled_source_sha256',{}))==17,'source or immutable identity mismatch')
     require(value.get('production_armed') is False and value.get('full_work_tracking_verified') is False
             and value.get('production_rollout') is False,'test result cannot grant production authority')
 

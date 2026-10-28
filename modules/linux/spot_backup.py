@@ -312,7 +312,7 @@ class Backup:
             raise
 
 
-def configured(config, call, cold, checkpoint):
+def configured(config, call, cold, checkpoint, journal=None):
     if not isinstance(config.get('backup'), dict):
         raise Unsafe('verified backup policy is required before a drain')
-    return Backup(config, call, cold, checkpoint, Journal(config['backup']['journal']))
+    return Backup(config, call, cold, checkpoint, journal if journal is not None else Journal(config['backup']['journal']))

@@ -16,9 +16,9 @@ p=importlib.util.module_from_spec(spec);spec.loader.exec_module(p)
 
 
 def completed():
-    counts=[('validation',42),('work',74),('schedule-guard',98),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),('drain',29),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',14),('acp-linux',9),('gateway-linux',7),('cold-linux',8),('validation-linux',2),('cache-linux',9),('native-kiro-linux',8),('frontend-JS',15),('native-frontend-linux',3)]
-    return {'all_passed':True,'executed':559,'unit_cases':499,'root_linux_cases':60,'source_sha256':{'test':'a'*64},
-            'compiled_source_sha256':{str(n):'b'*64 for n in range(16)},'production_armed':False,'full_work_tracking_verified':False,'production_rollout':False,
+    counts=[('validation',42),('work',74),('schedule-guard',99),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),('drain',29),('ledger',38),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',14),('acp-linux',9),('gateway-linux',7),('cold-linux',8),('validation-linux',2),('cache-linux',9),('native-kiro-linux',8),('frontend-JS',15),('native-frontend-linux',3)]
+    return {'all_passed':True,'executed':598,'unit_cases':538,'root_linux_cases':60,'source_sha256':{'test':'a'*64},
+            'compiled_source_sha256':{str(n):'b'*64 for n in range(17)},'production_armed':False,'full_work_tracking_verified':False,'production_rollout':False,
             'suites':[{'suite':name,'expected':count,'executed':count,'passed':True,'returncode':0,'no_skips_or_resource_warnings':True} for name,count in counts]}
 
 

@@ -72,7 +72,7 @@ class ScheduleTests(unittest.TestCase):
 class SafetyTests(DrainSandboxMixin, unittest.TestCase):
     def setUp(self):
         super().setUp()
-        self.config = {"armed": True, "home_uuid": "uuid", "instance_id": "i-test"}
+        self.config = {"armed": True, "home_uuid": "uuid", "instance_id": "i-test", 'durable_journal':{'bucket':'private-test','key':'journal/private-test/state.json'}}
         self.group = {"DesiredCapacity": 0}
         self.now = at("2026-10-26T02:15:00")
         self.node = {
@@ -87,6 +87,9 @@ class SafetyTests(DrainSandboxMixin, unittest.TestCase):
 
     def test_verified_idle_can_be_considered(self):
         self.assertEqual(self.reasons(), [])
+
+    def test_unconfigured_off_root_intent_cannot_release_protection(self):
+        del self.config['durable_journal'];self.assertIn('durable_journal_not_configured',self.reasons())
 
     def test_previous_boot_cannot_reuse_work_tracking_approval(self):
         self.node['manifest']['boot_id']='previous-boot'

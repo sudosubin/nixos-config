@@ -12,6 +12,7 @@ import spot_gateway
 import spot_backup
 import spot_cold
 import spot_drain
+import spot_ledger
 from datetime import datetime, time, timezone
 import fcntl
 import importlib.util
@@ -64,10 +65,11 @@ def command(*args, timeout=25):
 
 def aws(config, service, action, *args):
     env = os.environ.copy()
-    for name in ("AWS_PROFILE", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
-        env.pop(name, None)
-    env.update(AWS_CONFIG_FILE="/dev/null", AWS_SHARED_CREDENTIALS_FILE="/dev/null", AWS_PAGER="", AWS_MAX_ATTEMPTS="3")
-    if service == 'ec2' and action == 'create-snapshot':
+    for name in tuple(env):
+        if name.startswith(('AWS_', 'AMAZON_')):
+            env.pop(name, None)
+    env.update(AWS_CONFIG_FILE="/dev/null", AWS_SHARED_CREDENTIALS_FILE="/dev/null", AWS_PAGER="", AWS_MAX_ATTEMPTS="3", AWS_EC2_METADATA_DISABLED='false')
+    if (service, action) in {('ec2', 'create-snapshot'), ('s3api', 'put-object')}:
         # EC2 has no ClientToken here. A transport retry could create a second
         # charged copy; recover the tagged attempt instead of blind SDK retry.
         env['AWS_MAX_ATTEMPTS'] = '1'
@@ -133,6 +135,8 @@ def reasons(config, now, group, node, sessions, volume):
     result = []
     if config.get("armed") is not True:
         result.append("observation_mode")
+    if not config.get('durable_journal'):
+        result.append('durable_journal_not_configured')
     if running_window(now):
         result.append("scheduled_running_window")
     if group["DesiredCapacity"] != 0:
@@ -305,7 +309,31 @@ def verify_profile_cache(config):
 
 def drain_transaction(config, protocol):
     return spot_drain.Transaction(config, protocol,
-        config.get('drain_journal', '/var/lib/spot-schedule-guard/drain.json'))
+        config.get('drain_journal', '/var/lib/spot-schedule-guard/drain.json'),
+        ledger=spot_ledger.configured(config, protocol, lambda *args: aws(config, *args)))
+
+
+def reconcile_backup(config, ledger):
+    # Read/reconcile only; no cold claim or new capture is permitted here. An
+    # unknown create must be identified before home can be mounted or reopened.
+    backup = spot_backup.configured(config, lambda *args: aws(config, *args), None, None,
+                                   journal=ledger.backup_journal())
+    backup.prepare()
+
+
+def pre_home_journal(config, protocol):
+    if not config.get('durable_journal'):
+        return  # legacy observation only; arming independently requires remote state
+    transaction = drain_transaction(config, protocol)
+    try:
+        transaction.acquire()
+        transaction.ledger.claim()
+        record = transaction.read()
+        if record is not None:
+            transaction.claim()  # includes exact termination proof before replacing origin identity
+        reconcile_backup(config, transaction.ledger)
+    finally:
+        transaction.close()
 
 
 def capture_services(config):
@@ -378,9 +406,16 @@ def startup_workloads(config, protocol):
             transaction.acquire()
         except BlockingIOError:
             return False  # live recovery may be waiting for this dependency
+        if transaction.ledger is not None:
+            transaction.ledger.claim()
         record = transaction.read()  # malformed/foreign intent NEVER becomes no intent
         if record is not None and record['phase'] != 'recovered':
             return False
+        if transaction.ledger is not None:
+            backup = transaction.ledger.stream('backup')
+            if backup is not None and backup.get('phase') not in {'successful', 'aborted', 'rejected', 'aborted_reconciled'}:
+                return False
+            reconcile_backup(config, transaction.ledger)  # terminal record validation only; no capture
         protocol.startup_ready()  # same admission lock as all job acceptance
         return True
     finally:
@@ -398,6 +433,9 @@ def verify_recovery_services(config, before):
 class RecoveryOperations:
     def __init__(self, config, protocol):
         self.config, self.protocol = config, protocol
+
+    def backup(self, journal):
+        spot_backup.configured(self.config, lambda *args: aws(self.config, *args), None, None, journal=journal).prepare()
 
     def group(self):
         return group_state(self.config)
@@ -454,7 +492,8 @@ def drain(config):
         if protocol.blockers():
             raise RuntimeError('work or extension appeared during cache verification')
         backup = spot_backup.configured(config, lambda *args: aws(config, *args),
-            lambda: backup_cold_check(config, cold_claim), lambda: backup_wait_checkpoint(config, protocol, gateway))
+            lambda: backup_cold_check(config, cold_claim), lambda: backup_wait_checkpoint(config, protocol, gateway),
+            **({'journal': transaction.ledger.backup_journal()} if transaction.ledger is not None else {}))
         backup.prepare()
         gateway = spot_gateway.configured(config, protocol, publish=transaction.gateway)
         if gateway is not None:
@@ -555,6 +594,7 @@ def main():
             config["instance_id"] = doc["instanceId"]
             if args.protect_only:
                 startup_protection(config)
+                pre_home_journal(config, work_protocol(config))
                 return
             protocol = work_protocol(config)
             if args.startup_only:
@@ -562,12 +602,13 @@ def main():
                 status({'state': 'startup_ready' if ready else 'startup_recovery_pending', 'instance_id': config['instance_id']})
                 return
             journal = Path(config.get('drain_journal', '/var/lib/spot-schedule-guard/drain.json'))
-            if os.path.lexists(journal):
+            if config.get('durable_journal') or os.path.lexists(journal):
                 protocol = work_protocol(config)
                 transaction = drain_transaction(config, protocol)
                 try:
                     record = transaction.read()
                 except Exception:
+                    transaction.close()
                     protection(config, True)
                     raise
                 if record is not None and record['phase'] != 'recovered':
@@ -577,6 +618,7 @@ def main():
                             raise RuntimeError('startup recovery is still pending')
                     status({'state': 'recovery_'+outcome, 'instance_id': config['instance_id']})
                     return  # A restored old drain is never a fresh shutdown approval.
+                transaction.close()
             try:
                 starting = protocol.startup_state() == 'starting'
             except Exception:

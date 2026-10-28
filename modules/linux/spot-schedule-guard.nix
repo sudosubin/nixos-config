@@ -17,6 +17,7 @@ let
     cp ${./spot_backup.py} "$out/spot_backup.py"
     cp ${./spot_cold.py} "$out/spot_cold.py"
     cp ${./spot_drain.py} "$out/spot_drain.py"
+    cp ${./spot_ledger.py} "$out/spot_ledger.py"
     cp ${./spot-profile-cache.py} "$out/spot-profile-cache.py"
     cp ${./spot_cache.py} "$out/spot_cache.py"
   '';
@@ -61,6 +62,9 @@ let
       journal = "/var/lib/spot-schedule-guard/backup.json";
     };
   }
+  // lib.optionalAttrs (cfg.durableJournal != null) {
+    durable_journal = cfg.durableJournal;
+  }
   // lib.optionalAttrs config.services.spotProfileCache.enable {
     profile_cache_manifest = "/home/persist/manifests/profile-cache.json";
     profile_cache_config = "/etc/spot-profile-cache.json";
@@ -93,6 +97,16 @@ in
       type = lib.types.str;
       default = "nixos-ec2-asg";
     };
+    durableJournal = lib.mkOption {
+      type = lib.types.nullOr (lib.types.submodule {
+        options = {
+          bucket = lib.mkOption { type = lib.types.str; };
+          key = lib.mkOption { type = lib.types.strMatching "journal/[a-zA-Z0-9_.-]{1,100}/state.json"; };
+        };
+      });
+      default = null;
+      description = "Explicitly seeded authoritative S3 CAS journal; missing/API errors keep startup closed. No runtime seed/reset.";
+    };
     backupSet = lib.mkOption {
       type = lib.types.strMatching "[a-zA-Z0-9_.-]{1,100}";
       default = "${cfg.asg}-home";
@@ -107,6 +121,10 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
+    assertions = [{
+      assertion = !cfg.armed || cfg.durableJournal != null;
+      message = "spotScheduleGuard arming requires off-root authoritative drain/backup intent";
+    }];
     services.spotWork.enable = true;
     environment.systemPackages = [
       guard
@@ -127,6 +145,8 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = "${guard}/bin/spot-schedule-guard --protect-only";
+        StateDirectory = "spot-schedule-guard";
+        StateDirectoryMode = "0700";
         TimeoutStartSec = 360;
         UMask = "0077";
       };

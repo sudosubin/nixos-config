@@ -50,13 +50,13 @@ class ReceiverTests(unittest.TestCase):
         with patch.object(r,'aws',side_effect=get),self.assertRaisesRegex(RuntimeError,'disagree'):r.get('bucket','key',target)
         self.assertTrue(target.exists())  # retain failed bytes, never overwrite
     def test_complete_pipeline_is_retained_without_executing_delta_or_profile(self):
-        scope='123456abcdef';directory=self.root/'received';value=commit();full={'prepared_system':'/nix/store/'+'a'*32+'-system','executed':559,'source_sha256':{'p':'b'*64}};validator=Mock()
+        scope='123456abcdef';directory=self.root/'received';value=commit();full={'prepared_system':'/nix/store/'+'a'*32+'-system','executed':598,'source_sha256':{'p':'b'*64}};validator=Mock()
         def get(bucket,key,target,expected=None):
             target.write_text(json.dumps(value if key.endswith('/pipeline.json') else full if key.endswith('/full-tests.json') else {'opaque':True}));return 'a'*64
         with patch.object(r,'get',side_effect=get),patch('shutil.disk_usage',return_value=SimpleNamespace(free=100*1024**3)),patch.object(r.subprocess,'run') as run:
             result=r.receive(scope,time.time()+60,directory,validator,{'expected':'b'*64})
         validator.validate_full.assert_called_once_with(full,{'expected':'b'*64});run.assert_not_called()
-        self.assertEqual(result['full_regression_executed'],559);self.assertTrue(result['opaque_delta_not_imported']);self.assertFalse(result['goal_complete']);self.assertTrue((directory/'received.json').exists())
+        self.assertEqual(result['full_regression_executed'],598);self.assertTrue(result['opaque_delta_not_imported']);self.assertFalse(result['goal_complete']);self.assertTrue((directory/'received.json').exists())
     def test_insufficient_home_reserve_never_downloads_large_artifacts(self):
         scope='123456abcdef';calls=[]
         def get(bucket,key,target,expected=None):calls.append(key);target.write_text(json.dumps(commit()));return 'a'*64

@@ -90,7 +90,7 @@ def main():
         raise RuntimeError('prepared guard/cache configuration is not the disarmed, identity-bound policy')
     compiled={}
     sources=[('-spot-schedule-sources',['spot-schedule-guard.py','spot_work.py','spot_gateway.py','spot-gateway-rpc.mjs',
-                                      'spot_backup.py','spot_drain.py','spot_cold.py','spot-profile-cache.py','spot_cache.py']),
+                                      'spot_backup.py','spot_drain.py','spot_ledger.py','spot_cold.py','spot-profile-cache.py','spot_cache.py']),
              ('-spot-acp-sources',['spot_acp.py','spot_work.py','spot_frontend.py']),
              ('-spot-profile-cache-sources',['spot-profile-cache.py','spot_cache.py'])]
     for suffix,names in sources:
@@ -105,7 +105,7 @@ def main():
         if len(paths)!=1 or paths[0].read_bytes()!=(root/'modules/linux'/name).read_bytes():
             raise RuntimeError('immutable direct module differs: '+name)
         compiled[str(paths[0])]=sha(paths[0])
-    if len(compiled)!=16:raise RuntimeError('not all sixteen immutable module copies were verified')
+    if len(compiled)!=17:raise RuntimeError('not all seventeen immutable module copies were verified')
     openssl=[Path(x)/'bin/openssl' for x in requirements if (Path(x)/'bin/openssl').is_file()]
     if not openssl:raise RuntimeError('compiled OpenSSL runtime missing; signature tests cannot skip')
     os.environ['PATH']=':'.join(sorted({str(p.parent) for p in openssl}))+':/run/current-system/sw/bin'
@@ -128,8 +128,8 @@ def main():
         fd=os.open(args.output.parent,os.O_RDONLY|os.O_DIRECTORY)
         try:os.fsync(fd)
         finally:os.close(fd)
-    base=[('validation',42),('work',74),('schedule-guard',98),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
-          ('drain',29),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',14),('acp-linux',9),
+    base=[('validation',42),('work',74),('schedule-guard',99),('profile-cache',29),('cache',52),('acp',43),('gateway',28),('backup',33),
+          ('drain',29),('ledger',38),('gateway-recovery',19),('cold',17),('frontend',20),('work-linux',14),('acp-linux',9),
           ('gateway-linux',7),('cold-linux',8),('validation-linux',2)]
     commands=[(name,count,[sys.executable,'-W','error::ResourceWarning',str(root/'modules/linux'/('test-spot-'+name+'.py')),'-v']) for name,count in base]
     for name,count,command in commands:
@@ -177,7 +177,7 @@ def main():
         state['root_linux_cases' if name.endswith('-linux') else 'unit_cases']+=max(0,executed)
         save();print(json.dumps({'suite':name,'executed':executed,'passed':passed}),flush=True)
         if not passed:raise RuntimeError('suite failed; COMPLETE stdout/stderr preserved: '+name)
-    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(559,499,60):
+    if (state['executed'],state['unit_cases'],state['root_linux_cases'])!=(598,538,60):
         raise RuntimeError('executed counts do not match the complete scope')
     if {name:sha(root/name) for name in expected}!=actual:raise RuntimeError('source changed during verification')
     for name,value in compiled.items():

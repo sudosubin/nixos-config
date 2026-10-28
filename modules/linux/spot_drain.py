@@ -41,7 +41,7 @@ def valid_owner(value):
 
 
 class Transaction:
-    def __init__(self, config, protocol, path, owner_uid=0, current_owner=None):
+    def __init__(self, config, protocol, path, owner_uid=0, current_owner=None, ledger=None):
         self.config, self.protocol, self.path = config, protocol, Path(path)
         self.owner_uid = owner_uid
         self.owner = current_owner or owner(protocol.boot_id)
@@ -58,17 +58,33 @@ class Transaction:
         self.fd = None
         self.mutex = threading.RLock()
         self.record = None
+        self.ledger, self.remote_record = ledger, None
 
     def read(self):
+        if self.ledger is not None:
+            record = self.ledger.stream('drain')
+            if record is not None:
+                self.validate(record, foreign=True)
+            self.remote_record = record
+            return record  # local files are diagnostic caches, not absence/idle authority
         try:
             record, _ = work.read_record(self.path, {self.owner_uid}, limit=65536)
         except FileNotFoundError:
             return None
         return self.validate(record)
 
-    def validate(self, record):
+    def validate(self, record, foreign=False):
+        if not isinstance(record, dict):
+            raise Unsafe('drain record is not an object')
+        if 'origin_instance_id' in record and not re.fullmatch(r'i-[0-9a-f]{8,17}', record['origin_instance_id']):
+            raise Unsafe('drain origin instance unknown')
+        identity = record.get('identity')
+        if foreign and isinstance(identity, dict):
+            identity = {**identity, 'instance_id': self.config['instance_id']}
+            if not re.fullmatch(r'i-[0-9a-f]{8,17}', record['identity'].get('instance_id', '')):
+                raise Unsafe('durable origin instance unknown')
         if (type(record.get('schema')) is not int or record['schema'] != 1
-                or record.get('identity') != self.identity
+                or identity != self.identity
                 or not isinstance(record.get('id'), str)
                 or not re.fullmatch(r'drain-[0-9a-f]{32}', record['id'])
                 or not isinstance(record.get('phase'), str) or record['phase'] not in PHASES
@@ -134,11 +150,16 @@ class Transaction:
                     raise Unsafe('unknown drain phase')
                 candidate['phase'] = phase
             self.validate(candidate)
+            if self.ledger is not None:
+                self.ledger.write('drain', self.remote_record, candidate)
+                self.remote_record = candidate
             self.protocol.publish(self.path, candidate, durable=True)
             self.record = candidate
 
     def begin(self, services):
         self.acquire()
+        if self.ledger is not None:
+            self.ledger.claim()
         previous = self.read()
         if previous is not None and previous['phase'] != 'recovered':
             raise Unsafe('previous drain must be reconciled before another attempt')
@@ -161,7 +182,8 @@ class Transaction:
         # admission merely to roll that intent back. Other boots still need the
         # full startup/home/service verification path.
         if (self.record is None or self.record['phase'] != 'created'
-                or self.record['origin_boot'] != self.owner['boot_id']):
+                or self.record['origin_boot'] != self.owner['boot_id']
+                or self.record.get('origin_instance_id', self.config['instance_id']) != self.config['instance_id']):
             return False
         if self.fd is None:
             raise Unsafe('pre-action cancellation has no exclusive controller')
@@ -175,11 +197,18 @@ class Transaction:
 
     def claim(self):
         self.acquire()
+        if self.ledger is not None:
+            self.ledger.claim()
         record = self.read()
         if record is None:
             raise Unsafe('no durable drain to reconcile')
+        replaced = record['identity']['instance_id'] != self.config['instance_id']
+        if replaced:
+            if self.ledger is None:
+                raise Unsafe('replacement recovery requires authoritative off-root intent')
+            self.ledger.terminal(record['identity']['instance_id'])
         old = record['owner']
-        if old != self.owner and old['boot_id'] == self.owner['boot_id']:
+        if not replaced and old != self.owner and old['boot_id'] == self.owner['boot_id']:
             if old['pid_namespace'] != self.owner['pid_namespace']:
                 raise Unsafe('cannot prove controller exit across PID namespaces')
             try:
@@ -188,7 +217,10 @@ class Transaction:
             except (FileNotFoundError, ProcessLookupError):
                 pass
         self.record = record
-        self.update(owner=self.owner)
+        values = {'owner': self.owner}
+        if replaced:
+            values.update(identity=self.identity, origin_instance_id=record.get('origin_instance_id', record['identity']['instance_id']))
+        self.update(**values)
         return record
 
     @contextmanager
@@ -206,7 +238,8 @@ class Transaction:
         self.claim()
         record = self.record
         attempt = record['id']
-        same_boot = record['origin_boot'] == self.owner['boot_id']
+        same_boot = (record['origin_boot'] == self.owner['boot_id']
+                     and record.get('origin_instance_id', self.config['instance_id']) == self.config['instance_id'])
         group = operations.group()
         members = [i for i in group['Instances'] if i.get('InstanceId') == self.config['instance_id']]
         if len(members) != 1 or members[0].get('LifecycleState') != 'InService':
@@ -231,6 +264,8 @@ class Transaction:
         self.update('recovering')
         self.protocol.retire_recovery(record.get('service_authority'))
         self.update(service_authority=None)
+        if self.ledger is not None:
+            operations.backup(self.ledger.backup_journal())  # unknown create must settle BEFORE mounting or accepting work
         operations.home()
         restore = [u for u, state in record['services_before'].items() if state == 'active']
         if restore and (record['services_may_be_stopped'] or old_boot):
