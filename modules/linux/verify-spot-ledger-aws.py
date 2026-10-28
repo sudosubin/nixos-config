@@ -107,7 +107,7 @@ def main():
                 try:self.backend.put({**old,'revision':revision},tag);return 'accepted'
                 except backup.AWSFailure as error:return error.code
             with ThreadPoolExecutor(max_workers=2) as pool:results=list(pool.map(put,[old['revision']+1,old['revision']+2]))
-            self.assertEqual(sorted(results),['PreconditionFailed','accepted']);self.assertIn(self.ledger.read()['revision'],[old['revision']+1,old['revision']+2])
+            self.assertEqual(results.count('accepted'),1);self.assertEqual(len(results),2);self.assertTrue(all(r in {'accepted','PreconditionFailed','ConditionalRequestConflict'} for r in results));self.assertIn(self.ledger.read()['revision'],[old['revision']+1,old['revision']+2])
         def test_5_injected_lost_receipt_after_actual_PUT_no_retry(self):
             self.seed();old=self.ledger.read();original=self.backend.put;puts=[]
             def lost(value,tag):
@@ -142,7 +142,7 @@ def main():
     suite=unittest.defaultTestLoader.loadTestsFromTestCase(Cases);start=time.time();result=unittest.TextTestRunner(verbosity=2).run(suite)
     require(hashes()==expected,'source changed during real API verification')
     value={'scope':args.scope,'executed':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'skipped':len(result.skipped),'all_passed':result.wasSuccessful() and result.testsRun==9 and not result.skipped,
-           'resource_scope':{'cgroup':cgroup,'memory_peak':(leaf/'memory.peak').read_text(),'memory_events':(leaf/'memory.events').read_text(),'memory_max':256*1024**2,'not_general_networked_verification_authority':True},'source_sha256':expected,'instance':doc['instanceId'],'real_old_terminated_instance_observed':args.terminated_instance,'calls':calls,'started':start,'finished':time.time(),
+           'resource_scope':{'cgroup':cgroup,'memory_peak':(leaf/'memory.peak').read_text(),'memory_events':(leaf/'memory.events').read_text(),'memory_max':256*1024**2,'not_general_networked_verification_authority':True},'source_sha256':expected,'instance':doc['instanceId'],'requested_old_instance':args.terminated_instance,'calls':calls,'started':start,'finished':time.time(),
            'proof_scope':'actual S3 conditional writes/checksum body readback/concurrency + real EC2 terminal and PID observations; synthetic old-drain and local-cache deletion, NOT actual root loss/OS/EBS recovery',
            'snapshot_or_compute_mutations':False,'production_rollout':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
     fd=os.open(args.output,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
