@@ -336,7 +336,7 @@ def main():
     result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(LinuxAdmissionTests))
     print(json.dumps({'tests':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'skipped':len(result.skipped),
                       'private_PID_mount_network_and_empty_homes':True,'production_rollout':False,'all_producers_verified':False}))
-    raise SystemExit(0 if result.wasSuccessful() and not result.skipped and result.testsRun==12 else 1)
+    raise SystemExit(0 if result.wasSuccessful() and not result.skipped and result.testsRun==14 else 1)
 
 
 if __name__=='__main__':main()
