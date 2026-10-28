@@ -257,6 +257,24 @@ def settled(v,receipt):
         require(time.monotonic()<limit,'previous owned stage has not exited; no next launch/reload');time.sleep(.1)
 
 
+def launch_controller(source,authority,proof):
+    """Keep the coordinator bounded without making its OWN initializer read-only.
+
+    Test children still always get ProtectControlGroups=yes from v.launch.
+    Only the attested caller initializes its UUID-owned kernel OOM fence.
+    """
+    ident=uuid.uuid4().hex;unit='spot-proof-pipeline-'+proof['scope']+'-'+ident
+    log=Path('/home/persist/root')/('coordinator-'+ident+'.log')
+    fd=os.open(log,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600);os.close(fd)
+    subprocess.run(['systemd-run','--unit='+unit,'--description=Attested-canary-build-verify-artifact-chain','--collect','--property=Type=exec',
+                    '--property=MemoryMax=256M','--property=MemorySwapMax=0','--property=CPUQuota=25%','--property=OOMScoreAdjust=1000',
+                    '--property=Nice=19','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=no',
+                    '--property=StandardOutput=append:'+str(log),'--property=StandardError=append:'+str(log),
+                    '--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty',sys.executable,'-I',
+                    str(source/'scripts/spot-canary-pipeline.py'),'run','--source',str(source),'--authority',str(authority)],check=True,capture_output=True,text=True)
+    return {'unit':unit,'log':str(log),'started':True,'launch_receipt_is_phase_success':False,'goal_complete':False}
+
+
 def orchestrate(source,authority,v,proof,expected):
     require(v.current() is None,'orchestrator must not escape/relabel another cage')
     scope=proof['scope'];bucket='nixos-spot-proof-537112465379-'+scope;folder=Path('/home/persist/root')/('pipeline-'+uuid.uuid4().hex);folder.mkdir(mode=0o700)
@@ -272,6 +290,7 @@ def orchestrate(source,authority,v,proof,expected):
         subprocess.run(['systemd-run','--unit=spot-proof-watch-'+scope+'-'+folder.name[-12:],'--description=Scoped-expiring-evidence-only','--collect',
                         '--property=Type=exec','--property=MemoryMax=128M','--property=MemorySwapMax=0','--property=CPUQuota=10%',
                         '--property=OOMScoreAdjust=1000','--property=Nice=19','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=yes',
+                        '--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty',
                         sys.executable,'-I',str(script),'watch',*common],check=True,capture_output=True,text=True)
         publish(folder/'baseline.json',baseline_inventory())
         receipt=v.launch([sys.executable,'-I',str(script),'build',*common],folder/'build-result.json',purpose='canary-build');state['build_receipt']=receipt;publish(folder/'pipeline.json',state)
@@ -305,14 +324,16 @@ def orchestrate(source,authority,v,proof,expected):
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('stage',choices=['run','build','package','watch']);parser.add_argument('--source',type=Path,required=True);parser.add_argument('--authority',type=Path,required=True);parser.add_argument('--folder',type=Path);args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('stage',choices=['launch','run','build','package','watch']);parser.add_argument('--source',type=Path,required=True);parser.add_argument('--authority',type=Path,required=True);parser.add_argument('--folder',type=Path);args=parser.parse_args()
     require(sys.platform=='linux' and os.geteuid()==0,'root Linux required; no skip or production fallback')
     os.environ['NIX_REMOTE']='local'  # legacy nix-store export/query must not escape the resource cage via a daemon
-    if args.stage!='run':
+    if args.stage not in ('launch','run'):
         require(args.folder is not None and args.folder.parent==Path('/home/persist/root') and re.fullmatch('pipeline-[0-9a-f]{32}',args.folder.name)
                 and args.folder.is_dir() and not args.folder.is_symlink() and args.folder.stat().st_uid==0 and not args.folder.stat().st_mode&0o077,'unknown stage workspace')
     source,expected,v,proof=load_source(args.source,args.authority,args.stage,args.folder)
-    if args.stage=='run':orchestrate(source,args.authority,v,proof,expected)
+    if args.stage=='launch':
+        require(v.current() is None,'controller launch cannot escape another cage');print(json.dumps(launch_controller(source,args.authority,proof)),flush=True)
+    elif args.stage=='run':orchestrate(source,args.authority,v,proof,expected)
     elif args.stage=='watch':
         require(v.current() is None,'observer cannot escape another cage');watch(args.folder,proof)
     else:

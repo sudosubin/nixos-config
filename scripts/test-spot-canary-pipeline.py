@@ -88,6 +88,14 @@ class PipelineTests(unittest.TestCase):
         error=subprocess.CalledProcessError(1,['never-executed'],stderr='public source unavailable')
         with patch.object(p,'nix',side_effect=error),self.assertRaises(subprocess.CalledProcessError):p.build(source,folder,v,{})
         result=json.loads((folder/'build-result.json').read_text());self.assertTrue(result['completed']);self.assertEqual(result['returncode'],-1);v.cleanup_definition.assert_called_once()
+    def test_controller_launcher_bounds_parent_but_allows_exact_owned_oom_initializer(self):
+        def path(*args):return self.root if args==('/home/persist/root',) else Path(*args)
+        with patch.object(p,'Path',side_effect=path),patch.object(p.subprocess,'run') as run:
+            value=p.launch_controller(self.root,self.root/'authority',{'scope':'123456abcdef'})
+        argv=run.call_args.args[0]
+        for item in ['--property=MemoryMax=256M','--property=MemorySwapMax=0','--property=CPUQuota=25%','--property=OOMScoreAdjust=1000','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=no','--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty']:self.assertIn(item,argv)
+        self.assertFalse(value['launch_receipt_is_phase_success']);self.assertFalse(value['goal_complete']);self.assertEqual(Path(value['log']).stat().st_mode&0o777,0o600)
+
     def run_orchestrator(self,fail_final=False,fail_baseline=False):
         from contextlib import ExitStack
         work=self.root/'work';work.mkdir();source=self.root/'source';source.mkdir();uploads=[]
@@ -104,7 +112,9 @@ class PipelineTests(unittest.TestCase):
             return {'slice':'owned-'+argv[3]+'.slice'}
         v.launch.side_effect=launch
         def verify(argv,**kwargs):
-            if argv[0]=='systemd-run':return SimpleNamespace(returncode=0,stdout='',stderr='')
+            if argv[0]=='systemd-run':
+                self.assertIn('--setenv=PATH=/run/current-system/sw/bin',argv);self.assertIn('--setenv=HOME=/var/empty',argv)
+                return SimpleNamespace(returncode=0,stdout='',stderr='')
             path=Path(argv[argv.index('--output')+1]);p.publish(path,completed())
             return SimpleNamespace(returncode=0,stdout=json.dumps({'slice':'owned-verify.slice'}),stderr='')
         def upload(bucket,key,path,folder):
