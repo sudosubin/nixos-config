@@ -145,6 +145,12 @@ def build(source,folder,v,expected):
         result.update(returncode=p.returncode,prepared=str(output.resolve()) if p.returncode==0 else None)
         require(p.returncode==0 and output.exists(),'full system build failed; complete log retained')
         require(json.loads((output/'etc/spot-schedule-guard.json').read_text())['armed'] is False,'prepared guard is not disarmed')
+        contract_expression='let f = builtins.getFlake "git+file://'+str(source)+'?rev='+head+'&shallow=1"; in import '+str(source)+'/modules/linux/startup-contract.nix { nixpkgs = f.inputs.nixpkgs.outPath; }'
+        contract=folder/'startup-contract';require(not contract.exists(),'startup contract link already exists')
+        with (folder/'startup-contract-build.log').open('x') as log:
+            r=subprocess.run(['nix','--store','local','--extra-experimental-features','nix-command flakes','build','--impure','--no-write-lock-file','--max-jobs','1','--cores','1','--option','builders','','--option','substituters','https://cache.nixos.org','--option','require-sigs','true','--out-link',str(contract),'--expr',contract_expression],stdout=log,stderr=subprocess.STDOUT)
+        require(r.returncode==0 and contract.exists(),'startup declaration build failed; never verification from build')
+        (folder/'startup-declarations.json').write_bytes((contract/'contract.json').read_bytes());result['startup_contract']=str(contract.resolve())
     except BaseException as error:
         result.update(returncode=-1,error_type=type(error).__name__,stderr=getattr(error,'stderr',None))
         raise
@@ -286,7 +292,7 @@ def launch_controller(source,authority,proof,artifact_run=None):
 def orchestrate(source,authority,v,proof,expected,artifact_run=None):
     require(v.current() is None,'orchestrator must not escape/relabel another cage')
     scope=proof['scope'];prefix=final_prefix(scope,artifact_run);bucket='nixos-spot-proof-537112465379-'+scope;folder=Path('/home/persist/root')/('pipeline-'+uuid.uuid4().hex);folder.mkdir(mode=0o700)
-    state={'scope':scope,'artifact_run':artifact_run,'instance':proof['instance'],'expires':proof['expires'],'folder':str(folder),'all_requested_phase_passed':False,'full_regression_verified':False,'all_artifacts_uploaded_and_read_back':False,'actual_OS_boot_performed':False,'production_rollout':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
+    state={'scope':scope,'artifact_run':artifact_run,'instance':proof['instance'],'expires':proof['expires'],'folder':str(folder),'all_requested_phase_passed':False,'startup_contract_verified':False,'full_regression_verified':False,'all_artifacts_uploaded_and_read_back':False,'actual_OS_boot_performed':False,'production_rollout':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
     publish(folder/'source-map.json',expected);publish(folder/'identity.json',proof);publish(folder/'pipeline.json',state)
     # Snapshot before fetching/building. The retained clean base AMI can recreate
     # these paths; every additional runtime output is exported automatically.
@@ -309,6 +315,12 @@ def orchestrate(source,authority,v,proof,expected,artifact_run=None):
         receipt=json.loads(p.stdout.strip().splitlines()[-1]);state['verify_receipt']=receipt
         value=wait_file(folder/'full-tests.json',proof,lambda r:r.get('all_passed') is True or 'resource_failure' in r or any(row.get('passed') is False for row in r.get('suites',[])),receipt,v)
         validate_full(value,expected);settled(v,receipt);state['full_regression_verified']=True;publish(folder/'pipeline.json',state)
+        contract_output=folder/'startup-contract-proof.json'
+        command=[sys.executable,'-I',str(source/'modules/linux/verify-spot-startup-contract.py'),'--source',str(source),'--expected-source',str(authority),'--contract',str(folder/'startup-contract'),'--output',str(contract_output)]
+        receipt=v.launch(command,contract_output,purpose='canary-verify');state['startup_contract_receipt']=receipt
+        declaration=wait_file(contract_output,proof,lambda r:'all_passed' in r,receipt,v)
+        require(declaration.get('all_passed') is True and declaration.get('actual_check_count')==12,'startup declarations not verified');settled(v,receipt)
+        state['startup_contract_verified']=True;publish(folder/'pipeline.json',state)
         receipt=v.launch([sys.executable,'-I',str(script),'package',*common],folder/'package-result.json',purpose='build');state['package_receipt']=receipt
         value=wait_file(folder/'package-result.json',proof,lambda r:r.get('completed') is True,receipt,v);require(value.get('all_packaged') is True,'packaging failed; no artifact success');settled(v,receipt)
         state['artifacts']=[upload(bucket,prefix+name,folder/name,folder,exclusive=True) for name in ['proof.tar.gz','missing-from-base.nix-export.gz','package-result.json','full-tests.json']]

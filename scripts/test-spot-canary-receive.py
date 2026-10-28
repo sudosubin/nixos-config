@@ -15,7 +15,7 @@ r=importlib.util.module_from_spec(spec);spec.loader.exec_module(r)
 
 def commit(scope='123456abcdef'):
     prefix='results/final/'+scope+'/'
-    return {'scope':scope,'all_requested_phase_passed':True,'full_regression_verified':True,'all_artifacts_uploaded_and_read_back':True,
+    return {'scope':scope,'all_requested_phase_passed':True,'full_regression_verified':True,'startup_contract_verified':True,'all_artifacts_uploaded_and_read_back':True,
             'production_rollout':False,'work_tracking_verified':False,'armed':False,'goal_complete':False,
             'artifacts':[{'key':prefix+n,'sha256':'a'*64,'bytes':1,'body_readback_verified':True} for n in ['proof.tar.gz','missing-from-base.nix-export.gz','package-result.json','full-tests.json']]}
 
@@ -40,7 +40,7 @@ class ReceiverTests(unittest.TestCase):
 
     def test_all_four_artifacts_require_independent_body_readback_identity(self):
         self.assertEqual(len(r.validate_commit(commit(),'123456abcdef','results/final/123456abcdef/')),4)
-        for key in ['all_requested_phase_passed','full_regression_verified','all_artifacts_uploaded_and_read_back']:
+        for key in ['all_requested_phase_passed','full_regression_verified','startup_contract_verified','all_artifacts_uploaded_and_read_back']:
             value=commit();value[key]=False
             with self.subTest(key=key),self.assertRaises(RuntimeError):r.validate_commit(value,'123456abcdef','results/final/123456abcdef/')
     def test_unknown_duplicate_or_cross_scope_roster_never_downloads(self):

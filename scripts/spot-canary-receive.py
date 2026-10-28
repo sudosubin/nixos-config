@@ -69,7 +69,7 @@ def get(bucket,key,target,expected=None):
 
 def validate_commit(value,scope,prefix):
     require(value.get('scope')==scope and value.get('all_requested_phase_passed') is True
-            and value.get('full_regression_verified') is True and value.get('all_artifacts_uploaded_and_read_back') is True,'pipeline is not complete')
+            and value.get('full_regression_verified') is True and value.get('startup_contract_verified') is True and value.get('all_artifacts_uploaded_and_read_back') is True,'pipeline is not complete')
     require(value.get('production_rollout') is False and value.get('work_tracking_verified') is False
             and value.get('armed') is False and value.get('goal_complete') is False,'proof cannot authorize production')
     names={'proof.tar.gz','missing-from-base.nix-export.gz','package-result.json','full-tests.json'}

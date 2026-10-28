@@ -114,7 +114,7 @@ class PipelineTests(unittest.TestCase):
         with patch.object(p,'aws',side_effect=api):p.upload('own','results/final/proof',source,self.root,exclusive=True)
         self.assertEqual(calls[0][-2:],('--if-none-match','*'));self.assertEqual(sum(a[:2]==('s3api','put-object') for a in calls),1)
 
-    def run_orchestrator(self,fail_final=False,fail_baseline=False,artifact_run=None):
+    def run_orchestrator(self,fail_final=False,fail_baseline=False,artifact_run=None,fail_contract=False):
         from contextlib import ExitStack
         work=self.root/'work';work.mkdir();source=self.root/'source';source.mkdir();uploads=[]
         proof={'scope':'123456abcdef','instance':'i-0123456789abcdef0','expires':time.time()+1000}
@@ -126,6 +126,8 @@ class PipelineTests(unittest.TestCase):
             elif argv[3]=='package':
                 for name in ['proof.tar.gz','missing-from-base.nix-export.gz']:(folder/name).write_bytes(b'fixture-only')
                 p.publish(output,{'completed':True,'all_packaged':True})
+            elif str(argv[2]).endswith('/verify-spot-startup-contract.py'):
+                self.assertEqual(purpose,'canary-verify');p.publish(output,{'all_passed':not fail_contract,'actual_check_count':0 if fail_contract else 12})
             else:raise AssertionError(argv)
             return {'slice':'owned-'+argv[3]+'.slice'}
         v.launch.side_effect=launch
@@ -144,8 +146,8 @@ class PipelineTests(unittest.TestCase):
         with ExitStack() as stack:
             stack.enter_context(patch.object(p,'Path',side_effect=path));stack.enter_context(patch.object(p,'baseline_inventory',side_effect=RuntimeError('baseline snapshot failed') if fail_baseline else None,return_value=['/nix/store/'+'a'*32+'-base']))
             stack.enter_context(patch.object(p.subprocess,'run',side_effect=verify));stack.enter_context(patch.object(p,'settled'));stack.enter_context(patch.object(p,'upload',side_effect=upload))
-            if fail_final or fail_baseline:
-                with self.assertRaisesRegex(RuntimeError,'baseline snapshot' if fail_baseline else 'final S3'):p.orchestrate(source,self.root/'authority',v,proof,self.expected,artifact_run)
+            if fail_final or fail_baseline or fail_contract:
+                with self.assertRaisesRegex(RuntimeError,'baseline snapshot' if fail_baseline else 'startup declarations' if fail_contract else 'final S3'):p.orchestrate(source,self.root/'authority',v,proof,self.expected,artifact_run)
             else:p.orchestrate(source,self.root/'authority',v,proof,self.expected,artifact_run)
         state=json.loads(next(work.glob('pipeline-*/pipeline.json')).read_text());return state,uploads
 
@@ -158,6 +160,9 @@ class PipelineTests(unittest.TestCase):
     def test_named_run_autonomously_commits_under_only_its_fresh_prefix(self):
         state,uploads=self.run_orchestrator(artifact_run='c'*32);self.assertTrue(state['all_requested_phase_passed']);self.assertEqual(state['artifact_run'],'c'*32)
         final=[key for key in uploads if key.startswith('results/final/')];self.assertEqual(len(final),5);self.assertTrue(all(key.startswith('results/final/123456abcdef/'+'c'*32+'/') for key in final))
+
+    def test_failed_declaration_verification_prevents_packaging_or_final_commit(self):
+        state,uploads=self.run_orchestrator(fail_contract=True);self.assertFalse(state['all_requested_phase_passed']);self.assertFalse(state['startup_contract_verified']);self.assertNotIn('package_receipt',state);self.assertFalse(any(k.startswith('results/final/') for k in uploads))
 
     def test_failed_final_commit_upload_cannot_leave_pipeline_success(self):
         state,uploads=self.run_orchestrator(True);self.assertFalse(state['all_requested_phase_passed']);self.assertEqual(state['error_type'],'RuntimeError')
