@@ -221,12 +221,10 @@ def create(api, state, force_evidence=None):
     with tempfile.TemporaryDirectory(prefix='protected-expiry-') as folder:
         path = Path(folder)/'template.json';path.write_text(json.dumps(doc));path.chmod(0o600)
         api('cloudformation', 'validate-template', '--template-body', 'file://'+str(path))
-        # IAM/role validation errors before CreateStack may be retried by the
-        # operator only after definite nonacceptance. Never blind replay here.
-        reply = api('cloudformation', 'create-stack', '--stack-name', state['name'], '--template-body', 'file://'+str(path),
+        reply = create_native_stack(api, ['--stack-name', state['name'], '--template-body', 'file://'+str(path),
                     '--role-arn', 'arn:aws:iam::'+ACCOUNT+':role/'+state['role'], '--on-failure', 'ROLLBACK',
                     '--timeout-in-minutes', str(state['stack_timeout_minutes']), '--tags', json.dumps(tags(state)),
-                    '--client-request-token', state['name'])
+                    '--client-request-token', state['name']], state['role'])
     stack_id = reply['StackId']
     # Waiting observes cloud provisioning; it does NOT implement the expiry.
     limit = time.monotonic()+100
@@ -241,6 +239,19 @@ def create(api, state, force_evidence=None):
         api('autoscaling', 'set-desired-capacity', '--auto-scaling-group-name', state['name'], '--desired-capacity', '1')
     return {'state': state, 'StackId': stack_id, 'LT': lt, 'containment': observed,
             'capacity_requested': state['mode'] == 'protected', 'expiry_or_termination_verified': False}
+
+
+def create_native_stack(api, arguments, role):
+    # Only an exact, definitive IAM propagation rejection is repeatable. Keep
+    # the SAME frozen template/token. Lost/unknown replies are never replayed.
+    phrase = 'Role arn:aws:iam::'+ACCOUNT+':role/'+role+' is invalid or cannot be assumed'
+    for attempt in range(8):
+        try:return api('cloudformation', 'create-stack', *arguments)
+        except APIError as error:
+            if (error.service, error.action, error.code) != ('cloudformation', 'create-stack', 'ValidationError') or phrase not in error.detail:raise
+            print(json.dumps({'stage':'definite-role-propagation-rejection','attempt':attempt,'capacity':0}),flush=True)
+            time.sleep(5)
+    raise RuntimeError('CFN role propagation not confirmed; no capacity')
 
 
 def validate_force_evidence(value):

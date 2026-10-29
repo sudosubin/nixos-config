@@ -84,6 +84,15 @@ class ExpiryTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):self.contained(change)
     def test_role_policy_change_never_passes_capacity_gate(self):
         with self.assertRaises(RuntimeError):self.contained(lambda r:r['iam','get-role-policy'].update(PolicyDocument={}))
+    def test_only_exact_definite_role_rejection_retries_same_frozen_stack_request(self):
+        s=state();error=p.APIError('cloudformation','create-stack','ValidationError','Role arn:aws:iam::'+p.ACCOUNT+':role/'+s['role']+' is invalid or cannot be assumed');api=Mock(side_effect=[error,{'StackId':'native'}])
+        with patch.object(p.time,'sleep'):self.assertEqual(p.create_native_stack(api,['same-template','same-token'],s['role']),{'StackId':'native'})
+        self.assertEqual(api.call_args_list[0],api.call_args_list[1])
+    def test_unknown_create_reply_or_other_role_error_never_replays(self):
+        for code,detail in [('UnknownTransportOrCLIError',''),('ValidationError','foreign role invalid'),('AccessDenied','')]:
+            api=Mock(side_effect=p.APIError('cloudformation','create-stack',code,detail))
+            with self.subTest(code=code),self.assertRaises(RuntimeError):p.create_native_stack(api,[],state()['role'])
+            self.assertEqual(api.call_count,1)
     def test_exact_completed_native_force_event_required(self):p.validate_force_evidence(evidence())
     def test_ack_nonforce_wrong_actor_error_or_foreign_account_cannot_authorize_capacity(self):
         for key,bad in [('forceDelete',False),('forceDelete',1),('autoScalingGroupName',p.PRODUCTION)]:
