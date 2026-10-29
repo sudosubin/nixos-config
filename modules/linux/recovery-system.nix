@@ -37,7 +37,7 @@ let
               ExecStart = pkgs.writeShellScript "recovery-fixture-HM" ''
                 set -eu
                 [ "$(${pkgs.util-linux}/bin/findmnt -n -o UUID --mountpoint /home)" = '${homeUUID}' ]
-                ${config.services.spotWork.package}/bin/spot-work check-service-open
+                ${config.services.spotWork.package}/bin/spot-work check-service-open home-manager-sudosubin.service
                 printf '%s\n' '${scope}' > /run/spot-recovery-HM-fixture-started
               '';
             };
