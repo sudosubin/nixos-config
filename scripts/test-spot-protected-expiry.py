@@ -117,6 +117,19 @@ class ExpiryTests(unittest.TestCase):
     def test_file_receipt_must_be_independently_reread_from_CFN_and_CloudTrail(self):
         v=evidence();api=Mock(side_effect=[{'Stacks':[{'StackStatus':'ROLLBACK_COMPLETE','StackName':v['state']['name'],'StackId':v['StackId']}]},{'TemplateBody':{'Metadata':{'Investigation':v['state']}}},{'StackEvents':v['native_events']},{'AutoScalingGroups':[]},{'Events':[{'CloudTrailEvent':json.dumps(v['event'])}]}]);p.verify_force_evidence(api,v)
         self.assertEqual(api.call_count,5);self.assertEqual(api.call_args.args[0:2],('cloudtrail','lookup-events'))
+    def collect(self, status='ROLLBACK_COMPLETE', events=True, force=True):
+        v=evidence();event=copy.deepcopy(v['event']);event['requestParameters']['forceDelete']=force
+        replies={('sts','get-caller-identity'):{'Account':p.ACCOUNT},('cloudformation','describe-stacks'):{'Stacks':[{'StackName':v['state']['name'],'StackId':v['StackId'],'StackStatus':status}]},('cloudformation','get-template'):{'TemplateBody':{'Metadata':{'Investigation':v['state']}}},('cloudformation','describe-stack-events'):{'StackEvents':v['native_events']},('autoscaling','describe-auto-scaling-groups'):{'AutoScalingGroups':[]},('cloudtrail','lookup-events'):{'Events':[{'CloudTrailEvent':json.dumps(event)}] if events else []}}
+        api=Mock(side_effect=lambda service,action,*args:replies[service,action]);return p.collect_empty(api,v['state']['scope']),api
+    def test_actual_empty_probe_collection_rechecks_native_sources_not_file_flags(self):
+        result,api=self.collect();self.assertTrue(result['verified']);self.assertFalse(result['capacity_requested']);self.assertEqual(sum(c.args[:2]==('cloudtrail','lookup-events') for c in api.call_args_list),2)
+    def test_pending_stack_does_not_claim_expiry_or_probe_CloudTrail(self):
+        result,api=self.collect(status='CREATE_IN_PROGRESS');self.assertFalse(result['verified']);self.assertFalse(any(c.args[0]=='cloudtrail' for c in api.call_args_list))
+    def test_late_missing_CloudTrail_is_pending_not_force_proof(self):
+        result,_=self.collect(events=False);self.assertFalse(result['verified']);self.assertNotIn('event',result)
+    def test_native_nonforce_deletion_is_preserved_but_cannot_authorize_protected_trial(self):
+        result,_=self.collect(force=False);self.assertFalse(result['verified']);self.assertTrue(result['not_independent_protected_expiry'])
+
     def test_missing_or_partial_fresh_event_never_passes_manifest(self):
         for reply in [{'Events':[]},{'Events':[{'CloudTrailEvent':json.dumps(evidence()['event'])}],'NextToken':'incomplete'}]:
             v=evidence();api=Mock(side_effect=[{'Stacks':[{'StackStatus':'ROLLBACK_COMPLETE','StackName':v['state']['name'],'StackId':v['StackId']}]},{'TemplateBody':{'Metadata':{'Investigation':v['state']}}},{'StackEvents':v['native_events']},{'AutoScalingGroups':[]},reply])

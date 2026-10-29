@@ -328,15 +328,58 @@ def verify_force_evidence(api, value):
     return value
 
 
+def collect_empty(api, scope):
+    require(api('sts', 'get-caller-identity')['Account'] == ACCOUNT, 'wrong account')
+    require(re.fullmatch('[0-9a-f]{12}', scope), 'invalid scope')
+    name = 'nixos-protected-expiry-'+scope
+    stacks = api('cloudformation', 'describe-stacks', '--stack-name', name)['Stacks'];require(len(stacks) == 1, 'unknown stack')
+    stack = stacks[0];doc = api('cloudformation', 'get-template', '--stack-name', stack['StackId'])['TemplateBody']
+    if isinstance(doc, str):doc = json.loads(doc)
+    state = doc['Metadata']['Investigation'];require(state['scope'] == scope and state['mode'] == 'empty', 'not this empty probe')
+    result = {'verified': False, 'state': state, 'StackId': stack['StackId'], 'stack_status': stack['StackStatus'],
+              'goal_complete': False, 'capacity_requested': False}
+    if stack['StackStatus'] != 'ROLLBACK_COMPLETE':return result
+    result['group_absent'] = not api('autoscaling', 'describe-auto-scaling-groups', '--auto-scaling-group-names', name)['AutoScalingGroups']
+    require(result['group_absent'], 'native group still exists')
+    events = api('cloudformation', 'describe-stack-events', '--stack-name', stack['StackId'])
+    require(not events.get('NextToken'), 'native stack events incomplete')
+    result['native_events'] = events['StackEvents'];validate_timeout_events(result['native_events'])
+    selected = [];token = None;seen = set()
+    for _ in range(8):
+        args = ['--no-paginate', '--lookup-attributes', 'AttributeKey=EventName,AttributeValue=DeleteAutoScalingGroup',
+                '--start-time', state['created'], '--max-results', '50']
+        if token is not None:args += ['--next-token', token]
+        reply = api('cloudtrail', 'lookup-events', *args)
+        for row in reply['Events']:
+            event = json.loads(row['CloudTrailEvent'])
+            if event.get('requestParameters', {}).get('autoScalingGroupName') == name and not event.get('errorCode'):
+                selected.append(event_projection(event))
+        token = reply.get('NextToken')
+        if token is None:break
+        require(isinstance(token, str) and token and token not in seen, 'CloudTrail pagination unknown');seen.add(token)
+    else:raise RuntimeError('CloudTrail observation exceeds bound; no capacity authority')
+    result['native_delete_events'] = selected
+    if not selected:return result  # Event history delivery delay is not proof.
+    require(len(selected) == 1, 'native delete event not unique')
+    result['event'] = selected[0]
+    if result['event']['requestParameters'].get('forceDelete') is not True:
+        result['not_independent_protected_expiry'] = True
+        return result
+    validate_force_evidence(result);verify_force_evidence(api, result)
+    result['verified'] = True
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['plan', 'create', 'status'])
+    parser.add_argument('action', choices=['plan', 'create', 'status', 'audit-empty'])
     parser.add_argument('--scope', required=True);parser.add_argument('--mode', choices=['empty', 'protected'], default='empty')
     parser.add_argument('--image', required=True);parser.add_argument('--source-revision', required=True)
     parser.add_argument('--force-evidence', type=Path);parser.add_argument('--profile');args = parser.parse_args()
     state = plan(args.scope, args.mode, args.image, args.source_revision)
     if args.action == 'plan':print(json.dumps({'state': state, 'policy': role_policy(state), 'launch': launch_data(state)}, indent=2));return
     api = API(args.profile)
+    if args.action == 'audit-empty':print(json.dumps(collect_empty(api, args.scope), indent=2));return
     if args.action == 'status':
         require(api('sts', 'get-caller-identity')['Account'] == ACCOUNT, 'wrong account');print(json.dumps(inspect(api, state), indent=2));return
     evidence = json.loads(args.force_evidence.read_text()) if args.force_evidence else None
