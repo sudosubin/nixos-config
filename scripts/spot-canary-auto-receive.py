@@ -6,7 +6,6 @@ admission is read back by the creator. A complete receipt means opaque bodies
 were retained, NOT production readiness, AMI approval, or safe termination.
 """
 import argparse
-import base64
 from datetime import datetime
 import hashlib
 import importlib.util
@@ -97,6 +96,12 @@ def validate_binding(scope,run,commit,binding,authority_sha256):
     return identity
 
 
+def console_bytes(response):
+    # AWS CLI's EC2 customization already decodes the API's base64 console.
+    # This exact CLI contract was observed; do not decode/plaintext-fallback.
+    output=response.get('Output','');require(isinstance(output,str),'unknown CLI console type');data=output.encode('utf-8');require(len(data)<=2097152,'oversized console data');return data
+
+
 def observe(scope,deadline,folder,expected):
     bucket='nixos-spot-proof-'+r.ACCOUNT+'-'+scope;completed={};errors=[];seen_failure=set();console_seen={}
     while time.time()<deadline:
@@ -107,9 +112,9 @@ def observe(scope,deadline,folder,expected):
         for instance in instances:
             iid=instance['InstanceId'];require(iid!=r.ORIGINAL and {t['Key']:t['Value'] for t in instance.get('Tags',[])}.get('ScopeId')==scope,'foreign console target')
             try:
-                response=r.aws('ec2','get-console-output','--instance-id',iid,'--latest');encoded=response.get('Output','');require(isinstance(encoded,str) and len(encoded)<=2097152,'oversized console data')
-                if encoded:
-                    data=base64.b64decode(encoded,validate=True);digest=hashlib.sha256(data).hexdigest()
+                response=r.aws('ec2','get-console-output','--instance-id',iid,'--latest');data=console_bytes(response)
+                if data:
+                    digest=hashlib.sha256(data).hexdigest()
                     if console_seen.get(iid)!=digest:
                         path=folder/('console-'+iid+'-'+uuid.uuid4().hex+'.log')
                         with path.open('xb') as f:f.write(data);f.flush();os.fsync(f.fileno())

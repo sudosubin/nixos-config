@@ -269,6 +269,18 @@ def final_prefix(scope,artifact_run=None):
     return 'results/final/'+scope+'/'+(artifact_run+'/' if artifact_run is not None else '')
 
 
+def metadata_fence(stage):
+    """Service OOMPolicy=kill is kernel-read back, never assumed for a slice."""
+    require(stage in ('launch','run','watch'),'unknown metadata purpose')
+    maximum,quota,pattern=(128*1024**2,10,r'spot-proof-watch-[0-9a-f]{12}-[0-9a-f]{12}\.service') if stage=='watch' else (256*1024**2,25,r'spot-(?:bootstrap-launch-[0-9a-f]{12}|proof-pipeline-[0-9a-f]{12}-[0-9a-f]{32})\.service')
+    text=Path('/proc/self/cgroup').read_text().strip();require(text.startswith('0::/system.slice/') and re.fullmatch(pattern,text.rsplit('/',1)[-1]),'metadata stage is not its dedicated service')
+    group=Path('/sys/fs/cgroup')/text.split('::',1)[1].lstrip('/')
+    require((group/'memory.max').read_text().strip()==str(maximum) and (group/'memory.swap.max').read_text().strip()=='0' and (group/'memory.oom.group').read_text().strip()=='1','metadata kernel memory/swap/OOM group unknown')
+    cpu=(group/'cpu.max').read_text().split();require(len(cpu)==2 and all(x.isdecimal() for x in cpu) and 0<int(cpu[0])*100<=int(cpu[1])*quota,'metadata CPU exceeds its budget')
+    require('NoNewPrivs:\t1' in Path('/proc/self/status').read_text() and Path('/proc/self/oom_score_adj').read_text().strip()=='1000','metadata priority/NNP unknown')
+    return group
+
+
 def launch_controller(source,authority,proof,artifact_run=None):
     """Keep the coordinator bounded without making its OWN initializer read-only.
 
@@ -286,7 +298,7 @@ def launch_controller(source,authority,proof,artifact_run=None):
     fd=os.open(log,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600);os.close(fd)
     subprocess.run(['systemd-run','--unit='+unit,'--description=Attested-canary-build-verify-artifact-chain','--collect','--property=Type=exec',
                     '--property=MemoryMax=256M','--property=MemorySwapMax=0','--property=CPUQuota=25%','--property=OOMScoreAdjust=1000',
-                    '--property=Nice=19','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=no',
+                    '--property=Nice=19','--property=NoNewPrivileges=yes','--property=OOMPolicy=kill','--property=ProtectControlGroups=no',
                     '--property=StandardOutput=append:'+str(log),'--property=StandardError=append:'+str(log),
                     '--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty',sys.executable,'-I',
                     str(source/'scripts/spot-canary-pipeline.py'),'run','--source',str(source),'--authority',str(authority),*extra],check=True,capture_output=True,text=True)
@@ -307,7 +319,7 @@ def orchestrate(source,authority,v,proof,expected,artifact_run=None):
         # if this coordinator fails. It has no workload control or paid service.
         subprocess.run(['systemd-run','--unit=spot-proof-watch-'+scope+'-'+folder.name[-12:],'--description=Scoped-expiring-evidence-only','--collect',
                         '--property=Type=exec','--property=MemoryMax=128M','--property=MemorySwapMax=0','--property=CPUQuota=10%',
-                        '--property=OOMScoreAdjust=1000','--property=Nice=19','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=yes',
+                        '--property=OOMScoreAdjust=1000','--property=Nice=19','--property=NoNewPrivileges=yes','--property=OOMPolicy=kill','--property=ProtectControlGroups=yes',
                         '--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty',
                         sys.executable,'-I',str(script),'watch',*common],check=True,capture_output=True,text=True)
         publish(folder/'baseline.json',baseline_inventory())
@@ -351,6 +363,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('stage',choices=['launch','run','build','package','watch']);parser.add_argument('--source',type=Path,required=True);parser.add_argument('--authority',type=Path,required=True);parser.add_argument('--folder',type=Path);parser.add_argument('--artifact-run');args=parser.parse_args()
     require(sys.platform=='linux' and os.geteuid()==0,'root Linux required; no skip or production fallback')
     os.environ['NIX_REMOTE']='local'  # legacy nix-store export/query must not escape the resource cage via a daemon
+    if args.stage in ('launch','run','watch'):metadata_fence(args.stage)
     if args.stage not in ('launch','run'):
         require(args.folder is not None and args.folder.parent==Path('/home/persist/root') and re.fullmatch('pipeline-[0-9a-f]{32}',args.folder.name)
                 and args.folder.is_dir() and not args.folder.is_symlink() and args.folder.stat().st_uid==0 and not args.folder.stat().st_mode&0o077,'unknown stage workspace')

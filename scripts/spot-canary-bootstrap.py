@@ -136,14 +136,23 @@ def run(config):
   require(not parent.is_symlink(),'public runtime destination untrusted')
  destination.mkdir(mode=0o755,parents=True,exist_ok=True)
  require(not any((destination/name).exists() or (destination/name).is_symlink() for name in ['kiro-cli','openclaw-npm']),'existing runtime custody is never overwritten')
- with tarfile.open(folder/'runtime.body') as archive:
-  for member in archive.getmembers():require(member.name.split('/')[0] in {'openclaw-npm','kiro-cli'} and '..' not in Path(member.name).parts and not Path(member.name).is_absolute(),'nonpublic runtime archive path')
-  archive.extractall(destination,filter='data')
+ # Archive extraction is separate private ARTIFACT work, not verification.
+ # Neither a nested Python/AWS launcher nor44k TarInfo objects may expand the
+ #128MiB network transport's budget or create unbounded allocation pressure.
+ import importlib.util
+ spec=importlib.util.spec_from_file_location('bootstrap_validation',source/'modules/linux/spot_validation.py');v=importlib.util.module_from_spec(spec);spec.loader.exec_module(v)
+ extracted=folder/'public-runtime-extracted.json';receipt=v.launch([sys.executable,'-B','-I',str(source/'scripts/spot-runtime-extract.py'),'--archive',str(folder/'runtime.body'),'--output',str(extracted)],extracted,purpose='build');new(folder/'extract-launch-not-success.json',receipt)
+ while not extracted.exists():
+  require(time.time()<datetime.fromisoformat(config['expires']).timestamp()-900,'native lifetime too short for remaining build')
+  leaf=Path('/sys/fs/cgroup')/receipt['slice'];require(leaf.exists() and 'populated 0' not in (leaf/'cgroup.events').read_text(),'owned extraction exited without result');time.sleep(.2)
+ require(json.loads(extracted.read_text()).get('extracted') is True,'public extraction failed; no launch')
+ leaf=Path('/sys/fs/cgroup')/receipt['slice'];settle=time.monotonic()+30
+ while leaf.exists() and 'populated 0' not in (leaf/'cgroup.events').read_text():require(time.monotonic()<settle,'extractor did not settle');time.sleep(.1)
  run_id=hashlib.sha256((iid+':'+boot).encode()).hexdigest()[:32];new(folder/'bootstrap-verified-not-tests.json',{'identity':identity,'source':str(source),'authority':str(authority),'artifact_run':run_id,'memory_peak':(group/'memory.peak').read_text(),'memory_events':(group/'memory.events').read_text(),'full_regression_verified':False,'goal_complete':False})
  # The maintained launcher performs fresh actual disposable/API/memory
  # attestation, creates its OWN256MiB coordinator, then separate6GiB build and
  # private2GiB verification. No build/verification runs in this transport cage.
- result=subprocess.run([sys.executable,'-B','-I',str(source/'scripts/spot-canary-pipeline.py'),'launch','--source',str(source),'--authority',str(authority),'--artifact-run',run_id],env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'},capture_output=True,text=True,timeout=120)
+ result=subprocess.run(['systemd-run','--quiet','--pipe','--wait','--collect','--unit=spot-bootstrap-launch-'+config['scope'],'--property=Type=exec','--property=MemoryMax=256M','--property=MemorySwapMax=0','--property=CPUQuota=25%','--property=OOMPolicy=kill','--property=OOMScoreAdjust=1000','--property=Nice=19','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=no','--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty',sys.executable,'-B','-I',str(source/'scripts/spot-canary-pipeline.py'),'launch','--source',str(source),'--authority',str(authority),'--artifact-run',run_id],env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'},capture_output=True,text=True,timeout=120)
  new(folder/'pipeline-launch-reply-not-success.json',{'returncode':result.returncode,'stdout':result.stdout,'stderr':result.stderr,'goal_complete':False});require(result.returncode==0,'pipeline launch refused; failure retained')
  status(CONTEXT,'staged',{'identity':identity,'artifact_run':run_id,'pipeline_launched_not_verified':True,'goal_complete':False})
  print(json.dumps({'bootstrap_staged':True,'instance':iid,'boot':boot,'artifact_run':run_id,'folder':str(folder),'launch_is_test_success':False,'goal_complete':False}))

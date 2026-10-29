@@ -33,6 +33,11 @@ class ControllerTests(unittest.TestCase):
                         {'Contents':[{'Key':'results/final/123456abcdef/'+str(i)*32+'/pipeline.json'} for i in range(4)]}]:
             with self.assertRaises(RuntimeError):a.runs('123456abcdef',listing)
 
+    def test_native_CLI_console_is_already_decoded_not_base64(self):
+        self.assertEqual(a.console_bytes({'Output':'UEFI boot\r\n\x1b[31mfailed'}),b'UEFI boot\r\n\x1b[31mfailed');self.assertEqual(a.console_bytes({}),b'')
+        with self.assertRaises(RuntimeError):a.console_bytes({'Output':b'not CLI string'})
+        with self.assertRaises(RuntimeError):a.console_bytes({'Output':'x'*2097153})
+
     def test_exact_instance_boot_source_binding_is_required(self):
         identity={'instanceId':'i-'+'c'*17,'boot':'12345678-1234-1234-1234-123456789abc','root_volume':'vol-'+'d'*17,'scope':'123456abcdef'};run=hashlib.sha256((identity['instanceId']+':'+identity['boot']).encode()).hexdigest()[:32];binding={'identity':identity,'authority_sha256':'f'*64};commit={'instance':identity['instanceId']}
         self.assertEqual(a.validate_binding('123456abcdef',run,commit,binding,'f'*64),identity)

@@ -111,6 +111,24 @@ class PipelineTests(unittest.TestCase):
             run.assert_not_called()
         self.root.chmod(0o700)
 
+    def metadata_fixture(self,stage,changes=None):
+        unit=('spot-proof-watch-123456abcdef-'+'a'*12 if stage=='watch' else 'spot-bootstrap-launch-123456abcdef' if stage=='launch' else 'spot-proof-pipeline-123456abcdef-'+'a'*32)+'.service'
+        folder=self.root/('meta-'+stage);folder.mkdir();group=folder/'sysfs/system.slice'/unit;group.mkdir(parents=True)
+        values={'memory.max':str((128 if stage=='watch' else 256)*1024**2),'memory.swap.max':'0','memory.oom.group':'1','cpu.max':'10000 100000' if stage=='watch' else '25000 100000'};values.update(changes or {})
+        for name,value in values.items():(group/name).write_text(value)
+        (folder/'cgroup').write_text('0::/system.slice/'+unit);(folder/'status').write_text('NoNewPrivs:\t1\n');(folder/'score').write_text('1000')
+        def path(*args):
+            mapping={'/sys/fs/cgroup':folder/'sysfs','/proc/self/cgroup':folder/'cgroup','/proc/self/status':folder/'status','/proc/self/oom_score_adj':folder/'score'}
+            return mapping[args[0]] if len(args)==1 and args[0] in mapping else Path(*args)
+        with patch.object(p,'Path',side_effect=path):return p.metadata_fence(stage)
+    def test_actual_service_metadata_fence_checks_each_fixed_budget(self):
+        for stage in ['launch','run','watch']:self.assertTrue(self.metadata_fixture(stage).is_dir())
+    def test_missing_owned_kernel_oom_group_refuses_metadata_execution(self):
+        with self.assertRaises(RuntimeError):self.metadata_fixture('launch',{'memory.oom.group':'0'})
+    def test_metadata_CPU_or_unknown_purpose_never_inherits_larger_authority(self):
+        with self.assertRaises(RuntimeError):self.metadata_fixture('watch',{'cpu.max':'25000 100000'})
+        with self.assertRaises(RuntimeError):p.metadata_fence('other')
+
     def test_exact_artifact_run_namespace_cannot_alias_previous_scope_commit(self):
         self.assertEqual(p.final_prefix('123456abcdef','a'*32),'results/final/123456abcdef/'+'a'*32+'/')
         for bad in ['', '../escape', 'A'*32, 'a'*31]:

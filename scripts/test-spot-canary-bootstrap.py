@@ -73,6 +73,10 @@ class BootstrapTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):ns['status'](ctx,'failure',{'goal_complete':False})
             self.assertEqual(api.call_count,1);self.assertIn('--if-none-match',api.call_args.args)
 
+    def test_transport_never_nests_API_launcher_in_its_128MiB_budget(self):
+        self.assertIn("'--unit=spot-bootstrap-launch-'+config['scope']",p.RUNTIME);self.assertIn("'--property=MemoryMax=256M'",p.RUNTIME);self.assertIn("'--property=OOMPolicy=kill'",p.RUNTIME)
+        self.assertNotIn("result=subprocess.run([sys.executable",p.RUNTIME)
+
     def test_userdata_is_deterministic_not_a_new_deadline_or_artifact_run(self):
         self.assertEqual(p.user_data(config()),p.user_data(copy.deepcopy(config())));self.assertNotIn('datetime.now',p.RUNTIME)
         self.assertIn("(iid+':'+boot)",p.RUNTIME);self.assertIn("hexdigest()[:32]",p.RUNTIME)
