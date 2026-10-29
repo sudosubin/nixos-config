@@ -278,7 +278,11 @@ def launch_controller(source,authority,proof,artifact_run=None):
     final_prefix(proof['scope'],artifact_run)
     extra=['--artifact-run',artifact_run] if artifact_run is not None else []
     ident=uuid.uuid4().hex;unit='spot-proof-pipeline-'+proof['scope']+'-'+ident
-    log=Path('/home/persist/root')/('coordinator-'+ident+'.log')
+    parent=Path('/home/persist/root');parent.mkdir(mode=0o700,parents=True,exist_ok=True)
+    info=parent.lstat()
+    require(parent.is_dir() and not parent.is_symlink() and info.st_uid==os.geteuid() and not info.st_mode&0o077,
+            'coordinator log parent is not private caller-owned storage')
+    log=parent/('coordinator-'+ident+'.log')
     fd=os.open(log,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600);os.close(fd)
     subprocess.run(['systemd-run','--unit='+unit,'--description=Attested-canary-build-verify-artifact-chain','--collect','--property=Type=exec',
                     '--property=MemoryMax=256M','--property=MemorySwapMax=0','--property=CPUQuota=25%','--property=OOMScoreAdjust=1000',

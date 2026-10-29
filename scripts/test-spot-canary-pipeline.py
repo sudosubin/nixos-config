@@ -96,6 +96,21 @@ class PipelineTests(unittest.TestCase):
         for item in ['--property=MemoryMax=256M','--property=MemorySwapMax=0','--property=CPUQuota=25%','--property=OOMScoreAdjust=1000','--property=NoNewPrivileges=yes','--property=ProtectControlGroups=no','--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty']:self.assertIn(item,argv)
         self.assertFalse(value['launch_receipt_is_phase_success']);self.assertFalse(value['goal_complete']);self.assertEqual(Path(value['log']).stat().st_mode&0o777,0o600)
 
+    def test_fresh_root_without_log_parent_is_created_before_systemd_launch(self):
+        parent=self.root/'not-yet-created'
+        def path(*args):return parent if args==('/home/persist/root',) else Path(*args)
+        with patch.object(p,'Path',side_effect=path),patch.object(p.subprocess,'run') as run:
+            value=p.launch_controller(self.root,self.root/'authority',{'scope':'123456abcdef'})
+        self.assertEqual(parent.stat().st_mode&0o777,0o700);self.assertTrue(Path(value['log']).is_file());self.assertEqual(run.call_count,1)
+    def test_symlink_or_nonprivate_log_parent_never_starts_controller(self):
+        alias=self.root/'alias';alias.symlink_to(self.root)
+        for parent in [alias,self.root]:
+            if parent==self.root:parent.chmod(0o755)
+            def path(*args):return parent if args==('/home/persist/root',) else Path(*args)
+            with patch.object(p,'Path',side_effect=path),patch.object(p.subprocess,'run') as run,self.assertRaises(RuntimeError):p.launch_controller(self.root,self.root/'authority',{'scope':'123456abcdef'})
+            run.assert_not_called()
+        self.root.chmod(0o700)
+
     def test_exact_artifact_run_namespace_cannot_alias_previous_scope_commit(self):
         self.assertEqual(p.final_prefix('123456abcdef','a'*32),'results/final/123456abcdef/'+'a'*32+'/')
         for bad in ['', '../escape', 'A'*32, 'a'*31]:
