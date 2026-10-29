@@ -37,9 +37,9 @@ def digest(value):
 
 
 class APIError(RuntimeError):
-    def __init__(self, service, action, code):
-        self.service, self.action, self.code = service, action, code
-        super().__init__(service+':'+action+':'+code)
+    def __init__(self, service, action, code, detail=''):
+        self.service, self.action, self.code, self.detail = service, action, code, detail
+        super().__init__(service+':'+action+':'+code+(':'+detail if detail else ''))
 
 
 class API:
@@ -56,7 +56,8 @@ class API:
         result = subprocess.run(command+list(args), capture_output=True, text=True, timeout=60, env=env)
         if result.returncode:
             code = re.search(r'An error occurred \(([A-Za-z0-9_.-]+)\)', result.stderr)
-            raise APIError(service, action, code[1] if code else 'UnknownTransportOrCLIError')
+            detail = result.stderr.split(' operation: ', 1)[-1].strip()[:1000] if code else ''
+            raise APIError(service, action, code[1] if code else 'UnknownTransportOrCLIError', detail)
         return json.loads(result.stdout) if result.stdout.strip() else {}
 
 
