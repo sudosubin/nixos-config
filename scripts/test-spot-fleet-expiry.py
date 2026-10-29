@@ -87,6 +87,32 @@ class FleetTests(unittest.TestCase):
         for change in [{'HeartbeatTimeout':3600},{'DefaultResult':'CONTINUE'},{'NotificationTargetARN':'external'}]:
             with self.assertRaises(RuntimeError):p.validate_launch_guard(s,[{**h,**change}])
 
+    def test_attachment_settles_before_protection_and_existing_true_needs_no_mutation(self):
+        iid='i-test';pending={'InstanceId':iid,'LifecycleState':'Pending','ProtectedFromScaleIn':True};ready={**pending,'LifecycleState':'InService'};api=Mock(side_effect=[{'AutoScalingGroups':[{'Instances':[pending]}]},{'AutoScalingGroups':[{'Instances':[ready]}]}])
+        with patch.object(p.time,'sleep'):self.assertEqual(p.confirm_protected_member(api,state(),iid),ready)
+        self.assertTrue(all(c.args[1]=='describe-auto-scaling-groups' for c in api.call_args_list))
+    def test_protection_is_one_request_then_actual_readback_not_ack(self):
+        iid='i-test';member={'InstanceId':iid,'LifecycleState':'InService','ProtectedFromScaleIn':False};ready={**member,'ProtectedFromScaleIn':True};api=Mock(side_effect=[{'AutoScalingGroups':[{'Instances':[member]}]}, {}, {'AutoScalingGroups':[{'Instances':[ready]}]}])
+        with patch.object(p.time,'sleep'):self.assertEqual(p.confirm_protected_member(api,state(),iid),ready)
+        self.assertEqual(sum(c.args[1]=='set-instance-protection' for c in api.call_args_list),1)
+
+    def expiry_evidence(self):
+        s=state();s['FleetId']='sfr-test';expires=datetime.fromisoformat(s['expires']).timestamp();iid='i-empty';request={'SpotFleetRequestId':s['FleetId'],'SpotFleetRequestConfig':p.config(s)}
+        capture={'scope':s['scope'],'FleetId':s['FleetId'],'capture_complete':True,'errors':[],'instances':{iid:{'seen_zero_requested_but_protected_running':True,'state':'terminated','root_absent':True,'last_protected_running_observed':expires-5,'first_observed_terminated':expires+40}}}
+        history={'SpotFleetRequestId':s['FleetId'],'LastEvaluatedTime':s['expires'],'HistoryRecords':[{'EventType':'fleetRequestChange','EventInformation':{'EventSubType':'cancelled_terminating'},'Timestamp':s['expires']},{'EventType':'instanceChange','EventInformation':{'EventSubType':'terminated','InstanceId':iid},'Timestamp':s['expires']}]}
+        event={'eventSource':'ec2.amazonaws.com','eventName':'TerminateInstances','awsRegion':p.b.REGION,'recipientAccountId':p.b.ACCOUNT,'eventTime':s['expires'],'requestParameters':{'instancesSet':{'items':[{'instanceId':iid}]}},'userIdentity':{'invokedBy':'spotfleet.amazonaws.com','sessionContext':{'sessionIssuer':{'arn':'arn:aws:iam::'+p.b.ACCOUNT+':role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet'}}}}
+        return s,request,history,capture,[event]
+    def test_positive_expiry_needs_native_actor_and_actual_protected_terminal_root_evidence(self):
+        self.assertTrue(p.verify_expiry_evidence(*self.expiry_evidence())['independent_disposable_protected_expiry_verified'])
+    def test_standalone_unprotected_or_stale_capture_cannot_be_promoted(self):
+        for change in [lambda a:a[3]['instances']['i-empty'].update(seen_zero_requested_but_protected_running=False),lambda a:a[3]['instances']['i-empty'].update(last_protected_running_observed=0),lambda a:a[3]['instances']['i-empty'].update(root_absent=False),lambda a:a[3].update(errors=['unknown'])]:
+            args=self.expiry_evidence();change(args)
+            with self.assertRaises(RuntimeError):p.verify_expiry_evidence(*args)
+    def test_early_cancellation_manual_termination_or_ACK_without_history_is_not_expiry(self):
+        for change in [lambda a:a[2]['HistoryRecords'][0].update(Timestamp=NOW.isoformat()),lambda a:a[4][0]['userIdentity'].update(invokedBy='human'),lambda a:a[2]['HistoryRecords'].pop()]:
+            args=self.expiry_evidence();change(args)
+            with self.assertRaises(RuntimeError):p.verify_expiry_evidence(*args)
+
     def test_activate_cannot_modify_capacity_before_fresh_zero_containment(self):
         api=Mock()
         with patch.object(p,'zero_readback',side_effect=RuntimeError('not verified')),self.assertRaisesRegex(RuntimeError,'not verified'):p.activate(api,state())

@@ -182,9 +182,23 @@ def activate(api,state):
     require(len(volume)==1 and volume[0]['Encrypted'] is True and volume[0]['Size']==8,'encrypted disposable root unknown')
     require(datetime.fromisoformat(state['off_at']).timestamp()-time.time()>60,'too late to attach; native expiry remains')
     api('autoscaling','attach-instances','--auto-scaling-group-name',state['name'],'--instance-ids',iid)
-    api('autoscaling','set-instance-protection','--auto-scaling-group-name',state['name'],'--instance-ids',iid,'--protected-from-scale-in')
+    protected=confirm_protected_member(api,state,iid)
     state.update(instance=iid,root_volume=instance['BlockDeviceMappings'][0]['Ebs']['VolumeId'])
-    return {'state':state,'capacity_requested':True,'attach_and_protection_requests_are_observations_not_proof':True,'expiry_success':False,'goal_complete':False}
+    return {'state':state,'capacity_requested':True,'protected_InService_readback':protected,'expiry_success':False,'goal_complete':False}
+
+
+def confirm_protected_member(api,state,iid):
+    limit=time.monotonic()+30;attempted=False
+    while True:
+        groups=api('autoscaling','describe-auto-scaling-groups','--auto-scaling-group-names',state['name'])['AutoScalingGroups']
+        require(len(groups)==1,'attachment group identity unknown')
+        members=[i for i in groups[0]['Instances'] if i['InstanceId']==iid]
+        require(len(members)<=1,'ambiguous attached member')
+        if members and members[0]['LifecycleState']=='InService':
+            if members[0].get('ProtectedFromScaleIn') is True:return members[0]
+            require(not attempted,'protection request not confirmed; no replay')
+            api('autoscaling','set-instance-protection','--auto-scaling-group-name',state['name'],'--instance-ids',iid,'--protected-from-scale-in');attempted=True
+        require(time.monotonic()<limit,'attachment/protection not confirmed; native expiry remains armed');time.sleep(2)
 
 
 def validate_launch_guard(state,hooks):
@@ -208,6 +222,34 @@ def simulate_termination_authority(api,state):
     require(len(specific)==len(rows)==2 and set(rows)=={base+'i-0123456789abcdef0',base+'i-0c39eff85c4286b38'}
             and rows[base+'i-0123456789abcdef0']['EvalResourceDecision']=='allowed'
             and rows[base+'i-0c39eff85c4286b38']['EvalResourceDecision']=='explicitDeny','native Fleet termination authority not confirmed')
+
+
+def verify_expiry_evidence(state,request,history,capture,termination_events):
+    """Scope-specific positive evidence; never approval for production deadlines."""
+    expiry=datetime.fromisoformat(state['expires']).timestamp();fid=state['FleetId'];c=request['SpotFleetRequestConfig']
+    require(request['SpotFleetRequestId']==history['SpotFleetRequestId']==capture['FleetId']==fid
+            and capture['scope']==state['scope'] and c['TerminateInstancesWithExpiration'] is True
+            and datetime.fromisoformat(c['ValidUntil']).timestamp()==expiry,'expiry evidence identity changed')
+    require(capture['capture_complete'] is True and not capture['errors'],'protected/zero/terminal/root evidence incomplete or uncertain')
+    selected=[i for i,r in capture['instances'].items() if r.get('seen_zero_requested_but_protected_running') is True
+              and r.get('state')=='terminated' and r.get('root_absent') is True
+              and r.get('last_protected_running_observed',0)>=expiry-30 and r.get('first_observed_terminated',0)>=expiry]
+    require(len(selected)==1,'no unique protected live member held until native expiry');iid=selected[0]
+    records=history['HistoryRecords'];require(not history.get('NextToken') and datetime.fromisoformat(history['LastEvaluatedTime']).timestamp()>=expiry,'native history incomplete')
+    cancels=[r for r in records if r['EventType']=='fleetRequestChange' and r['EventInformation']['EventSubType']=='cancelled_terminating']
+    require(len(cancels)==1 and datetime.fromisoformat(cancels[0]['Timestamp']).timestamp()==expiry,'native cancellation not at the fixed expiry')
+    require(any(r['EventType']=='instanceChange' and r['EventInformation'].get('InstanceId')==iid and r['EventInformation']['EventSubType']=='terminated'
+                and datetime.fromisoformat(r['Timestamp']).timestamp()>=expiry for r in records),'native instance termination history missing')
+    events=[e for e in termination_events if iid in [i['instanceId'] for i in e.get('requestParameters',{}).get('instancesSet',{}).get('items',[])]]
+    require(len(events)==1,'native termination actor not unique');event=events[0];identity=event['userIdentity']
+    require(event['eventSource']=='ec2.amazonaws.com' and event['eventName']=='TerminateInstances' and event['awsRegion']==b.REGION
+            and event['recipientAccountId']==b.ACCOUNT and not event.get('errorCode') and identity.get('invokedBy')=='spotfleet.amazonaws.com'
+            and identity['sessionContext']['sessionIssuer']['arn']=='arn:aws:iam::'+b.ACCOUNT+':role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet'
+            and expiry<=datetime.fromisoformat(event['eventTime'].replace('Z','+00:00')).timestamp()<=expiry+180,'not the native Fleet termination actor')
+    return {'independent_disposable_protected_expiry_verified':True,'instance':iid,'FleetId':fid,'expires':state['expires'],
+            'native_service_linked_role_is_distinct_from_customer_role_simulation':True,
+            'scope':'empty Spot protected ASG member held across native zero request then Fleet expiry; NOT OS/home/all-work/production proof',
+            'production_rollout':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
 
 
 def main():
