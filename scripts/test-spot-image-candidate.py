@@ -2,6 +2,7 @@
 from datetime import datetime,timezone
 import importlib.util
 import json
+import inspect
 from pathlib import Path
 import unittest
 from unittest.mock import Mock,patch
@@ -45,8 +46,16 @@ class CandidateTests(unittest.TestCase):
         api=Mock();created={'volume':'vol-'+'c'*17};capture={'snapshot':'snap-'+'b'*17,'volume':created['volume'],'cold_verification':{'target_volume':created['volume'],'system':'wrong-system','all_NAR_hashes_match':False}}
         with patch.object(p.c,'read',side_effect=[created,capture]),self.assertRaises(RuntimeError):p.register_image(api,state(),capture['snapshot'],'expected-system')
         api.assert_not_called()
+    def test_empty_boot_requires_original_whole_body_custody_before_any_mutation(self):
+        api=Mock()
+        with patch.object(p.time,'time',return_value=NOW.timestamp()),patch.object(p.c,'read',side_effect=RuntimeError('no independent original custody')),self.assertRaises(RuntimeError):p.boot_empty_trial(api,state(),'ami-candidate')
+        api.assert_not_called()
+    def test_empty_boot_does_not_extend_expired_native_deadline(self):
+        api=Mock()
+        with self.assertRaises(RuntimeError):p.boot_empty_trial(api,state(),'ami-candidate')
+        api.assert_not_called()
     def test_candidate_writer_never_changes_default_ASG_or_releases_protection(self):
-        text=Path(p.__file__).read_text()
+        text=inspect.getsource(p.lt_candidate)
         for action in ['update-auto-scaling-group','set-desired-capacity','modify-launch-template','set-instance-protection','--force-detach','--force-delete']:self.assertNotIn(action,text)
         self.assertIn("'--source-version','1'",text);self.assertIn("'numeric_candidate_version':2",text);self.assertIn('UNAPPROVED-source-',text)
 

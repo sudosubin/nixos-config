@@ -370,6 +370,15 @@ nix eval --no-write-lock-file --raw \
 
 새 이미지 검증이 끝나기 전 `services.spotScheduleGuard.armed`를 true로 바꾸거나 검증 플래그를 임의로 채우지 않습니다. 관찰 단계는 실수로 종료를 활성화하지 않도록 설계되었습니다.
 
+## 실제 네이티브 부트스트랩·이미지 후보 (2026-10-29, 범위 제한)
+
+- `d521546`/231파일, 빈 Spot 범위 `76e73035372b`: 숫자 LT2의 **네이티브 UserData → 공개 소스/런타임 수령 → private2GiB 런타임 추출 → 별도256MiB 코디네이터 → 실제 ARM 전체618(558+60)/22 suites/17 compiled → 별도 선언12 → 조건부 S3 전체 body readback → 원본 서버 자동 발견·전체 수령**을 실제 확인했다. 런치 ACK나 수동 SSM 부트스트랩을 성공으로 대신하지 않았다. 원본 수령본은 `/home/persist/root/autoreceived-76e73035372b-90acfb76c4a249bd9810b6c45d52b8dd/run-805be21d8e9d07933dadc68a9d8e45ec-f2128d25efec4e85b51a054d2c310ca3/attempt-5ee9ee45e0734357b30441ccbef6e6a1`에 있다. 빌드 peak3345702912bytes/OOM0. 이는 운영 idle/종료/복원 승인이 아니다.
+- 첫 빈 시도 `bbe979458515`의128MiB 추출 OOM은 실패 그대로 원본에 보존하고 인스턴스/root 및 임시 자원을 정리했다. 두 번째 범위의 게시자도128MiB에서 OOM으로 실패했으며 당시 capacity0이었다. `51e3a36`은256MiB 메타데이터 코디네이터와 **각각 별도128MiB/CPU10 AWS CLI**로 분리했다. 이미 커밋된 세 파일은 HEAD+전체 GET으로만 조정했고 **잃은 데이터 PUT을 재실행하지 않았다**. 새 완료 키만 조건부 게시했다. private 예산의 성공은 운영1GiB 빌드 용량 증거가 아니다.
+- `spot-image-candidate.py`는 독립 수령618과 현재 정확한 ASG ARN/비보호/nativeoff를 확인한 후에만 새 암호화32GiB 빈 이미지 볼륨을 만든다. 신호 없는 CFN 정상 rollback은 compute 만료10분 뒤의 별도 정리 요청이며 강제 분리나 엄격한 wall-clock 보장이 아니다. 기존 root/home/candidate는 명시적으로 제외한다.
+- 그 새 볼륨에서 `spot_image.py`의 **private2GiB/local-store-only 오프라인 설치**, ARM64 GRUB, 정상 unmount가 실제 통과했다(peak2147483648/max45011/OOM0). 실행 중인 OS/profile은 바꾸지 않았다. `bab03d8`의 별도 private1GiB 검증은 타깃 내부의 절대 symlink, 비어 있는 machine/agent/secret custody, ARM64 UEFI와 **실제1169개 NAR 전체 hash**를 확인했다(peak1073741824/max48467/OOM0). 완전 로그378307bytes/SHA `94c75a8dde8092d074f628989484d604a9d78ea5ec17793b378cfa83dd8e693d`. 정상 unmount 뒤 정확한 device epoch FD를 유지하되 **모든 privileged raw-I/O 차단 증거는 아니다**.
+- 이미지 검증의 첫 호출은 결과 parent 부재로 **단위 실행 전에 실패**했다. 그 실패/원본 레시피를 보존하고 새 경로에서만 수정했다. 설치 로그188406bytes/SHA `957f94fc70f1dc89f22dec93d9846965bbc776951f8a8a3a6f3bf313b81335c0`. SSM stdout truncation은 전체 로그 수령으로 세지 않는다.
+- 현재 이미지 snapshot/AMI 부팅/운영 LT 승격·guard 활성화/실제 운영 zero→재생성은 별도 후속 게이트다. 운영 `armed`, `work_tracking_verified`, `goal_complete`는 계속 false이며 기존 LT1/보호를 유지한다. 준비 도구의 숫자 LT2 후보 생성도 default/ASG 전환과 다르다.
+
 ## 비용·백업 주의
 
 - EIP는 연결 중에도, 미연결 보유 중에도 public IPv4 요금이 발생함.
