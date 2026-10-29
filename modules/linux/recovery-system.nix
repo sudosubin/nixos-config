@@ -42,9 +42,33 @@ let
               '';
             };
           };
+          systemd.services.spot-recovery-os-observer = {
+            description = "Disposable-only readonly real boot/EBS evidence";
+            wantedBy = [ "multi-user.target" ];
+            after = [ "network-online.target" "amazon-ssm-agent.service" ];
+            wants = [ "network-online.target" ];
+            unitConfig.ConditionPathExists = "/var/lib/spot-recovery-os-plan.json";
+            path = [ pkgs.awscli2 pkgs.util-linux pkgs.systemd pkgs.coreutils ];
+            serviceConfig = {
+              Type = "exec";
+              ExecStart = "${pkgs.python3}/bin/python3 -B -I ${./verify-spot-recovery-os.py}";
+              StateDirectory = "spot-recovery-os-results";
+              StateDirectoryMode = "0700";
+              UMask = "0077";
+              MemoryMax = "256M";
+              MemorySwapMax = 0;
+              CPUQuota = "25%";
+              OOMPolicy = "kill";
+              OOMScoreAdjust = 1000;
+              Nice = 19;
+              NoNewPrivileges = true;
+              ProtectControlGroups = false; # exact owned OOM initialization only
+            };
+          };
           environment.systemPackages = [ pkgs.hello ];
           environment.etc."spot-recovery-fixture.json".text = builtins.toJSON {
             inherit scope homeVolume homeUUID;
+            probe_sha256 = builtins.hashFile "sha256" ./verify-spot-recovery-os.py;
             fixture = "real OS/home/cache/user-manager/Docker; inert HM only";
             actual_HM_activation_verified = false;
             production_EIP_verified = false;
