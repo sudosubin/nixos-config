@@ -56,6 +56,22 @@ def sha(path):
  return h.hexdigest()
 def new(path,value):
  with path.open('x') as f:json.dump(value,f,indent=2);f.flush();os.fsync(f.fileno())
+CONTEXT={}
+def status(context,name,value):
+ folder=context['folder'];path=folder/(name+'.json');new(path,value);digest=sha(path);key='results/bootstrap/'+context['config']['scope']+'/'+context['run']+'/'+name+'.json';api=context['api'];bucket=context['config']['bucket']
+ api('s3api','put-object','--bucket',bucket,'--key',key,'--body',str(path),'--if-none-match','*','--expected-bucket-owner','537112465379','--server-side-encryption','AES256','--checksum-algorithm','SHA256','--metadata','sha256='+digest)
+ back=folder/(name+'-readback.json');meta=api('s3api','get-object','--bucket',bucket,'--key',key,'--expected-bucket-owner','537112465379',str(back));require(sha(back)==digest==meta['Metadata']['sha256'],'bootstrap status body differs')
+def entry(config):
+ failure=None
+ try:run(config)
+ except Exception as error:
+  failure={'error_type':type(error).__name__,'error':str(error)[:2000],'bootstrap_success':False,'work_tracking_verified':False,'armed':False,'goal_complete':False};error.__traceback__=None
+ if failure is not None:
+  import gc;gc.collect()
+  if CONTEXT:
+   try:status(CONTEXT,'failure',failure)
+   except Exception as error:print('bootstrap failure publication unconfirmed: '+type(error).__name__,flush=True)
+  raise RuntimeError(json.dumps(failure))
 def run(config):
  require(sys.platform=='linux' and os.geteuid()==0,'root Linux required')
  boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()
@@ -99,6 +115,8 @@ def run(config):
  base=Path('/var/lib/spot-autobootstrap');base.mkdir(mode=0o700,exist_ok=True);require(not base.is_symlink() and base.stat().st_uid==0 and not base.stat().st_mode&0o077,'bootstrap storage untrusted')
  folder=base/boot;folder.mkdir(mode=0o700) # existing boot custody is NEVER reset/retried
  identity={**doc,'root_volume':volume,'scope':config['scope'],'expires':config['expires'],'boot':boot,'not_test_success':True};new(folder/'identity.json',identity)
+ run_id=hashlib.sha256((iid+':'+boot).encode()).hexdigest()[:32];CONTEXT.update(folder=folder,api=api,config=config,run=run_id)
+ status(CONTEXT,'started',{'identity':identity,'authority_sha256':config['artifacts']['authority']['sha256'],'source_revision':config['revision'],'goal_complete':False})
  for name in ['source','authority','runtime']:
   item=config['artifacts'][name];path=folder/(name+'.body');reply=api('s3api','get-object','--bucket',config['bucket'],'--key',item['key'],'--expected-bucket-owner','537112465379','--checksum-mode','ENABLED',str(path))
   require(path.stat().st_size==item['bytes'] and sha(path)==item['sha256']==reply['Metadata']['sha256'],'bootstrap artifact body differs: '+name);path.chmod(0o600)
@@ -127,6 +145,7 @@ def run(config):
  # private2GiB verification. No build/verification runs in this transport cage.
  result=subprocess.run([sys.executable,'-B','-I',str(source/'scripts/spot-canary-pipeline.py'),'launch','--source',str(source),'--authority',str(authority),'--artifact-run',run_id],env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'},capture_output=True,text=True,timeout=120)
  new(folder/'pipeline-launch-reply-not-success.json',{'returncode':result.returncode,'stdout':result.stdout,'stderr':result.stderr,'goal_complete':False});require(result.returncode==0,'pipeline launch refused; failure retained')
+ status(CONTEXT,'staged',{'identity':identity,'artifact_run':run_id,'pipeline_launched_not_verified':True,'goal_complete':False})
  print(json.dumps({'bootstrap_staged':True,'instance':iid,'boot':boot,'artifact_run':run_id,'folder':str(folder),'launch_is_test_success':False,'goal_complete':False}))
 '''
 
@@ -145,11 +164,11 @@ def validate_config(config):
 
 def user_data(config):
     validate_config(config)
-    program=RUNTIME+'\nrun('+repr(config)+')\n';compressed=base64.b64encode(zlib.compress(program.encode(),9)).decode()
+    program=RUNTIME+'\nentry('+repr(config)+')\n';compressed=base64.b64encode(zlib.compress(program.encode(),9)).decode()
     code="import base64,zlib;exec(compile(zlib.decompress(base64.b64decode("+repr(compressed)+")),'<pinned-canary-bootstrap>','exec'))"
     import shlex
     script=('#!/bin/sh\nset -eu\nPY="";for p in /nix/store/*-python3-*/bin/python3;do if [ -x "$p" ];then PY="$p";break;fi;done\n[ -n "$PY" ]\nexec systemd-run --quiet --wait --collect --unit=spot-autobootstrap-'+config['scope']+
-            ' -p Type=exec -p MemoryMax=128M -p MemorySwapMax=0 -p CPUQuota=10% -p OOMPolicy=kill -p OOMScoreAdjust=1000 -p Nice=19 -p NoNewPrivileges=yes -p ProtectControlGroups=no --setenv=PATH=/run/current-system/sw/bin --setenv=HOME=/var/empty "$PY" -B -I -c '+shlex.quote(code)+'\n')
+            ' -p Type=exec -p MemoryMax=128M -p MemorySwapMax=0 -p CPUQuota=10% -p OOMPolicy=kill -p OOMScoreAdjust=1000 -p Nice=19 -p NoNewPrivileges=yes -p ProtectControlGroups=no -p StandardOutput=journal+console -p StandardError=journal+console --setenv=PATH=/run/current-system/sw/bin --setenv=HOME=/var/empty "$PY" -B -I -c '+shlex.quote(code)+'\n')
     require(len(script.encode())<=16384,'EC2 decoded UserData exceeds16KiB')
     return base64.b64encode(script.encode()).decode()
 

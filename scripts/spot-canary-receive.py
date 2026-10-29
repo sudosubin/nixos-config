@@ -51,7 +51,7 @@ def identity():
 
 def aws(*args):
     env={k:v for k,v in os.environ.items() if not k.startswith(('AWS_','AMAZON_'))}
-    env.update(AWS_DEFAULT_REGION=REGION,AWS_CONFIG_FILE='/dev/null',AWS_SHARED_CREDENTIALS_FILE='/dev/null',AWS_EC2_METADATA_DISABLED='false',HOME='/var/empty')
+    env.update(AWS_DEFAULT_REGION=REGION,AWS_CONFIG_FILE='/dev/null',AWS_SHARED_CREDENTIALS_FILE='/dev/null',AWS_EC2_METADATA_DISABLED='false',AWS_MAX_ATTEMPTS='1',HOME='/var/empty')
     p=subprocess.run(['aws',*args,'--region',REGION,'--output','json'],env=env,capture_output=True,text=True,timeout=120)
     if p.returncode:
         code=re.search(r'An error occurred \(([A-Za-z0-9_.-]+)\)',p.stderr)

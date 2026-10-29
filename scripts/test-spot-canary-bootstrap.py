@@ -52,7 +52,26 @@ class BootstrapTests(unittest.TestCase):
     def test_compressed_userdata_contains_exact_runtime_and_fixed_config(self):
         body=base64.b64decode(p.user_data(config())).decode();command=shlex.split(body.split(' -c ',1)[1]);tree=ast.parse(command[0]);call=tree.body[1].value.args[0].args[0].args[0]
         encoded=ast.literal_eval(call.args[0]);decoded=zlib.decompress(base64.b64decode(encoded)).decode()
-        self.assertEqual(decoded,p.RUNTIME+'\nrun('+repr(config())+')\n');compile(decoded,'pinned-userdata','exec')
+        self.assertEqual(decoded,p.RUNTIME+'\nentry('+repr(config())+')\n');compile(decoded,'pinned-userdata','exec')
+
+    def test_failure_before_verified_context_never_publishes_remote_authority(self):
+        ns={};exec(compile(p.RUNTIME,'runtime-fixture','exec'),ns)
+        run=Mock(side_effect=RuntimeError('unknown API'));status=Mock();ns.update(run=run,status=status)
+        with self.assertRaises(RuntimeError):ns['entry'](config())
+        status.assert_not_called()
+
+    def test_failure_after_verified_context_is_published_once_not_retried(self):
+        ns={};exec(compile(p.RUNTIME,'runtime-fixture','exec'),ns)
+        status=Mock(side_effect=RuntimeError('lost failure PUT'));ns.update(run=Mock(side_effect=RuntimeError('failed stage')),status=status,CONTEXT={'verified':'fixture only'})
+        with self.assertRaises(RuntimeError):ns['entry'](config())
+        self.assertEqual(status.call_count,1);self.assertEqual(status.call_args.args[1],'failure');self.assertFalse(status.call_args.args[2]['goal_complete'])
+
+    def test_bootstrap_status_requires_conditional_single_PUT_and_body_readback(self):
+        ns={};exec(compile(p.RUNTIME,'runtime-fixture','exec'),ns)
+        with tempfile.TemporaryDirectory() as d:
+            api=Mock(side_effect=RuntimeError('lost PUT'));ctx={'folder':Path(d),'run':'a'*32,'api':api,'config':config()}
+            with self.assertRaises(RuntimeError):ns['status'](ctx,'failure',{'goal_complete':False})
+            self.assertEqual(api.call_count,1);self.assertIn('--if-none-match',api.call_args.args)
 
     def test_userdata_is_deterministic_not_a_new_deadline_or_artifact_run(self):
         self.assertEqual(p.user_data(config()),p.user_data(copy.deepcopy(config())));self.assertNotIn('datetime.now',p.RUNTIME)
