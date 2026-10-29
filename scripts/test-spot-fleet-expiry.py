@@ -1,5 +1,5 @@
 """Pure native Fleet containment tests. Never creates AWS or guest work."""
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import copy
 import importlib.util
 import json
@@ -111,6 +111,14 @@ class FleetTests(unittest.TestCase):
     def test_early_cancellation_manual_termination_or_ACK_without_history_is_not_expiry(self):
         for change in [lambda a:a[2]['HistoryRecords'][0].update(Timestamp=NOW.isoformat()),lambda a:a[4][0]['userIdentity'].update(invokedBy='human'),lambda a:a[2]['HistoryRecords'].pop()]:
             args=self.expiry_evidence();change(args)
+            with self.assertRaises(RuntimeError):p.verify_expiry_evidence(*args)
+
+    def test_later_native_ASG_reconciliation_is_preserved_without_replacing_first_Fleet_actor(self):
+        args=self.expiry_evidence();second=copy.deepcopy(args[4][0]);second['eventTime']=(datetime.fromisoformat(args[0]['expires'])+timedelta(seconds=20)).isoformat();second['userIdentity']['invokedBy']='autoscaling.amazonaws.com';second['userIdentity']['sessionContext']['sessionIssuer']['arn']='arn:aws:iam::'+p.b.ACCOUNT+':role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling';args[4].append(second)
+        self.assertEqual(p.verify_expiry_evidence(*args)['following_native_ASG_reconciliation_events'],1)
+    def test_earlier_ASG_or_later_human_termination_cannot_be_Fleet_causality(self):
+        for later in [False,True]:
+            args=self.expiry_evidence();second=copy.deepcopy(args[4][0]);second['eventTime']=(datetime.fromisoformat(args[0]['expires'])+timedelta(seconds=20 if later else -1)).isoformat();second['userIdentity']['invokedBy']='human' if later else 'autoscaling.amazonaws.com';args[4].append(second)
             with self.assertRaises(RuntimeError):p.verify_expiry_evidence(*args)
 
     def test_activate_cannot_modify_capacity_before_fresh_zero_containment(self):

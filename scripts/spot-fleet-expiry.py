@@ -241,12 +241,25 @@ def verify_expiry_evidence(state,request,history,capture,termination_events):
     require(any(r['EventType']=='instanceChange' and r['EventInformation'].get('InstanceId')==iid and r['EventInformation']['EventSubType']=='terminated'
                 and datetime.fromisoformat(r['Timestamp']).timestamp()>=expiry for r in records),'native instance termination history missing')
     events=[e for e in termination_events if iid in [i['instanceId'] for i in e.get('requestParameters',{}).get('instancesSet',{}).get('items',[])]]
-    require(len(events)==1,'native termination actor not unique');event=events[0];identity=event['userIdentity']
+    require(1<=len(events)<=4,'native termination event roster unknown')
+    events=sorted(events,key=lambda e:datetime.fromisoformat(e['eventTime'].replace('Z','+00:00')))
+    event=events[0];identity=event['userIdentity'];first_time=datetime.fromisoformat(event['eventTime'].replace('Z','+00:00')).timestamp()
+    require(sum(datetime.fromisoformat(e['eventTime'].replace('Z','+00:00')).timestamp()==first_time for e in events)==1,'first termination actor not unique')
     require(event['eventSource']=='ec2.amazonaws.com' and event['eventName']=='TerminateInstances' and event['awsRegion']==b.REGION
             and event['recipientAccountId']==b.ACCOUNT and not event.get('errorCode') and identity.get('invokedBy')=='spotfleet.amazonaws.com'
             and identity['sessionContext']['sessionIssuer']['arn']=='arn:aws:iam::'+b.ACCOUNT+':role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet'
             and expiry<=datetime.fromisoformat(event['eventTime'].replace('Z','+00:00')).timestamp()<=expiry+180,'not the native Fleet termination actor')
-    return {'independent_disposable_protected_expiry_verified':True,'instance':iid,'FleetId':fid,'expires':state['expires'],
+    # ASG can reconcile an already Fleet-terminating member with another native
+    # TerminateInstances call. Preserve it, but never accept an earlier/tied ASG
+    # call or a later human/foreign actor as proof of Fleet expiry causality.
+    for following in events[1:]:
+        who=following['userIdentity'];stamp=datetime.fromisoformat(following['eventTime'].replace('Z','+00:00')).timestamp()
+        require(following['eventSource']=='ec2.amazonaws.com' and following['eventName']=='TerminateInstances'
+                and following['awsRegion']==b.REGION and following['recipientAccountId']==b.ACCOUNT and not following.get('errorCode')
+                and who.get('invokedBy')=='autoscaling.amazonaws.com'
+                and who['sessionContext']['sessionIssuer']['arn']=='arn:aws:iam::'+b.ACCOUNT+':role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling'
+                and first_time<stamp<=expiry+180,'unknown/earlier non-Fleet termination actor')
+    return {'independent_disposable_protected_expiry_verified':True,'following_native_ASG_reconciliation_events':len(events)-1,'instance':iid,'FleetId':fid,'expires':state['expires'],
             'native_service_linked_role_is_distinct_from_customer_role_simulation':True,
             'scope':'empty Spot protected ASG member held across native zero request then Fleet expiry; NOT OS/home/all-work/production proof',
             'production_rollout':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
