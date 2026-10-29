@@ -20,7 +20,7 @@ def ready():
     s=state();config=p.config(s);request={'SpotFleetRequestState':'active','SpotFleetRequestConfig':config}
     group={'AutoScalingGroupName':s['name'],'DesiredCapacity':0,'Instances':[],'MinSize':0,'MaxSize':1,
            'NewInstancesProtectedFromScaleIn':True,'CapacityRebalance':False,'DeletionProtection':'none',
-           'SuspendedProcesses':[{'ProcessName':'Launch'}],
+           'SuspendedProcesses':[],
            'MixedInstancesPolicy':{'LaunchTemplate':{'LaunchTemplateSpecification':{'LaunchTemplateId':s['LT'],'Version':'1'}},
                                   'InstancesDistribution':{'OnDemandBaseCapacity':0,'OnDemandPercentageAboveBaseCapacity':0}}}
     actions=[{'MinSize':0,'MaxSize':0,'DesiredCapacity':0,'StartTime':s['off_at']}]
@@ -48,8 +48,8 @@ class FleetTests(unittest.TestCase):
     def test_no_expiry_no_terminate_or_nonzero_capacity_refuses(self):
         for key,bad in [('TerminateInstancesWithExpiration',False),('TargetCapacity',1),('OnDemandTargetCapacity',1),('InstanceInterruptionBehavior','stop')]:
             with self.subTest(key=key),self.assertRaises(RuntimeError):self.valid(lambda s,r,g,a:r['SpotFleetRequestConfig'].update({key:bad}))
-    def test_asg_launch_must_stay_suspended_to_prevent_unbounded_replacement(self):
-        with self.assertRaises(RuntimeError):self.valid(lambda s,r,g,a:g.update(SuspendedProcesses=[]))
+    def test_launch_suspension_cannot_be_assumed_compatible_with_real_attachment(self):
+        with self.assertRaises(RuntimeError):self.valid(lambda s,r,g,a:g.update(SuspendedProcesses=[{'ProcessName':'Launch'}]))
         with self.assertRaises(RuntimeError):self.valid(lambda s,r,g,a:g.update(Instances=[{'InstanceId':'unexpected'}]))
     def test_protection_and_numeric_LT_cannot_be_substituted(self):
         with self.assertRaises(RuntimeError):self.valid(lambda s,r,g,a:g.update(NewInstancesProtectedFromScaleIn=False))
@@ -70,16 +70,22 @@ class FleetTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):p.simulate_termination_authority(Mock(return_value=reply),s)
     def test_complete_zero_readback_requires_remote_policy_fixed_guest_and_simulation(self):
         s,r,g,a=ready();base='arn:aws:ec2:'+p.b.REGION+':'+p.b.ACCOUNT+':instance/'
-        replies={('ec2','describe-spot-fleet-requests'):{'SpotFleetRequestConfigs':[r]},('autoscaling','describe-auto-scaling-groups'):{'AutoScalingGroups':[g]},('autoscaling','describe-scheduled-actions'):{'ScheduledUpdateGroupActions':a},('iam','get-role-policy'):{'PolicyDocument':p.fleet_policy(s)},('ec2','describe-launch-template-versions'):{'LaunchTemplateVersions':[{'LaunchTemplateData':p.b.launch_data(s)}]},('iam','simulate-principal-policy'):{'EvaluationResults':[{'EvalActionName':'ec2:TerminateInstances','MissingContextValues':[],'ResourceSpecificResults':[{'EvalResourceName':base+i,'EvalResourceDecision':d} for i,d in [('i-0123456789abcdef0','allowed'),('i-0c39eff85c4286b38','explicitDeny')]]}]}}
+        replies={('ec2','describe-spot-fleet-requests'):{'SpotFleetRequestConfigs':[r]},('autoscaling','describe-auto-scaling-groups'):{'AutoScalingGroups':[g]},('autoscaling','describe-scheduled-actions'):{'ScheduledUpdateGroupActions':a},('autoscaling','describe-lifecycle-hooks'):{'LifecycleHooks':[{'LifecycleHookName':s['name']+'-discard-new','LifecycleTransition':'autoscaling:EC2_INSTANCE_LAUNCHING','HeartbeatTimeout':30,'DefaultResult':'ABANDON'}]},('iam','get-role-policy'):{'PolicyDocument':p.fleet_policy(s)},('ec2','describe-launch-template-versions'):{'LaunchTemplateVersions':[{'LaunchTemplateData':p.b.launch_data(s)}]},('iam','simulate-principal-policy'):{'EvaluationResults':[{'EvalActionName':'ec2:TerminateInstances','MissingContextValues':[],'ResourceSpecificResults':[{'EvalResourceName':base+i,'EvalResourceDecision':d} for i,d in [('i-0123456789abcdef0','allowed'),('i-0c39eff85c4286b38','explicitDeny')]]}]}}
         api=Mock(side_effect=lambda service,action,*args:replies[service,action])
         with patch.object(p.time,'time',return_value=NOW.timestamp()+30):p.zero_readback(api,s)
-        self.assertEqual(api.call_count,6);self.assertTrue(all(c.args[1].startswith(('describe-','get-','simulate-')) for c in api.call_args_list))
-        self.assertIn(s['LT'],api.call_args_list[4].args)
+        self.assertEqual(api.call_count,7);self.assertTrue(all(c.args[1].startswith(('describe-','get-','simulate-')) for c in api.call_args_list))
+        self.assertIn(s['LT'],api.call_args_list[5].args)
 
     def test_missing_context_or_duplicate_IAM_resource_results_cannot_pass(self):
         base='arn:aws:ec2:'+p.b.REGION+':'+p.b.ACCOUNT+':instance/';row={'EvalResourceName':base+'i-0123456789abcdef0','EvalResourceDecision':'allowed'}
         for result in [{'EvalActionName':'ec2:TerminateInstances','MissingContextValues':['tag'],'ResourceSpecificResults':[]},{'EvalActionName':'ec2:TerminateInstances','ResourceSpecificResults':[row,row]}]:
             with self.assertRaises(RuntimeError):p.simulate_termination_authority(Mock(return_value={'EvaluationResults':[result]}),state())
+
+    def test_missing_slow_continue_or_external_heartbeat_guard_refuses_paid_capacity(self):
+        s=state();h={'LifecycleHookName':s['name']+'-discard-new','LifecycleTransition':'autoscaling:EC2_INSTANCE_LAUNCHING','HeartbeatTimeout':30,'DefaultResult':'ABANDON'};p.validate_launch_guard(s,[h])
+        with self.assertRaises(RuntimeError):p.validate_launch_guard(s,[])
+        for change in [{'HeartbeatTimeout':3600},{'DefaultResult':'CONTINUE'},{'NotificationTargetARN':'external'}]:
+            with self.assertRaises(RuntimeError):p.validate_launch_guard(s,[{**h,**change}])
 
     def test_activate_cannot_modify_capacity_before_fresh_zero_containment(self):
         api=Mock()

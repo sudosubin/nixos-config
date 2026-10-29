@@ -17,7 +17,7 @@ import time
 import urllib.request
 
 ACCOUNT='537112465379';REGION='ap-northeast-2';ORIGINAL='i-0c39eff85c4286b38'
-ALLOWED={('ec2',a) for a in ['describe-spot-fleet-requests','describe-spot-fleet-instances','describe-spot-fleet-request-history','describe-instances','describe-volumes']}|{('autoscaling','describe-auto-scaling-groups')}
+ALLOWED={('ec2',a) for a in ['describe-spot-fleet-requests','describe-spot-fleet-instances','describe-spot-fleet-request-history','describe-instances','describe-volumes']}|{('autoscaling',a) for a in ['describe-auto-scaling-groups','describe-lifecycle-hooks']}
 
 
 def require(value,message):
@@ -83,8 +83,9 @@ def observe(scope,fid,expires,directory,group):
                 rows=call('ec2','describe-spot-fleet-requests','--spot-fleet-request-ids',fid)['SpotFleetRequestConfigs'];require(len(rows)==1 and rows[0]['SpotFleetRequestId']==fid,'unknown Fleet')
                 c=rows[0]['SpotFleetRequestConfig'];require(c['TerminateInstancesWithExpiration'] is True and datetime.fromisoformat(c['ValidUntil']).timestamp()==expires and c.get('OnDemandTargetCapacity',0)==0 and c['IamFleetRole']=='arn:aws:iam::'+ACCOUNT+':role/nixos-fleet-expiry-'+scope+'-fleet','native expiry was changed')
                 value['last_fleet_state']=rows[0]['SpotFleetRequestState'];active=call('ec2','describe-spot-fleet-instances','--spot-fleet-request-id',fid)['ActiveInstances'];groups=call('autoscaling','describe-auto-scaling-groups','--auto-scaling-group-names','nixos-fleet-expiry-'+scope)['AutoScalingGroups'];require(len(groups)<=1,'unknown group roster');g=groups[0] if groups else None
-                if g:require({x['ProcessName'] for x in g['SuspendedProcesses']}=={'Launch'},'ASG non-fleet replacement containment lost')
-                members={i['InstanceId']:i for i in g['Instances']} if g else {};ids=set(value['instances'])|{i['InstanceId'] for i in active}|set(members);require(len(ids)<=8 and ORIGINAL not in ids,'observer instance roster invalid')
+                if g:
+                    require(not g['SuspendedProcesses'],'ASG process state changed');hooks=call('autoscaling','describe-lifecycle-hooks','--auto-scaling-group-name',g['AutoScalingGroupName'])['LifecycleHooks'];require(len(hooks)==1 and hooks[0]['HeartbeatTimeout']==30 and hooks[0]['DefaultResult']=='ABANDON' and hooks[0]['LifecycleTransition']=='autoscaling:EC2_INSTANCE_LAUNCHING' and not hooks[0].get('NotificationTargetARN'),'native replacement ABANDON containment lost')
+                members={i['InstanceId']:i for i in g['Instances']} if g else {};ids=set(value['instances'])|{i['InstanceId'] for i in active}|set(members);require(len(ids)<=16 and ORIGINAL not in ids,'observer instance roster invalid')
                 observation={'time':time.time(),'fleet':rows[0],'group':g,'instances':[]}
                 for iid in sorted(ids):
                     reservations=call('ec2','describe-instances','--instance-ids',iid)['Reservations'];require(len(reservations)==1 and reservations[0]['OwnerId']==ACCOUNT and len(reservations[0]['Instances'])==1,'EC2 absence is not termination proof');i=reservations[0]['Instances'][0];require(i['InstanceId']==iid and {t['Key']:t['Value'] for t in i.get('Tags',[])}.get('ScopeId')==scope,'foreign instance')

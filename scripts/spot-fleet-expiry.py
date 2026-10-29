@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Native Spot Fleet expiry for EMPTY-WORKLOAD protected ASG trials only.
 
-ASG Launch is suspended BEFORE any paid request so it cannot create a non-fleet
-replacement escaping Fleet expiry. Fleet target starts0; fixed ValidUntil and
+ASG-born replacements have a fixed native30s ABANDON launch hook BEFORE any
+paid request; the fixed native ASG off request bounds replacement attempts.
+Launch cannot be suspended because the real AttachInstances API rejects that. Fleet target starts0; fixed ValidUntil and
 TerminateInstancesWithExpiration are read back before target1. No guest role,
 keys, userdata, public IPv4, model/config data or larger validation authority.
 Never use this forced disposable deadline on production or accepted user work.
@@ -94,7 +95,7 @@ def validate_zero(state, request, group, actions):
     require(group['AutoScalingGroupName']==state['name'] and group['DesiredCapacity']==0 and not group['Instances']
             and group['MinSize']==0 and group['MaxSize']==1 and group['NewInstancesProtectedFromScaleIn'] is True
             and group['CapacityRebalance'] is False and group.get('DeletionProtection','none')=='none'
-            and {x['ProcessName'] for x in group['SuspendedProcesses']}=={'Launch'}, 'ASG can create an unbounded non-fleet replacement')
+            and not group['SuspendedProcesses'], 'ASG attachment/launch process state changed')
     mixed=group['MixedInstancesPolicy'];require(mixed['LaunchTemplate']['LaunchTemplateSpecification']['LaunchTemplateId']==state['LT']
             and mixed['LaunchTemplate']['LaunchTemplateSpecification']['Version']=='1'
             and mixed['InstancesDistribution']['OnDemandBaseCapacity']==0
@@ -128,7 +129,8 @@ def create(api, state):
     api('autoscaling','create-auto-scaling-group','--auto-scaling-group-name',state['name'],'--min-size','0','--max-size','1','--desired-capacity','0',
         '--vpc-zone-identifier',b.SUBNET,'--new-instances-protected-from-scale-in','--no-capacity-rebalance',
         '--mixed-instances-policy',json.dumps(mixed),'--tags',json.dumps([{**x,'PropagateAtLaunch':True} for x in b.tags(state)]))
-    api('autoscaling','suspend-processes','--auto-scaling-group-name',state['name'],'--scaling-processes','Launch')
+    api('autoscaling','put-lifecycle-hook','--auto-scaling-group-name',state['name'],'--lifecycle-hook-name',state['name']+'-discard-new',
+        '--lifecycle-transition','autoscaling:EC2_INSTANCE_LAUNCHING','--heartbeat-timeout','30','--default-result','ABANDON')
     api('autoscaling','put-scheduled-update-group-action','--auto-scaling-group-name',state['name'],'--scheduled-action-name',state['name']+'-off',
         '--start-time',state['off_at'],'--min-size','0','--max-size','0','--desired-capacity','0')
     # No paid capacity yet. A fleet-role propagation error here is safe but not
@@ -150,6 +152,7 @@ def zero_readback(api,state):
     group=api('autoscaling','describe-auto-scaling-groups','--auto-scaling-group-names',state['name'])['AutoScalingGroups']
     actions=api('autoscaling','describe-scheduled-actions','--auto-scaling-group-name',state['name'])['ScheduledUpdateGroupActions']
     require(len(request)==len(group)==1,'containment observation unknown');validate_zero(state,request[0],group[0],actions)
+    hooks=api('autoscaling','describe-lifecycle-hooks','--auto-scaling-group-name',state['name'])['LifecycleHooks'];validate_launch_guard(state,hooks)
     require(api('iam','get-role-policy','--role-name',state['role'],'--policy-name','OnlyThisFleetTaggedInstances')['PolicyDocument']==fleet_policy(state),'Fleet cleanup policy changed')
     template=api('ec2','describe-launch-template-versions','--launch-template-id',state['LT'],'--versions','1')['LaunchTemplateVersions']
     require(len(template)==1 and template[0]['LaunchTemplateData']==b.launch_data(state),'fixed guest/root/network differs')
@@ -182,6 +185,14 @@ def activate(api,state):
     api('autoscaling','set-instance-protection','--auto-scaling-group-name',state['name'],'--instance-ids',iid,'--protected-from-scale-in')
     state.update(instance=iid,root_volume=instance['BlockDeviceMappings'][0]['Ebs']['VolumeId'])
     return {'state':state,'capacity_requested':True,'attach_and_protection_requests_are_observations_not_proof':True,'expiry_success':False,'goal_complete':False}
+
+
+def validate_launch_guard(state,hooks):
+    require(len(hooks)==1 and hooks[0]['LifecycleHookName']==state['name']+'-discard-new'
+            and hooks[0]['LifecycleTransition']=='autoscaling:EC2_INSTANCE_LAUNCHING'
+            and hooks[0]['HeartbeatTimeout']==30 and hooks[0]['DefaultResult']=='ABANDON'
+            and not hooks[0].get('NotificationTargetARN') and not hooks[0].get('RoleARN'),
+            'native bounded ABANDON guard for non-fleet ASG launches missing')
 
 
 def simulate_termination_authority(api,state):
