@@ -69,7 +69,29 @@ def capture_complete(value):
             and value.get('after_native_expiry') is True)
 
 
-def observe(scope,fid,expires,directory,group):
+def subject(scope,purpose):
+    require(purpose in {'empty','recovery'},'unknown observer purpose; no broader authority')
+    return ('nixos-fleet-expiry-' if purpose=='empty' else 'nixos-spot-proof-')+scope
+
+
+def live_identity(scope,i,purpose):
+    name=subject(scope,purpose);devices=i['BlockDeviceMappings']
+    require(i['InstanceLifecycle']=='spot' and not i.get('KeyName'),'not disposable Spot')
+    roots=[d for d in devices if d['DeviceName']=='/dev/xvda'];require(len(roots)==1 and roots[0]['Ebs']['DeleteOnTermination'] is True,'disposable root unknown')
+    protected={'vol-065729ef75553a7ec','vol-09fea2ff4615b1088','vol-0b529abe51df1eca1'}
+    require(not any(d['Ebs']['VolumeId'] in protected for d in devices),'retained storage forbidden')
+    if purpose=='empty':require(not i.get('PublicIpAddress') and not i.get('IamInstanceProfile') and len(devices)==1,'not contained empty guest')
+    else:
+        require(i['ImageId']=='ami-0d44956a8229b0dad' and i.get('PublicIpAddress') and i.get('IamInstanceProfile',{}).get('Arn')=='arn:aws:iam::'+ACCOUNT+':instance-profile/'+name and len(devices) in {1,2},'not scoped recovery guest')
+        for device in devices:
+            volume=call('ec2','describe-volumes','--volume-ids',device['Ebs']['VolumeId'])['Volumes'];require(len(volume)==1 and volume[0]['Encrypted'] is True,'recovery volume encryption unknown')
+            root=device is roots[0];tags={t['Key']:t['Value'] for t in volume[0].get('Tags',[])}
+            require(volume[0]['Size']==(32 if root else 16) and tags.get('ScopeId')==scope and tags.get('ManagedBy')=='nixos-spot-validation'
+                    and (root or (device['Ebs']['DeleteOnTermination'] is False and tags.get('Purpose')=='recovery-home')),'foreign/unknown recovery storage')
+    return roots[0]['Ebs']['VolumeId']
+
+
+def observe(scope,fid,expires,directory,group,purpose='empty'):
     require(not directory.exists(),'observation destination exists');directory.mkdir(mode=0o700)
     value={'scope':scope,'FleetId':fid,'expires':expires,'instances':{},'seen_protected_running':False,
            'seen_zero_requested_but_protected_running':False,'capture_complete':False,'native_cause_verified':False,
@@ -81,8 +103,8 @@ def observe(scope,fid,expires,directory,group):
         while time.time()<deadline:
             try:
                 rows=call('ec2','describe-spot-fleet-requests','--spot-fleet-request-ids',fid)['SpotFleetRequestConfigs'];require(len(rows)==1 and rows[0]['SpotFleetRequestId']==fid,'unknown Fleet')
-                c=rows[0]['SpotFleetRequestConfig'];require(c['TerminateInstancesWithExpiration'] is True and datetime.fromisoformat(c['ValidUntil']).timestamp()==expires and c.get('OnDemandTargetCapacity',0)==0 and c['IamFleetRole']=='arn:aws:iam::'+ACCOUNT+':role/nixos-fleet-expiry-'+scope+'-fleet','native expiry was changed')
-                value['last_fleet_state']=rows[0]['SpotFleetRequestState'];active=call('ec2','describe-spot-fleet-instances','--spot-fleet-request-id',fid)['ActiveInstances'];groups=call('autoscaling','describe-auto-scaling-groups','--auto-scaling-group-names','nixos-fleet-expiry-'+scope)['AutoScalingGroups'];require(len(groups)<=1,'unknown group roster');g=groups[0] if groups else None
+                c=rows[0]['SpotFleetRequestConfig'];require(c['TerminateInstancesWithExpiration'] is True and datetime.fromisoformat(c['ValidUntil']).timestamp()==expires and c.get('OnDemandTargetCapacity',0)==0 and c['IamFleetRole']=='arn:aws:iam::'+ACCOUNT+':role/'+subject(scope,purpose)+'-fleet','native expiry was changed')
+                value['last_fleet_state']=rows[0]['SpotFleetRequestState'];active=call('ec2','describe-spot-fleet-instances','--spot-fleet-request-id',fid)['ActiveInstances'];groups=call('autoscaling','describe-auto-scaling-groups','--auto-scaling-group-names',subject(scope,purpose))['AutoScalingGroups'];require(len(groups)<=1,'unknown group roster');g=groups[0] if groups else None
                 if g:
                     require(not g['SuspendedProcesses'],'ASG process state changed');hooks=call('autoscaling','describe-lifecycle-hooks','--auto-scaling-group-name',g['AutoScalingGroupName'])['LifecycleHooks'];require(len(hooks)==1 and hooks[0]['HeartbeatTimeout']==30 and hooks[0]['DefaultResult']=='ABANDON' and hooks[0]['LifecycleTransition']=='autoscaling:EC2_INSTANCE_LAUNCHING' and not hooks[0].get('NotificationTargetARN'),'native replacement ABANDON containment lost')
                 members={i['InstanceId']:i for i in g['Instances']} if g else {};ids=set(value['instances'])|{i['InstanceId'] for i in active}|set(members);require(len(ids)<=16 and ORIGINAL not in ids,'observer instance roster invalid')
@@ -91,8 +113,7 @@ def observe(scope,fid,expires,directory,group):
                     reservations=call('ec2','describe-instances','--instance-ids',iid)['Reservations'];require(len(reservations)==1 and reservations[0]['OwnerId']==ACCOUNT and len(reservations[0]['Instances'])==1,'EC2 absence is not termination proof');i=reservations[0]['Instances'][0];require(i['InstanceId']==iid and {t['Key']:t['Value'] for t in i.get('Tags',[])}.get('ScopeId')==scope,'foreign instance')
                     record=value['instances'].setdefault(iid,{});record['state']=i['State']['Name'];record.setdefault('first_observed_'+record['state'],time.time());observation['instances'].append(i)
                     if i['State']['Name'] in {'running','pending'}:
-                        require(i['InstanceLifecycle']=='spot' and not i.get('PublicIpAddress') and not i.get('IamInstanceProfile') and len(i['BlockDeviceMappings'])==1 and i['BlockDeviceMappings'][0]['Ebs']['DeleteOnTermination'] is True,'not contained empty guest')
-                        record['root_volume']=i['BlockDeviceMappings'][0]['Ebs']['VolumeId']
+                        record['root_volume']=live_identity(scope,i,purpose)
                     member=members.get(iid)
                     if member and member.get('ProtectedFromScaleIn') is True and member['LifecycleState']=='InService' and record['state']=='running':
                         value['seen_protected_running']=True;record['seen_protected_running']=True;record['last_protected_running_observed']=time.time()
@@ -108,14 +129,14 @@ def observe(scope,fid,expires,directory,group):
                 value['errors'].append({'time':time.time(),'type':type(error).__name__,'message':str(error)});publish(directory/'result.json',value)
             time.sleep(10)
     try:
-        history=call('ec2','describe-spot-fleet-request-history','--spot-fleet-request-id',fid,'--start-time',datetime.fromtimestamp(expires-720,timezone.utc).isoformat());publish(directory/'native-history.json',history)
+        history=call('ec2','describe-spot-fleet-request-history','--spot-fleet-request-id',fid,'--start-time',datetime.fromtimestamp(expires-(720 if purpose=='empty' else 6600),timezone.utc).isoformat());publish(directory/'native-history.json',history)
     except Exception as error:value['errors'].append({'type':type(error).__name__,'message':str(error)})
     value['memory_peak']=(group/'memory.peak').read_text();value['memory_events']=(group/'memory.events').read_text();publish(directory/'result.json',value);print(json.dumps(value),flush=True)
 
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--scope',required=True);p.add_argument('--fleet-id',required=True);p.add_argument('--expires',required=True);p.add_argument('--expected-sha256',required=True);a=p.parse_args()
-    require(os.geteuid()==0 and re.fullmatch('[0-9a-f]{12}',a.scope) and re.fullmatch('sfr-[0-9a-f-]{36}',a.fleet_id),'observer scope invalid');require(hashlib.sha256(Path(__file__).read_bytes()).hexdigest()==a.expected_sha256,'executed observer source differs');expiry=datetime.fromisoformat(a.expires).timestamp();require(0<expiry-time.time()<=720,'observer native lifetime invalid');identity();g=budget(a.scope);observe(a.scope,a.fleet_id,expiry,Path('/home/persist/root')/('fleet-expiry-proof-'+a.scope),g)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--scope',required=True);p.add_argument('--fleet-id',required=True);p.add_argument('--expires',required=True);p.add_argument('--expected-sha256',required=True);p.add_argument('--purpose',choices=['empty','recovery'],default='empty');a=p.parse_args()
+    require(os.geteuid()==0 and re.fullmatch('[0-9a-f]{12}',a.scope) and re.fullmatch('sfr-[0-9a-f-]{36}',a.fleet_id),'observer scope invalid');require(hashlib.sha256(Path(__file__).read_bytes()).hexdigest()==a.expected_sha256,'executed observer source differs');expiry=datetime.fromisoformat(a.expires).timestamp();require(0<expiry-time.time()<=(720 if a.purpose=='empty' else 6600),'observer native lifetime invalid');identity();g=budget(a.scope);observe(a.scope,a.fleet_id,expiry,Path('/home/persist/root')/('fleet-expiry-proof-'+a.scope),g,a.purpose)
 
 
 if __name__=='__main__':main()

@@ -95,7 +95,7 @@ def save(api,state,stage):
     print(json.dumps({'scope':state['scope'],'stage':stage,'capacity_request_is_build_or_test_success':False}),flush=True)
 
 
-def create(api,state):
+def create(api,state,activate=True):
     api.account();name=state['name'];bucket=state['bucket']
     # An existing group or role is not ours to overwrite/retry blindly.
     if api('autoscaling','describe-auto-scaling-groups','--auto-scaling-group-names',name)['AutoScalingGroups']:
@@ -160,6 +160,9 @@ def create(api,state):
     # A slow setup cannot turn a bounded launch into an expired/unbounded one.
     if not 300<(datetime.fromisoformat(state['expires'])-datetime.now(timezone.utc)).total_seconds()<=7200:
         raise RuntimeError('insufficient remaining native expiry; no capacity requested')
+    if not activate:
+        save(api,state,'native-zero-ready-no-capacity-requested')
+        return state
     api('autoscaling','set-desired-capacity','--auto-scaling-group-name',name,'--desired-capacity','1')
     save(api,state,'capacity-requested-not-build-success')
     return state

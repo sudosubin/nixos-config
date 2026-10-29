@@ -27,6 +27,26 @@ class ObserverTests(unittest.TestCase):
         v=complete();v['last_fleet_state']='active';self.assertFalse(m.capture_complete(v))
     def test_all_seen_instances_are_required_not_just_latest(self):
         v=complete();v['instances']['i-other']={'state':'running'};self.assertFalse(m.capture_complete(v))
+    def recovery(self):
+        scope='a'*12;name=m.subject(scope,'recovery');root='vol-'+'b'*17;home='vol-'+'c'*17
+        instance={'InstanceLifecycle':'spot','ImageId':'ami-0d44956a8229b0dad','PublicIpAddress':'192.0.2.1','IamInstanceProfile':{'Arn':'arn:aws:iam::'+m.ACCOUNT+':instance-profile/'+name},'BlockDeviceMappings':[{'DeviceName':'/dev/xvda','Ebs':{'VolumeId':root,'DeleteOnTermination':True}}]}
+        def volume(size,purpose):return {'Volumes':[{'Size':size,'Encrypted':True,'Tags':[{'Key':'ScopeId','Value':scope},{'Key':'ManagedBy','Value':'nixos-spot-validation'},{'Key':'Purpose','Value':purpose}]}]}
+        return scope,instance,home,volume
+    def test_recovery_is_metadata_only_exact_profile_image_and_single_root(self):
+        scope,i,home,volume=self.recovery()
+        with patch.object(m,'call',return_value=volume(32,'artifact-test')):self.assertEqual(m.live_identity(scope,i,'recovery'),i['BlockDeviceMappings'][0]['Ebs']['VolumeId'])
+        i['IamInstanceProfile']['Arn']='arn:aws:iam::'+m.ACCOUNT+':instance-profile/nixos-ec2-ssm-profile'
+        with self.assertRaises(RuntimeError):m.live_identity(scope,i,'recovery')
+    def test_recovery_may_observe_only_its_owned_encrypted16GiB_test_home(self):
+        scope,i,home,volume=self.recovery();i['BlockDeviceMappings'].append({'DeviceName':'/dev/sdf','Ebs':{'VolumeId':home,'DeleteOnTermination':False}})
+        with patch.object(m,'call',side_effect=[volume(32,'artifact-test'),volume(16,'recovery-home')]):m.live_identity(scope,i,'recovery')
+        bad=volume(16,'daily-home')
+        with patch.object(m,'call',side_effect=[volume(32,'artifact-test'),bad]),self.assertRaises(RuntimeError):m.live_identity(scope,i,'recovery')
+    def test_retained_storage_or_unknown_purpose_never_obtains_observation_approval(self):
+        scope,i,home,volume=self.recovery();i['BlockDeviceMappings'][0]['Ebs']['VolumeId']='vol-09fea2ff4615b1088'
+        with self.assertRaises(RuntimeError):m.live_identity(scope,i,'recovery')
+        with self.assertRaises(RuntimeError):m.subject(scope,'general-networked-validation')
+
     def test_cloud_mutation_or_other_observation_API_never_spawns(self):
         for pair in [('ec2','terminate-instances'),('autoscaling','set-instance-protection'),('ssm','send-command'),('s3api','put-object')]:
             with self.subTest(pair=pair),patch.object(m.subprocess,'run') as run,self.assertRaises(RuntimeError):m.call(*pair)

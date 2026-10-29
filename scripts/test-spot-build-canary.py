@@ -76,6 +76,11 @@ class ProvisionTests(unittest.TestCase):
         self.assertTrue(any(e[:2]==('autoscaling','describe-scheduled-actions') for e in events[:request]))
         self.assertTrue(any(e[:2]==('upload','control/infra-ledger-current.json') and e[2]['stage']=='native-expiry-readback-and-scoped-artifact-access-installed' for e in events[:request]))
 
+    def test_zero_only_preparation_never_calls_either_capacity_API(self):
+        result=c.create(self.api,self.state,activate=False)
+        self.assertFalse(self.requested());self.assertEqual(result['stage'],'native-zero-ready-no-capacity-requested')
+        self.assertFalse(any(e[:2]==('ec2','modify-spot-fleet-request') for e in self.api.events))
+
     def test_existing_scope_is_not_recreated(self):self.rejected('existing')
     def test_unknown_production_IAM_change_is_not_overwritten(self):self.rejected('baseline')
     def test_unavailable_image_is_not_replaced_with_another_image(self):self.rejected('image')

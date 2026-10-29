@@ -1,0 +1,264 @@
+{
+  "state": {
+    "schema": 1,
+    "scope": "a6401bc9d875",
+    "name": "nixos-fleet-expiry-a6401bc9d875",
+    "role": "nixos-fleet-expiry-a6401bc9d875-fleet",
+    "mode": "empty",
+    "account": "537112465379",
+    "region": "ap-northeast-2",
+    "image": "ami-01262e2ae8cf75bdd",
+    "source_revision": "8fc2b4501df3804036b69644620a7b95774824e6",
+    "created": "2026-10-29T02:25:57.931849+00:00",
+    "off_at": "2026-10-29T02:29:57+00:00",
+    "wait_seconds": 90,
+    "stack_timeout_minutes": 5,
+    "capacity_initial": 0,
+    "capacity_after_containment": 1,
+    "instance_type": "t4g.small",
+    "spot_hourly_ceiling": "0.010",
+    "production_rollout": false,
+    "goal_complete": false,
+    "expires": "2026-10-29T02:37:57+00:00",
+    "purpose": "empty-workload native protected expiry",
+    "LT": "lt-0798b10d2a979fc6d",
+    "FleetId": "sfr-c137961d-0d7f-442a-a0ea-925c7b0f4f7d"
+  },
+  "request": {
+    "CreateTime": "2026-10-29T02:26:18.326000+00:00",
+    "SpotFleetRequestConfig": {
+      "AllocationStrategy": "lowestPrice",
+      "OnDemandAllocationStrategy": "lowestPrice",
+      "ClientToken": "nixos-fleet-expiry-a6401bc9d875",
+      "ExcessCapacityTerminationPolicy": "NoTermination",
+      "FulfilledCapacity": 0.0,
+      "OnDemandFulfilledCapacity": 0.0,
+      "IamFleetRole": "arn:aws:iam::537112465379:role/nixos-fleet-expiry-a6401bc9d875-fleet",
+      "LaunchTemplateConfigs": [
+        {
+          "LaunchTemplateSpecification": {
+            "LaunchTemplateId": "lt-0798b10d2a979fc6d",
+            "Version": "1"
+          },
+          "Overrides": [
+            {
+              "InstanceType": "t4g.small",
+              "SubnetId": "subnet-0500a35263dc62859"
+            }
+          ]
+        }
+      ],
+      "SpotPrice": "0.01",
+      "TargetCapacity": 1,
+      "OnDemandTargetCapacity": 0,
+      "SpotMaxTotalPrice": "0.01",
+      "TerminateInstancesWithExpiration": true,
+      "Type": "maintain",
+      "ValidUntil": "2026-10-29T02:37:57+00:00",
+      "ReplaceUnhealthyInstances": false,
+      "InstanceInterruptionBehavior": "terminate",
+      "InstancePoolsToUseCount": 1
+    },
+    "SpotFleetRequestId": "sfr-c137961d-0d7f-442a-a0ea-925c7b0f4f7d",
+    "SpotFleetRequestState": "cancelled_terminating",
+    "Tags": [
+      {
+        "Key": "Disposable",
+        "Value": "true"
+      },
+      {
+        "Key": "Purpose",
+        "Value": "native-protected-expiry"
+      },
+      {
+        "Key": "ScopeId",
+        "Value": "a6401bc9d875"
+      },
+      {
+        "Key": "ManagedBy",
+        "Value": "nixos-spot-validation"
+      }
+    ]
+  },
+  "history": {
+    "HistoryRecords": [
+      {
+        "EventInformation": {
+          "EventSubType": "submitted"
+        },
+        "EventType": "fleetRequestChange",
+        "Timestamp": "2026-10-29T02:26:18+00:00"
+      },
+      {
+        "EventInformation": {
+          "EventSubType": "active"
+        },
+        "EventType": "fleetRequestChange",
+        "Timestamp": "2026-10-29T02:26:28+00:00"
+      },
+      {
+        "EventInformation": {
+          "EventDescription": "Modify request received. Requested targetCapacity: 1, excessCapacityTerminationPolicy: NoTermination",
+          "EventSubType": "modify_in_progress"
+        },
+        "EventType": "fleetRequestChange",
+        "Timestamp": "2026-10-29T02:27:29+00:00"
+      },
+      {
+        "EventInformation": {
+          "EventDescription": "New targetCapacity: 1, excessCapacityTerminationPolicy: NoTermination",
+          "EventSubType": "modify_succeeded"
+        },
+        "EventType": "fleetRequestChange",
+        "Timestamp": "2026-10-29T02:28:28+00:00"
+      },
+      {
+        "EventInformation": {
+          "EventDescription": "t4g.small, ami-01262e2ae8cf75bdd, Linux/UNIX, ap-northeast-2d, apne2-az4, capacityUnitsRequested: 1.0, totalCapacityUnitsRequested: 1.0, totalCapacityUnitsFulfilled: 1.0, targetCapacity: 0, detail: Fleet overprovisioned to meet target capacity. Target capacity is not divisible by weighted capacity of launch specification selected.",
+          "EventSubType": "progress"
+        },
+        "EventType": "fleetRequestChange",
+        "Timestamp": "2026-10-29T02:28:30+00:00"
+      },
+      {
+        "EventInformation": {
+          "EventDescription": "{\"instanceType\":\"t4g.small\",\"image\":\"ami-01262e2ae8cf75bdd\",\"productDescription\":\"Linux/UNIX\",\"availabilityZone\":\"ap-northeast-2d\",\"availabilityZoneId\":\"apne2-az4\"}",
+          "EventSubType": "launched",
+          "InstanceId": "i-050ed9af0e6e8fd3f"
+        },
+        "EventType": "instanceChange",
+        "Timestamp": "2026-10-29T02:28:30+00:00"
+      },
+      {
+        "EventInformation": {
+          "EventSubType": "cancelled_terminating"
+        },
+        "EventType": "fleetRequestChange",
+        "Timestamp": "2026-10-29T02:37:57+00:00"
+      },
+      {
+        "EventInformation": {
+          "EventDescription": "BidId sir-6evzgpfp, PreviousState: cancelled",
+          "EventSubType": "cancelled"
+        },
+        "EventType": "spotInstanceRequestChange",
+        "Timestamp": "2026-10-29T02:38:02+00:00"
+      },
+      {
+        "EventInformation": {
+          "EventDescription": "{\"instanceType\":\"t4g.small\",\"image\":\"ami-01262e2ae8cf75bdd\",\"productDescription\":\"Linux/UNIX\",\"availabilityZone\":\"ap-northeast-2d\",\"availabilityZoneId\":\"apne2-az4\"}",
+          "EventSubType": "terminated",
+          "InstanceId": "i-050ed9af0e6e8fd3f"
+        },
+        "EventType": "instanceChange",
+        "Timestamp": "2026-10-29T02:39:18+00:00"
+      },
+      {
+        "EventInformation": {
+          "EventDescription": "BidId sir-6evzgpfp, PreviousState: cancelled",
+          "EventSubType": "cancelled"
+        },
+        "EventType": "spotInstanceRequestChange",
+        "Timestamp": "2026-10-29T02:39:18+00:00"
+      }
+    ],
+    "LastEvaluatedTime": "2026-10-29T02:41:41+00:00",
+    "SpotFleetRequestId": "sfr-c137961d-0d7f-442a-a0ea-925c7b0f4f7d",
+    "StartTime": "2026-10-29T02:25:57+00:00"
+  },
+  "capture": {
+    "scope": "a6401bc9d875",
+    "FleetId": "sfr-c137961d-0d7f-442a-a0ea-925c7b0f4f7d",
+    "expires": 1793241477.0,
+    "instances": {
+      "i-050ed9af0e6e8fd3f": {
+        "state": "terminated",
+        "first_observed_running": 1793240928.0309007,
+        "root_volume": "vol-021bef1bf3380f380",
+        "seen_protected_running": true,
+        "last_protected_running_observed": 1793241481.5647461,
+        "seen_zero_requested_but_protected_running": true,
+        "first_observed_shutting-down": 1793241497.430804,
+        "first_observed_terminated": 1793241513.2673361,
+        "root_absent": true
+      }
+    },
+    "seen_protected_running": true,
+    "seen_zero_requested_but_protected_running": true,
+    "capture_complete": true,
+    "native_cause_verified": false,
+    "scope_note": "API evidence only; not OS/home/work tracking or production expiry authority",
+    "work_tracking_verified": false,
+    "armed": false,
+    "goal_complete": false,
+    "errors": [],
+    "last_fleet_state": "cancelled_terminating",
+    "after_native_expiry": true,
+    "memory_peak": "94150656\n",
+    "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+  },
+  "termination_events": [
+    {
+      "eventID": "9d488dac-e377-4acf-a12f-0e5bb0e5f21d",
+      "eventTime": "2026-10-29T02:38:22Z",
+      "eventSource": "ec2.amazonaws.com",
+      "eventName": "TerminateInstances",
+      "awsRegion": "ap-northeast-2",
+      "recipientAccountId": "537112465379",
+      "errorCode": null,
+      "requestParameters": {
+        "instancesSet": {
+          "items": [
+            {
+              "instanceId": "i-050ed9af0e6e8fd3f"
+            }
+          ]
+        },
+        "force": false,
+        "skipOsShutdown": false
+      },
+      "userAgent": "autoscaling.amazonaws.com",
+      "userIdentity": {
+        "type": "AssumedRole",
+        "invokedBy": "autoscaling.amazonaws.com",
+        "sessionContext": {
+          "sessionIssuer": {
+            "arn": "arn:aws:iam::537112465379:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+          }
+        }
+      }
+    },
+    {
+      "eventID": "9f07a211-37db-4001-8ccf-6c6662c98bb7",
+      "eventTime": "2026-10-29T02:38:02Z",
+      "eventSource": "ec2.amazonaws.com",
+      "eventName": "TerminateInstances",
+      "awsRegion": "ap-northeast-2",
+      "recipientAccountId": "537112465379",
+      "errorCode": null,
+      "requestParameters": {
+        "instancesSet": {
+          "items": [
+            {
+              "instanceId": "i-050ed9af0e6e8fd3f"
+            }
+          ]
+        },
+        "force": false,
+        "skipOsShutdown": false
+      },
+      "userAgent": "spotfleet.amazonaws.com",
+      "userIdentity": {
+        "type": "AssumedRole",
+        "invokedBy": "spotfleet.amazonaws.com",
+        "sessionContext": {
+          "sessionIssuer": {
+            "arn": "arn:aws:iam::537112465379:role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet"
+          }
+        }
+      }
+    }
+  ],
+  "CloudTrail_no_partial": true,
+  "first_history_query_microseconds_rejected_no_mutation": true
+}
