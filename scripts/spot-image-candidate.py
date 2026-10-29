@@ -73,6 +73,16 @@ def create_root(api,state,run):
     value={'volume':vid,'instance':iid,'stack':stack,'role':plan['role'],'plan':plan,'build_receipt':receipt,'installed_snapshot_or_AMI_verified':False,'goal_complete':False};immutable(api,state,'control/image-root-created.json',value);return value
 
 
+def register_image(api,state,snapshot,system):
+    api.account();created=c.read(api,state,'control/image-root-created.json');capture=c.read(api,state,'control/image-snapshot-created.json');proof=capture['cold_verification'];require(capture['snapshot']==snapshot and capture['volume']==created['volume']==proof['target_volume'] and created['volume'] not in PROTECTED and proof['system']==system and proof['all_NAR_hashes_match'] is True and proof['verified_and_cold_FD_held'] is True and proof['source_closure_paths']>1000,'complete independent cold image authority required')
+    snapshots=api('ec2','describe-snapshots','--snapshot-ids',snapshot)['Snapshots'];require(len(snapshots)==1,'snapshot ambiguous');snap=snapshots[0];tags={r['Key']:r['Value'] for r in snap.get('Tags',[])}
+    require(snap['State']=='completed' and snap['VolumeId']==created['volume'] and snap['OwnerId']==b.ACCOUNT and snap['Encrypted'] is True and snap['VolumeSize']==32 and tags.get('ScopeId')==state['scope'] and tags.get('Purpose')=='image-candidate' and tags.get('Protected')=='true','not the completed own cold encrypted image snapshot')
+    name='nixos-ec2-cloud-20261029-'+state['scope']+'-'+state['source_revision'][:12];mapping=[{'DeviceName':'/dev/xvda','Ebs':{'SnapshotId':snapshot,'VolumeSize':32,'VolumeType':'gp3','DeleteOnTermination':True}}];image_tags=[{'Key':k,'Value':v} for k,v in {'Name':name,'ManagedBy':'nixos-spot-validation','ScopeId':state['scope'],'DeploymentStage':'candidate','SourceRevision':state['source_revision'],'PreparedSystem':system,'ProductionApproved':'false'}.items()]
+    immutable(api,state,'control/image-registration-intent.json',{'name':name,'snapshot':snapshot,'system':system,'mapping':mapping,'image_tags':image_tags,'no_register_replay_on_unknown_response':True})
+    reply=api('ec2','register-image','--name',name,'--architecture','arm64','--virtualization-type','hvm','--ena-support','--boot-mode','uefi','--root-device-name','/dev/xvda','--block-device-mappings',json.dumps(mapping),'--tag-specifications',json.dumps([{'ResourceType':'image','Tags':image_tags}]))
+    value={'image':reply['ImageId'],'snapshot':snapshot,'system':system,'candidate_only_not_boot_or_production_approval':True,'goal_complete':False};immutable(api,state,'control/image-registered-candidate.json',value);return value
+
+
 def lt_candidate(api,state,image,system):
     api.account();rows=api('ec2','describe-images','--image-ids',image)['Images'];require(len(rows)==1,'candidate image ambiguous');im=rows[0];tags={r['Key']:r['Value'] for r in im.get('Tags',[])}
     require(im['OwnerId']==b.ACCOUNT and im['State']=='available' and im['Architecture']=='arm64' and im.get('BootMode')=='uefi' and im['RootDeviceName']=='/dev/xvda' and tags.get('ScopeId')==state['scope'] and tags.get('DeploymentStage')=='candidate' and tags.get('PreparedSystem')==system,'unverified/foreign candidate image')
@@ -88,9 +98,10 @@ def lt_candidate(api,state,image,system):
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('action',choices=['plan','create-root','lt-candidate']);parser.add_argument('--scope',required=True);parser.add_argument('--source-revision',required=True);parser.add_argument('--run');parser.add_argument('--image');parser.add_argument('--system');parser.add_argument('--profile');args=parser.parse_args();os.environ['AWS_MAX_ATTEMPTS']='1';api=b.API(args.profile);state=c.p.read_state(api,b.plan(args.scope,args.source_revision))
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('action',choices=['plan','create-root','register-image','lt-candidate']);parser.add_argument('--scope',required=True);parser.add_argument('--source-revision',required=True);parser.add_argument('--run');parser.add_argument('--image');parser.add_argument('--snapshot');parser.add_argument('--system');parser.add_argument('--profile');args=parser.parse_args();os.environ['AWS_MAX_ATTEMPTS']='1';api=b.API(args.profile);state=c.p.read_state(api,b.plan(args.scope,args.source_revision))
     if args.action=='plan':result=root_plan(state)
     elif args.action=='create-root':require(args.run is not None,'retained run required');result=create_root(api,state,args.run)
+    elif args.action=='register-image':require(args.snapshot and args.system,'completed cold snapshot/system required');result=register_image(api,state,args.snapshot,args.system)
     else:require(args.image and args.system,'verified candidate image/system required');result=lt_candidate(api,state,args.image,args.system)
     print(json.dumps(result,indent=2))
 

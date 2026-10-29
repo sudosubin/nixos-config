@@ -37,6 +37,14 @@ class CandidateTests(unittest.TestCase):
         api=Mock(side_effect=RuntimeError('lost PUT'))
         with self.assertRaises(RuntimeError):p.immutable(api,state(),'control/exact',{'goal_complete':False})
         self.assertEqual(api.call_count,1);self.assertIn('--if-none-match',api.call_args.args)
+    def test_unknown_cold_capture_never_registers_AMI(self):
+        api=Mock()
+        with patch.object(p.c,'read',side_effect=RuntimeError('missing capture')),self.assertRaises(RuntimeError):p.register_image(api,state(),'snap-'+'b'*17,'/nix/store/system')
+        api.assert_not_called()
+    def test_register_requires_matching_actual_cold_target_and_all_hashes(self):
+        api=Mock();created={'volume':'vol-'+'c'*17};capture={'snapshot':'snap-'+'b'*17,'volume':created['volume'],'cold_verification':{'target_volume':created['volume'],'system':'wrong-system','all_NAR_hashes_match':False}}
+        with patch.object(p.c,'read',side_effect=[created,capture]),self.assertRaises(RuntimeError):p.register_image(api,state(),capture['snapshot'],'expected-system')
+        api.assert_not_called()
     def test_candidate_writer_never_changes_default_ASG_or_releases_protection(self):
         text=Path(p.__file__).read_text()
         for action in ['update-auto-scaling-group','set-desired-capacity','modify-launch-template','set-instance-protection','--force-detach','--force-delete']:self.assertNotIn(action,text)
