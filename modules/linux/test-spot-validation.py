@@ -134,7 +134,7 @@ class ValidationBudgetTests(unittest.TestCase):
                 with self.assertRaisesRegex(validation.Unsafe,'fresh validation output'):validation.launch(['not-started'],p)
             run.assert_not_called();self.assertEqual(p.read_text(),'prior-proof')
 
-    def test_launch_acknowledgement_is_not_execution_or_success(self):
+    def test_launch_never_reloads_and_acknowledgement_is_not_execution_or_success(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);runtime=root/'runtime';units=root/'units';units.mkdir()
             real_lstat=Path.lstat
@@ -155,6 +155,8 @@ class ValidationBudgetTests(unittest.TestCase):
             self.assertEqual((runtime/receipt['run_id']/'ready').read_text(),receipt['run_id'])
             self.assertTrue(receipt['verification_started']);self.assertFalse(receipt['all_passed'])
             self.assertFalse(receipt['launch_receipt_is_test_success']);self.assertFalse(receipt['production_rollout'])
+            self.assertTrue(all(call.args[0][0]=='systemd-run' for call in run.call_args_list))
+            self.assertFalse(any('daemon-reload' in call.args[0] for call in run.call_args_list))
             argv=run.call_args.args[0];self.assertIn('--property=PrivateNetwork=yes',argv)
             self.assertIn('--property=OOMScoreAdjust=1000',argv);self.assertIn('--collect',argv)
             self.assertFalse((root/'result.json').exists())

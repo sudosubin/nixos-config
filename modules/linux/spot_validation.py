@@ -297,7 +297,9 @@ def launch(argv,output,purpose='verify'):
     if disposable is not None:owner['disposable']=disposable
     write_new(folder/'owner.json',json.dumps(owner,sort_keys=True).encode())
     log=output.parent/(output.stem+'-'+ident+'.log');write_new(log,b'')
-    subprocess.run(['systemctl','daemon-reload'],check=True,capture_output=True,text=True)
+    # This never-used UUID unit is loaded on demand by systemd-run. A global
+    # daemon-reload can reset manually initialized OOM fences in OTHER active
+    # validation slices; neither launch nor cleanup may issue it.
     command=['systemd-run','--unit='+driver,'--slice='+slice_name,'--collect','--property=Type=exec',
              '--property=Nice=19','--property=OOMScoreAdjust=1000','--property=OOMPolicy=stop',
              '--property=NoNewPrivileges=yes','--property=PrivateNetwork='+private_network(purpose),'--property=ProtectControlGroups=yes',
