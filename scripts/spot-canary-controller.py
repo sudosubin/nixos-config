@@ -24,6 +24,19 @@ b=p.b
 require=p.require
 
 
+class OriginalTransportAPI(b.API):
+    """One AWS CLI per128MiB service;256MiB coordinator never contains it."""
+    def __call__(self,service,operation,*args):
+        import uuid
+        require(self.profile is None and ((service=='sts' and operation=='get-caller-identity') or (service=='s3api' and operation in {'head-object','get-object','put-object'})),'original transport is not general AWS authority')
+        aws=['aws',service,operation,*args,'--region',b.REGION,'--output','json']
+        gate="from pathlib import Path;import os,sys\ng=Path('/sys/fs/cgroup')/Path('/proc/self/cgroup').read_text().strip().split('::')[-1].lstrip('/');assert (g/'memory.max').read_text().strip()=='134217728' and (g/'memory.swap.max').read_text().strip()=='0' and (g/'memory.oom.group').read_text().strip()=='1';os.execvp(sys.argv[1],sys.argv[1:])"
+        command=['systemd-run','--quiet','--pipe','--wait','--collect','--unit=spot-original-s3-'+uuid.uuid4().hex,'-p','Type=exec','-p','MemoryMax=128M','-p','MemorySwapMax=0','-p','CPUQuota=10%','-p','OOMPolicy=kill','-p','OOMScoreAdjust=1000','-p','NoNewPrivileges=yes','-p','Nice=19','-p','ProtectControlGroups=yes','-p','RuntimeMaxSec=180','--setenv=PATH=/run/current-system/sw/bin','--setenv=HOME=/var/empty','--setenv=AWS_CONFIG_FILE=/dev/null','--setenv=AWS_SHARED_CREDENTIALS_FILE=/dev/null','--setenv=AWS_MAX_ATTEMPTS=1','--setenv=AWS_EC2_METADATA_DISABLED=false',__import__('sys').executable,'-B','-I','-c',gate,*aws]
+        result=subprocess.run(command,capture_output=True,text=True,timeout=200)
+        if result.returncode:raise RuntimeError('original isolated transport failed: '+service+':'+operation+' '+result.stderr[-1500:])
+        return json.loads(result.stdout) if result.stdout.strip() else {}
+
+
 def original_policy(state):
     arn='arn:aws:s3:::'+state['bucket']
     condition={'DateLessThan':{'aws:CurrentTime':state['permission_expires']},'ArnEquals':{'ec2:SourceInstanceARN':'arn:aws:ec2:'+b.REGION+':'+b.ACCOUNT+':instance/'+b.PRODUCTION}}
@@ -42,10 +55,10 @@ def read(api,state,key):
 
 def transport(scope):
     require(os.geteuid()==0,'original root transport required')
-    expected='/system.slice/spot-autopublish-'+scope+'.service';require(Path('/proc/self/cgroup').read_text().strip()=='0::'+expected,'foreign publishing cgroup')
-    group=Path('/sys/fs/cgroup')/expected.lstrip('/');require((group/'memory.max').read_text().strip()=='134217728' and (group/'memory.swap.max').read_text().strip()=='0','publishing budget missing')
+    expected='/system.slice/spot-autopublish-'+scope+'.service';actual=Path('/proc/self/cgroup').read_text().strip();require(actual in {'0::'+expected,'0::/system.slice/spot-autopublish-recover-'+scope+'.service'},'foreign publishing cgroup')
+    group=Path('/sys/fs/cgroup')/actual.split('::',1)[1].lstrip('/');require((group/'memory.max').read_text().strip()=='268435456' and (group/'memory.swap.max').read_text().strip()=='0','publishing coordinator budget missing')
     require('NoNewPrivs:\t1' in Path('/proc/self/status').read_text() and Path('/proc/self/oom_score_adj').read_text().strip()=='1000','publishing NNP/priority missing')
-    cpu=(group/'cpu.max').read_text().split();require(len(cpu)==2 and all(x.isdecimal() for x in cpu) and 0<int(cpu[0])<=int(cpu[1])//10,'publishing CPU exceeds10pct');(group/'memory.oom.group').write_text('1');return group
+    cpu=(group/'cpu.max').read_text().split();require(len(cpu)==2 and all(x.isdecimal() for x in cpu) and 0<int(cpu[0])<=int(cpu[1])//4,'publishing coordinator CPU exceeds25pct');(group/'memory.oom.group').write_text('1');return group
 
 
 def publish_original(api,state,source,runtime):
@@ -64,8 +77,29 @@ def publish_original(api,state,source,runtime):
     p.upload_new(api,state,'published-control',path);return value
 
 
-def configure(api,state):
-    api.account();published=read(api,state,'artifacts/autobootstrap-published-control')
+def recover_original(api,state,source,runtime):
+    """Resolve ONLY already-committed frozen objects; never repeat a lost PUT."""
+    import uuid
+    s=importlib.util.spec_from_file_location('receiver',Path(__file__).with_name('spot-canary-receive.py'));receiver=importlib.util.module_from_spec(s);s.loader.exec_module(receiver);receiver.identity();group=transport(state['scope']);api.account()
+    folder=Path('/home/persist/root')/('autopublished-'+state['scope']);require(folder.is_dir() and not folder.is_symlink(),'missing frozen publisher custody');recovery=folder/('recovery-'+uuid.uuid4().hex);recovery.mkdir(mode=0o700)
+    artifacts={}
+    for name,path in [('source',folder/'source.tar.gz'),('authority',folder/'authority.json'),('runtime',Path(runtime))]:
+        require(path.is_file(),'frozen source/software missing');digest=p.sha(path);key='artifacts/autobootstrap-'+name;head=api('s3api','head-object','--bucket',state['bucket'],'--key',key,'--checksum-mode','ENABLED')
+        require(head['ContentLength']==path.stat().st_size and head['Metadata']['sha256']==digest,'unknown old PUT; no retry or overwrite')
+        back=recovery/(name+'.body');reply=api('s3api','get-object','--bucket',state['bucket'],'--key',key,'--checksum-mode','ENABLED',str(back));require(back.stat().st_size==path.stat().st_size and p.sha(back)==digest==reply['Metadata']['sha256'],'frozen object body differs');back.unlink();artifacts[name]={'key':key,'bytes':path.stat().st_size,'sha256':digest}
+    require(artifacts['runtime']['sha256']==p.PUBLIC_SHA and artifacts['runtime']['bytes']==p.PUBLIC_BYTES,'not public runtime');require(subprocess.check_output([next(str(x) for x in Path('/nix/store').glob('*-git-*/bin/git') if x.is_file()),'-C',str(source),'rev-parse','HEAD'],text=True).strip()==state['source_revision'],'frozen source revision changed')
+    value={'scope':state['scope'],'revision':state['source_revision'],'source_path':str(Path(source).resolve()),'authority_path':str(folder/'authority.json'),'artifacts':artifacts,'all_bodies_read_back':True,'old_data_PUTs_not_retried':True,'memory_peak':(group/'memory.peak').read_text(),'memory_events':(group/'memory.events').read_text(),'goal_complete':False};path=recovery/'published.json'
+    with path.open('x') as f:json.dump(value,f,indent=2);f.flush();os.fsync(f.fileno())
+    name='published-control-'+uuid.uuid4().hex;value['publication_key']='artifacts/autobootstrap-'+name
+    # A NEW completion record, never an overwrite/retry of an uncertain key.
+    path2=recovery/'publication.json'
+    with path2.open('x') as f:json.dump(value,f,indent=2);f.flush();os.fsync(f.fileno())
+    p.upload_new(api,state,name,path2);return value
+
+
+def configure(api,state,publication_key='artifacts/autobootstrap-published-control'):
+    require(re.fullmatch('artifacts/autobootstrap-published-control(?:-[0-9a-f]{32})?',publication_key),'foreign publication key')
+    api.account();published=read(api,state,publication_key)
     require(published.get('scope')==state['scope'] and published.get('revision')==state['source_revision'] and published.get('all_bodies_read_back') is True,'foreign/unverified publication')
     config={'scope':state['scope'],'bucket':state['bucket'],'revision':state['source_revision'],'expires':state['expires'],'artifacts':published['artifacts']};p.validate_config(config);data=p.user_data(config)
     # Fresh metadata/SHA agreement supplements the ORIGINAL-host complete body
@@ -165,14 +199,14 @@ def activate(api,value):
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('action',choices=['install-publisher-policy','publish','configure','launch-receiver','activate']);parser.add_argument('--scope',required=True);parser.add_argument('--source-revision',required=True);parser.add_argument('--source',type=Path);parser.add_argument('--runtime',type=Path,default=Path('/home/persist/root/disposable-public-runtime-20261028.tar.gz'));parser.add_argument('--profile');args=parser.parse_args();os.environ['AWS_MAX_ATTEMPTS']='1';api=b.API(args.profile);api.account();state=p.read_state(api,b.plan(args.scope,args.source_revision))
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('action',choices=['install-publisher-policy','publish','recover-publication','configure','launch-receiver','activate']);parser.add_argument('--scope',required=True);parser.add_argument('--source-revision',required=True);parser.add_argument('--source',type=Path);parser.add_argument('--runtime',type=Path,default=Path('/home/persist/root/disposable-public-runtime-20261028.tar.gz'));parser.add_argument('--profile');parser.add_argument('--publication-key',default='artifacts/autobootstrap-published-control');args=parser.parse_args();os.environ['AWS_MAX_ATTEMPTS']='1';api=OriginalTransportAPI(args.profile) if args.action in {'publish','recover-publication'} else b.API(args.profile);api.account();state=p.read_state(api,b.plan(args.scope,args.source_revision))
     if args.action=='install-publisher-policy':
         require(api('iam','get-role-policy','--role-name','nixos-ec2-ssm-role','--policy-name',state['primary_policy_name'])['PolicyDocument']==b.primary_policy(state),'foreign original temporary policy')
         api('iam','put-role-policy','--role-name','nixos-ec2-ssm-role','--policy-name',state['primary_policy_name'],'--policy-document',json.dumps(original_policy(state)));result={'installed_scoped_original_policy':True,'capacity_requested':False}
-    elif args.action=='publish':
+    elif args.action in {'publish','recover-publication'}:
         require(args.source is not None and args.profile is None,'original cloud role and source required; no operator profile')
-        result=publish_original(api,state,args.source,args.runtime)
-    elif args.action=='configure':result=configure(api,state)
+        result=(publish_original if args.action=='publish' else recover_original)(api,state,args.source,args.runtime)
+    elif args.action=='configure':result=configure(api,state,args.publication_key)
     else:
         value=read(api,state,'artifacts/autobootstrap-prepared-control');result=launch_receiver(api,value) if args.action=='launch-receiver' else activate(api,value)
     print(json.dumps(result,indent=2))

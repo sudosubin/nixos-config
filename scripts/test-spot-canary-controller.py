@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import Mock,patch
 
 
@@ -74,6 +75,24 @@ class ControllerTests(unittest.TestCase):
         for name in ['source_path','authority_path']:
             v=value();v['publication'][name]='/tmp/untrusted'
             with self.assertRaises(RuntimeError):c.admission_code(v)
+
+    def test_original_network_transport_cannot_be_general_AWS_authority(self):
+        api=c.OriginalTransportAPI(None)
+        with patch.object(c.subprocess,'run') as run,self.assertRaises(RuntimeError):api('ec2','terminate-instances')
+        run.assert_not_called()
+        with patch.object(c.subprocess,'run') as run,self.assertRaises(RuntimeError):c.OriginalTransportAPI('operator')('s3api','get-object')
+        run.assert_not_called()
+
+    def test_network_process_has_own128MiB_not_publisher_parent_budget(self):
+        with patch.object(c.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout='{}',stderr='')) as run:c.OriginalTransportAPI(None)('s3api','head-object','--bucket','owned','--key','public')
+        args=run.call_args.args[0]
+        for value in ['MemoryMax=128M','MemorySwapMax=0','CPUQuota=10%','OOMPolicy=kill','ProtectControlGroups=yes']:self.assertIn(value,args)
+        self.assertTrue(any('os.execvp' in x for x in args));self.assertNotIn('MemoryMax=256M',args)
+
+    def test_foreign_publication_key_refuses_before_any_API(self):
+        api=Mock()
+        with self.assertRaises(RuntimeError):c.configure(api,value()['state'],'other-bucket-key')
+        api.assert_not_called()
 
     def test_original_diagnostic_is_bounded_private_not_global_reload(self):
         script=c.shell("print('{}')")
