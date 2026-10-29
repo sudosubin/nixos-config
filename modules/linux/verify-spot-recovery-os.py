@@ -96,7 +96,7 @@ def observe(plan,cfg,folder,boot):
     while time.monotonic()-start<600:
         try:
             units={u:dict(line.split('=',1) for line in command(['systemctl','show',u+'.service','-p','LoadState','-p','ActiveState','-p','SubState','-p','MainPID','-p','Result','-p','ExecMainStatus']).splitlines()) for u in UNITS}
-            require(all(v['LoadState']=='loaded' for v in units.values()),'required unit not loaded');startup=trusted('/run/spot-work/startup');require(startup['boot_id']==boot,'startup epoch differs')
+            require(all(v['LoadState']=='loaded' for v in units.values()),'required unit not loaded');startup=trusted('/run/spot-schedule-guard/startup');require(startup['boot_id']==boot,'startup epoch differs')
             mounted=subprocess.run(['findmnt','-n','-o','UUID','--mountpoint','/home'],capture_output=True,text=True,timeout=10);require(mounted.returncode in {0,1},'mount state unknown')
             groups=api('autoscaling','describe-auto-scaling-groups','--auto-scaling-group-names','nixos-spot-proof-'+cfg['scope'])['AutoScalingGroups'];require(len(groups)==1 and groups[0]['AutoScalingGroupARN']==plan['asg_arn'],'ASG identity differs');members=[m for m in groups[0]['Instances'] if m['InstanceId']==plan['instance']];require(len(members)==1,'member ambiguous')
             volume=api('ec2','describe-volumes','--volume-ids',cfg['homeVolume'])['Volumes'];require(len(volume)==1 and volume[0]['Encrypted'] is True and volume[0]['Size']==16,'fixture volume unknown');attachments=volume[0]['Attachments'];require(len(attachments)<=1,'ambiguous fixture attachment')

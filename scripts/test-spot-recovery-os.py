@@ -32,6 +32,11 @@ class Predicates(unittest.TestCase):
     def test_unknown_or_empty_observation_does_not_complete(self):
         for case in ['positive','wrong','delayed','unknown']:self.assertFalse(p.complete(case,[],999))
         self.assertFalse(p.ready({}));self.assertFalse(p.closed({}))
+    def test_observer_reads_the_real_protocol_startup_location(self):
+        import inspect
+        protocol=Path(__file__).parents[1]/'modules/linux/spot_work.py';spec=importlib.util.spec_from_file_location('real_work',protocol);work=importlib.util.module_from_spec(spec);spec.loader.exec_module(work)
+        text=inspect.getsource(p.observe);self.assertIn(str(work.RUNTIME/'startup'),text);self.assertNotIn("trusted('/run/spot-work/startup')",text)
+
     def test_storage_or_service_mutations_never_spawn(self):
         for action in [('ec2','attach-volume'),('ec2','terminate-instances'),('autoscaling','set-instance-protection'),('ssm','send-command')]:
             with patch.object(p.subprocess,'run') as run,self.assertRaises(RuntimeError):p.api(*action)
