@@ -66,8 +66,21 @@ class FleetTests(unittest.TestCase):
         args=ready()
         with patch.object(p.time,'time',return_value=NOW.timestamp()+200),self.assertRaises(RuntimeError):p.validate_zero(*args)
     def test_simulation_requires_actual_allow_and_explicit_original_deny(self):
-        s=state();base='arn:aws:ec2:'+p.b.REGION+':'+p.b.ACCOUNT+':instance/';rows=[{'EvalResourceName':base+i,'EvalDecision':d} for i,d in [('i-0123456789abcdef0','allowed'),('i-0c39eff85c4286b38','explicitDeny')]];p.simulate_termination_authority(Mock(return_value={'EvaluationResults':rows}),s);rows[1]['EvalDecision']='allowed'
-        with self.assertRaises(RuntimeError):p.simulate_termination_authority(Mock(return_value={'EvaluationResults':rows}),s)
+        s=state();base='arn:aws:ec2:'+p.b.REGION+':'+p.b.ACCOUNT+':instance/';rows=[{'EvalResourceName':base+i,'EvalResourceDecision':d} for i,d in [('i-0123456789abcdef0','allowed'),('i-0c39eff85c4286b38','explicitDeny')]];reply={'EvaluationResults':[{'EvalActionName':'ec2:TerminateInstances','MissingContextValues':[],'ResourceSpecificResults':rows}]};p.simulate_termination_authority(Mock(return_value=reply),s);rows[1]['EvalResourceDecision']='allowed'
+        with self.assertRaises(RuntimeError):p.simulate_termination_authority(Mock(return_value=reply),s)
+    def test_complete_zero_readback_requires_remote_policy_fixed_guest_and_simulation(self):
+        s,r,g,a=ready();base='arn:aws:ec2:'+p.b.REGION+':'+p.b.ACCOUNT+':instance/'
+        replies={('ec2','describe-spot-fleet-requests'):{'SpotFleetRequestConfigs':[r]},('autoscaling','describe-auto-scaling-groups'):{'AutoScalingGroups':[g]},('autoscaling','describe-scheduled-actions'):{'ScheduledUpdateGroupActions':a},('iam','get-role-policy'):{'PolicyDocument':p.fleet_policy(s)},('ec2','describe-launch-template-versions'):{'LaunchTemplateVersions':[{'LaunchTemplateData':p.b.launch_data(s)}]},('iam','simulate-principal-policy'):{'EvaluationResults':[{'EvalActionName':'ec2:TerminateInstances','MissingContextValues':[],'ResourceSpecificResults':[{'EvalResourceName':base+i,'EvalResourceDecision':d} for i,d in [('i-0123456789abcdef0','allowed'),('i-0c39eff85c4286b38','explicitDeny')]]}]}}
+        api=Mock(side_effect=lambda service,action,*args:replies[service,action])
+        with patch.object(p.time,'time',return_value=NOW.timestamp()+30):p.zero_readback(api,s)
+        self.assertEqual(api.call_count,6);self.assertTrue(all(c.args[1].startswith(('describe-','get-','simulate-')) for c in api.call_args_list))
+        self.assertIn(s['LT'],api.call_args_list[4].args)
+
+    def test_missing_context_or_duplicate_IAM_resource_results_cannot_pass(self):
+        base='arn:aws:ec2:'+p.b.REGION+':'+p.b.ACCOUNT+':instance/';row={'EvalResourceName':base+'i-0123456789abcdef0','EvalResourceDecision':'allowed'}
+        for result in [{'EvalActionName':'ec2:TerminateInstances','MissingContextValues':['tag'],'ResourceSpecificResults':[]},{'EvalActionName':'ec2:TerminateInstances','ResourceSpecificResults':[row,row]}]:
+            with self.assertRaises(RuntimeError):p.simulate_termination_authority(Mock(return_value={'EvaluationResults':[result]}),state())
+
     def test_activate_cannot_modify_capacity_before_fresh_zero_containment(self):
         api=Mock()
         with patch.object(p,'zero_readback',side_effect=RuntimeError('not verified')),self.assertRaisesRegex(RuntimeError,'not verified'):p.activate(api,state())

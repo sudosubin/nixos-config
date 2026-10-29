@@ -151,7 +151,7 @@ def zero_readback(api,state):
     actions=api('autoscaling','describe-scheduled-actions','--auto-scaling-group-name',state['name'])['ScheduledUpdateGroupActions']
     require(len(request)==len(group)==1,'containment observation unknown');validate_zero(state,request[0],group[0],actions)
     require(api('iam','get-role-policy','--role-name',state['role'],'--policy-name','OnlyThisFleetTaggedInstances')['PolicyDocument']==fleet_policy(state),'Fleet cleanup policy changed')
-    template=api('ec2','describe-launch-template-versions','--launch-template-id',lt,'--versions','1')['LaunchTemplateVersions']
+    template=api('ec2','describe-launch-template-versions','--launch-template-id',state['LT'],'--versions','1')['LaunchTemplateVersions']
     require(len(template)==1 and template[0]['LaunchTemplateData']==b.launch_data(state),'fixed guest/root/network differs')
     simulate_termination_authority(api,state)
 
@@ -190,10 +190,13 @@ def simulate_termination_authority(api,state):
         '--action-names','ec2:TerminateInstances','--resource-arns',base+'i-0123456789abcdef0',base+'i-0c39eff85c4286b38',
         '--context-entries',json.dumps([{'ContextKeyName':'ec2:ResourceTag/ScopeId','ContextKeyType':'string','ContextKeyValues':[state['scope']]},
          {'ContextKeyName':'ec2:ResourceTag/ManagedBy','ContextKeyType':'string','ContextKeyValues':['nixos-spot-validation']}]))
-    rows={r['EvalResourceName']:r for r in reply['EvaluationResults']}
-    require(set(rows)=={base+'i-0123456789abcdef0',base+'i-0c39eff85c4286b38'}
-            and rows[base+'i-0123456789abcdef0']['EvalDecision']=='allowed'
-            and rows[base+'i-0c39eff85c4286b38']['EvalDecision']=='explicitDeny','native Fleet termination authority not confirmed')
+    results=reply['EvaluationResults']
+    require(len(results)==1 and results[0]['EvalActionName']=='ec2:TerminateInstances'
+            and not results[0].get('MissingContextValues'),'IAM action simulation incomplete')
+    specific=results[0].get('ResourceSpecificResults',[]);rows={r['EvalResourceName']:r for r in specific}
+    require(len(specific)==len(rows)==2 and set(rows)=={base+'i-0123456789abcdef0',base+'i-0c39eff85c4286b38'}
+            and rows[base+'i-0123456789abcdef0']['EvalResourceDecision']=='allowed'
+            and rows[base+'i-0c39eff85c4286b38']['EvalResourceDecision']=='explicitDeny','native Fleet termination authority not confirmed')
 
 
 def main():
