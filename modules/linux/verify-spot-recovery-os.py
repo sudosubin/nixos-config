@@ -112,7 +112,7 @@ def observe(plan,cfg,folder,boot):
 
 
 def main():
-    require(os.geteuid()==0,'root metadata observer required');cfg=trusted('/etc/spot-recovery-fixture.json');plan=trusted('/var/lib/spot-recovery-os-plan.json');require(re.fullmatch('[0-9a-f]{12}',cfg['scope']) and plan['scope']==cfg['scope'] and plan['case'] in {'positive','wrong','delayed'} and re.fullmatch('[0-9a-f]{32}',plan['nonce']),'bad fixture plan');require(digest(__file__)==cfg['probe_sha256'],'observer bytes differ')
+    require(os.geteuid()==0,'root metadata observer required');cfg=trusted(os.path.realpath('/etc/spot-recovery-fixture.json'));plan=trusted('/var/lib/spot-recovery-os-plan.json');require(re.fullmatch('[0-9a-f]{12}',cfg['scope']) and plan['scope']==cfg['scope'] and plan['case'] in {'positive','wrong','delayed'} and re.fullmatch('[0-9a-f]{32}',plan['nonce']),'bad fixture plan');require(digest(__file__)==cfg['probe_sha256'],'observer bytes differ')
     cg=budget();doc=identity(cfg['scope'],plan['instance']);boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip();require(boot!=plan['prior_boot'] and str(Path('/run/current-system').resolve())==plan['expected_system'],'not a new expected OS boot')
     folder=Path('/var/lib/spot-recovery-os-results')/(plan['case']+'-'+plan['nonce']+'-'+boot);folder.mkdir(mode=0o700,parents=True);rows,errors,passed=observe(plan,cfg,folder,boot)
     journal=command(['journalctl','-b','--no-pager','-o','json']);require(len(journal.encode())<=16*1024**2,'complete boot journal exceeds bound');(folder/'full-boot-journal.jsonl').write_text(journal)
