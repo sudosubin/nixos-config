@@ -20,6 +20,7 @@ def evidence():
     s = state()
     return {'state': s, 'StackId': 'arn:aws:cloudformation:'+p.REGION+':'+p.ACCOUNT+':stack/'+s['name']+'/uuid',
             'stack_status': 'ROLLBACK_COMPLETE', 'group_absent': True,
+            'native_events': [{'LogicalResourceId':n,'ResourceStatus':status,**({'ResourceStatusReason':'Failed to receive 1 resource signal(s)'} if status=='CREATE_FAILED' else {})} for n,status in [('Group','CREATE_COMPLETE'),('Off','CREATE_COMPLETE'),('Deadline','CREATE_IN_PROGRESS'),('Deadline','CREATE_FAILED')]],
             'event': p.event_projection({'eventID': '11111111-2222-3333-4444-555555555555',
              'eventTime': '2026-10-29T00:02:00Z', 'eventSource': 'autoscaling.amazonaws.com',
              'eventName': 'DeleteAutoScalingGroup', 'awsRegion': p.REGION, 'recipientAccountId': p.ACCOUNT,
@@ -93,6 +94,12 @@ class ExpiryTests(unittest.TestCase):
             api=Mock(side_effect=p.APIError('cloudformation','create-stack',code,detail))
             with self.subTest(code=code),self.assertRaises(RuntimeError):p.create_native_stack(api,[],state()['role'])
             self.assertEqual(api.call_count,1)
+    def test_runtime_LT_permission_is_exact_not_general_EC2_launch(self):
+        s={**state(),'LT':'lt-'+'a'*17};allow=p.role_policy(s)['Statement'][3];self.assertEqual(allow['Action'],'ec2:RunInstances');self.assertEqual(allow['Condition']['ArnEquals']['ec2:LaunchTemplate'],'arn:aws:ec2:'+p.REGION+':'+p.ACCOUNT+':launch-template/'+s['LT']);self.assertIn('arn:aws:ec2:'+p.REGION+'::image/'+s['image'],allow['Resource']);self.assertNotIn('*',allow['Resource'])
+    def test_group_creation_error_or_non_timeout_rollback_is_not_native_expiry(self):
+        for change in [lambda v:v.update(native_events=[]),lambda v:v['native_events'][-1].update(ResourceStatusReason='AccessDenied'),lambda v:v['event'].update(eventTime='2026-10-28T00:00:00Z')]:
+            v=evidence();change(v)
+            with self.assertRaises(RuntimeError):p.validate_force_evidence(v)
     def test_exact_completed_native_force_event_required(self):p.validate_force_evidence(evidence())
     def test_ack_nonforce_wrong_actor_error_or_foreign_account_cannot_authorize_capacity(self):
         for key,bad in [('forceDelete',False),('forceDelete',1),('autoScalingGroupName',p.PRODUCTION)]:
@@ -108,11 +115,11 @@ class ExpiryTests(unittest.TestCase):
         event={**evidence()['event'],'sourceIPAddress':'sensitive','userIdentity':{'accessKeyId':'sensitive','sessionContext':{'sessionIssuer':{'arn':'expected'}}},'responseElements':{'private':'value'}}
         result=p.event_projection(event);self.assertNotIn('sensitive',json.dumps(result));self.assertNotIn('responseElements',result)
     def test_file_receipt_must_be_independently_reread_from_CFN_and_CloudTrail(self):
-        v=evidence();api=Mock(side_effect=[{'Stacks':[{'StackStatus':'ROLLBACK_COMPLETE','StackName':v['state']['name'],'StackId':v['StackId']}]},{'TemplateBody':{'Metadata':{'Investigation':v['state']}}},{'AutoScalingGroups':[]},{'Events':[{'CloudTrailEvent':json.dumps(v['event'])}]}]);p.verify_force_evidence(api,v)
-        self.assertEqual(api.call_count,4);self.assertEqual(api.call_args.args[0:2],('cloudtrail','lookup-events'))
+        v=evidence();api=Mock(side_effect=[{'Stacks':[{'StackStatus':'ROLLBACK_COMPLETE','StackName':v['state']['name'],'StackId':v['StackId']}]},{'TemplateBody':{'Metadata':{'Investigation':v['state']}}},{'StackEvents':v['native_events']},{'AutoScalingGroups':[]},{'Events':[{'CloudTrailEvent':json.dumps(v['event'])}]}]);p.verify_force_evidence(api,v)
+        self.assertEqual(api.call_count,5);self.assertEqual(api.call_args.args[0:2],('cloudtrail','lookup-events'))
     def test_missing_or_partial_fresh_event_never_passes_manifest(self):
         for reply in [{'Events':[]},{'Events':[{'CloudTrailEvent':json.dumps(evidence()['event'])}],'NextToken':'incomplete'}]:
-            v=evidence();api=Mock(side_effect=[{'Stacks':[{'StackStatus':'ROLLBACK_COMPLETE','StackName':v['state']['name'],'StackId':v['StackId']}]},{'TemplateBody':{'Metadata':{'Investigation':v['state']}}},{'AutoScalingGroups':[]},reply])
+            v=evidence();api=Mock(side_effect=[{'Stacks':[{'StackStatus':'ROLLBACK_COMPLETE','StackName':v['state']['name'],'StackId':v['StackId']}]},{'TemplateBody':{'Metadata':{'Investigation':v['state']}}},{'StackEvents':v['native_events']},{'AutoScalingGroups':[]},reply])
             with self.subTest(reply=reply),self.assertRaises(RuntimeError):p.verify_force_evidence(api,v)
 
 

@@ -85,7 +85,7 @@ def tags(state):
 
 def role_policy(state):
     arn = 'arn:aws:autoscaling:'+REGION+':'+ACCOUNT+':autoScalingGroup:*:autoScalingGroupName/'+state['name']
-    return {'Version': '2012-10-17', 'Statement': [
+    value = {'Version': '2012-10-17', 'Statement': [
         {'Effect': 'Allow', 'Action': ['autoscaling:CreateAutoScalingGroup', 'autoscaling:UpdateAutoScalingGroup',
          'autoscaling:DeleteAutoScalingGroup', 'autoscaling:SetInstanceProtection', 'autoscaling:CreateOrUpdateTags',
          'autoscaling:DeleteTags', 'autoscaling:PutScheduledUpdateGroupAction', 'autoscaling:DeleteScheduledAction'],
@@ -97,6 +97,19 @@ def role_policy(state):
         {'Effect': 'Deny', 'Action': ['ec2:AttachVolume', 'ec2:DetachVolume', 'ec2:AssociateAddress',
          'ec2:DisassociateAddress', 'ec2:TerminateInstances', 'ec2:CreateSnapshot', 'ec2:DeleteSnapshot',
          'ec2:DeleteVolume', 'cloudformation:SignalResource'], 'Resource': '*'}]}
+    if state.get('LT'):
+        require(re.fullmatch('lt-[0-9a-f]{17}', state['LT']), 'unknown runtime LT authority')
+        base = 'arn:aws:ec2:'+REGION+':'+ACCOUNT+':'
+        value['Statement'] += [
+            {'Effect': 'Allow', 'Action': 'ec2:RunInstances', 'Resource': [
+                base+'launch-template/'+state['LT'], 'arn:aws:ec2:'+REGION+'::image/'+state['image'],
+                base+'subnet/'+SUBNET, base+'security-group/'+SG,
+                *[base+kind+'/*' for kind in ['instance', 'volume', 'network-interface', 'spot-instances-request']]],
+             'Condition': {'ArnEquals': {'ec2:LaunchTemplate': base+'launch-template/'+state['LT']},
+                           'StringEquals': {'aws:RequestedRegion': REGION}}},
+            {'Effect': 'Allow', 'Action': 'ec2:CreateTags', 'Resource': [base+'instance/*', base+'volume/*'],
+             'Condition': {'StringEquals': {'ec2:CreateAction': 'RunInstances', 'aws:RequestTag/ScopeId': state['scope']}}}]
+    return value
 
 
 def launch_data(state):
@@ -202,7 +215,7 @@ def create(api, state, force_evidence=None):
     # Missing stack uses ValidationError; additionally verify there are no live
     # named stacks, rather than treating every ValidationError as absence.
     summaries = api('cloudformation', 'list-stacks')['StackSummaries']
-    require(not any(s['StackName'] == state['name'] and s['StackStatus'] != 'DELETE_COMPLETE' for s in summaries), 'existing stack')
+    require(not any(s['StackName'] == state['name'] for s in summaries), 'scope was already used; choose a fresh scope')
     if state['mode'] == 'protected':
         require(force_evidence is not None, 'first prove empty native force-delete without paid capacity')
         validate_force_evidence(force_evidence)
@@ -214,9 +227,10 @@ def create(api, state, force_evidence=None):
     policy = role_policy(state)
     trust = {'Version': '2012-10-17', 'Statement': [{'Effect': 'Allow', 'Principal': {'Service': 'cloudformation.amazonaws.com'}, 'Action': 'sts:AssumeRole'}]}
     api('iam', 'create-role', '--role-name', state['role'], '--assume-role-policy-document', json.dumps(trust), '--tags', json.dumps(tags(state)))
-    api('iam', 'put-role-policy', '--role-name', state['role'], '--policy-name', 'OnlyThisDisposableGroup', '--policy-document', json.dumps(policy))
     lt = api('ec2', 'create-launch-template', '--launch-template-name', state['name'], '--client-token', state['name'],
              '--launch-template-data', json.dumps(launch_data(state)), '--tag-specifications', json.dumps([{'ResourceType': 'launch-template', 'Tags': tags(state)}]))['LaunchTemplate']['LaunchTemplateId']
+    state['LT'] = lt;policy = role_policy(state)
+    api('iam', 'put-role-policy', '--role-name', state['role'], '--policy-name', 'OnlyThisDisposableGroup', '--policy-document', json.dumps(policy))
     doc = template(state, lt, Path(__file__).read_text())
     with tempfile.TemporaryDirectory(prefix='protected-expiry-') as folder:
         path = Path(folder)/'template.json';path.write_text(json.dumps(doc));path.chmod(0o600)
@@ -260,7 +274,12 @@ def validate_force_evidence(value):
         and state['name'] == 'nixos-protected-expiry-'+state['scope'] and state['role'] == state['name']+'-cfn'
         and state['account'] == ACCOUNT and state['region'] == REGION, 'not an empty native probe')
     require(value['stack_status'] == 'ROLLBACK_COMPLETE' and value['group_absent'] is True, 'empty rollback incomplete')
+    validate_timeout_events(value['native_events'])
     event = value['event'];request = event['requestParameters']
+    timestamp = datetime.fromisoformat(event['eventTime'].replace('Z', '+00:00'))
+    created = datetime.fromisoformat(state['created'])
+    require(timestamp.utcoffset() is not None and created <= timestamp <= created+timedelta(minutes=20),
+            'native force event is outside its exact probe interval')
     require(event['eventSource'] == 'autoscaling.amazonaws.com' and event['eventName'] == 'DeleteAutoScalingGroup'
             and event['awsRegion'] == REGION and event['recipientAccountId'] == ACCOUNT and not event.get('errorCode')
             and re.fullmatch('[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}', event.get('eventID', ''))
@@ -269,6 +288,16 @@ def validate_force_evidence(value):
             'no exact native CFN force-delete evidence')
     require(event['userAgent'] == 'cloudformation.amazonaws.com' or event['userIdentity'].get('invokedBy') == 'cloudformation.amazonaws.com', 'not native CloudFormation cleanup')
     return value
+
+
+def validate_timeout_events(events):
+    statuses = {(r.get('LogicalResourceId'), r.get('ResourceStatus')) for r in events}
+    require({('Group', 'CREATE_COMPLETE'), ('Off', 'CREATE_COMPLETE'), ('Deadline', 'CREATE_IN_PROGRESS'),
+             ('Deadline', 'CREATE_FAILED')} <= statuses and ('Deadline', 'CREATE_COMPLETE') not in statuses,
+            'not an actual unsignalled native deadline rollback')
+    failed = [r for r in events if (r.get('LogicalResourceId'), r.get('ResourceStatus')) == ('Deadline', 'CREATE_FAILED')]
+    require(len(failed) == 1 and 'Failed to receive 1 resource signal' in failed[0].get('ResourceStatusReason', ''),
+            'deadline failed for another reason; not native expiry evidence')
 
 
 def event_projection(event):
@@ -288,6 +317,9 @@ def verify_force_evidence(api, value):
     doc = api('cloudformation', 'get-template', '--stack-name', value['StackId'])['TemplateBody']
     if isinstance(doc, str):doc = json.loads(doc)
     require(doc['Metadata']['Investigation'] == state, 'native probe deployment differs')
+    observed_events = api('cloudformation', 'describe-stack-events', '--stack-name', value['StackId'])
+    require(not observed_events.get('NextToken'), 'native probe events incomplete')
+    validate_timeout_events(observed_events['StackEvents'])
     require(not api('autoscaling', 'describe-auto-scaling-groups', '--auto-scaling-group-names', state['name'])['AutoScalingGroups'], 'native group still exists')
     events = api('cloudtrail', 'lookup-events', '--lookup-attributes',
                  'AttributeKey=EventId,AttributeValue='+value['event']['eventID'])
