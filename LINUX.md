@@ -476,6 +476,8 @@ sudo /var/lib/spot-work-shadow-tui/844c978e4dbc/source/spot-work-shadow-tui laun
 
 - `spot-work-shadow-tui.nix`도 추가했지만 **enable=false**다. 선언적 package에는 정확한 공개 vendorBun/vendorTui 입력이 필요하며 실제 reboot/new-root/AMI04c8/LT2 포함을 검증하지 않았다. 설치만으로 현재28d4 lock/unencrypted home/schema1 cache/backup IAM·journal/full guard/운영 LT1을 전환하지 않았다. 다음은 trusted delivery·consumer replacement/conflict·keeper/off-root recovery·Herdr/tool/MCP/subagent/SSM/Docker/direct custody다. **암호화 home/전체 복구/운영 restart→갱신 lock 재적용→재검증/5종 최저가/실제 zero→예약 재생성은 미완료**, `work_tracking_verified/armed/termination_capable/goal_complete=false` 및 원본 보호를 유지한다.
 
+- 모든 실패/부분 prefix/강한 pre-proof/설치경로/published-wrapper proof의 raw PTY·로그·source8×272/control36/plan과 **44개 snapshot의1751개 synthetic body**를 원본 `/home/persist/root/phase43-tui-entry-20261030/custody-ce9db15fa11841fba0bb528b9be7e070/complete-operating-TUI-source-controls-and-native-evidence.tar.gz`에 보존하고 전부 재해시했다. **4896299bytes/2353manifest records/SHA `3b23dd6f1e6b28c9606ac989b509003544614d75986511b1d1c06c01cbb59760`**. 원본8개 scope·definition 부재와47기록 불변 뒤 data-codec17parts만 삭제했다. scoped reference `/home/persist/manifests/phase43-TUI-entry-current-scoped-20261030.json`, SHA `a5bcbd6d0577fa8c5e6158a9c7ace7495b385889de28adf6c0160377013c133c`는 **모든 broad approval을 false**로 유지한다. 전체 goal/새 root 지속성 승인이 아니다.
+
 ## 비용·백업 주의
 
 - EIP는 연결 중에도, 미연결 보유 중에도 public IPv4 요금이 발생함.
