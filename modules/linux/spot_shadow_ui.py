@@ -22,6 +22,7 @@ import spot_shadow as shadow
 import spot_shadow_frontend as front
 import spot_shadow_acp as acp
 import spot_work as work
+import spot_shadow_output as output
 
 
 def rpc(endpoint,message,limit=2*1024**2):
@@ -39,27 +40,55 @@ def opaque_run(store,binding,backend,arguments,home,native_env=None):
     """Dedicated wrapper only: explicit owned HOME, never host-home fallback."""
     shadow.require(acp.space(store.root)>=acp.RESERVE,'native helper spool reserve insufficient; no effect')
     command=acp.drop_command(backend,arguments,home,native_env)
-    adapter=shadow.Adapter(store,binding,[backend,*arguments]);saved=adapter.create
-    original=[os.dup(n) for n in [0,1,2]];opened=[]
+    adapter=shadow.Adapter(store,binding,[backend,*arguments])
+    saved_create,saved_finish,saved_heartbeat=adapter.create,adapter.finish_job,adapter.heartbeat
+    original={n:os.dup(n) for n in [0,1,2]};spool=None;streams={}
+    def restore(numbers):
+        for number in numbers:
+            if number in original:
+                fd=original.pop(number);os.dup2(fd,number);os.close(fd)
     def create(kind):
-        lease=saved(kind);path=store.job(lease['id'])
-        for number,name in [(1,'stdout'),(2,'stderr')]:
-            fd=os.open(path/name,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
-            opened.append(fd);os.dup2(fd,number)
+        nonlocal spool
+        lease=saved_create(kind);spool=output.Output(store,lease)
+        spool.update(kind='tui_opaque_native_helper',state='helper_leased_before_spawn')
+        # Pipe read custody and durable lease precede every native effect.
+        for number,channel in [(1,'stdout'),(2,'stderr')]:
+            read,write=os.pipe();streams[channel]=os.fdopen(read,'rb')
+            try:os.dup2(write,number)
+            finally:os.close(write)
+        spool.start(streams)
+        spool.update(state='helper_spawn_intent_unknown_until_wait')
         return lease
-    adapter.create=create
+    def heartbeat(lease):
+        with spool.lock:saved_heartbeat(lease)
+    def finish(lease):
+        restore([1,2]);spool.finish()
+        with spool.lock:saved_finish(lease)
+    adapter.create,adapter.heartbeat,adapter.finish_job=create,heartbeat,finish
+    uncertain=False
     try:
         null=os.open('/dev/null',os.O_RDONLY)
         try:os.dup2(null,0)
         finally:os.close(null)
-        code=work.run_job(adapter,command)
-        for fd in opened:os.fsync(fd)
+        try:code=work.run_job(adapter,command)
+        except BaseException:
+            if spool is None:raise
+            # Popen may have created a native child before losing its receipt.
+            # Keep all read pipes alive; wait ONLY our kernel-owned child set.
+            # Never replay spawn, close a reader early or force-kill that work.
+            uncertain=True;spool.unknown('helper_spawn_or_wait_uncertain_no_replay')
+            restore([1,2])
+            try:work.wait_descendants();spool.finish()
+            except BaseException:
+                spool.unknown('helper_child_or_output_custody_uncertain');spool.hold()
+                raise
+            code=75
+        spool.update(exit_status=code,kind='tui_opaque_native_helper',
+                     state='helper_spawn_or_wait_uncertain_output_pending' if uncertain else 'local_children_reaped_output_pending',
+                     spawn_outcome='unknown_no_replay' if uncertain else 'local_wait_returned')
     finally:
-        for n,fd in zip([0,1,2],original):os.dup2(fd,n);os.close(fd)
-        for fd in opened:os.close(fd)
-    lease=adapter.lease;store.update(lease,exit_status=code,kind='tui_opaque_native_helper',
-        output_spool={name:shadow.spool_hash(store.job(lease['id'])/name) for name in ['stdout','stderr']})
-    return {'job':lease['id'],'exit_status':code,'output_delivery':'unverified'}
+        restore([0,1,2])
+    return {'job':adapter.lease['id'],'exit_status':code,'output_delivery':'unverified'}
 
 
 class Broker:
@@ -145,13 +174,9 @@ class Broker:
                      +repr(self.backend)+','+repr(message['arguments'])+','+repr(self.home)+','+repr(self.native_env)+');print(json.dumps(value))')
             result=subprocess.run([sys.executable,'-B','-I','-c',program],capture_output=True,text=True)
             shadow.require(result.returncode==0,'native helper outcome unknown; inspect custody; never replay')
-            record=json.loads(result.stdout);path=self.store.job(record['job'])
-            response={'exit_status':record['exit_status'],'output_delivery':'unverified'}
-            for channel in ['stdout','stderr']:
-                with (path/channel).open('rb') as stream:data=stream.read(1024**2+1)
-                shadow.require(len(data)<=1024**2,'native helper output exceeds bridge bound; retained, not truncated')
-                response[channel]=base64.b64encode(data).decode()
-            return response
+            record=json.loads(result.stdout)
+            return dict(output.bridge_output(self.store,record['job']),
+                        exit_status=record['exit_status'],output_delivery='unverified')
         raise RuntimeError('unknown UI bridge action; no ACK/clear/takeover')
 
     def open(self,endpoint):

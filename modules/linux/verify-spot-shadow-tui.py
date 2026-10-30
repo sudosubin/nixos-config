@@ -31,7 +31,7 @@ import spot_validation as validation
 import spot_shadow_ui as ui
 
 PUBLIC_FILES=['spot_work.py','spot_shadow.py','spot_acp.py','spot_shadow_acp.py','spot_frontend.py',
-              'spot_shadow_frontend.py','spot_shadow_ui.py','spot-kiro-frontend.mjs','spot-shadow-kiro-frontend.mjs']
+              'spot_shadow_frontend.py','spot_shadow_ui.py','spot_shadow_output.py','spot-kiro-frontend.mjs','spot-shadow-kiro-frontend.mjs']
 NATIVE_ROOT=Path('/nix/store/bn6yjl0rgrd0yqxk3cbkkamjcxg9h47x-kiro-cli-2.10.0/bin')
 
 
