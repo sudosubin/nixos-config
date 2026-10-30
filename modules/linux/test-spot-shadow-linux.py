@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import subprocess
 import tempfile
 import time
 import unittest
@@ -83,6 +84,52 @@ class ShadowLinuxTests(unittest.TestCase):
         self.assertNotEqual(result['exit_status'], 0)
         self.assertTrue(self.store.status()['jobs'][0]['always_blocks_termination'])
         self.assertTrue((self.store.job(result['job'])/'stderr').stat().st_size)
+
+    def test_real_lost_spawn_receipt_never_retires_or_replays(self):
+        owned = {}
+        def uncertain(argv, **kwargs):
+            pid = os.fork()
+            if pid == 0:
+                os.setsid(); os.execv(argv[0], argv)
+            owned['pid'] = pid
+            raise OSError('owned fixture lost receipt AFTER native fork')
+        with patch.object(p.work.subprocess, 'Popen', side_effect=uncertain):
+            with self.assertRaises(OSError):
+                p.run(self.store, self.binding, [sys.executable, '-B', '-I', '-c',
+                      'import time,os;time.sleep(.3);os.write(1,b"late synthetic output\\n")'])
+        waited, status = os.waitpid(owned['pid'], 0x40000000)
+        self.assertEqual(waited, owned['pid']); self.assertEqual(status, 0)
+        jobs = self.store.status()['jobs']; self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0]['state'], 'lease_before_possible_spawn')
+        self.assertEqual((self.store.job(jobs[0]['id'])/'stdout').read_text(), 'late synthetic output\n')
+        self.assertTrue(jobs[0]['always_blocks_termination'])
+
+    def test_real_owned_wrapper_crash_does_not_stop_child_or_clear_record(self):
+        p.work.subreaper()
+        payload = ('import os,time;print(os.getpid(),flush=True);time.sleep(.5);'
+                   'os.write(1,b"child survived owned wrapper crash\\n")')
+        helper = ('import sys,json;sys.path.insert(0,'+repr(str(Path(p.__file__).parent))+');'
+                  'import spot_shadow as p;'
+                  'p.run(p.Store('+repr(str(self.root))+'),'+repr(self.binding)+','
+                  +repr([sys.executable,'-B','-I','-c',payload])+')')
+        with subprocess.Popen([sys.executable,'-B','-I','-c',helper], stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE, text=True) as wrapper:
+            deadline = time.monotonic()+5; paths=[]; first=''
+            while time.monotonic()<deadline:
+                paths = list((self.root/'jobs').iterdir())
+                if paths and (paths[0]/'stdout').exists(): first=(paths[0]/'stdout').read_text()
+                if first: break
+                time.sleep(.005)
+            self.assertTrue(first, 'owned fixture did not start')
+            payload_pid = int(first.splitlines()[0]); wrapper.kill()
+            out, err = wrapper.communicate(timeout=5)
+            self.assertEqual(wrapper.returncode, -9, err)
+            waited, status = os.waitpid(payload_pid, 0x40000000)
+            self.assertEqual(waited, payload_pid); self.assertEqual(status, 0)
+        record = p.Store(self.root).status()['jobs'][0]
+        self.assertEqual(record['state'], 'lease_before_possible_spawn')
+        self.assertIn('child survived owned wrapper crash', (paths[0]/'stdout').read_text())
+        self.assertTrue(record['always_blocks_termination'])
 
     def test_low_reserve_rejects_before_lease_or_spawn(self):
         class Low: f_bavail = 1; f_frsize = 4096
