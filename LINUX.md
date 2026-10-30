@@ -478,6 +478,26 @@ sudo /var/lib/spot-work-shadow-tui/844c978e4dbc/source/spot-work-shadow-tui laun
 
 - 모든 실패/부분 prefix/강한 pre-proof/설치경로/published-wrapper proof의 raw PTY·로그·source8×272/control36/plan과 **44개 snapshot의1751개 synthetic body**를 원본 `/home/persist/root/phase43-tui-entry-20261030/custody-ce9db15fa11841fba0bb528b9be7e070/complete-operating-TUI-source-controls-and-native-evidence.tar.gz`에 보존하고 전부 재해시했다. **4896299bytes/2353manifest records/SHA `3b23dd6f1e6b28c9606ac989b509003544614d75986511b1d1c06c01cbb59760`**. 원본8개 scope·definition 부재와47기록 불변 뒤 data-codec17parts만 삭제했다. scoped reference `/home/persist/manifests/phase43-TUI-entry-current-scoped-20261030.json`, SHA `a5bcbd6d0577fa8c5e6158a9c7ace7495b385889de28adf6c0160377013c133c`는 **모든 broad approval을 false**로 유지한다. 전체 goal/새 root 지속성 승인이 아니다.
 
+### 2026-10-30: 클라이언트 소실 후 읽기 전용 출력 UI 복구·view 충돌/종료 복구(부분 적용)
+
+- 별도 **`spot-output-review` 버전3189d6383053**를 실제 설치했다. `/var/lib/spot-output-review/3189d6383053/source/spot-output-review`, marker `/etc/spot-output-review-current.json`, 같은 버전 `install-intent/verified.json`이다. **기존 TUI844/ACP/498 store·collector/default launcher를 교체하지 않는다.** 설치 자체는 namespace/view/model/session을 시작하지 않았다. 기존47기록/boot63bfc/profile2gb47/SSM901/Docker1318/user743/config·operational-status SHA가 전후 같았다. source6와 Python GCroot만 고정했고 vendor/native 실행 의존성이나 paid AWS resource를 추가하지 않았다.
+- original startup/controller와 **실제 bound Bun actor가 같은 boot/PID namespace에서 정확히 종료됐음**을 확인한 후에만 replacement review를 허용한다. PID 재사용은 그 old consumer의 종료만 증명하며 server idle/keeper 소유권 증명이 아니다. partial/malformed actor roster·missing output inventory·old boot/namespace·바뀐 spool inode는 거절한다. 전용 review namespace는 **최초 명시적 provision만** 허용하고 kernel flock으로 동시 view를 거절한다. TTL/clear/reset/죽은 keeper takeover가 아니다.
+- **출력 전용 새 터미널 UI**가 exposed immutable segment의 길이/SHA를 검증하고 제한된 페이지로 표시한다. 제어문자/OSC/CSI/bidi/잘못된 UTF-8를 literal로 표시하며 실제 사용자 payload를 metadata에 저장하지 않는다. 각 view lease→page-write intent→write-returned-not-delivery를 기록한다. 불확실 write는 재시도/다음 body read 없이 unknown으로 남긴다. view가 죽으면 과거 기록을 유지하고 사용자에게 명시적으로 요청된 **새 `--from-start` OUTPUT 재검토**만 허용한다. provider IPC/input/session/load/new/prompt/모델 재실행을 하지 않는다. q/EOF/read/render/cursor는 delivery ACK가 아니다.
+- 첫 source0c7a6b1 ARM119 attempt는 새 driver가 사전 `owned-fixtures` 디렉터리를 만들지 않아 기존 Linux6개 tearDown/snapshot에서 실패하고 ResourceWarning을 냈다. full failure log·native2/실제복구console의118body와 kernel/ownscope cleanup은 보존했으나 해당 **Linux6개 body는 미보존**이다. 이를119성공으로 바꾸지 않았다. 실패 receipt SHA `ee2aafc8eaa93205364cf10a94b4100f478311c9b2d226e566fff98c87293c37`.
+- 같은 **0c7a6b174997e51b0831f19600c73d4adede2ed5/source278**의 fresh corrected driver는 **ARM119=Python94(19+7+12+6+16+8+21+5)+JS25/Nix3 parse/compiled4 + native2·실제 review UI**를 통과했다. private1GiB/min2GiB/Swap0/CPU≤1/OOM1/NNP/score1000/Nice19/peak707112960/전memoryevents0/no skips·ResourceWarning. 파일chip/queue/parse14 회귀 후 owned root client-controller 소실→late native output→새 output console12pages, 동시 view 거절, **새 합성 viewer만 pidfd SIGKILL**→명시적 새 output re-review를 확인했다. 기존 user/provider/서비스에 신호를 보내거나 input을 replay하지 않았다. pre result SHA `2ae81ea13feb2f5b5c3e29b642a290b7482f05b78509d935272f2ab9aa18f247`.
+- 설치 후 **실제 published TUI844와 review3189 CLI 실행**으로 ARM119/Nix3/native2+review를 다시 통과했다. `/home/persist/root/phase44-output-review-20261030/operating-3189d6383053/postinstall/ARM119-installed-native-review-full-and-owned-cleanup.json`, raw result SHA **38b3df5b3e10c7d3471b890b0d75dd6193fee1f6804c4f4e197df099ae2787e7**. private1GiB/peak423821312/전memoryevents0/fence1/전체 snapshot8의315body 재해시/metadata-only 정상GC/exactscope·definition 없음과 설치6bytes/old47·전체64기록 불변을 확인했다. 원래 vendor TUI 상태/입력 재개나 trusted recipient delivery까지 복원한 것이 아니다.
+- **일반 `launch` 경로도 실제 실행했다.** 이미 끝난 새 synthetic session의 출력만 root interactive PTY에서 재검토했고 실제 별도 PID1 reader의 **256MiB/Swap0/OOM1/CPU25%/private network/NNP/score1000**을 읽었다(표시 중 peak13651968/events0).12pages/q 자연 종료/정확한 reader cgroup 부재/원래64기록 불변을 확인해 현재65개 unknown 기록이 남았다. `/home/persist/root/phase44-output-review-20261030/operating-3189d6383053/normal-private256-launch/proof.json`. metadata coordinator256은 **이 제한된 data reader만 실행했으며 build/general verification 권한이 아니다**. 첫 dispatch의 overlong comment는 SendCommand 전에 로컬 거절됐고 실제 작업을 재전송한 것이 아니다.
+
+```sh
+# root interactive cloud TTY, 원래 controller/actor가 종료된 새 TUI session 선택.
+# 최초 명시적 namespace 생성만 --prepare-new-review; 이후 재검토에서는 이 flag를 제거.
+sudo /var/lib/spot-output-review/3189d6383053/source/spot-output-review \
+  --tui-session /var/lib/spot-work-shadow-tui/844c978e4dbc/sessions/<session-id> \
+  launch --from-start --prepare-new-review
+```
+
+- reader는 private256MiB/CPU25/Swap0·최소2GiB 여유/강제 deadline 없는 자기 metadata cage만 쓴다. 일반 native/build permission을 부여하지 않는다. `spot-output-review.nix`는 선언했지만 **enable=false**이며 actual reboot/new-root package 지속성은 아직 아니다. **복구된 것은 읽기 전용 output review**다. 원래 vendor UI state·입력 재개, keeper crash takeover, 새 boot/off-root 복구, 신뢰된 delivery, 전체 producer·첨부 경로는 남아 있다. 최종 감사는 Desired0/보호된 원본1대/observercurrenttrue/fullguardabsent다. **암호화 home/전체 backup·package·homeEIP 복원/운영 restart·새lock/5종최저가/실제 zero→예약재생성도 미완료**, 모든 broad approval/arming/termination/goal flags는 false로 유지한다.
+
 ## 비용·백업 주의
 
 - EIP는 연결 중에도, 미연결 보유 중에도 public IPv4 요금이 발생함.
