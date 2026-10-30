@@ -21,13 +21,13 @@ import time
 spec=importlib.util.spec_from_file_location('audit_controller',Path(__file__).with_name('spot-canary-controller.py'));c=importlib.util.module_from_spec(spec);spec.loader.exec_module(c)
 
 COLLECTOR=r'''from pathlib import Path
-import json,subprocess,hashlib,os,time,base64,gzip
+import json,subprocess,hashlib,os,time,base64,gzip,stat
 units={}
 for name in ['spot-schedule-guard.service','spot-schedule-guard.timer','spot-scale-in-protection-ready.service','spot-work-admission-ready.service','spot-workload-startup-ready.service']:
  p=subprocess.run(['systemctl','show',name,'-p','LoadState','-p','ActiveState','-p','UnitFileState','-p','FragmentPath','-p','MainPID'],capture_output=True,text=True,timeout=10)
  units[name]={'probe_ok':p.returncode==0,'properties':dict(line.split('=',1) for line in p.stdout.splitlines() if '=' in line)}
 files={};allowed={'armed','asg','asg_arn','home_volume','home_uuid','manifest','durable_journal','profile_cache_manifest','schema','state','phase','reasons','system','user_profile','boot_id','instance_id','updated_at','replacement_verified','closure_restore_verified','work_tracking_verified','backup_restore_verified','production_armed','termination_armed','runtime_units_reboot_persistent','runtime_atomic_seal_installed','runtime_cold_guard_installed','full_work_tracking_verified','all_producer_fencing_verified','cold_raw_privileged_write_fencing_verified','production_backup_IAM_installed','production_cold_backup_rollout_verified','production_daily_retention_enabled','home_live_sync_complete','home_migration_complete','production_cutover_complete'}
-for name in ['/etc/spot-schedule-guard.json','/run/spot-schedule-guard/status.json','/run/spot-schedule-guard/startup','/run/spot-work/state.json','/home/persist/manifests/active.json','/home/persist/manifests/profile-cache.json','/home/persist/manifests/deployment-status.json']:
+for name in ['/etc/spot-schedule-guard.json','/run/spot-schedule-guard/status.json','/run/spot-schedule-guard/startup','/run/spot-schedule-guard/draining','/home/persist/manifests/active.json','/home/persist/manifests/profile-cache.json','/home/persist/manifests/deployment-status.json']:
  p=Path(name);row={'exists':p.exists()}
  if p.is_file() and p.stat().st_size<=1048576:
   data=p.read_bytes();row['sha256']=hashlib.sha256(data).hexdigest()
@@ -42,7 +42,18 @@ for p in Path('/proc').iterdir():
   comm=(p/'comm').read_text().strip()
   if comm in {'herdr','kiro-cli','kiro-cli-chat','bun','node','nix','nix-build','cargo','rustc','java'}:processes.append({'pid':int(p.name),'comm':comm,'uid':p.stat().st_uid})
  except OSError:pass
-value={'schema':1,'observed_at':time.time(),'boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),'current_system':str(Path('/run/current-system').resolve()),'profile':str(Path('/nix/var/nix/profiles/system').resolve()),'units':units,'files':files,'guard_binary_exists':Path('/run/current-system/sw/bin/spot-schedule-guard').exists(),'work_binary_exists':Path('/run/current-system/sw/bin/spot-work').exists(),'named_process_observations_NOT_busy_or_idle_proof':processes,'not_idle_or_arming_authority':True};data=json.dumps(value).encode();print(json.dumps({'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'gzip':base64.b64encode(gzip.compress(data)).decode()}))
+metadata={}
+for name,kind,mode in [('admission.lock','file',0o660),('leases','directory',0o1733),('participants','directory',0o1733)]:
+ p=Path('/run/spot-schedule-guard')/name;row={'exists':p.exists(),'trusted':False}
+ try:
+  st=p.lstat();row['trusted']=not p.is_symlink() and st.st_uid==0 and stat.S_IMODE(st.st_mode)==mode and (stat.S_ISREG(st.st_mode) if kind=='file' else stat.S_ISDIR(st.st_mode))
+ except OSError:pass
+ metadata[name]=row
+root=Path('/run/spot-schedule-guard');metadata['runtime']={'trusted':False}
+try:
+ st=root.lstat();metadata['runtime']['trusted']=stat.S_ISDIR(st.st_mode) and st.st_uid==0 and not st.st_mode&0o022
+except OSError:pass
+value={'schema':1,'observed_at':time.time(),'protocol_metadata':metadata,'boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),'current_system':str(Path('/run/current-system').resolve()),'profile':str(Path('/nix/var/nix/profiles/system').resolve()),'units':units,'files':files,'guard_binary_exists':Path('/run/current-system/sw/bin/spot-schedule-guard').exists(),'work_binary_exists':Path('/run/current-system/sw/bin/spot-work').exists(),'named_process_observations_NOT_busy_or_idle_proof':processes,'not_idle_or_arming_authority':True};data=json.dumps(value).encode();print(json.dumps({'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'gzip':base64.b64encode(gzip.compress(data)).decode()}))
 '''
 
 
@@ -74,7 +85,8 @@ def diagnose(group,runtime,instance,*,now=None,after=None):
     else:classification='protected_guard_reasons_require_current_custody'
     if config.get('armed') is not True:issues.append('termination_not_explicitly_armed')
     if not config.get('durable_journal') or not config.get('asg_arn'):issues.append('durable_journal_or_exact_ASG_ARN_unconfigured')
-    if not runtime.get('files',{}).get('/run/spot-work/state.json',{}).get('exists'):issues.append('current_work_custody_unknown')
+    startup=fields(runtime,'/run/spot-schedule-guard/startup');metadata=runtime.get('protocol_metadata',{})
+    if (startup.get('boot_id')!=runtime.get('boot_id') or not runtime.get('boot_id') or startup.get('state') not in {'starting','ready'} or not all(metadata.get(name,{}).get('trusted') is True for name in ['runtime','admission.lock','leases','participants'])):issues.append('current_work_custody_unknown')
     if not manifest:issues.append('current_arming_manifest_missing_or_unknown')
     for key in ['replacement_verified','closure_restore_verified','work_tracking_verified','backup_restore_verified']:
         if manifest.get(key) is not True:issues.append('arming_prerequisite_unverified:'+key)

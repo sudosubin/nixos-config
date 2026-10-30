@@ -53,6 +53,11 @@ class AuditTests(unittest.TestCase):
         after=group();after['AutoScalingGroupARN']='arn:recreated';self.assertEqual(self.diagnose(after=after)['classification'],'observation_unknown')
     def test_arming_marker_alone_does_not_prove_current_busy_or_idle(self):
         r=loaded(runtime());r['files']['/etc/spot-schedule-guard.json']['fields']['armed']=True;result=self.diagnose(r);self.assertEqual(result['classification'],'protected_guard_reasons_require_current_custody');self.assertIsNone(result['runtime_busy_reason']);self.assertFalse(result['auto_unprotect_recommended'])
+    def test_custody_uses_actual_protocol_startup_and_owned_metadata(self):
+        r=runtime();r['files']['/run/spot-schedule-guard/startup']={'exists':True,'fields':{'boot_id':'current','state':'starting'}};r['protocol_metadata']={name:{'trusted':True} for name in ['runtime','admission.lock','leases','participants']};self.assertNotIn('current_work_custody_unknown',self.diagnose(r)['deployment_and_safety_gaps']);self.assertFalse(self.diagnose(r)['auto_unprotect_recommended'])
+        r['protocol_metadata']['admission.lock']['trusted']=False;self.assertIn('current_work_custody_unknown',self.diagnose(r)['deployment_and_safety_gaps'])
+    def test_collector_paths_match_canonical_protocol_not_nonexistent_state_json(self):
+        source=(Path(__file__).parent.parent/'modules/linux/spot_work.py').read_text();self.assertIn("RUNTIME = Path('/run/spot-schedule-guard')",source);self.assertIn("self.runtime / 'startup'",source);self.assertIn('/run/spot-schedule-guard/startup',p.COLLECTOR);self.assertNotIn('/run/spot-work',p.COLLECTOR)
     def test_missing_approval_and_schema1_remain_explicit_gaps(self):
         gaps=self.diagnose()['deployment_and_safety_gaps'];self.assertIn('arming_prerequisite_unverified:work_tracking_verified',gaps);self.assertIn('arming_epoch_not_current',gaps);self.assertIn('production_profile_cache_not_schema2',gaps)
     def test_decoder_checks_entire_compressed_body(self):
