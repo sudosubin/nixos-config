@@ -48,7 +48,7 @@ def write_new(path,data,mode=0o600):
 
 def directory(path,mode):
     path=Path(path)
-    if not os.path.lexists(path):path.mkdir(mode=mode)
+    if not os.path.lexists(path):path.mkdir(mode=mode);path.chmod(mode)
     st=path.lstat();require(stat.S_ISDIR(st.st_mode) and st.st_uid==0 and not st.st_mode&0o022,'foreign/writable deployment parent: '+str(path))
 
 
@@ -92,9 +92,13 @@ def install(source,python,asg_arn,expected_boot,expected_system):
         time.sleep(1)
     require(value['observed_at']>=stamp,'second observer pass not confirmed')
     while subprocess.check_output(['systemctl','show',plan['service_name'],'-p','MainPID','--value'],text=True).strip()!='0' and time.monotonic()<end:time.sleep(.2)
-    require(subprocess.check_output(['systemctl','show',plan['service_name'],'-p','MainPID','--value'],text=True).strip()=='0','observer read not settled');after=baseline();require(before==after,'original service/epoch/config/OOM state changed; inspect, never force rollback user state');require(subprocess.check_output(['systemctl','is-active',plan['timer_name']],text=True).strip()=='active','observer timer inactive');require(subprocess.check_output(['systemctl','is-enabled',plan['timer_name']],text=True).strip()=='enabled','persistent timer target link not recognized')
+    require(subprocess.check_output(['systemctl','show',plan['service_name'],'-p','MainPID','--value'],text=True).strip()=='0','observer read not settled');after=baseline();require(before==after,'original service/epoch/config/OOM state changed; inspect, never force rollback user state');require(subprocess.check_output(['systemctl','is-active',plan['timer_name']],text=True).strip()=='active','observer timer inactive');require((wants/plan['timer_name']).is_symlink() and os.readlink(wants/plan['timer_name'])=='../'+plan['timer_name'] and (wants/plan['timer_name']).resolve()==UNITS/plan['timer_name'],'persistent vendor boot link differs')
+    enabled=subprocess.run(['systemctl','is-enabled',plan['timer_name']],capture_output=True,text=True)
+    # Vendor .wants links are boot activation, not administrator enable state.
+    # Current NixOS /etc/systemd/system is immutable; never replace it to make
+    # is-enabled say enabled. Actual reboot proof remains explicitly false.
     for suffix in ['service','timer']:require(subprocess.check_output(['systemctl','show',plan[suffix+'_name'],'-p','FragmentPath','--value'],text=True).strip()==str(UNITS/plan[suffix+'_name']),'observer unit is shadowed')
-    value={'deployed_read_only_observer':True,'deployment_id':plan['id'],'service':plan['service_name'],'timer':plan['timer_name'],'status':plan['marker']['status_path'],'observed_classification':value['classification'],'before':before,'after':after,'persistent_unit_path_and_timer_boot_link_verified':True,'interpreter_GC_root':str(gcroot),'actual_reboot_performed':False,'replacement_root_image_updated':False,'full_termination_guard_deployed':False,'work_tracking_verified':False,'armed':False,'goal_complete':False};write_new(Path(plan['directory'])/'install-verified.json',json.dumps(value,indent=2));return value
+    value={'deployed_read_only_observer':True,'deployment_id':plan['id'],'service':plan['service_name'],'timer':plan['timer_name'],'status':plan['marker']['status_path'],'observed_classification':value['classification'],'before':before,'after':after,'persistent_unit_path_and_timer_boot_link_verified':True,'systemctl_is_enabled':enabled.stdout.strip(),'vendor_boot_link_NOT_admin_enable_state':True,'interpreter_GC_root':str(gcroot),'actual_reboot_performed':False,'replacement_root_image_updated':False,'full_termination_guard_deployed':False,'work_tracking_verified':False,'armed':False,'goal_complete':False};write_new(Path(plan['directory'])/'install-verified.json',json.dumps(value,indent=2));return value
 
 
 def rollback(plan):

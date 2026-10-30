@@ -20,6 +20,8 @@ class DeployTests(unittest.TestCase):
         self.assertFalse(plan['marker']['termination_capable']);self.assertTrue(plan['no_full_guard_install_or_arming'])
     def test_persistent_lower_priority_path_does_not_replace_Nix_managed_etc(self):
         plan=p.render(SOURCE,PYTHON,ARN);self.assertEqual(plan['unit_directory'],'/usr/local/lib/systemd/system');self.assertIn('WantedBy=timers.target',plan['timer']);self.assertIn('OnBootSec=2min',plan['timer']);self.assertIn('Persistent=false',plan['timer'])
+    def test_vendor_boot_link_not_misreported_as_admin_enabled(self):
+        text=Path(p.__file__).read_text();self.assertIn("'systemctl_is_enabled':enabled.stdout.strip()",text);self.assertIn("'vendor_boot_link_NOT_admin_enable_state':True",text);self.assertNotIn("strip()=='enabled'",text)
     def test_config_rejects_nonimmutable_interpreter(self):
         with self.assertRaises(RuntimeError):p.render(SOURCE,'/usr/bin/python3',ARN)
     def test_exclusive_owned_file_never_overwrites(self):
