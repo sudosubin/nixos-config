@@ -146,7 +146,8 @@ def main():
         # A real queued second turn is accepted BEFORE the private fault fence;
         # its later same-stack handoff must continue without a new admission.
         os.write(master,b'ONLY accepted queued fixture');time.sleep(.2);read_console()
-        os.write(master,b'\x13')  # Actual pinned TUI Ctrl+S queue binding.
+        os.write(master,b'\x13');time.sleep(.12);read_console()  # Ctrl+S selects queue mode.
+        os.write(master,b'\r')  # Enter accepts that draft into the real queue.
         wait(lambda:broker.census.record.get('counters',{}).get('queued')==1,'accepted queued turn')
         queued_record=dict(broker.census.record)
         broker.census.protection=lambda:(_ for _ in ()).throw(RuntimeError('PRIVATE fixture admission fault'))
