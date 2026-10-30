@@ -138,7 +138,16 @@ def main():
                     os.write(master,b'\r');wait(lambda:front()['counters']['queued']==1,'accepted queue')
                     signal.pidfd_send_signal(fd,signal.SIGCONT,None,0);os.close(fd);paused=None
                     wait(lambda:b'ENTRY_QUEUE_MOCK_OUTPUT' in read_console(),'two actual PTY mock replies')
-                    wait(lambda:front().get('parsed_output_count',0)>8 and front()['counters']['processing'] is False,'new output parsed and local actions complete')
+                    def complete_parse_prefix():
+                        record=p.ui.shadow.read(store.job(d['session'])/'record.json')
+                        count=record.get('output_segments',0);stdout=0
+                        for number in range(count):
+                            try:row=p.ui.acp.Segments.read(store.job(d['session'])/'output',number)
+                            except FileNotFoundError:return False
+                            if row['channel']=='stdout':stdout+=1
+                        state=front();counters=state.get('counters',{})
+                        return stdout>8 and state.get('parsed_output_count')==stdout and counters.get('processing') is False and counters.get('actions')==0
+                    wait(complete_parse_prefix,'ALL new model stdout parsed and local actions complete, not first-turn prefix')
                 else:
                     fd_client=owned_fd(client.pid,client_start,0,budget['cgroup'])
                     try:
