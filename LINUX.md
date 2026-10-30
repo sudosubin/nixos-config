@@ -400,7 +400,9 @@ python3 scripts/spot-protection-audit.py --output protection-audit.json
 python3 scripts/test-spot-protection-audit.py -v
 ```
 
-후속 배포는 원본 작업을 강제로 재시작하지 않는 관찰·수집 단계부터 진행하고, 재부팅 지속성/실제 모든 작업 custody/backup·real recovery를 통과한 뒤에만 arming과 운영 ASG 전환을 허용한다. 진단 보완은 종료 자동화 배포 완료와 다르다.
+진단은 실제 canonical `/run/spot-schedule-guard/startup` 및 root-owned runtime/admission.lock/leases/participants metadata를 읽는다. 존재하지 않는 `/run/spot-work/state.json`를 사용하지 않으며 canonical source와 경로를 대조하는 회귀도 포함한다. **e7f575b/source237의 실제 ARM21**은 private1GiB/최소2GiB/Swap0/CPU≤1/OOM1/NNP/score1000에서 전부 통과했다(peak33083392/모든 OOM events0/no skips/ResourceWarning). live fence 보존과 정확한 자기 cgroup/definition 소멸을 확인했고, 완전 로그·결과는 원본 `/home/persist/root/protection-audit-20261030/ARM21-full-and-cleanup.json`에 보존했다. 최신 read-only 실제 운영 진단도 `protected_without_deployed_guard`를 반환했다.
+
+후속 배포는 원본 작업을 강제로 재시작하지 않는 관찰·수집 단계부터 진행하고, 재부팅 지속성/실제 모든 작업 custody/backup·real recovery를 통과한 뒤에만 arming과 운영 ASG 전환을 허용한다. **진단 보완은 종료 자동화 배포 완료와 다르며 이번 감사에서 운영 guard를 설치하거나 보호를 해제하지 않았다.**
 
 ## 비용·백업 주의
 
