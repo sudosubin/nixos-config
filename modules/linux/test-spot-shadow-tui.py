@@ -24,6 +24,9 @@ class RuntimeTests(unittest.TestCase):
         self.assertIn('/owned/runtime/tui.js',artifacts['entry.mjs'])
         self.assertIn('installWarmFrontend(',artifacts['entry.mjs'])
         self.assertNotIn('KIRO_ACP_RECORD_PATH',artifacts['entry.mjs'])
+        proof=(HERE/'verify-spot-shadow-tui-entry.py').read_text()
+        self.assertIn("invocation=([marker['cli']] if args.installed else",proof)
+        self.assertIn("'-c',gate,*invocation,'client'",proof)
     def test_private_verification_inherits_exact_budget_no_application_elevation(self):
         budget={'purpose':'verify','slice':'spotvalidation'+'a'*32+'.slice','memory_max':1024**3}
         with patch.object(p.validation,'current',return_value=budget):

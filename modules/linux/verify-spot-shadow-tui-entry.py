@@ -95,8 +95,10 @@ def main():
             folder=p.prepare(cfg,home,'spot-canary',fixture_env=environment);folders.append(folder)
             master,slave=pty.openpty();fcntl.ioctl(slave,termios.TIOCSWINSZ,struct.pack('HHHH',40,120,0,0))
             gate='import os,sys,fcntl,termios;fcntl.ioctl(0,termios.TIOCSCTTY,0);os.execv(sys.argv[1],sys.argv[1:])'
-            client=subprocess.Popen([sys.executable,'-B','-I','-c',gate,sys.executable,'-B','-I',str(code/'spot_shadow_tui.py'),
-                 '--config',str(config),'client','--session',str(folder)],stdin=slave,stdout=slave,stderr=slave,start_new_session=True)
+            invocation=([marker['cli']] if args.installed else
+                [sys.executable,'-B','-I',str(code/'spot_shadow_tui.py'),'--config',str(config)])
+            client=subprocess.Popen([sys.executable,'-B','-I','-c',gate,*invocation,'client','--session',str(folder)],
+                stdin=slave,stdout=slave,stderr=slave,start_new_session=True)
             client_start=p.ui.work.process_start(client.pid);os.close(slave);console=bytearray();paused=None;d=None;done=False
             def read_console():
                 while select.select([master],[],[],0)[0]:
