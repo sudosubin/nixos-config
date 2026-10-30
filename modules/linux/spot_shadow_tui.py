@@ -54,7 +54,7 @@ def settings(value):
         and re.fullmatch('[0-9a-f]{12}',value['shadow_deployment_id'])
         and type(value['fixture_only']) is bool
         and (value['store_directory']=='/var/lib/spot-work-shadow/'+value['shadow_deployment_id']
-             or value['fixture_only'] and re.fullmatch('/tmp/spotshadowtuifixture-[0-9a-f]{32}/store',value['store_directory']))
+             or value['fixture_only'] and re.fullmatch('/tmp/stui-[0-9a-f]{32}/store',value['store_directory']))
         and all(Path(value[n]).is_absolute() for n in ['source_directory','session_directory','backend','frontend','bun','tui'])
         and Path(value['backend']).parent==Path(value['frontend']).parent
         and value['backend'].startswith('/nix/store/') and value['backend'].endswith('/bin/kiro-cli-chat')
@@ -154,6 +154,10 @@ def launch_application(cfg,config,folder):
     return child.wait()
 
 
+def unix_endpoint(path):
+    ui.shadow.require(len(os.fsencode(path))<108,'AF_UNIX pathname exceeds kernel bound; no native start')
+
+
 def prepare(cfg,home,agent,*,fixture_env=None):
     ui.shadow.require(os.geteuid()==0,'root launcher required');arguments(agent)
     home=Path(home);st=home.stat();ui.shadow.require(st.st_uid==1001 and home.is_dir() and not st.st_mode&0o022,'owned UID1001 HOME required')
@@ -161,7 +165,10 @@ def prepare(cfg,home,agent,*,fixture_env=None):
     if fixture_env is not None:
         budget=validation.current();ui.shadow.require(budget and budget['purpose'] in {'verify','canary-verify'},'fixture env requires private owned verification')
     root=Path(cfg['session_directory']);ui.shadow.require(root.is_dir() and root.stat().st_uid==0 and not root.stat().st_mode&0o022,'session namespace untrusted')
-    folder=root/uuid.uuid4().hex;folder.mkdir(mode=0o711)
+    folder=root/uuid.uuid4().hex
+    unix_endpoint(folder/'broker.sock')
+    unix_endpoint(Path(cfg['store_directory'])/'jobs'/('job-'+'f'*32)/'keeper.sock')
+    folder.mkdir(mode=0o711)
     # Private controller configuration; never archive actual user sessions.
     ui.shadow.publish(folder/'session.json',{'schema':1,'id':folder.name,'deployment_id':cfg['deployment_id'],
         'home':str(home),'agent':agent,'binding':binding,'fixture_env':fixture_env},new=True)
@@ -209,7 +216,14 @@ def initializer_members(before,after,client,expected_gate,client_group,keeper_gr
 
 
 def initialize_keeper_budget(cfg,folder):
+    # Type=exec service start/parent cgroup realization must have settled at
+    # PID1 before the gate writes the kernel flag. This is an EMPTY gate only.
+    release=folder/'keeper-initialize-release.json';deadline=time.monotonic()+30
+    while not release.exists() and time.monotonic()<deadline:time.sleep(.02)
+    ui.shadow.require(release.exists(),'empty keeper gate not released; no native effect')
     intent=ui.shadow.read(folder/'keeper-budget-intent.json');budget=intent['budget']
+    ui.shadow.require(ui.shadow.read(release)=={'session':folder.name,'client_pid':intent['client_pid'],
+                       'client_start':intent['client_start']},'keeper initialization release differs')
     ui.shadow.require(intent['boot_id']==Path('/proc/sys/kernel/random/boot_id').read_text().strip()
         and ui.work.process_start(intent['client_pid'])==intent['client_start']
         and Path('/proc/'+str(intent['client_pid'])+'/cgroup').read_text().strip()=='0::'+budget['cgroup'],
@@ -279,6 +293,8 @@ def run_session(cfg,config,folder):
     ui.shadow.require(subprocess.check_output(['systemctl','show',name,'-p','LoadState','--value'],text=True).strip()=='not-found',
                       'foreign/partial keeper unit; no start replay')
     subprocess.run(command,check=True,capture_output=True,text=True)
+    ui.shadow.publish(folder/'keeper-initialize-release.json',{'session':folder.name,
+        'client_pid':os.getpid(),'client_start':ui.work.process_start(os.getpid())},new=True)
     deadline=time.monotonic()+20
     while not (folder/'keeper.json').exists() and time.monotonic()<deadline:time.sleep(.02)
     ui.shadow.require((folder/'keeper.json').exists(),'keeper start outcome unknown; inspect intent, never replay')
@@ -334,5 +350,17 @@ def main():
 
 if __name__=='__main__':
     try:main()
-    except (OSError,ValueError,RuntimeError,subprocess.SubprocessError):
+    except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as error:
+        # Content-free diagnostics: no exception message, argv, environment,
+        # prompt, RPC IDs or user payload. Only trusted controller frame names.
+        import traceback
+        try:
+            folder=Path(sys.argv[sys.argv.index('--session')+1])
+            st=folder.lstat()
+            if os.geteuid()==0 and st.st_uid==0 and not st.st_mode&0o022 and re.fullmatch('[0-9a-f]{32}',folder.name):
+                ui.shadow.publish(folder/('controller-error-'+str(os.getpid())+'.json'),
+                    {'error_type':type(error).__name__,'controller_frames':[
+                        {'file':Path(row.filename).name,'function':row.name,'line':row.lineno}
+                        for row in traceback.extract_tb(error.__traceback__)]},new=True)
+        except (OSError,ValueError,RuntimeError,IndexError):pass
         print('New TUI outcome unknown/admission refused; inspect retained intent, no replay or forced cleanup',file=sys.stderr);sys.exit(75)

@@ -43,7 +43,7 @@ def main():
         marker=json.loads(Path('/etc/spot-work-shadow-tui-current.json').read_text());code=Path(marker['cli']).parent
     else:code=Path(__file__).parent
     sys.path.insert(0,str(code));import spot_shadow_tui as p
-    base=Path('/tmp/spotshadowtuifixture-'+uuid.uuid4().hex);base.mkdir(mode=0o755)
+    base=Path('/tmp/stui-'+uuid.uuid4().hex);base.mkdir(mode=0o755)
     if args.installed:
         config=code/'config.json';cfg=p.check_config(config)
         p.ui.shadow.require(cfg['deployment_id']==marker['deployment_id'],'installed marker/source mismatch')
@@ -196,7 +196,8 @@ def main():
             data=path.read_bytes();p.ui.shadow.require(len(data)<=2*1024**2,'fixture body bound exceeded')
             snapshot['records'][str(path.relative_to(store.root))]={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'body_base64':base64.b64encode(data).decode()}
         for folder in folders:
-            for name in ['session.json','keeper.json','frontend.json','keeper-start-intent.json','keeper-budget-intent.json','keeper-budget-verified.json']:
+            for name in ['session.json','keeper.json','frontend.json','keeper-start-intent.json','keeper-budget-intent.json','keeper-budget-verified.json',
+                         'keeper-initialize-release.json',*[path.name for path in folder.glob('controller-error-*.json')]]:
                 path=folder/name
                 if path.exists():
                     data=path.read_bytes();snapshot['records']['sessions/'+folder.name+'/'+name]={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'body_base64':base64.b64encode(data).decode()}

@@ -68,6 +68,12 @@ class RuntimeTests(unittest.TestCase):
         text=inspect.getsource(p.initialize_keeper_budget)
         self.assertLess(text.index('initializer_members('),text.index("write_text('1')"))
         self.assertIn('definition_sha256',text);self.assertIn('current_group()',text)
+    def test_unix_kernel_path_bound_is_checked_before_any_native_effect(self):
+        p.unix_endpoint(Path('/tmp/stui-'+'a'*32+'/store/jobs/job-'+'b'*32+'/keeper.sock'))
+        p.unix_endpoint(Path('/var/lib/spot-work-shadow/498e2c5726a5/jobs/job-'+'a'*32+'/keeper.sock'))
+        with self.assertRaisesRegex(RuntimeError,'AF_UNIX'):
+            p.unix_endpoint(Path('/tmp/spotshadowtuifixture-'+'a'*32+'/store/jobs/job-'+'b'*32+'/keeper.sock'))
+        self.assertLess(inspect.getsource(p.prepare).index('unix_endpoint('),inspect.getsource(p.prepare).index('folder.mkdir('))
     def test_config_requires_exact_fields_hashes_and_original_lineage(self):
         spec=importlib.util.spec_from_file_location('deploy_for_runtime_test',Path(__file__).parents[2]/'scripts/spot-deploy-shadow-tui.py')
         module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
