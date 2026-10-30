@@ -65,7 +65,7 @@ class Segments:
         self.count, self.bytes = 0, 0
         self.lock = threading.RLock()
 
-    def append(self, channel, data):
+    def append(self, channel, data, *, visible=True):
         shadow.require(channel in {'stdout','stderr'} and isinstance(data, bytes)
                        and 0 < len(data) <= acp.MAX_FRAME+1, 'invalid output segment')
         with self.lock:
@@ -82,14 +82,29 @@ class Segments:
                    'sha256':hashlib.sha256(data).hexdigest(),'consumer_delivery':'unverified'}
             shadow.publish(self.directory/(str(number).zfill(12)+'.json'),row,new=True)
             self.count += 1; self.bytes += len(data)
+            if visible:self.expose(number)
             return row
+
+    def expose(self, number):
+        # Separate immutable OUTPUT visibility commit, never startup readiness.
+        # Keeper calls this only after tracker state is applied (or admission is
+        # conservatively closed), so a visible initialize reply cannot race it.
+        shadow.require(type(number) is int and 0<=number<65536,'invalid output exposure')
+        row=shadow.read(self.directory/(str(number).zfill(12)+'.json'),self.owner)
+        digest=hashlib.sha256(json.dumps(row,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        shadow.publish(self.directory/(str(number).zfill(12)+'.exposed'),
+                       {'sequence':number,'row_sha256':digest,'consumer_delivery':'unverified'},new=True)
 
     @staticmethod
     def read(directory, number, owner=0):
         shadow.require(type(number) is int and 0 <= number < 65536, 'invalid output sequence')
         directory = Path(directory); shadow.directory(directory,owner)
         prefix = str(number).zfill(12)
+        exposed = shadow.read(directory/(prefix+'.exposed'),owner)
         row = shadow.read(directory/(prefix+'.json'),owner)
+        shadow.require(exposed.get('sequence')==number and exposed.get('consumer_delivery')=='unverified'
+                       and exposed.get('row_sha256')==hashlib.sha256(json.dumps(row,sort_keys=True,separators=(',',':')).encode()).hexdigest(),
+                       'output exposure commit unknown')
         fd = os.open(directory/(prefix+'.bin'),os.O_RDONLY|os.O_NOFOLLOW)
         with os.fdopen(fd,'rb') as stream:
             st = os.fstat(stream.fileno()); data = stream.read(acp.MAX_FRAME+2)
@@ -211,7 +226,7 @@ class Keeper:
             if capacity:break
             self.unknown('output_backpressure'); self.done.wait(.2)
         try:
-            row=self.segments.append(channel,data)
+            row=self.segments.append(channel,data,visible=False)
             with self.state_lock:
                 self.store.update(self.lease,output_segments=self.segments.count,
                                   output_bytes=self.segments.bytes,consumer_delivery='unverified')
@@ -220,6 +235,12 @@ class Keeper:
             # A data/metadata write may have committed. NEVER repeat that write,
             # consume another frame, acknowledge delivery or force-kill work.
             self.io_uncertain=True; self.unknown('output_write_uncertain_no_retry')
+            threading.Event().wait()
+
+    def expose(self,row):
+        try:self.segments.expose(row['sequence'])
+        except (OSError,ValueError,RuntimeError):
+            self.io_uncertain=True; self.unknown('output_exposure_uncertain_no_retry')
             threading.Event().wait()
 
     def maybe_close_input(self):
@@ -234,15 +255,16 @@ class Keeper:
             while True:
                 raw=self.child.stdout.readline(acp.MAX_FRAME+1)
                 if not raw:break
-                self.retain('stdout',raw)  # Durable before ANY client can read.
+                row=self.retain('stdout',raw)  # Durable but NOT YET visible.
                 if len(raw)>acp.MAX_FRAME or not raw.endswith(b'\n'):
-                    self.unknown('oversized_or_incomplete_backend_frame')
+                    self.unknown('oversized_or_incomplete_backend_frame'); self.expose(row)
                     while raw and not raw.endswith(b'\n'):
                         raw=self.child.stdout.readline(acp.MAX_FRAME+1)
-                        if raw:self.retain('stdout',raw)
+                        if raw:self.expose(self.retain('stdout',raw))
                     continue
                 try:self.tracker.backend(json.loads(raw))
                 except (OSError,ValueError,TypeError,RuntimeError):self.unknown('backend_tracking_unknown')
+                self.expose(row)
                 self.maybe_close_input()
         except (OSError,ValueError,RuntimeError):self.unknown('backend_transport_unknown')
         finally:
@@ -252,7 +274,7 @@ class Keeper:
 
     def stderr_reader(self):
         try:
-            while raw:=self.child.stderr.read1(65536):self.retain('stderr',raw)
+            while raw:=self.child.stderr.read1(65536):self.expose(self.retain('stderr',raw))
         except (OSError,ValueError,RuntimeError):self.unknown('stderr_transport_unknown')
         finally:self.stderr_done.set()
 

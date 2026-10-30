@@ -60,6 +60,20 @@ class KeeperTests(unittest.TestCase):
         self.assertEqual(row['consumer_delivery'],'unverified')
         for lease in self.k.protocol.leases.values():self.assertEqual(self.record(lease)['output_delivery'],'unverified')
         self.assertFalse(self.store.status()['all_work_idle'])
+    def test_durable_body_is_not_exposed_until_explicit_visibility_commit(self):
+        row=self.k.segments.append('stdout',b'fixture',visible=False)
+        with self.assertRaises(FileNotFoundError):p.Segments.read(self.k.path/'output',0,os.geteuid())
+        self.k.segments.expose(row['sequence'])
+        self.assertEqual(base64.b64decode(p.Segments.read(self.k.path/'output',0,os.geteuid())['data_base64']),b'fixture')
+    def test_initialize_tracking_precedes_reply_exposure_and_next_input(self):
+        self.k.input(self.request(0,'initialize'))
+        response={'jsonrpc':'2.0','id':0,'result':{'protocolVersion':1,'agentCapabilities':{}}}
+        row=self.k.retain('stdout',(json.dumps(response)+'\n').encode())
+        self.assertFalse(self.k.tracker.initialized)
+        with self.assertRaises(FileNotFoundError):p.Segments.read(self.k.path/'output',row['sequence'],os.geteuid())
+        self.k.tracker.backend(response);self.k.expose(row)
+        self.assertTrue(self.k.tracker.initialized)
+        self.assertTrue(self.k.input(self.request(1,'session/prompt'))['admitted'])
     def test_terminal_response_is_pending_delivery_and_record_never_removed(self):
         self.initialize();self.k.input(self.request(1,'session/prompt'))
         self.k.tracker.backend({'jsonrpc':'2.0','id':1,'result':{'stopReason':'end_turn'}})

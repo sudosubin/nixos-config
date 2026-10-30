@@ -6,6 +6,7 @@ mock and fake outputs are SYNTHETIC; a file/pipe read is NOT delivery authority.
 """
 import base64
 import json
+import hashlib
 import os
 from pathlib import Path
 import select
@@ -86,6 +87,25 @@ class KeeperLinuxTests(unittest.TestCase):
                 try:self.child.wait(timeout=3)
                 except subprocess.TimeoutExpired:self.child.kill();self.child.wait(timeout=3)
         for stream in self.logs:stream.close()
+        evidence=os.environ.get('SPOT_WARM_ACP_TEST_EVIDENCE_DIR')
+        if evidence:
+            destination=Path(evidence);p.shadow.directory(destination)
+            snapshot={'case':self._testMethodName,'fixture_only_no_real_models_or_credentials':True,
+                      'store_records_and_output':{},'logs':{},'descriptor':None}
+            total=0
+            for path in self.root.rglob('*'):
+                if not path.is_file() or path.is_symlink():continue
+                relative=str(path.relative_to(self.root))
+                if path.name not in {'seed.json','record.json'} and '/output/' not in '/'+relative:continue
+                data=path.read_bytes();total+=len(data)
+                if total>8*1024**2:raise RuntimeError('owned fixture evidence exceeds bound; no complete proof')
+                snapshot['store_records_and_output'][relative]={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),
+                                                                'body_base64':base64.b64encode(data).decode()}
+            for name in ['keeper.stdout','keeper.stderr']:
+                path=self.base/name
+                if path.exists():snapshot['logs'][name]=path.read_text()
+            if self.descriptor.exists():snapshot['descriptor']=json.loads(self.descriptor.read_text())
+            with (destination/(self._testMethodName+'.json')).open('x') as out:json.dump(snapshot,out,indent=2)
         self.temp.cleanup()
 
     def start(self,native=False,uncertain=False,startup_exit=False):
