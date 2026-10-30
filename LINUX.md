@@ -384,6 +384,24 @@ nix eval --no-write-lock-file --raw \
 - 고정16:46:28Z nativeoff 뒤 실제 시험 ASG Min/Max/Desired0/member0 및 세 인스턴스 terminated를 읽었다. 최종 native ASG service-linked TerminateInstances **16:46:43Z/event19dbd3a0**는 forcefalse/skipOsShutdownfalse였다. 수동 deadline 연장/강제 종료/분리를 하지 않았다. 전체 bucket 당시 **67objects**를 원본 `/home/persist/root/phase36-complete-S3-mirror-8266a11df45b4c4a9ad63ff1fad6cf02`에서 전체 SHA/길이/ETag로 검증했다(receipt SHA `c775ac403c774fb14889c2fdfd72ceb13b579b46aa2c379df8cb4eb8534cbde3`). 뒤에 추가한 source/control85+plan archive574660bytes/SHA `3c89166a6262e0c698950fcb271e798704691cdc9db05c1d204cdc4552615f83`도 원본 `phase36-current-controls-15d44d7269c545edab5fca1e90037695`에서 전87record를 별도 검증했다. 이미지 볼륨은 **16:56:57Z CFN 전용 role의 DeleteVolume/eventc3c48e43**로 실제 삭제됐고 genuine timeout→ROLLBACK_COMPLETE/두 resource DELETE_COMPLETE/실제 volume 부재를 확인했다. 그 빈 stack·시험 ASG(no force)·시험 LT·profile·고객 role2개·bucket68objects·자기 원본 임시 policy2개도 삭제/부재를 재조회했다. 의도적 후보 AMI/snapshot/운영 후보 LT2만 보존하며 원본 IAM baseline2 SHA는 그대로다.
 - **8d346341/source235의 실제 ARM140/9suites**도 별도 private1GiB/최소2GiB/Swap0/CPU≤1/OOM1/NNP/score1000에서 모두 통과했다. peak37199872/모든 OOM events0/no skips/ResourceWarning, live fence 보존/정확한 단위·정의·cgroup 소멸을 재확인했다. 원본 `/home/persist/root/rollout-phase36-ARM140-20261029/ARM140-full-and-cleanup.json`, result SHA `1a4099fe3cc0046abbd9e9f1f056a6bd31166ca723347d6499d1494e223e64b4`. 이는 새 helper 회귀이며 d521/source231의 whole618 증거와 구별한다. 보존 후보 AMI/snapshot/운영 LT2는 의도적 예외이고 운영 원본의 EC2/EBS/EIP 비용도 계속된다.
 
+## 현재 종료 보호의 원인 확인 (2026-10-30 실측)
+
+운영의 **ASG 보호 설정**과 **실행 중인 guard의 작업 보류 판정**을 구분해야 한다.
+
+- 실제 운영은 `ProtectedFromScaleIn=true`, ASG Desired0/new-member protectiontrue다. 최근02:00 KST native 종료 요청은 `Could not scale to desired capacity because all remaining instances are protected from scale-in.`으로 취소됐다.
+- 현재 실행 중인 구형 `2gb47…` 시스템에는 **guard 실행 파일/service/timer가 없다**(`LoadState=not-found`). `/etc/spot-schedule-guard.json`의 `armed=false`는 남아 있는 수동 설정일 뿐, 실행 중인 observer가 아니다. `/run/spot-schedule-guard/status.json`과 현재 작업 custody/arming manifest도 없다. 따라서 현재 보호 이유를 “guard가 특정 작업을 busy로 판단했다”라고 설명하면 부정확하다. 실제 원인은 **보호 플래그 유지 + 운영 controller 배포 누락**이다.
+- 새 AMI/후보LT2/시험 성공은 기존 운영에 배포됐다는 뜻이 아니다. 현재 cache schema1/unencrypted home/미배포 작업 추적·백업 및 복원 게이트도 남아 있으므로 보호를 먼저 해제하거나 승인을 채우지 않는다. Herdr/Kiro/Bun 프로세스의 존재나 빈 registry도 busy/idle 증거로 사용하지 않는다.
+- `scripts/spot-protection-audit.py`는 standard-role CloudShell에서 ASG+bounded SSM metadata를 읽어 `protected_without_deployed_guard`, timer 비활성, observation mode, 관찰 unknown을 구분한다. guard를 실행하거나 lease 초기화/서비스 reload·restart/보호 해제/IAM 변경을 하지 않는다. 단발 reader는 private-network128MiB/Swap0/CPU10/OOM-group/NNP로 제한된다. gzip 전체 SHA/길이/schema/최대1MiB/SSM truncation/ASG 전후 변경을 검사하며 **자동 보호 해제를 권하지 않는다**.
+
+```sh
+# 공개 feature/linux-on-cloud checkout + standard AWS CLI role, Mac 상주 작업 불필요
+python3 scripts/spot-protection-audit.py --output protection-audit.json
+# 로컬 operator profile이 필요한 경우에만 --profile을 명시한다.
+python3 scripts/test-spot-protection-audit.py -v
+```
+
+후속 배포는 원본 작업을 강제로 재시작하지 않는 관찰·수집 단계부터 진행하고, 재부팅 지속성/실제 모든 작업 custody/backup·real recovery를 통과한 뒤에만 arming과 운영 ASG 전환을 허용한다. 진단 보완은 종료 자동화 배포 완료와 다르다.
+
 ## 비용·백업 주의
 
 - EIP는 연결 중에도, 미연결 보유 중에도 public IPv4 요금이 발생함.
