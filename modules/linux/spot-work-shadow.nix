@@ -45,6 +45,14 @@ in {
     assertions = [{ assertion = config.services.spotProtectionObserver.enable or false;
       message = "shadow jobs require independently observed protection; never infer it from local empty state"; }];
     environment.systemPackages = [ tool ];
+    environment.etc."spot-work-shadow-current.json".text = builtins.toJSON {
+      deployment_id = identifier;
+      cli = "${tool}/bin/spot-work-shadow";
+      status_path = "${directory}/status.json";
+      shadow_only = true;
+      termination_capable = false;
+      work_tracking_verified = false;
+    };
     systemd.tmpfiles.rules = [
       "d /var/lib/spot-work-shadow 0755 root root -"
       "d ${directory} 0700 root root -"

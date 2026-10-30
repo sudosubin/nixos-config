@@ -40,6 +40,11 @@ class DeployTests(unittest.TestCase):
             with patch.object(p,'MARKER',marker),patch.object(p.os,'geteuid',return_value=0),patch.object(p.subprocess,'run') as run:
                 with self.assertRaises(RuntimeError):p.disable(self.plan())
                 run.assert_not_called()
+    def test_future_Nix_marker_points_to_declarative_package_not_warm_runtime(self):
+        text=(SOURCE/'modules/linux/spot-work-shadow.nix').read_text()
+        self.assertIn('environment.etc."spot-work-shadow-current.json".text',text)
+        self.assertIn('cli = "${tool}/bin/spot-work-shadow";',text)
+        self.assertIn('work_tracking_verified = false;',text)
     def test_static_timer_not_a_paid_scheduler_or_force_deadline(self):
         text=self.plan()['timer']
         self.assertIn('OnUnitInactiveSec=1min',text);self.assertIn('Persistent=false',text)
