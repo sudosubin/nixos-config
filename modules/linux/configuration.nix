@@ -21,6 +21,7 @@
     ./spot-work.nix
     ./spot-work-shadow.nix
     ./spot-work-shadow-acp.nix
+    ./spot-work-shadow-tui.nix
     ./spot-acp.nix
     ./spot-gateway.nix
     ./spot-profile-cache.nix
@@ -40,6 +41,9 @@
   services.spotWorkShadow.enable = true;
   # Explicit new ACP entry only; never replace an existing TUI/session.
   services.spotWorkShadowAcp.enable = true;
+  # Warm opt-in TUI is separate; package the exact public vendor software and
+  # verify replacement-root recovery before enabling this declarative package.
+  services.spotWorkShadowTui.enable = false;
 
   services.spotProfileCache.enable = true;
 
