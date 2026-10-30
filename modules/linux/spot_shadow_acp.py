@@ -380,7 +380,8 @@ def drop_command(backend,arguments,home,extra_env=None):
         environment.update(extra_env)
     gate=('import os,sys,json,ctypes;libc=ctypes.CDLL(None,use_errno=True);'
           'assert libc.prctl(38,1,0,0,0)==0;os.setgroups([]);os.setgid(int(sys.argv[1]));os.setuid(1001);'
-          'os.execvpe(sys.argv[3],sys.argv[3:],json.loads(sys.argv[2]))')
+          'environment=json.loads(sys.argv[2]);os.chdir(environment["HOME"]);'
+          'os.execvpe(sys.argv[3],sys.argv[3:],environment)')
     return [sys.executable,'-B','-I','-c',gate,str(user.pw_gid),json.dumps(environment),str(backend),*arguments]
 
 

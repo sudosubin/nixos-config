@@ -56,7 +56,7 @@ class KeeperLinuxTests(unittest.TestCase):
     def setUp(self):
         b=validation.current();self.assertTrue(b and b['purpose'] in {'verify','canary-verify'})
         self.assertEqual(os.geteuid(),0);p.work.subreaper()
-        self.temp=tempfile.TemporaryDirectory(prefix='warmacp-',dir='/run');self.base=Path(self.temp.name);self.base.chmod(0o755)
+        self.temp=tempfile.TemporaryDirectory(prefix='warmacp-',dir='/tmp');self.base=Path(self.temp.name);self.base.chmod(0o755)
         self.root=self.base/'store';self.root.mkdir(mode=0o700);self.home=self.base/'home';self.home.mkdir(mode=0o700)
         os.chown(self.home,1001,__import__('pwd').getpwuid(1001).pw_gid)
         for name in ['.runtime','.kiro/settings','.kiro/agents']:
