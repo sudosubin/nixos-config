@@ -69,7 +69,7 @@ def main():
         +'process.env.KIRO_CHAT_CLI_BIN='+json.dumps(str(proxy))+';\ninstallWarmFrontend('+json.dumps(str(front_tool))+');\n'
         +'process.argv[1]='+json.dumps(str(public/'tui.js'))+';\n'
         +'import {writeFileSync} from "node:fs";const probe=setInterval(()=>{try{const s=globalThis[Symbol.for("nixos.spot.kiro.frontend.v1")].store?.getState();if(s)writeFileSync('
-        +json.dumps(str(home/'fixture-input-shape.json'))+',JSON.stringify({lines:s.input.lines.map(x=>x.length),command:s.commandInputValue.length,images:s.pendingImages.length,files:s.attachedFiles.length,pendingFile:s.pendingFileAttachment!=null,voice:s.pendingVoiceText!=null||s.voicePartialText!=null,restore:s.queuedInputRestore!=null}));}catch{}},100);probe.unref();\n'
+        +json.dumps(str(home/'fixture-input-shape.json'))+',JSON.stringify({lines:s.input.lines.map(x=>x.length),command:s.commandInputValue.length,images:s.pendingImages.length,files:s.attachedFiles.length,pendingFile:s.pendingFileAttachment!=null,voice:s.pendingVoiceText!=null||s.voicePartialText!=null,restore:s.queuedInputRestore!=null,queue:s.activeInterruptMode==="queue"}));}catch{}},100);probe.unref();\n'
         +'await import(pathToFileURL(process.argv[1]).href);\n');entry.chmod(0o444)
     env={'KIRO_API_KEY':'test-only-nonfunctional-no-network-key','KIRO_MOCK_CHAT_RESPONSE':str(mock),
          'PATH':str(public)+':'+str(home/'.local/bin')+':'+str(NATIVE_ROOT)+':/run/current-system/sw/bin',
@@ -127,9 +127,19 @@ def main():
         draft=b'ONLY_SYNTHETIC_DRAFT'
         os.write(master,draft);wait(lambda:broker.census.record.get('counters',{}).get('draft') is True,'draft custody')
         draft_record=dict(broker.census.record)
-        # Control keys must be separate terminal events, not one pasted chunk.
-        for _ in draft:
-            os.write(master,b'\x7f');read_console();time.sleep(.12)
+        # Each control key gets a fixture-only length acknowledgement. A fixed
+        # sleep can still coalesce keys under CPU throttling; never retry one
+        # whose outcome is unknown, and never clear the vendor store directly.
+        def input_shape():
+            try:return json.loads((home/'fixture-input-shape.json').read_text())
+            except (OSError,ValueError):return {}
+        def input_length():
+            value=input_shape()
+            return sum(value['lines'])+value['command'] if value else None
+        wait(lambda:input_length()==len(draft),'actual typed draft length')
+        for remaining in range(len(draft)-1,-1,-1):
+            os.write(master,b'\x7f')
+            wait(lambda:input_length()==remaining,'one acknowledged backspace event')
         wait(lambda:broker.census.record.get('counters',{}).get('draft') is False,'draft cleared but custody retained')
         native=ui.shadow.read(session/'record.json');pid=native['backend_pid'];start=native['backend_start']
         ui.shadow.require(Path('/proc/'+str(pid)+'/cgroup').read_text().strip()=='0::'+budget['cgroup'] and work_start(pid)==start,'not owned mock backend')
@@ -145,8 +155,10 @@ def main():
         wait(pending_request,'leased native request')
         # A real queued second turn is accepted BEFORE the private fault fence;
         # its later same-stack handoff must continue without a new admission.
-        os.write(master,b'ONLY accepted queued fixture');time.sleep(.2);read_console()
-        os.write(master,b'\x13');time.sleep(.12);read_console()  # Ctrl+S selects queue mode.
+        queued_input=b'ONLY accepted queued fixture';os.write(master,queued_input)
+        wait(lambda:input_length()==len(queued_input),'actual queued draft length')
+        os.write(master,b'\x13')  # Ctrl+S selects queue mode; fixture probe only observes.
+        wait(lambda:input_shape().get('queue') is True,'native queue mode selected')
         os.write(master,b'\r')  # Enter accepts that draft into the real queue.
         wait(lambda:broker.census.record.get('counters',{}).get('queued')==1,'accepted queued turn')
         queued_record=dict(broker.census.record)
