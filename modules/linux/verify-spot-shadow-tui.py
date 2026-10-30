@@ -60,7 +60,7 @@ def main():
     for name in ['bun','tui.js']:(home/'.local/share/kiro-cli'/name).symlink_to(public/name)
     agent=home/'.kiro/agents/spot-canary.json';agent.write_text(json.dumps({'name':'spot-canary','description':'ONLY private TUI mock',
          'tools':[],'allowedTools':[],'mcpServers':{},'resources':[],'hooks':{}}));agent.chmod(0o644)
-    mock=base/'mock.json';mock.write_text(json.dumps([['SHADOW_TUI_MOCK_OUTPUT'],['MUST_NOT_RUN_SECOND_MODEL']]));mock.chmod(0o644)
+    mock=base/'mock.json';mock.write_text(json.dumps([['SHADOW_TUI_MOCK_OUTPUT'],['SHADOW_TUI_QUEUED_OUTPUT'],['MUST_NOT_RUN_THIRD_MODEL']]));mock.chmod(0o644)
     root=base/'store';root.mkdir(mode=0o700);store=ui.shadow.Store(root);binding=ui.shadow.protected_observation();store.initialize(binding)
     python=sys.executable
     front_tool=public/'spot-shadow-front';front_tool.write_text('#!'+python+' -I\nimport sys;sys.dont_write_bytecode=True;sys.path.insert(0,'+repr(str(public))+');import spot_shadow_frontend as f;f.main()\n');front_tool.chmod(0o555)
@@ -134,6 +134,7 @@ def main():
         native=ui.shadow.read(session/'record.json');pid=native['backend_pid'];start=native['backend_start']
         ui.shadow.require(Path('/proc/'+str(pid)+'/cgroup').read_text().strip()=='0::'+budget['cgroup'] and work_start(pid)==start,'not owned mock backend')
         fd=os.pidfd_open(pid,0);signal.pidfd_send_signal(fd,signal.SIGSTOP,None,0);paused=(fd,pid,start)
+        parse_before_model=broker.census.record.get('parsed_output_count',0)
         os.write(master,b'ONLY synthetic TUI model prompt.\r')
         def pending_request():
             for path in (root/'jobs').iterdir():
@@ -142,16 +143,28 @@ def main():
                 if record.get('parent_session')==d['session'] and record.get('provider_terminal_observed') is False:return True
             return False
         wait(pending_request,'leased native request')
+        # A real queued second turn is accepted BEFORE the private fault fence;
+        # its later same-stack handoff must continue without a new admission.
+        os.write(master,b'ONLY accepted queued fixture');time.sleep(.2);read_console()
+        os.write(master,b'\x13')  # Actual pinned TUI Ctrl+S queue binding.
+        wait(lambda:broker.census.record.get('counters',{}).get('queued')==1,'accepted queued turn')
+        queued_record=dict(broker.census.record)
         broker.census.protection=lambda:(_ for _ in ()).throw(RuntimeError('PRIVATE fixture admission fault'))
         rejected_before=broker.census.record['admission_rejections']
-        os.write(master,b'MUST_NOT_ACCEPT_SECOND_PROMPT\r')
+        os.write(master,b'MUST_NOT_ACCEPT_THIRD_PROMPT\r')
         wait(lambda:broker.census.record['admission_rejections']>rejected_before,'synchronous pre-mutation rejection')
         signal.pidfd_send_signal(fd,signal.SIGCONT,None,0);os.close(fd);paused=None
         wait(lambda:b'SHADOW_TUI_MOCK_OUTPUT' in read_console(),'actual PTY output')
-        wait(lambda:broker.census.record.get('parsed_output_count',0)>0,'content-free parsed output watermark')
-        ui.shadow.require(b'MUST_NOT_RUN_SECOND_MODEL' not in read_console(),'second model started')
+        wait(lambda:b'SHADOW_TUI_QUEUED_OUTPUT' in read_console(),'accepted queue continuation behind fault fence')
+        wait(lambda:broker.census.record.get('parsed_output_count',0)>parse_before_model
+             and broker.census.record.get('parsed_output_count',0)==len(broker.census.offered),
+             'new model output parse watermark caught up, not just initialization')
+        ui.shadow.require(b'MUST_NOT_RUN_THIRD_MODEL' not in read_console(),'third model started')
         success=True
         proof={'actual_pinned_TUI_draft_native_turn_and_pre_mutation_denial_passed':True,'draft_snapshot':draft_record,
+               'accepted_queued_snapshot':queued_record,'parsed_before_model':parse_before_model,
+               'parsed_after_models':broker.census.record['parsed_output_count'],'offered_stdout_segments':len(broker.census.offered),
+               'positive_queue_continuation_and_new_model_parse_prefix_verified':True,
                'frontend_record':broker.census.record,'retained_store_status':store.status(),'keeper_session':d['session'],
                'bun_sha256':ui.front.BUN_SHA,'bundle_sha256':ui.front.BUNDLE_SHA,'native_sha256':ui.acp.NATIVE_SHA,
                'parsed_receipt_is_NOT_UI_delivery':True,'all_work_tracking_verified':False,'armed':False,'goal_complete':False}
