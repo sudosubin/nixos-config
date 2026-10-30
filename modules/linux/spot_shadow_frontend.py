@@ -71,6 +71,14 @@ class Census:
                               parsed_output_count=0,output_delivery='unverified')
             return {'id':self.ident,'seq':0,'accepted':True}
 
+    def actor_unknown(self):
+        # Root broker's process-identity observer, NOT a caller ACK/takeover.
+        # Do not advance the actor's RPC sequence, delete or initialize custody.
+        with self.lock:
+            if self.record is not None and self.record['healthy']:
+                self.store.update(self.record,healthy=False,state='frontend_actor_exit_or_identity_unknown',
+                                  heartbeat_at=time.time())
+
     def invoke(self,action,value,owner):
         with self.lock:
             shadow.require(self.owner==owner and self.record is not None,'frontend actor unknown; no rebind')

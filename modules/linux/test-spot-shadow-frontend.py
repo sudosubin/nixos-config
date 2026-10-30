@@ -68,6 +68,15 @@ class CensusTests(unittest.TestCase):
     def test_wrong_sequence_does_not_replay_state(self):
         with self.assertRaises(RuntimeError):self.c.invoke('state',{'id':self.attached['id'],'seq':9,'counters':IDLE},self.actor)
         self.assertEqual(self.c.record['seq'],0)
+    def test_root_actor_loss_keeps_sequence_and_custody_without_rearming(self):
+        self.invoke('state',counters=dict(IDLE,draft=True));seq=self.c.record['seq']
+        self.c.actor_unknown();self.c.actor_unknown()
+        self.assertEqual(self.c.record['seq'],seq);self.assertFalse(self.c.record['healthy'])
+        self.assertEqual(self.c.record['state'],'frontend_actor_exit_or_identity_unknown')
+        self.assertEqual(len(self.store.status()['jobs']),2)
+        self.assertFalse(self.invoke('admit')['accepted'])
+        self.invoke('state',counters=IDLE);self.assertFalse(self.c.record['healthy'])
+        self.assertEqual(self.c.record['output_delivery'],'unverified')
     def test_fault_is_sticky_but_does_not_clear_record(self):
         self.invoke('fault');self.assertFalse(self.invoke('admit')['accepted'])
         self.invoke('state',counters=IDLE)

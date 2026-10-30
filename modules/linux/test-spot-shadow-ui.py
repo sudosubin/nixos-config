@@ -50,6 +50,12 @@ class BrokerTests(unittest.TestCase):
         self.assertNotIn('value=s.run(',text)
         text=inspect.getsource(p.opaque_run);self.assertIn('acp.drop_command(backend,arguments,home',text)
         self.assertIn('work.run_job(adapter,command)',text)
+    def test_actor_identity_loss_marks_unknown_without_touching_keeper_or_rebinding(self):
+        self.b.actor={'pid':100,'pid_start':78,'pid_namespace':'pid:[42]'}
+        self.b.census.actor_unknown=Mock();self.b.keeper_rpc=Mock()
+        self.b.observe_actor();self.b.census.actor_unknown.assert_called_once_with()
+        self.b.keeper_rpc.assert_not_called();self.assertIsNone(self.b.proxy)
+        self.assertEqual(self.b.actor['pid_start'],78)
     def test_no_full_admission_readiness_or_delivery_authority(self):
         text=Path(p.__file__).read_text()
         self.assertNotIn('work.Protocol(',text);self.assertNotIn('startup_ready(',text)

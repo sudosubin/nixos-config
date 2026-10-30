@@ -45,7 +45,9 @@ def copy_verified(source,target,expected):
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--evidence',type=Path,required=True);args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--evidence',type=Path,required=True)
+    parser.add_argument('--case',choices=['queue','consumer-exit'],default='queue')
+    parser.add_argument('--attachment',action='store_true',help='ONLY synthetic file via actual @ picker');args=parser.parse_args()
     budget=validation.current();ui.shadow.require(budget and budget['purpose'] in {'verify','canary-verify'},'owned private verify budget required')
     evidence=args.evidence;evidence.mkdir(mode=0o700);temporary=tempfile.TemporaryDirectory(prefix='warmtui-',dir='/tmp')
     base=Path(temporary.name);base.chmod(0o755);public=base/'public';public.mkdir(mode=0o755)
@@ -56,6 +58,9 @@ def main():
     user=pwd.getpwuid(1001);home=base/'home';home.mkdir(mode=0o700);os.chown(home,1001,user.pw_gid)
     for relative in ['.runtime','.kiro/agents','.kiro/settings','.local/bin','.local/share/kiro-cli']:(home/relative).mkdir(parents=True,exist_ok=True)
     for path in home.rglob('*'):os.chown(path,1001,user.pw_gid)
+    attachment_marker='ONLY_SYNTHETIC_ATTACHMENT_CONTENT_42'
+    if args.attachment:
+        attachment=home/'fixture-attachment.txt';attachment.write_text(attachment_marker+'\n');attachment.chmod(0o644)
     for name in ['kiro-cli','kiro-cli-chat']:(home/'.local/bin'/name).symlink_to(NATIVE_ROOT/name)
     for name in ['bun','tui.js']:(home/'.local/share/kiro-cli'/name).symlink_to(public/name)
     agent=home/'.kiro/agents/spot-canary.json';agent.write_text(json.dumps({'name':'spot-canary','description':'ONLY private TUI mock',
@@ -69,7 +74,7 @@ def main():
         +'process.env.KIRO_CHAT_CLI_BIN='+json.dumps(str(proxy))+';\ninstallWarmFrontend('+json.dumps(str(front_tool))+');\n'
         +'process.argv[1]='+json.dumps(str(public/'tui.js'))+';\n'
         +'import {writeFileSync} from "node:fs";const probe=setInterval(()=>{try{const s=globalThis[Symbol.for("nixos.spot.kiro.frontend.v1")].store?.getState();if(s)writeFileSync('
-        +json.dumps(str(home/'fixture-input-shape.json'))+',JSON.stringify({lines:s.input.lines.map(x=>x.length),command:s.commandInputValue.length,images:s.pendingImages.length,files:s.attachedFiles.length,pendingFile:s.pendingFileAttachment!=null,voice:s.pendingVoiceText!=null||s.voicePartialText!=null,restore:s.queuedInputRestore!=null,queue:s.activeInterruptMode==="queue"}));}catch{}},100);probe.unref();\n'
+        +json.dumps(str(home/'fixture-input-shape.json'))+',JSON.stringify({lines:s.input.lines.map(x=>x.length),command:s.commandInputValue.length,images:s.pendingImages.length,files:s.attachedFiles.length,pendingFile:s.pendingFileAttachment!=null,voice:s.pendingVoiceText!=null||s.voicePartialText!=null,restore:s.queuedInputRestore!=null,queue:s.activeInterruptMode==="queue",filePicker:s.filePickerHasResults}));}catch{}},100);probe.unref();\n'
         +'await import(pathToFileURL(process.argv[1]).href);\n');entry.chmod(0o444)
     env={'KIRO_API_KEY':'test-only-nonfunctional-no-network-key','KIRO_MOCK_CHAT_RESPONSE':str(mock),
          'PATH':str(public)+':'+str(home/'.local/bin')+':'+str(NATIVE_ROOT)+':/run/current-system/sw/bin',
@@ -78,8 +83,11 @@ def main():
     descriptor=base/'keeper-descriptor.json'
     code=('from pathlib import Path;import sys;sys.path.insert(0,'+repr(str(Path(__file__).parent))+');import spot_shadow_acp as p;'
           'store=p.shadow.Store('+repr(str(root))+');binding=p.shadow.protected_observation();k=p.Keeper(store,binding,'
-          +repr([str(NATIVE_ROOT/'kiro-cli-chat'),'acp','--agent','spot-canary'])+',p.shadow.protected_observation);'
-          'sys.exit(k.serve(p.drop_command('+repr(str(NATIVE_ROOT/'kiro-cli-chat'))+',["acp","--agent","spot-canary"],'
+          +repr([str(NATIVE_ROOT/'kiro-cli-chat'),'acp','--agent','spot-canary'])+',p.shadow.protected_observation);')
+    if args.attachment:
+        code+='\noriginal_input=k.input;observation=Path('+repr(str(evidence/'attachment-wire-metadata.json'))+');marker='+repr(attachment_marker)+'\n'
+        code+='def fixture_input(message):\n reply=original_input(message)\n if message.get("method")=="session/prompt" and not observation.exists():\n  import json\n  p.shadow.publish(observation,{"fixture_only":True,"synthetic_attachment_in_native_prompt":marker in json.dumps(message.get("params",{}).get("prompt",[])),"input_admitted_once":reply.get("admitted") is True},new=True)\n return reply\nk.input=fixture_input\n'
+    code+=('sys.exit(k.serve(p.drop_command('+repr(str(NATIVE_ROOT/'kiro-cli-chat'))+',["acp","--agent","spot-canary"],'
           +repr(str(home))+','+repr(env)+'),'+repr(str(descriptor))+'))')
     keeper_out=(evidence/'keeper.stdout').open('x');keeper_err=(evidence/'keeper.stderr').open('x')
     keeper=subprocess.Popen([python,'-B','-I','-c',code],stdout=keeper_out,stderr=keeper_err,start_new_session=True)
@@ -114,12 +122,12 @@ def main():
                 if b'\x1b[6n' in data:os.write(master,b'\x1b[1;1R')
                 ui.shadow.require(len(console)<=2*1024**2,'fixture console exceeds bound')
             return re.sub(rb'\x1b\[[0-?]*[ -/]*[@-~]',b'',bytes(console))
-        def wait(predicate,label,seconds=35):
+        def wait(predicate,label,seconds=35,frontend_required=True):
             deadline=time.monotonic()+seconds
             while time.monotonic()<deadline:
                 read_console()
                 if predicate():return
-                ui.shadow.require(frontend_process.poll() is None,'native fixture UI exited before '+label)
+                if frontend_required:ui.shadow.require(frontend_process.poll() is None,'native fixture UI exited before '+label)
                 time.sleep(.02)
             raise RuntimeError('private TUI condition missing: '+label)
         wait(lambda:broker.census.record and broker.census.record.get('initialized') and not (termios.tcgetattr(master)[3]&termios.ICANON),'initialized real pinned TUI')
@@ -141,9 +149,27 @@ def main():
             os.write(master,b'\x7f')
             wait(lambda:input_length()==remaining,'one acknowledged backspace event')
         wait(lambda:broker.census.record.get('counters',{}).get('draft') is False,'draft cleared but custody retained')
+        def owned_pidfd(pid,start,uid,pgid):
+            def check():
+                ui.shadow.require(work_start(pid)==start and ui.work.process_uid(pid)==uid
+                    and os.getpgid(pid)==pgid
+                    and Path('/proc/'+str(pid)+'/cgroup').read_text().strip()=='0::'+budget['cgroup']
+                    and Path('/proc/'+str(pid)+'/ns/pid').stat().st_ino==Path('/proc/self/ns/pid').stat().st_ino,
+                    'not exact owned synthetic process; no signal')
+            check();fd=os.pidfd_open(pid,0)
+            try:check()
+            except BaseException:os.close(fd);raise
+            return fd
+        attachment_record=None
+        if args.attachment:
+            os.write(master,b'@fixture-attachment')
+            wait(lambda:input_shape().get('filePicker') is True,'real local @ file picker results')
+            os.write(master,b'\r')  # Select file; NOT a model submission.
+            wait(lambda:input_length()==1 and b'fixture-attachment.txt' in read_console(),'real file-only chip')
+            wait(lambda:broker.census.record['counters']['draft'] is True,'file-only draft remains protected')
+            attachment_record=dict(broker.census.record)
         native=ui.shadow.read(session/'record.json');pid=native['backend_pid'];start=native['backend_start']
-        ui.shadow.require(Path('/proc/'+str(pid)+'/cgroup').read_text().strip()=='0::'+budget['cgroup'] and work_start(pid)==start,'not owned mock backend')
-        fd=os.pidfd_open(pid,0);signal.pidfd_send_signal(fd,signal.SIGSTOP,None,0);paused=(fd,pid,start)
+        fd=owned_pidfd(pid,start,1001,pid);signal.pidfd_send_signal(fd,signal.SIGSTOP,None,0);paused=(fd,pid,start)
         parse_before_model=broker.census.record.get('parsed_output_count',0)
         os.write(master,b'ONLY synthetic TUI model prompt.\r')
         def pending_request():
@@ -153,6 +179,58 @@ def main():
                 if record.get('parent_session')==d['session'] and record.get('provider_terminal_observed') is False:return True
             return False
         wait(pending_request,'leased native request')
+        if args.case=='consumer-exit':
+            # This is ONLY the new mock TUI actor, not a host/user/Herdr process.
+            # Its death must not propagate input EOF/signals to the keeper.
+            actor=broker.actor;frozen_files={path.name:hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in (session/'output').iterdir() if path.is_file()}
+            actor_fd=owned_pidfd(actor['pid'],actor['pid_start'],1001,os.getpgid(actor['pid']))
+            try:
+                signal.pidfd_send_signal(actor_fd,signal.SIGKILL,None,0)
+                wait(lambda:bool(select.select([actor_fd],[],[],0)[0]),'exact mock TUI pidfd exit',frontend_required=False)
+            finally:os.close(actor_fd)
+            wait(lambda:broker.census.record['healthy'] is False,'resident actor-loss observation',frontend_required=False)
+            broker.close();thread.join(timeout=2)
+            ui.shadow.require(keeper.poll() is None and work_start(d['pid'])==d['pid_start'],
+                              'consumer death lost independent keeper')
+            ui.shadow.require(work_start(pid)==start and pending_request(),'accepted work lost before backend resume')
+            signal.pidfd_send_signal(fd,signal.SIGCONT,None,0);os.close(fd);paused=None
+            output_rows=[]
+            def retained_after_exit():
+                while True:
+                    reply=ui.rpc(d['socket'],{'op':'read','sequence':len(output_rows)})
+                    if reply.get('segment') is None:break
+                    output_rows.append(reply['segment'])
+                return b'SHADOW_TUI_MOCK_OUTPUT' in b''.join(base64.b64decode(row['data_base64']) for row in output_rows)
+            wait(retained_after_exit,'retained late output after real TUI death',frontend_required=False)
+            def exposed_terminal():
+                retained_after_exit()
+                if pending_request():return False
+                for row in output_rows:
+                    if row['channel']!='stdout':continue
+                    result=json.loads(base64.b64decode(row['data_base64'])).get('result')
+                    if isinstance(result,dict) and result.get('stopReason')=='end_turn':return True
+                return False
+            wait(exposed_terminal,'exposed provider terminal after TUI death',frontend_required=False)
+            ui.shadow.require(b'SHADOW_TUI_QUEUED_OUTPUT' not in b''.join(base64.b64decode(row['data_base64']) for row in output_rows),
+                              'unexpected second model execution after consumer death')
+            for name,digest in frozen_files.items():
+                ui.shadow.require(hashlib.sha256((session/'output'/name).read_bytes()).hexdigest()==digest,
+                                  'old immutable output changed across consumer death')
+            ui.shadow.require(keeper.poll() is None and work_start(d['pid'])==d['pid_start'],
+                              'keeper ended before explicit finish-input')
+            success=True
+            proof={'actual_pinned_TUI_consumer_death_keeps_backend_and_late_output':True,
+                   'case':args.case,'fixture_only_SIGKILL_actor':actor,'frozen_output_files':frozen_files,
+                   'late_retained_segments':[{'sequence':row['sequence'],'channel':row['channel'],
+                       'bytes':row['bytes'],'sha256':row['sha256']} for row in output_rows],
+                   'keeper_identity_unchanged':True,'consumer_exit_pidfd_observed':True,
+                   'resident_actor_loss_marked_unknown_without_retirement':True,
+                   'independent_root_read_is_NOT_UI_recovery_or_delivery':True,
+                   'frontend_record':broker.census.record,'retained_store_status':store.status(),
+                   'all_work_tracking_verified':False,'armed':False,'goal_complete':False}
+            with (evidence/'proof.json').open('x') as out:json.dump(proof,out,indent=2)
+            return
         # A real queued second turn is accepted BEFORE the private fault fence;
         # its later same-stack handoff must continue without a new admission.
         queued_input=b'ONLY accepted queued fixture';os.write(master,queued_input)
@@ -173,9 +251,16 @@ def main():
              and broker.census.record.get('parsed_output_count',0)==len(broker.census.offered),
              'new model output parse watermark caught up, not just initialization')
         ui.shadow.require(b'MUST_NOT_RUN_THIRD_MODEL' not in read_console(),'third model started')
+        ui.shadow.require(broker.census.record['healthy'] is True,'live TUI actor incorrectly marked unknown')
+        attachment_wire=None
+        if args.attachment:
+            attachment_wire=ui.shadow.read(evidence/'attachment-wire-metadata.json')
+            ui.shadow.require(attachment_wire.get('synthetic_attachment_in_native_prompt') is True
+                              and attachment_wire.get('input_admitted_once') is True,'attachment did not reach admitted native prompt')
         success=True
         proof={'actual_pinned_TUI_draft_native_turn_and_pre_mutation_denial_passed':True,'draft_snapshot':draft_record,
-               'accepted_queued_snapshot':queued_record,'parsed_before_model':parse_before_model,
+               'accepted_queued_snapshot':queued_record,'attachment_only_draft_snapshot':attachment_record,
+               'synthetic_attachment_wire_metadata':attachment_wire,'parsed_before_model':parse_before_model,
                'parsed_after_models':broker.census.record['parsed_output_count'],'offered_stdout_segments':len(broker.census.offered),
                'positive_queue_continuation_and_new_model_parse_prefix_verified':True,
                'frontend_record':broker.census.record,'retained_store_status':store.status(),'keeper_session':d['session'],

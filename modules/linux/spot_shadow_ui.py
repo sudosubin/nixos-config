@@ -185,8 +185,22 @@ class Broker:
         os.chown(endpoint,0,__import__('pwd').getpwuid(1001).pw_gid);os.chmod(endpoint,0o660)
         self.listener.listen(8);self.listener.settimeout(.2);self.endpoint=str(endpoint)
 
+    def observe_actor(self):
+        owner=self.actor
+        if owner is None:return
+        try:
+            pid=owner['pid']
+            shadow.require(work.process_start(pid)==owner['pid_start'] and work.process_uid(pid)==1001
+                and Path('/proc/'+str(pid)+'/cgroup').read_text().strip()=='0::'+self.cgroup
+                and os.readlink('/proc/'+str(pid)+'/ns/pid')==owner['pid_namespace']
+                and str(self.entry).encode() in Path('/proc/'+str(pid)+'/cmdline').read_bytes().split(bytes([0])),
+                'frontend actor identity lost')
+        except (OSError,ValueError,KeyError,RuntimeError):self.census.actor_unknown()
+        # No kill, input EOF, output retirement, proxy replacement or replay.
+
     def serve(self):
         while not self.done.is_set():
+            self.observe_actor()
             try:connection,_=self.listener.accept()
             except socket.timeout:continue
             except OSError:
