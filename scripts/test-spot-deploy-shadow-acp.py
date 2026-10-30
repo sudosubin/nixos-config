@@ -40,6 +40,12 @@ class DeployTests(unittest.TestCase):
             with patch.object(p,'MARKER',marker),patch.object(p.os,'geteuid',return_value=0):
                 with self.assertRaises(RuntimeError):p.disable(self.plan())
             self.assertTrue(marker.is_symlink())
+    def test_postinstall_mock_proof_signals_only_stable_pidfd_in_exact_owned_cgroup(self):
+        text=(SOURCE/'modules/linux/verify-spot-shadow-acp.py').read_text()
+        self.assertIn('validation.current()',text);self.assertIn("budget['cgroup']",text)
+        self.assertIn('os.pidfd_open(',text);self.assertIn('signal.pidfd_send_signal(',text)
+        self.assertNotIn('os.kill(',text);self.assertNotIn('startup_ready(',text)
+        self.assertIn('test-only-nonfunctional-no-network-key',text)
     def test_future_Nix_config_never_auto_starts_a_provider(self):
         text=(SOURCE/'modules/linux/spot-work-shadow-acp.nix').read_text()
         self.assertNotIn('wantedBy =',text);self.assertNotIn('ExecStart =',text)
