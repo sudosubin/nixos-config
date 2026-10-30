@@ -17,6 +17,7 @@
     # Persistent /home volume + EIP re-attach for the Spot + ASG deployment.
     ./spot-home-volume.nix
     ./spot-schedule-guard.nix
+    ./spot-protection-observer.nix
     ./spot-work.nix
     ./spot-acp.nix
     ./spot-gateway.nix
@@ -29,6 +30,10 @@
     enable = true;
     armed = false;
   };
+
+  # Independent read-only status still works with absent/closed work custody.
+  # This does not arm or enable termination.
+  services.spotProtectionObserver.enable = true;
 
   services.spotProfileCache.enable = true;
 
