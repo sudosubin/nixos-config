@@ -67,7 +67,10 @@ def main():
     proxy=public/'spot-shadow-ui-proxy';proxy.write_text('#!'+python+' -I\nimport sys;sys.dont_write_bytecode=True;sys.path.insert(0,'+repr(str(public))+');import spot_shadow_ui as u;u.main()\n');proxy.chmod(0o555)
     entry=public/'entry.mjs';entry.write_text('import {pathToFileURL} from "node:url";\nimport {installWarmFrontend} from '+json.dumps(str(public/'spot-shadow-kiro-frontend.mjs'))+';\n'
         +'process.env.KIRO_CHAT_CLI_BIN='+json.dumps(str(proxy))+';\ninstallWarmFrontend('+json.dumps(str(front_tool))+');\n'
-        +'process.argv[1]='+json.dumps(str(public/'tui.js'))+';\nawait import(pathToFileURL(process.argv[1]).href);\n');entry.chmod(0o444)
+        +'process.argv[1]='+json.dumps(str(public/'tui.js'))+';\n'
+        +'import {writeFileSync} from "node:fs";const probe=setInterval(()=>{try{const s=globalThis[Symbol.for("nixos.spot.kiro.frontend.v1")].store?.getState();if(s)writeFileSync('
+        +json.dumps(str(home/'fixture-input-shape.json'))+',JSON.stringify({lines:s.input.lines.map(x=>x.length),command:s.commandInputValue.length,images:s.pendingImages.length,files:s.attachedFiles.length,pendingFile:s.pendingFileAttachment!=null,voice:s.pendingVoiceText!=null||s.voicePartialText!=null,restore:s.queuedInputRestore!=null}));}catch{}},100);probe.unref();\n'
+        +'await import(pathToFileURL(process.argv[1]).href);\n');entry.chmod(0o444)
     env={'KIRO_API_KEY':'test-only-nonfunctional-no-network-key','KIRO_MOCK_CHAT_RESPONSE':str(mock),
          'PATH':str(public)+':'+str(home/'.local/bin')+':'+str(NATIVE_ROOT)+':/run/current-system/sw/bin',
          'TERM':'xterm-256color','KIRO_CHAT_CLI_BIN':str(NATIVE_ROOT/'kiro-cli-chat')}
@@ -124,7 +127,10 @@ def main():
         draft=b'ONLY_SYNTHETIC_DRAFT'
         os.write(master,draft);wait(lambda:broker.census.record.get('counters',{}).get('draft') is True,'draft custody')
         draft_record=dict(broker.census.record)
-        os.write(master,b'\x7f'*len(draft));wait(lambda:broker.census.record.get('counters',{}).get('draft') is False,'draft cleared but custody retained')
+        # Control keys must be separate terminal events, not one pasted chunk.
+        for _ in draft:
+            os.write(master,b'\x7f');read_console();time.sleep(.12)
+        wait(lambda:broker.census.record.get('counters',{}).get('draft') is False,'draft cleared but custody retained')
         native=ui.shadow.read(session/'record.json');pid=native['backend_pid'];start=native['backend_start']
         ui.shadow.require(Path('/proc/'+str(pid)+'/cgroup').read_text().strip()=='0::'+budget['cgroup'] and work_start(pid)==start,'not owned mock backend')
         fd=os.pidfd_open(pid,0);signal.pidfd_send_signal(fd,signal.SIGSTOP,None,0);paused=(fd,pid,start)
@@ -201,6 +207,8 @@ def main():
             data=path.read_bytes();ui.shadow.require(len(data)<=2*1024**2,'fixture evidence file exceeds bound')
             snapshot['records'][str(path.relative_to(root))]={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'body_base64':base64.b64encode(data).decode()}
         if broker and broker.census.record:snapshot['frontend_final']=broker.census.record
+        shape=home/'fixture-input-shape.json'
+        if shape.exists():snapshot['fixture_only_primitive_input_shape']=json.loads(shape.read_text())
         with (evidence/'complete-owned-fixture-snapshot.json').open('x') as out:json.dump(snapshot,out,indent=2)
         temporary.cleanup()
 
