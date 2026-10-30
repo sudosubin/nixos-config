@@ -33,6 +33,20 @@ import spot_validation as validation
 NATIVE=Path('/nix/store/bn6yjl0rgrd0yqxk3cbkkamjcxg9h47x-kiro-cli-2.10.0/bin/kiro-cli-chat')
 
 
+class PublicationPending(Exception):
+    """Directory is visible before its durable header; NEVER empty/idle."""
+
+
+def new_records(jobs,old,read):
+    result=[]
+    for path in Path(jobs).iterdir():
+        if path.name in old:continue
+        try:value=read(path/'record.json')
+        except FileNotFoundError:raise PublicationPending() from None
+        result.append(value)
+    return result
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--evidence',type=Path,required=True)
     parser.add_argument('--installed',action='store_true');args=parser.parse_args()
@@ -97,12 +111,14 @@ def main():
                 deadline=time.monotonic()+seconds
                 while time.monotonic()<deadline:
                     read_console()
-                    if predicate():return
+                    try:
+                        if predicate():return
+                    except PublicationPending:pass  # read-only wait, never input/effect replay
                     if alive:p.ui.shadow.require(client.poll() is None,'fixture client exited before '+label)
                     time.sleep(.02)
                 raise RuntimeError('entry fixture condition missing: '+label)
             def records():
-                return [p.ui.shadow.read(path/'record.json') for path in (store.root/'jobs').iterdir() if path.name not in old]
+                return new_records(store.root/'jobs',old,p.ui.shadow.read)
             def front():
                 for value in records():
                     if value.get('kind')=='shadow_kiro_frontend' and value.get('parent_startup')==startup:return value
@@ -182,7 +198,12 @@ def main():
                     except ProcessLookupError:pass
                     os.close(paused)
                 # Only the NEW synthetic controller/actor, never host work.
-                actor=front().get('actor') if 'startup' in locals() else None
+                actor=None
+                if 'startup' in locals():
+                    deadline=time.monotonic()+2
+                    while time.monotonic()<deadline:
+                        try:actor=front().get('actor');break
+                        except PublicationPending:time.sleep(.02)
                 if actor:
                     try:
                         fd=owned_fd(actor['pid'],actor['pid_start'],1001,budget['cgroup'])

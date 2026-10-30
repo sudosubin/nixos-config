@@ -2,13 +2,15 @@
 import inspect
 import hashlib
 import importlib.util
+import json
 import os
 from pathlib import Path
 import sys
 import tempfile
 import unittest
 from unittest.mock import patch
-sys.path.insert(0,str(Path(__file__).parent))
+HERE=Path(__file__).parent
+sys.path.insert(0,str(HERE))
 import spot_shadow_tui as p
 
 
@@ -94,6 +96,21 @@ class RuntimeTests(unittest.TestCase):
                  patch.object(p,'scope_members',return_value={123:{'uid':1001}}),patch.object(p.ui.work,'process_start',return_value=77),patch.object(p.subprocess,'run') as run:
                 with self.assertRaisesRegex(RuntimeError,'live/foreign/uncertain'):p.collect_empty_metadata({'session_directory':d},folder)
                 run.assert_not_called()
+    def test_verifier_partial_header_is_explicit_pending_NOT_empty(self):
+        spec=importlib.util.spec_from_file_location('entry_proof',HERE/'verify-spot-shadow-tui-entry.py')
+        proof=importlib.util.module_from_spec(spec);spec.loader.exec_module(proof)
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);old=root/'job-old';old.mkdir();new=root/'job-new';new.mkdir()
+            reader=lambda path:json.loads(path.read_text())
+            with self.assertRaises(proof.PublicationPending):proof.new_records(root,{'job-old'},reader)
+            (new/'record.json').write_text('{"positive":"durable header"}')
+            self.assertEqual(proof.new_records(root,{'job-old'},reader),[{'positive':'durable header'}])
+    def test_verifier_does_not_hide_malformed_header_as_transient_or_empty(self):
+        spec=importlib.util.spec_from_file_location('entry_proof',HERE/'verify-spot-shadow-tui-entry.py')
+        proof=importlib.util.module_from_spec(spec);spec.loader.exec_module(proof)
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);(root/'job-new').mkdir();(root/'job-new/record.json').write_text('malformed')
+            with self.assertRaises(json.JSONDecodeError):proof.new_records(root,{},lambda path:json.loads(path.read_text()))
     def test_config_requires_exact_fields_hashes_and_original_lineage(self):
         spec=importlib.util.spec_from_file_location('deploy_for_runtime_test',Path(__file__).parents[2]/'scripts/spot-deploy-shadow-tui.py')
         module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
