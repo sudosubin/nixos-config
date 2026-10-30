@@ -196,7 +196,7 @@ def main():
             data=path.read_bytes();p.ui.shadow.require(len(data)<=2*1024**2,'fixture body bound exceeded')
             snapshot['records'][str(path.relative_to(store.root))]={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'body_base64':base64.b64encode(data).decode()}
         for folder in folders:
-            for name in ['session.json','keeper.json','frontend.json','keeper-start-intent.json']:
+            for name in ['session.json','keeper.json','frontend.json','keeper-start-intent.json','keeper-budget-intent.json','keeper-budget-verified.json']:
                 path=folder/name
                 if path.exists():
                     data=path.read_bytes();snapshot['records']['sessions/'+folder.name+'/'+name]={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'body_base64':base64.b64encode(data).decode()}
