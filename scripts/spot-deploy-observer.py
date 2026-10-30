@@ -105,9 +105,10 @@ def rollback(plan):
     """Only this observer's files/units. Preserve source, diagnostics and intent."""
     require(os.geteuid()==0,'root required');identifier=plan['id'];require(__import__('re').fullmatch('[0-9a-f]{12}',identifier),'invalid rollback ID');require(plan['directory']==str(ROOT/identifier) and plan['service_name']=='spot-protection-observer-'+identifier+'.service' and plan['timer_name']=='spot-protection-observer-'+identifier+'.timer','foreign rollback plan')
     for suffix in ['service','timer']:require((UNITS/plan[suffix+'_name']).read_text()==plan[suffix],'observer definition changed; no rollback')
-    if os.path.lexists(MARKER):require(json.loads(MARKER.read_text())==plan['marker'],'observer marker changed; no rollback')
+    if os.path.lexists(MARKER):require(not MARKER.is_symlink() and json.loads(MARKER.read_text())==plan['marker'],'observer marker changed or Nix-managed; no rollback')
     else:require((Path(plan['directory'])/'install-intent.json').is_file(),'unknown partial observer custody')
     gcroot=GCROOTS/('spot-protection-observer-'+identifier+'-python');require(gcroot.is_symlink() and os.readlink(gcroot)==plan['python_store_root'],'observer runtime GC root changed');require(os.readlink(UNITS/'timers.target.wants'/plan['timer_name'])=='../'+plan['timer_name'],'observer boot link changed')
+    for suffix in ['service','timer']:require(subprocess.check_output(['systemctl','show',plan[suffix+'_name'],'-p','FragmentPath','--value'],text=True).strip()==str(UNITS/plan[suffix+'_name']),'observer is no longer warm-loaded; no rollback')
     subprocess.run(['systemctl','stop',plan['timer_name'],plan['service_name']],check=True,timeout=30)
     for suffix in ['service','timer']:(UNITS/plan[suffix+'_name']).unlink()
     (UNITS/'timers.target.wants'/plan['timer_name']).unlink()

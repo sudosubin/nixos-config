@@ -404,6 +404,16 @@ python3 scripts/test-spot-protection-audit.py -v
 
 후속 배포는 원본 작업을 강제로 재시작하지 않는 관찰·수집 단계부터 진행하고, 재부팅 지속성/실제 모든 작업 custody/backup·real recovery를 통과한 뒤에만 arming과 운영 ASG 전환을 허용한다. **진단 보완은 종료 자동화 배포 완료와 다르며 이번 감사에서 운영 guard를 설치하거나 보호를 해제하지 않았다.**
 
+## 운영 실제 적용 1단계: 읽기 전용 observer (2026-10-30)
+
+- 원본에 **`spot-protection-observer-dd163c0b2143.service/.timer`**를 실제 설치·실행했다. 5분마다 인스턴스 역할로 IMDS/STS/정확한 ASG ARN/home metadata/SSM session과 로컬 상태를 읽는다. **종료 guard가 아니며** 보호·capacity·IAM·home/EIP·작업 registry를 바꾸거나 서비스/OS를 재시작하지 않는다. 새 진단은 `protected_observer_only_guard_not_armed`다. `armed/work_tracking_verified/goal_complete=false`는 유지한다.
+- 실제 상태는 **`/var/lib/spot-protection-observer/dd163c0b2143/status.json`**, 설치 receipt는 같은 디렉터리 `install-verified.json`이다. 원본 boot/profile/current2gb47 및 SSM901/Docker1318/user743, 원래 guard config SHA와 operational-status SHA가 전후 동일했다. `spot-protection-audit.py`는 이 observer 존재를 full guard 배포/종료 승인과 구분한다.
+- 수동 시작 없이 **실제 다음5분 timer 실행**도 확인했다. invocation `7e4d38ca…`→`f04cda8e…`, timer LastTrigger 변경과 새 완전한 status/기존PID 유지가 일치했다. 증거는 원본 `/home/persist/root/observer-deployment-20261030/autonomous-timer-full-proof.json`(SHA `79d7005eaed7680a4f5174148e0abe8c3f34e7331f27ae58b6e6f7fbc9485902`)에 보존했다. 증거 watcher는 만료형 cloud 단발 reader이며 운영 timer가 로컬 Mac을 필요로 하지 않는다.
+- metadata parent256MiB/CPU25/PrivateNetwork/Swap0/OOM1/NNP/score1000, AWS·IMDS 각각 별도128MiB/CPU10/exec-only/read allowlist다. 새 scheduler/EC2/EBS/IAM 권한을 만들지 않았으며 로컬 상주 controller가 필요 없다. 운영 journal만 사용한다.
+- 원래 `/etc/systemd/system`은 Nix store의 읽기 전용 symlink라 건드리지 않았다. **낮은 우선순위의 `/usr/local/lib/systemd/system`**에 새 versioned units와 persistent `timers.target.wants` vendor link를 배치하고 새 이름을 on-demand로만 로드했다. global daemon-reload/enable/NixOS switch/reboot는 하지 않았다. `systemctl is-enabled`는 vendor link에 대해 **disabled**이며 이를 enabled로 꾸미지 않는다. 실제 지속성 근거는 persistent unit search path/정확한 boot link/원본 interpreter GC root다. **운영 재부팅은 수행하지 않았으며 새 root/Spot 재생성 지속성도 아직 아니다.**
+- 다음 clean image에는 `modules/linux/spot-protection-observer.nix`가 선언적으로 포함되도록 추가했다. 현 운영 ASG/defaultLT1 및 후보AMI04c8/LT2는 변경하지 않았다. 현재 warm bridge를 새 AMI에 포함됐다고 주장하지 않는다. 유지관리 도구 `scripts/spot-deploy-observer.py`의 install/owned-only rollback은 기존 작업을 강제로 정리하지 않는다. 미래 Nix-managed marker/unit으로 교체되면 warm rollback이 새 선언적 unit을 중지/삭제하지 않도록 marker symlink/실제 FragmentPath를 확인해 거절한다.
+- 사전 actual ARM53/source243/c88dc750(21audit+21observer+11deployment), private1GiB/최소2GiB/Swap0/CPU≤1/OOM1/NNP/score1000/peak32710656/OOM0/no skips/ResourceWarning 및 Nix2파일 parse를 확인했다. 첫 shared-slice child fixture는 systemd가 수동 OOM fence를0으로 재적용해 실행 전에 거절됐고 실패를 보존했다. 후속 process-free target의 실제 timer trigger/단위 lookup/boot link probe는 fence1을 유지하며 통과했다. 이는 actual reboot proof가 아니다.
+
 ## 비용·백업 주의
 
 - EIP는 연결 중에도, 미연결 보유 중에도 public IPv4 요금이 발생함.

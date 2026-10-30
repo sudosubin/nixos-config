@@ -53,10 +53,20 @@ class DeployTests(unittest.TestCase):
             root,units,marker,gc,plan=self.fixture(d);link=gc/('spot-protection-observer-'+plan['id']+'-python');link.unlink();link.symlink_to('/nix/store/foreign')
             with patch.object(p,'UNITS',units),patch.object(p,'MARKER',marker),patch.object(p,'GCROOTS',gc),patch.object(p.os,'geteuid',return_value=0),patch.object(p.subprocess,'run') as run,self.assertRaises(RuntimeError):p.rollback(plan)
             run.assert_not_called()
+    def test_Nix_managed_marker_blocks_warm_rollback(self):
+        with tempfile.TemporaryDirectory() as d:
+            root,units,marker,gc,plan=self.fixture(d);body=marker.read_text();marker.unlink();target=root/'managed';target.write_text(body);marker.symlink_to(target)
+            with patch.object(p,'UNITS',units),patch.object(p,'MARKER',marker),patch.object(p,'GCROOTS',gc),patch.object(p.os,'geteuid',return_value=0),patch.object(p.subprocess,'run') as run,self.assertRaises(RuntimeError):p.rollback(plan)
+            run.assert_not_called();self.assertTrue(marker.is_symlink())
+    def test_shadowed_Nix_unit_blocks_warm_rollback_before_stop(self):
+        with tempfile.TemporaryDirectory() as d:
+            root,units,marker,gc,plan=self.fixture(d)
+            with patch.object(p,'UNITS',units),patch.object(p,'MARKER',marker),patch.object(p,'GCROOTS',gc),patch.object(p.os,'geteuid',return_value=0),patch.object(p.subprocess,'check_output',return_value='/nix/store/managed.service\\n'),patch.object(p.subprocess,'run') as run,self.assertRaises(RuntimeError):p.rollback(plan)
+            run.assert_not_called()
     def test_exact_owned_rollback_only_stops_owned_names_preserves_diagnostics(self):
         with tempfile.TemporaryDirectory() as d:
             root,units,marker,gc,plan=self.fixture(d);evidence=root/'keep-log';evidence.write_text('retained')
-            with patch.object(p,'UNITS',units),patch.object(p,'MARKER',marker),patch.object(p,'GCROOTS',gc),patch.object(p.os,'geteuid',return_value=0),patch.object(p.subprocess,'run') as run:result=p.rollback(plan)
+            with patch.object(p,'UNITS',units),patch.object(p,'MARKER',marker),patch.object(p,'GCROOTS',gc),patch.object(p.os,'geteuid',return_value=0),patch.object(p.subprocess,'check_output',side_effect=[str(units/plan['service_name'])+'\n',str(units/plan['timer_name'])+'\n']),patch.object(p.subprocess,'run') as run:result=p.rollback(plan)
             self.assertTrue(result['only_owned_read_only_observer_removed']);self.assertEqual(run.call_args.args[0],['systemctl','stop',plan['timer_name'],plan['service_name']]);self.assertFalse(marker.exists());self.assertTrue(evidence.exists())
 
 
