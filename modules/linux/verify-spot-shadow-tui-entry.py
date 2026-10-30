@@ -160,10 +160,12 @@ def main():
                 p.ui.rpc(d['socket'],{'op':'finish-input'})  # Explicit fixture finish, not implicit UI exit.
                 wait(lambda:p.ui.shadow.read(store.job(d['session'])/'record.json').get('state')=='backend_and_local_children_reaped_output_pending',
                      'natural keeper finish',alive=False)
-                wait(lambda:subprocess.check_output(['systemctl','show',p.keeper_unit(folder,{'fixture':True}),'-p','MainPID','--value'],text=True).strip()=='0',
-                     'resident fixture service naturally exited',alive=False)
+                wait(lambda:(folder/'keeper-metadata-hold.json').exists(),
+                     'native reaped; only trusted metadata holder remains',alive=False)
+                p.ui.shadow.require(p.ui.work.process_start(d['pid'])==d['pid_start'],
+                                    'metadata holder must keep budget stable while frontends exist')
                 done=True;cases.append({'case':case,'resident_keeper_unit':p.keeper_unit(folder,{'fixture':True}),
-                    'keeper_group':keeper_group,'client_group':budget['cgroup'],'frontend':front(),
+                    'keeper_group':keeper_group,'client_group':budget['cgroup'],'session_folder':str(folder),'frontend':front(),
                     'consumer_or_root_read_is_NOT_delivery':True,'all_work_idle':False})
             finally:
                 if paused is not None:
@@ -182,10 +184,14 @@ def main():
                 if d and not done:
                     try:p.ui.rpc(d['socket'],{'op':'finish-input'})
                     except (OSError,ValueError,RuntimeError):pass
+                if done:
+                    wait(lambda:all(row['uid']==0 for row in p.scope_members(budget['slice']).values()),
+                         'all owned synthetic user processes ended before another empty gate',alive=False)
                 os.close(master);(args.evidence/(case+'-full-pty.bin')).write_bytes(console)
         current={path.name:hashlib.sha256((path/'record.json').read_bytes()).hexdigest() for path in (store.root/'jobs').iterdir() if path.name in old}
         p.ui.shadow.require(current==old,'old records changed; never reset over them')
-        proof={'installed_path':args.installed,'deployment_id':cfg['deployment_id'],'actual_cases':cases,
+        proof={'installed_path':args.installed,'deployment_id':cfg['deployment_id'],'config':str(config),'fixture_base':str(base),
+            'metadata_holders_retained_until_own_driver_and_frontends_exit':True,'actual_cases':cases,
             'old_records_preserved':old,'new_records':sorted(path.name for path in (store.root/'jobs').iterdir() if path.name not in old),
             'all_passed':True,'consumer_delivery_verified':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
         p.ui.shadow.publish(args.evidence/'proof.json',proof,new=True)
@@ -197,14 +203,16 @@ def main():
             snapshot['records'][str(path.relative_to(store.root))]={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'body_base64':base64.b64encode(data).decode()}
         for folder in folders:
             for name in ['session.json','keeper.json','frontend.json','keeper-start-intent.json','keeper-budget-intent.json','keeper-budget-verified.json',
-                         'keeper-initialize-release.json',*[path.name for path in folder.glob('controller-error-*.json')]]:
+                         'keeper-initialize-release.json','keeper-unit-verified.json','keeper-metadata-hold.json','metadata-collected.json',*[path.name for path in folder.glob('controller-error-*.json')]]:
                 path=folder/name
                 if path.exists():
                     data=path.read_bytes();snapshot['records']['sessions/'+folder.name+'/'+name]={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'body_base64':base64.b64encode(data).decode()}
         p.ui.shadow.publish(args.evidence/'complete-owned-fixture-snapshot.json',snapshot,new=True)
         # Keep service/session evidence on a failure. Remove only unused public
         # copies/fake homes AFTER all synthetic fixture services ended naturally.
-        if len(cases)==2:shutil.rmtree(base)
+        # Root metadata holders are intentionally still present. The external
+        # owned coordinator collects them ONLY after this driver exits; preserve
+        # their exact config/close paths, source and all output until then.
 
 
 if __name__=='__main__':main()

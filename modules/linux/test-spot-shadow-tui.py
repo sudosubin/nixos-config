@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import inspect
+import hashlib
 import importlib.util
 import os
 from pathlib import Path
@@ -74,6 +75,25 @@ class RuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'AF_UNIX'):
             p.unix_endpoint(Path('/tmp/spotshadowtuifixture-'+'a'*32+'/store/jobs/job-'+'b'*32+'/keeper.sock'))
         self.assertLess(inspect.getsource(p.prepare).index('unix_endpoint('),inspect.getsource(p.prepare).index('folder.mkdir('))
+    def test_exited_keeper_metadata_is_not_unrealized_while_frontend_is_live(self):
+        self.assertIn('--property=RemainAfterExit=yes',inspect.getsource(p.run_session))
+        text=inspect.getsource(p.collect_empty_metadata)
+        self.assertLess(text.index('scope_members('),text.index("['systemctl','stop',name]"))
+        self.assertIn("ui.shadow.require(pid=='0'",text);self.assertIn('fragment_sha256',text)
+        self.assertNotIn('.unlink(',text);self.assertNotIn('kill(',text)
+    def test_metadata_collector_refuses_live_cage_without_any_stop(self):
+        with tempfile.TemporaryDirectory() as d:
+            path=Path(d)/'unit';path.write_bytes(b'owned exited metadata')
+            folder=Path('/owned/'+'a'*32);budget={'slice':'owned.slice','fixture':True}
+            receipt={'unit':p.keeper_unit(folder,budget),'boot_id':'fixture','fragment':str(path),
+                     'fragment_sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
+            values=iter([{'budget':budget},receipt,{'pid':42,'pid_start':77,'boot_id':'fixture'}])
+            fields=iter([b'42\n',b'active\n',b'running\n',(str(path)+'\n').encode()])
+            with patch.object(p,'session',return_value={'binding':{'boot_id':'fixture'}}),patch.object(p.ui.shadow,'read',side_effect=lambda *_:next(values)),\
+                 patch.object(p.subprocess,'check_output',side_effect=lambda *a,**kw:next(fields).decode()),\
+                 patch.object(p,'scope_members',return_value={123:{'uid':1001}}),patch.object(p.ui.work,'process_start',return_value=77),patch.object(p.subprocess,'run') as run:
+                with self.assertRaisesRegex(RuntimeError,'live/foreign/uncertain'):p.collect_empty_metadata({'session_directory':d},folder)
+                run.assert_not_called()
     def test_config_requires_exact_fields_hashes_and_original_lineage(self):
         spec=importlib.util.spec_from_file_location('deploy_for_runtime_test',Path(__file__).parents[2]/'scripts/spot-deploy-shadow-tui.py')
         module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)

@@ -270,7 +270,17 @@ def serve(cfg,folder):
     keeper=ui.acp.Keeper(store,value['binding'],[cfg['backend'],'acp',*extra],ui.shadow.protected_observation)
     environment=value['fixture_env']
     if environment is not None:ui.shadow.require(budget['fixture'],'no production env override')
-    return keeper.serve(ui.acp.drop_command(cfg['backend'],['acp',*extra],value['home'],environment),folder/'keeper.json')
+    result=keeper.serve(ui.acp.drop_command(cfg['backend'],['acp',*extra],value['home'],environment),folder/'keeper.json')
+    # PID1 can reset the parent slice OOM flag when a sibling is unrealized,
+    # even though another frontend still exists. Keep ONLY this trusted root
+    # metadata holder alive until the exact cage contains metadata holders only.
+    hold={'pid':os.getpid(),'pid_start':ui.work.process_start(os.getpid()),'boot_id':value['binding']['boot_id'],
+          'slice':budget['slice'],'unit':keeper_unit(folder,budget),'native_children_reaped_output_PENDING':True}
+    ui.shadow.publish(folder/'keeper-metadata-hold.json',hold,new=True)
+    close=folder/'metadata-close-request.json'
+    while not close.exists():time.sleep(.2)
+    ui.shadow.require(ui.shadow.read(close)==hold,'foreign metadata-close request; no automatic cleanup')
+    return result
 
 
 def run_session(cfg,config,folder):
@@ -288,11 +298,15 @@ def run_session(cfg,config,folder):
         'client_pid':os.getpid(),'client_start':ui.work.process_start(os.getpid()),'before_members':before_members},new=True)
     keeper_properties=[prop for prop in properties(budget) if prop!='--property=ProtectControlGroups=yes']
     command=['systemd-run','--quiet','--collect','--unit='+name,*keeper_properties,'--property=ProtectControlGroups=no',
-        '--property=KillMode=process','--property=TimeoutStopSec=infinity',
+        '--property=KillMode=process','--property=TimeoutStopSec=infinity','--property=RemainAfterExit=yes',
         sys.executable,'-B','-I',str(Path(cfg['source_directory'])/'spot_shadow_tui.py'),'--config',str(config),'serve','--session',str(folder)]
     ui.shadow.require(subprocess.check_output(['systemctl','show',name,'-p','LoadState','--value'],text=True).strip()=='not-found',
                       'foreign/partial keeper unit; no start replay')
     subprocess.run(command,check=True,capture_output=True,text=True)
+    fragment=Path(subprocess.check_output(['systemctl','show',name,'-p','FragmentPath','--value'],text=True).strip())
+    ui.shadow.require(fragment.is_file() and not fragment.is_symlink() and fragment.stat().st_uid==0,'keeper unit fragment ownership unknown')
+    ui.shadow.publish(folder/'keeper-unit-verified.json',{'unit':name,'fragment':str(fragment),
+        'fragment_sha256':hashlib.sha256(fragment.read_bytes()).hexdigest(),'boot_id':value['binding']['boot_id']},new=True)
     ui.shadow.publish(folder/'keeper-initialize-release.json',{'session':folder.name,
         'client_pid':os.getpid(),'client_start':ui.work.process_start(os.getpid())},new=True)
     deadline=time.monotonic()+20
@@ -319,9 +333,50 @@ def run_session(cfg,config,folder):
         # Resident keeper/source/records/output are left intact and protected.
 
 
+def collect_empty_metadata(cfg,folder):
+    # Only PID1 references to an EXITED owned keeper, never accepted work/data.
+    # Empty membership of THIS exact cage is not global work/delivery authority.
+    value=session(cfg,folder);intent=ui.shadow.read(folder/'keeper-budget-intent.json')
+    budget=intent['budget'];receipt=ui.shadow.read(folder/'keeper-unit-verified.json')
+    name=keeper_unit(folder,budget)
+    ui.shadow.require(receipt['unit']==name and receipt['boot_id']==value['binding']['boot_id'],
+                      'metadata unit owner/epoch changed')
+    fields={key:subprocess.check_output(['systemctl','show',name,'-p',key,'--value'],text=True).strip()
+            for key in ['MainPID','ActiveState','SubState','FragmentPath']}
+    hold=ui.shadow.read(folder/'keeper-metadata-hold.json')
+    ui.shadow.require(fields['MainPID']==str(hold['pid']) and fields['ActiveState']=='active' and fields['SubState']=='running'
+        and ui.work.process_start(hold['pid'])==hold['pid_start'] and hold['boot_id']==value['binding']['boot_id']
+        and fields['FragmentPath']==receipt['fragment']
+        and hashlib.sha256(Path(receipt['fragment']).read_bytes()).hexdigest()==receipt['fragment_sha256'],
+        'live/foreign/uncertain keeper cage; no metadata stop')
+    expected={}
+    for path in Path(cfg['session_directory']).glob('*/keeper-metadata-hold.json'):
+        other=ui.shadow.read(path)
+        if other['slice']==budget['slice'] and not (path.parent/'metadata-collected.json').exists():
+            expected[other['pid']]={'start':other['pid_start'],'uid':0,'cgroup':budget['slice']+'/'+other['unit']}
+    ui.shadow.require(scope_members(budget['slice'])==expected,'live/foreign/uncertain keeper cage; no metadata stop')
+    descriptor=ui.shadow.read(folder/'keeper.json');record=ui.shadow.read(ui.shadow.Store(cfg['store_directory']).job(descriptor['session'])/'record.json')
+    ui.shadow.require(record.get('state')=='backend_and_local_children_reaped_output_pending'
+        and record.get('consumer_delivery')=='unverified','local child/output receipt uncertain; no metadata stop')
+    # Only authenticated metadata holders remain; no user/native work exists
+    # in this exact cage. Ask this holder to exit normally, never signal work.
+    ui.shadow.publish(folder/'metadata-close-request.json',hold,new=True)
+    deadline=time.monotonic()+30
+    while time.monotonic()<deadline:
+        pid=subprocess.check_output(['systemctl','show',name,'-p','MainPID','--value'],text=True).strip()
+        if pid=='0':break
+        time.sleep(.05)
+    ui.shadow.require(pid=='0','metadata exit outcome unknown; no retry/kill')
+    subprocess.run(['systemctl','stop',name],check=True,capture_output=True,text=True)
+    result={'only_exited_owned_PID1_metadata_collected':name,'all_records_output_and_unknowns_retained':True,
+            'consumer_delivery_verified':False,'termination_capable':False}
+    ui.shadow.publish(folder/'metadata-collected.json',result,new=True)
+    return result
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--config',type=Path,required=True)
-    parser.add_argument('action',choices=['launch','client','serve','finish-input']);parser.add_argument('--home',type=Path)
+    parser.add_argument('action',choices=['launch','client','serve','finish-input','collect-metadata']);parser.add_argument('--home',type=Path)
     parser.add_argument('--agent',default='kiro_default');parser.add_argument('--session',type=Path);args=parser.parse_args()
     if args.action=='serve':
         # All code/config remain root-owned. Initialize the exact owned sibling
@@ -340,6 +395,8 @@ def main():
         ui.shadow.require(args.session is not None,'exact owned session required')
         if args.action=='client':result=run_session(cfg,args.config,args.session)
         elif args.action=='serve':result=serve(cfg,args.session)
+        elif args.action=='collect-metadata':
+            print(json.dumps(collect_empty_metadata(cfg,args.session)));return
         else:
             value=session(cfg,args.session);d=ui.shadow.read(args.session/'keeper.json')
             ui.shadow.require(d['boot_id']==value['binding']['boot_id'] and ui.work.process_start(d['pid'])==d['pid_start'],
