@@ -22,6 +22,7 @@
     ./spot-work-shadow.nix
     ./spot-work-shadow-acp.nix
     ./spot-work-shadow-tui.nix
+    ./spot-output-review.nix
     ./spot-acp.nix
     ./spot-gateway.nix
     ./spot-profile-cache.nix
@@ -44,6 +45,8 @@
   # Warm opt-in TUI is separate; package the exact public vendor software and
   # verify replacement-root recovery before enabling this declarative package.
   services.spotWorkShadowTui.enable = false;
+  # Read-only recovery console remains a warm opt-in until reboot/package gates.
+  services.spotOutputReview.enable = false;
 
   services.spotProfileCache.enable = true;
 

@@ -49,7 +49,9 @@ def new_records(jobs,old,read):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--evidence',type=Path,required=True)
-    parser.add_argument('--installed',action='store_true');args=parser.parse_args()
+    parser.add_argument('--installed',action='store_true');parser.add_argument('--output-review',action='store_true')
+    parser.add_argument('--review-cli',type=Path);args=parser.parse_args()
+    if args.review_cli and not args.output_review:raise RuntimeError('explicit private output review fixture required')
     budget=validation.current()
     if not budget or budget['purpose'] not in {'verify','canary-verify'}:raise RuntimeError('exact private verification budget required')
     args.evidence.mkdir(mode=0o700)
@@ -81,7 +83,7 @@ def main():
         config=source/'config.json';p.ui.shadow.publish(config,cfg,new=True);code=source
     store=p.ui.shadow.Store(cfg['store_directory'])
     old={path.name:hashlib.sha256((path/'record.json').read_bytes()).hexdigest() for path in (store.root/'jobs').iterdir()}
-    cases=[];folders=[]
+    cases=[];folders=[];review_proof=None
     try:
         for case in ['queue','client-loss']:
             home=base/('home-'+case);home.mkdir(mode=0o700);gid=pwd.getpwuid(1001).pw_gid;os.chown(home,1001,gid)
@@ -220,10 +222,14 @@ def main():
                     wait(lambda:all(row['uid']==0 for row in p.scope_members(budget['slice']).values()),
                          'all owned synthetic user processes ended before another empty gate',alive=False)
                 os.close(master);(args.evidence/(case+'-full-pty.bin')).write_bytes(console)
+            if args.output_review and case=='client-loss':
+                spec=importlib.util.spec_from_file_location('owned_review_fixture',Path(__file__).with_name('verify-spot-shadow-review.py'))
+                review=importlib.util.module_from_spec(spec);spec.loader.exec_module(review)
+                review_proof=review.exercise(store,folder,args.evidence/'output-review',args.review_cli)
         current={path.name:hashlib.sha256((path/'record.json').read_bytes()).hexdigest() for path in (store.root/'jobs').iterdir() if path.name in old}
         p.ui.shadow.require(current==old,'old records changed; never reset over them')
         proof={'installed_path':args.installed,'deployment_id':cfg['deployment_id'],'config':str(config),'fixture_base':str(base),
-            'metadata_holders_retained_until_own_driver_and_frontends_exit':True,'actual_cases':cases,
+            'metadata_holders_retained_until_own_driver_and_frontends_exit':True,'actual_cases':cases,'output_review_proof':review_proof,
             'old_records_preserved':old,'new_records':sorted(path.name for path in (store.root/'jobs').iterdir() if path.name not in old),
             'all_passed':True,'consumer_delivery_verified':False,'work_tracking_verified':False,'armed':False,'goal_complete':False}
         p.ui.shadow.publish(args.evidence/'proof.json',proof,new=True)
