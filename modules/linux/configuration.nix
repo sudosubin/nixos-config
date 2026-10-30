@@ -19,6 +19,7 @@
     ./spot-schedule-guard.nix
     ./spot-protection-observer.nix
     ./spot-work.nix
+    ./spot-work-shadow.nix
     ./spot-acp.nix
     ./spot-gateway.nix
     ./spot-profile-cache.nix
@@ -34,6 +35,8 @@
   # Independent read-only status still works with absent/closed work custody.
   # This does not arm or enable termination.
   services.spotProtectionObserver.enable = true;
+  # Explicit NEW non-interactive pilot; legacy/provider/output coverage UNKNOWN.
+  services.spotWorkShadow.enable = true;
 
   services.spotProfileCache.enable = true;
 
