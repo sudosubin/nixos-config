@@ -20,6 +20,7 @@
     ./spot-protection-observer.nix
     ./spot-work.nix
     ./spot-work-shadow.nix
+    ./spot-work-shadow-acp.nix
     ./spot-acp.nix
     ./spot-gateway.nix
     ./spot-profile-cache.nix
@@ -37,6 +38,8 @@
   services.spotProtectionObserver.enable = true;
   # Explicit NEW non-interactive pilot; legacy/provider/output coverage UNKNOWN.
   services.spotWorkShadow.enable = true;
+  # Explicit new ACP entry only; never replace an existing TUI/session.
+  services.spotWorkShadowAcp.enable = true;
 
   services.spotProfileCache.enable = true;
 
