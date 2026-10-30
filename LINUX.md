@@ -498,6 +498,8 @@ sudo /var/lib/spot-output-review/3189d6383053/source/spot-output-review \
 
 - reader는 private256MiB/CPU25/Swap0·최소2GiB 여유/강제 deadline 없는 자기 metadata cage만 쓴다. 일반 native/build permission을 부여하지 않는다. `spot-output-review.nix`는 선언했지만 **enable=false**이며 actual reboot/new-root package 지속성은 아직 아니다. **복구된 것은 읽기 전용 output review**다. 원래 vendor UI state·입력 재개, keeper crash takeover, 새 boot/off-root 복구, 신뢰된 delivery, 전체 producer·첨부 경로는 남아 있다. 최종 감사는 Desired0/보호된 원본1대/observercurrenttrue/fullguardabsent다. **암호화 home/전체 backup·package·homeEIP 복원/운영 restart·새lock/5종최저가/실제 zero→예약재생성도 미완료**, 모든 broad approval/arming/termination/goal flags는 false로 유지한다.
 
+- 완전 증거는 원본 `/home/persist/root/phase44-output-review-20261030/custody-23220b21f01a450692cceb22b36e7d08/complete-readonly-output-recovery-source-controls-and-native-evidence.tar.gz`에 보존했다. **1513095bytes/644manifest records/source2×278(두 번째는 명시적 LINUX-only doc overlay)/controls14/snapshot19의750synthetic body/SHA `647539a8b1cc1f3a7b05f9df8061657141120a3b9fbb28c19af026a610eb3b62`**를 전부 재해시했다. 세scope·definition/normalreaderCG 부재와65기록 불변 확인 뒤 codecparts5개만 삭제했다. scoped reference `/home/persist/manifests/phase44-output-review-current-scoped-20261030.json`, SHA `b8c3f838118d13d384d9c42c97083f91df575bf482f063fc5be2be5e5fec04ed`는 모든 broad approval/arming/termination/goal flags를 false로 유지한다.
+
 ## 비용·백업 주의
 
 - EIP는 연결 중에도, 미연결 보유 중에도 public IPv4 요금이 발생함.
