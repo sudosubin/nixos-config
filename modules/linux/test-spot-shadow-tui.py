@@ -48,6 +48,26 @@ class RuntimeTests(unittest.TestCase):
         text=inspect.getsource(p.launch_application)
         self.assertIn('nested application authority refused',text);self.assertNotIn('daemon-reload',text)
         self.assertIn("memory.oom.group",text);self.assertIn('unknown processes',text)
+    def test_initializer_accepts_only_same_owned_root_metadata_and_exact_gate(self):
+        before={10:{'start':1,'uid':0,'cgroup':'owned/client'}}
+        after=dict(before)
+        after[20]={'start':2,'uid':0,'cgroup':'owned/keeper'}
+        p.initializer_members(before,after,10,20,'owned/client','owned/keeper')
+    def test_initializer_refuses_any_live_UID1001_before_or_during_sibling_start(self):
+        root={10:{'start':1,'uid':0,'cgroup':'owned/client'}}
+        user={30:{'start':3,'uid':1001,'cgroup':'owned/client'}}
+        with self.assertRaisesRegex(RuntimeError,'live user participant'):
+            p.initializer_members(root|user,root,10,20,'owned/client','owned/keeper')
+        with self.assertRaisesRegex(RuntimeError,'live user participant'):
+            p.initializer_members(root,root|user,10,20,'owned/client','owned/keeper')
+    def test_initializer_does_not_repair_unknown_or_foreign_metadata_cages(self):
+        before={10:{'start':1,'uid':0,'cgroup':'owned/client'}}
+        after={10:before[10],99:{'start':9,'uid':0,'cgroup':'foreign/root'}}
+        with self.assertRaisesRegex(RuntimeError,'unknown participant'):
+            p.initializer_members(before,after,10,20,'owned/client','owned/keeper')
+        text=inspect.getsource(p.initialize_keeper_budget)
+        self.assertLess(text.index('initializer_members('),text.index("write_text('1')"))
+        self.assertIn('definition_sha256',text);self.assertIn('current_group()',text)
     def test_config_requires_exact_fields_hashes_and_original_lineage(self):
         spec=importlib.util.spec_from_file_location('deploy_for_runtime_test',Path(__file__).parents[2]/'scripts/spot-deploy-shadow-tui.py')
         module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)

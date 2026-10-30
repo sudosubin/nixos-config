@@ -183,6 +183,69 @@ def keeper_unit(folder,budget):
     return ('spot-resource-validation-'+folder.name[:12] if budget['fixture'] else 'spotshadowtui-keeper-'+folder.name)+'.service'
 
 
+def scope_members(slice_name):
+    rows={}
+    for path in (CGROUP/slice_name).rglob('cgroup.procs'):
+        for text in path.read_text().split():
+            pid=int(text)
+            try:rows[pid]={'start':ui.work.process_start(pid),'uid':ui.work.process_uid(pid),
+                           'cgroup':str(path.parent.relative_to(CGROUP))}
+            except (FileNotFoundError,ProcessLookupError):pass
+    return rows
+
+
+def initializer_members(before,after,client,expected_gate,client_group,keeper_group):
+    # Resource admission for THIS fresh owned cage, never server/work idle.
+    # A new sibling can make PID1 reset the slice OOM flag. No accepted UID1001
+    # work may exist when that sibling is started or while the gate initializes.
+    ui.shadow.require(all(row['uid']==0 for row in before.values()) and all(row['uid']==0 for row in after.values()),
+                      'live user participant; sibling start/fence reinitialization forbidden')
+    for pid,row in after.items():
+        original=before.get(pid)
+        allowed=original==row or pid==expected_gate and row['cgroup']==keeper_group
+        if not allowed:
+            allowed=row['cgroup']==client_group and ui.front.frontend.descendant(pid,client)
+        ui.shadow.require(allowed,'unknown participant in owned budget initializer')
+
+
+def initialize_keeper_budget(cfg,folder):
+    intent=ui.shadow.read(folder/'keeper-budget-intent.json');budget=intent['budget']
+    ui.shadow.require(intent['boot_id']==Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+        and ui.work.process_start(intent['client_pid'])==intent['client_start']
+        and Path('/proc/'+str(intent['client_pid'])+'/cgroup').read_text().strip()=='0::'+budget['cgroup'],
+        'budget initializer owner/epoch changed')
+    if budget['fixture']:
+        owner=validation.trusted_json(validation.RUNTIME/budget['id']/'owner.json')
+        ui.shadow.require(owner.get('schema')==2 and owner['id']==budget['id']
+            and owner['boot_id']==intent['boot_id'] and owner['slice']==budget['slice']
+            and validation.policy(owner['purpose'])[0]==budget['memory_max']
+            and owner['driver']=='spot-validation-'+budget['id']+'.service'
+            and owner['purpose'] in {'verify','canary-verify'}
+            and hashlib.sha256((UNITS/budget['slice']).read_bytes()).hexdigest()==owner['definition_sha256'],
+            'verification initializer is not its original owner')
+    else:
+        owner=ui.shadow.read(folder/'application-budget.json')
+        ui.shadow.require(owner['id']==folder.name and budget['memory_max']==APP_MAX
+            and owner['boot_id']==intent['boot_id'] and owner['slice']==budget['slice']
+            and hashlib.sha256((UNITS/budget['slice']).read_bytes()).hexdigest()==owner['definition_sha256'],
+            'application initializer is not its original owner')
+    keeper_group=budget['slice']+'/'+keeper_unit(folder,budget)
+    ui.shadow.require(current_group()=='/'+keeper_group,'initializer outside its exact new keeper unit')
+    before={int(pid):row for pid,row in intent['before_members'].items()}
+    after=scope_members(budget['slice'])
+    initializer_members(before,after,intent['client_pid'],os.getpid(),budget['cgroup'].lstrip('/'),keeper_group)
+    leaf=CGROUP/budget['slice'];cpu=(leaf/'cpu.max').read_text().split()
+    ui.shadow.require((leaf/'memory.max').read_text().strip()==str(budget['memory_max'])
+        and (leaf/'memory.swap.max').read_text().strip()=='0' and cpu[0]!='max' and 0<int(cpu[0])<=int(cpu[1])
+        and Path('/proc/self/oom_score_adj').read_text().strip()=='1000','initializer limits changed')
+    (leaf/'memory.oom.group').write_text('1')  # ONLY this ownership-checked empty-of-user-work cage.
+    ui.shadow.require((leaf/'memory.oom.group').read_text().strip()=='1','owned OOM fence not confirmed')
+    ui.shadow.publish(folder/'keeper-budget-verified.json',{'boot_id':intent['boot_id'],'slice':budget['slice'],
+        'gate_pid':os.getpid(),'gate_start':ui.work.process_start(os.getpid()),'memory_max':budget['memory_max'],
+        'oom_group':1,'no_UID1001_work_before_or_during_initialization':True,
+        'NOT_work_idle_or_build_authority':True},new=True)
+
+
 def serve(cfg,folder):
     value=session(cfg,folder);budget=app_budget(folder,keeper=True)
     # Fixture service is a sibling within the SAME owned validation slice.
@@ -204,7 +267,13 @@ def run_session(cfg,config,folder):
     store.update(startup,kind='shadow_tui_startup',state='resident_keeper_start_intent_unknown')
     name=keeper_unit(folder,budget)
     ui.shadow.publish(folder/'keeper-start-intent.json',{'unit':name,'startup':startup['id'],'boot_id':value['binding']['boot_id']},new=True)
-    command=['systemd-run','--quiet','--collect','--unit='+name,*properties(budget),
+    before_members=scope_members(budget['slice'])
+    ui.shadow.require(all(row['uid']==0 for row in before_members.values()),
+                      'live user participant; cannot start sibling that may reset owned OOM fence')
+    ui.shadow.publish(folder/'keeper-budget-intent.json',{'budget':budget,'boot_id':value['binding']['boot_id'],
+        'client_pid':os.getpid(),'client_start':ui.work.process_start(os.getpid()),'before_members':before_members},new=True)
+    keeper_properties=[prop for prop in properties(budget) if prop!='--property=ProtectControlGroups=yes']
+    command=['systemd-run','--quiet','--collect','--unit='+name,*keeper_properties,'--property=ProtectControlGroups=no',
         '--property=KillMode=process','--property=TimeoutStopSec=infinity',
         sys.executable,'-B','-I',str(Path(cfg['source_directory'])/'spot_shadow_tui.py'),'--config',str(config),'serve','--session',str(folder)]
     ui.shadow.require(subprocess.check_output(['systemctl','show',name,'-p','LoadState','--value'],text=True).strip()=='not-found',
@@ -238,6 +307,14 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--config',type=Path,required=True)
     parser.add_argument('action',choices=['launch','client','serve','finish-input']);parser.add_argument('--home',type=Path)
     parser.add_argument('--agent',default='kiro_default');parser.add_argument('--session',type=Path);args=parser.parse_args()
+    if args.action=='serve':
+        # All code/config remain root-owned. Initialize the exact owned sibling
+        # gate BEFORE any native effect or v.current() readiness assertion.
+        ui.shadow.require(args.session is not None,'exact owned session required')
+        preliminary=settings(ui.shadow.read(args.config))
+        ui.shadow.require(version(preliminary['source_directory'])==preliminary['deployment_id'],'initializer source changed')
+        ui.shadow.require(args.session.parent==Path(preliminary['session_directory']),'foreign initializer session')
+        initialize_keeper_budget(preliminary,args.session)
     cfg=check_config(args.config)
     if args.action=='launch':
         folder=prepare(cfg,args.home or Path(pwd.getpwuid(1001).pw_dir),args.agent)
