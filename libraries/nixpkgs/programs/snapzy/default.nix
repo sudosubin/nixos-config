@@ -9,13 +9,13 @@
 
 buildSwiftPackage (finalAttrs: {
   pname = "snapzy";
-  version = "2.0.0";
+  version = "2.1.0";
 
   src = fetchFromGitHub {
     owner = "duongductrong";
     repo = "Snapzy";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-nPr+PYDx6v5o4PaIel7OsMhRXIfRYFOT4zqdQrUq9Ko=";
+    hash = "sha256-ucDfLv8JIWuJRPsYLgldeigqpvn0lkf5uMAgu9KZ9Zo=";
   };
 
   swiftpmManifest = ./Package.swift;

@@ -15,7 +15,7 @@ mkDerivation (
   finalAttrs:
   {
     pname = "grok-bot";
-    version = "0.75.8";
+    version = "0.78.1";
 
     src = finalAttrs.passthru.sources.${stdenvNoCC.hostPlatform.system};
 
@@ -23,15 +23,15 @@ mkDerivation (
       sources = {
         aarch64-darwin = fetchurl {
           url = "https://downloads.cursor.com/sand/stable/darwin-arm64/${finalAttrs.version}/Grok_Bot_${finalAttrs.version}.dmg";
-          hash = "sha256-HcqEkQVQOzYvAjx2p1iR3AT5NITXawOnAzhMSg7xX34=";
+          hash = "sha256-Dldd/S9jiAjwSH+I3sa/U6hxysKTnef+RUmB+Sf58Nk=";
         };
         aarch64-linux = fetchurl {
-          url = "https://downloads.cursor.com/grokbot/stable/039d88c52f45f8af72fbe7379bc426c171edf62b/linux/arm64/Grok_Bot_0.75.8.AppImage";
-          hash = "sha256-zj/XzQIw7uD0/CHXlYpEezxB2nDjGvWWSueyFMQ+HZ4=";
+          url = "https://downloads.cursor.com/grokbot/stable/72e130b4e6be3fdc47b97e809b6b420908ce2dd8/linux/arm64/Grok_Bot_0.78.1.AppImage";
+          hash = "sha256-XJVTL2FOb6/CUl8uONim6q01Nz1iN2b6jmj1hDWoUeg=";
         };
         x86_64-linux = fetchurl {
-          url = "https://downloads.cursor.com/grokbot/stable/039d88c52f45f8af72fbe7379bc426c171edf62b/linux/x64/Grok_Bot_0.75.8.AppImage";
-          hash = "sha256-OM1gaqpIUIyZazUGjKNMfllvXBGuN3Zg2vokoa3hGGM=";
+          url = "https://downloads.cursor.com/grokbot/stable/72e130b4e6be3fdc47b97e809b6b420908ce2dd8/linux/x64/Grok_Bot_0.78.1.AppImage";
+          hash = "sha256-BQ11I8bvoEYmYROuLjsfPOlAlVSSwrlS/T5pi2DXP7g=";
         };
       };
       updateScript = ./update.sh;

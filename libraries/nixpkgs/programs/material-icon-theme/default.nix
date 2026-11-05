@@ -7,17 +7,17 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "material-icon-theme";
-  version = "5.39.0";
+  version = "5.40.0";
 
   src = fetchFromGitHub {
     owner = "material-extensions";
     repo = "vscode-material-icon-theme";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-rM0aMKLBw9sHjmJZKW7XEd+NiurGLkCyR1+dUPsYR7Q=";
+    hash = "sha256-oKB54ewYX8tfr2nDx0fA3K6ALGF4TsK2Tbn1GpVRy5w=";
   };
 
   nodejs = nodejs_24;
-  npmDepsHash = "sha256-xjzcKNldoy2G3kYreXC4Xg2+9W4aC8KGndMuvMbGX1I=";
+  npmDepsHash = "sha256-un8BKw6DJjiqji9F/j+4GwyhUhO04oAravPdpyY7S6c=";
 
   # upstream's lockfile lacks resolved URLs for most packages (npm/cli#6301), so ship a regenerated one
   postPatch = ''

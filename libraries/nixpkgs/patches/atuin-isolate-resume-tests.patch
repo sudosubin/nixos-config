@@ -1,0 +1,567 @@
+Subject: [PATCH] Isolate resume E2E tests from host processes
+
+Use fixture process observations for liveness checks and final write guards.
+The example target uses a fixture table; the installed CLI still uses the OS.
+
+Local proposal; not yet submitted upstream.
+
+diff --git a/crates/atuin-ai/src/commands.rs b/crates/atuin-ai/src/commands.rs
+index 27db1a3..71812dc 100644
+--- a/crates/atuin-ai/src/commands.rs
++++ b/crates/atuin-ai/src/commands.rs
+@@ -10,7 +10,7 @@ pub(crate) mod inline;
+ pub(crate) mod resume;
+ pub(crate) mod session;
+ 
+-pub use resume::Cmd as ResumeCmd;
++pub use resume::{Cmd as ResumeCmd, run_with_processes as resume_with_processes};
+ pub use session::{Cmd as ThreadsCmd, import_all};
+ 
+ #[derive(Args, Debug)]
+diff --git a/crates/atuin-ai/src/commands/resume.rs b/crates/atuin-ai/src/commands/resume.rs
+index f72e6a8..a9c9012 100644
+--- a/crates/atuin-ai/src/commands/resume.rs
++++ b/crates/atuin-ai/src/commands/resume.rs
+@@ -52,6 +52,7 @@ use std::sync::Arc;
+ use atuin_client::ai_session::{Analysis, AtuinSessionId, HarnessKind, HarnessSession, SourceId};
+ use atuin_client::settings::{AiSessionFilterMode, Settings};
+ use atuin_client::theme::ThemeManager;
++use atuin_common::harnesstools::sync::Processes;
+ use atuin_common::string::EscapeNonPrintablePosixExt as _;
+ use clap::Args;
+ use eyre::{Result, bail};
+@@ -393,7 +394,16 @@ async fn direct_target(
+     Ok(Some((row, note)))
+ }
+ 
+-pub async fn run(cmd: Cmd, mut settings: Settings) -> Result<()> {
++pub async fn run(cmd: Cmd, settings: Settings) -> Result<()> {
++    run_with_processes(cmd, settings, Processes::here()).await
++}
++
++/// Run with an explicit process source, allowing isolated integration fixtures.
++pub async fn run_with_processes(
++    cmd: Cmd,
++    mut settings: Settings,
++    processes: Processes,
++) -> Result<()> {
+     startup("started");
+     if let Some(mode) = cmd.filter_mode {
+         settings.threads.filter_mode = Some(mode);
+@@ -417,7 +427,8 @@ pub async fn run(cmd: Cmd, mut settings: Settings) -> Result<()> {
+     }
+     let source: Arc<dyn SessionSource> = Arc::new(SidecarSource::open(&path, &context).await?);
+     startup("session database open");
+-    let resumer: Arc<dyn Resumer> = Arc::new(HarnessResumer::new(context.clone(), &settings));
++    let resumer: Arc<dyn Resumer> =
++        Arc::new(HarnessResumer::new(context.clone(), &settings, processes));
+ 
+     if cmd.fork || cmd.continue_in.is_some() {
+         let (source, resumer, query) = (source.as_ref(), resumer.as_ref(), query.trim());
+diff --git a/crates/atuin-ai/src/resume_tui/resumer.rs b/crates/atuin-ai/src/resume_tui/resumer.rs
+index 2c57e9b..2e5c733 100644
+--- a/crates/atuin-ai/src/resume_tui/resumer.rs
++++ b/crates/atuin-ai/src/resume_tui/resumer.rs
+@@ -28,7 +28,8 @@ use atuin_common::harnesstools::rehydrate::{
+ };
+ pub use atuin_common::harnesstools::resume::{ResumeError, ResumePlan, ResumeTarget, quote};
+ use atuin_common::harnesstools::sync::{
+-    AppendOptions, AppendOutcome, Liveness, LocalTip, ReplaceOutcome, SessionSync as _, SyncError,
++    AppendOptions, AppendOutcome, Liveness, LocalTip, Processes, ReplaceOutcome, SessionSync as _,
++    SyncError,
+ };
+ use atuin_common::harnesstools::{AnyHarness, Harness as _, fork};
+ use atuin_common::path::PathBufExt as _;
+@@ -388,7 +389,9 @@ fn wrote(started: Instant) {
+ }
+ 
+ /// This machine, as the harnesses themselves see it.
+-pub struct ThisMachine;
++pub struct ThisMachine {
++    processes: Processes,
++}
+ 
+ #[async_trait]
+ impl Machine for ThisMachine {
+@@ -422,7 +425,7 @@ impl Machine for ThisMachine {
+     }
+ 
+     async fn is_live(&self, harness: AnyHarness, id: &str, cwd: Option<&Path>) -> Liveness {
+-        harness.is_live(id, cwd).await
++        harness.is_live(id, cwd, self.processes.clone()).await
+     }
+ 
+     async fn append(
+@@ -434,7 +437,11 @@ impl Machine for ThisMachine {
+         options: &AppendOptions<'_>,
+     ) -> Result<AppendOutcome, SyncError> {
+         let started = Instant::now();
+-        let appended = harness.append(id, base, lines, options).await;
++        let options = AppendOptions {
++            processes: Some(&self.processes),
++            ..options.clone()
++        };
++        let appended = harness.append(id, base, lines, &options).await;
+         if appended.as_ref().is_ok_and(|outcome| !outcome.appended.is_empty()) {
+             wrote(started);
+         }
+@@ -451,7 +458,11 @@ impl Machine for ThisMachine {
+         backups: &Path,
+     ) -> Result<ReplaceOutcome, SyncError> {
+         let started = Instant::now();
+-        let replaced = harness.replace(id, base, branch, options, backups).await;
++        let options = AppendOptions {
++            processes: Some(&self.processes),
++            ..options.clone()
++        };
++        let replaced = harness.replace(id, base, branch, &options, backups).await;
+         if replaced.is_ok() {
+             wrote(started);
+         }
+@@ -477,9 +488,10 @@ pub fn switched_dir(settings: &Settings) -> PathBuf {
+ }
+ 
+ impl HarnessResumer {
+-    pub fn new(context: ResumeContext, settings: &Settings) -> Self {
++    /// A resumer with an explicit view of the machine's running processes.
++    pub fn new(context: ResumeContext, settings: &Settings, processes: Processes) -> Self {
+         let templates = settings.threads.resume.clone();
+-        Self::on(context, templates, ThisMachine, switched_dir(settings))
++        Self::on(context, templates, ThisMachine { processes }, switched_dir(settings))
+     }
+ 
+     /// A resumer looking at `machine` instead of this one.
+@@ -759,6 +771,7 @@ impl Resumer for HarnessResumer {
+         let options = AppendOptions {
+             taken_ids: Some(&taken),
+             cwd: dir.as_deref(),
++            ..AppendOptions::default()
+         };
+         let outcome = match self.machine.append(harness, id, &base, &rows, &options).await {
+             Ok(outcome) => outcome,
+@@ -836,6 +849,7 @@ impl Resumer for HarnessResumer {
+         let options = AppendOptions {
+             taken_ids: Some(&taken),
+             cwd: dir.as_deref(),
++            ..AppendOptions::default()
+         };
+         let backups = self.switched.join(harness.name());
+         let replaced = self.machine.replace(harness, id, &tip, &branch, &options, &backups).await;
+diff --git a/crates/atuin-ai/src/resume_tui/resumer/tests.rs b/crates/atuin-ai/src/resume_tui/resumer/tests.rs
+index cfd7fdf..537f552 100644
+--- a/crates/atuin-ai/src/resume_tui/resumer/tests.rs
++++ b/crates/atuin-ai/src/resume_tui/resumer/tests.rs
+@@ -259,6 +259,53 @@ fn row(harness: HarnessKind, id: &str, cwd: &Path, remote: bool) -> SessionRow {
+     row
+ }
+ 
++#[tokio::test]
++async fn native_machine_uses_injected_processes_for_every_guard() {
++    use atuin_common::harnesstools::pi::Pi;
++    use atuin_common::harnesstools::sync::TableEntry;
++
++    let dir = tempfile::tempdir().unwrap();
++    let env = env::MockEnv::install();
++    env.set("PI_CODING_AGENT_DIR", dir.path().as_os_str());
++    let harness = AnyHarness::Pi(Pi::PI);
++    let base = LocalTip {
++        native_path: dir.path().join("missing.jsonl"),
++        ..fake::local_tip(&[], None)
++    };
++    let options = AppendOptions::default();
++    for (processes, expected) in [
++        (Processes::Table(vec![]), Liveness::NotLive),
++        (
++            Processes::Table(vec![TableEntry {
++                pid: 42,
++                name: "pi".into(),
++                ..TableEntry::default()
++            }]),
++            Liveness::Unknown,
++        ),
++        (Processes::Unavailable, Liveness::Unknown),
++    ] {
++        let machine = ThisMachine { processes };
++        assert_eq!(machine.is_live(harness, "fixture", None).await, expected);
++        let appended = machine.append(harness, "fixture", &base, &[], &options).await.unwrap_err();
++        let replaced = machine
++            .replace(harness, "fixture", &base, &[], &options, dir.path())
++            .await
++            .unwrap_err();
++        if expected == Liveness::NotLive {
++            assert!(matches!(appended, SyncError::Io(_)), "{appended:?}");
++            assert!(
++                matches!(replaced, SyncError::Unsupported("the branch has no rows")),
++                "{replaced:?}"
++            );
++        } else {
++            for error in [appended, replaced] {
++                assert!(matches!(error, SyncError::MaybeLive), "{error:?}");
++            }
++        }
++    }
++}
++
+ #[rstest]
+ fn shell_line_quotes_the_directory() {
+     let plan = ResumePlan {
+diff --git a/crates/atuin-common/src/harnesstools/sync.rs b/crates/atuin-common/src/harnesstools/sync.rs
+index 9d38492..5fa56b9 100644
+--- a/crates/atuin-common/src/harnesstools/sync.rs
++++ b/crates/atuin-common/src/harnesstools/sync.rs
+@@ -147,6 +147,14 @@ pub struct AppendOptions<'a> {
+     /// in the directory the transcript records ([`LocalTip::cwd`]) counts too; with either not
+     /// known, a process anywhere does.
+     pub cwd: Option<&'a Path>,
++    /// Process source for the final write check; `None` uses the operating system.
++    pub processes: Option<&'a Processes>,
++}
++
++impl AppendOptions<'_> {
++    fn processes(&self) -> Processes {
++        self.processes.cloned().unwrap_or_else(Processes::here)
++    }
+ }
+ 
+ /// What [`SessionSync::append`] did.
+@@ -208,6 +216,8 @@ fn pid_note(pid: Option<u32>) -> String {
+ }
+ 
+ /// The harness side of fast-forwarding a session (see the module docs).
++/// Process sources are supplied by the caller, including for the final checks before writing.
++/// OS-backed sources observe the current process table again on each check.
+ pub trait SessionSync {
+     /// What this machine's native copy of session `id` holds; `None` when it has none.
+     #[allow(async_fn_in_trait)]
+@@ -216,7 +226,7 @@ pub trait SessionSync {
+     /// Whether a harness process on this machine may be writing session `id`, last seen working
+     /// in `cwd`. [`Liveness::Unknown`] is to be taken as live.
+     #[allow(async_fn_in_trait)]
+-    async fn is_live(&self, id: &str, cwd: Option<&Path>) -> Liveness;
++    async fn is_live(&self, id: &str, cwd: Option<&Path>, processes: Processes) -> Liveness;
+ 
+     /// Append `lines` (root to head, the first hanging from the tip `base` read, each after it
+     /// from the tip or a row before it) to session `id`'s transcript, so the harness resumes from
+@@ -281,13 +291,13 @@ impl SessionSync for AnyHarness {
+         }
+     }
+ 
+-    async fn is_live(&self, id: &str, cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, id: &str, cwd: Option<&Path>, processes: Processes) -> Liveness {
+         match self {
+-            Self::ClaudeCode(h) => h.is_live(id, cwd).await,
+-            Self::Codex(h) => h.is_live(id, cwd).await,
+-            Self::Copilot(h) => h.is_live(id, cwd).await,
+-            Self::Opencode(h) => h.is_live(id, cwd).await,
+-            Self::Pi(h) => h.is_live(id, cwd).await,
++            Self::ClaudeCode(h) => h.is_live(id, cwd, processes).await,
++            Self::Codex(h) => h.is_live(id, cwd, processes).await,
++            Self::Copilot(h) => h.is_live(id, cwd, processes).await,
++            Self::Opencode(h) => h.is_live(id, cwd, processes).await,
++            Self::Pi(h) => h.is_live(id, cwd, processes).await,
+         }
+     }
+ 
+diff --git a/crates/atuin-common/src/harnesstools/sync/ccode.rs b/crates/atuin-common/src/harnesstools/sync/ccode.rs
+index 8cfd915..78191a3 100644
+--- a/crates/atuin-common/src/harnesstools/sync/ccode.rs
++++ b/crates/atuin-common/src/harnesstools/sync/ccode.rs
+@@ -63,13 +63,11 @@ impl SessionSync for Ccode {
+         blocking(move || locate(&root, &id).map(|path| read_tip(&path)).transpose()).await
+     }
+ 
+-    async fn is_live(&self, id: &str, _cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, id: &str, _cwd: Option<&Path>, processes: Processes) -> Liveness {
+         let (sessions, id) = (sessions_dir(), id.to_owned());
+-        tokio::task::spawn_blocking(move || {
+-            liveness(&sessions, &id, &Processes::here(), &pid_domain())
+-        })
+-        .await
+-        .unwrap_or(Liveness::Unknown)
++        tokio::task::spawn_blocking(move || liveness(&sessions, &id, &processes, &pid_domain()))
++            .await
++            .unwrap_or(Liveness::Unknown)
+     }
+ 
+     async fn append(
+@@ -79,7 +77,7 @@ impl SessionSync for Ccode {
+         lines: &[RehydrateMessage],
+         options: &AppendOptions<'_>,
+     ) -> Result<AppendOutcome, SyncError> {
+-        require_idle(self.is_live(id, None).await)?;
++        require_idle(self.is_live(id, None, options.processes()).await)?;
+         let (id, base, lines) = (id.to_owned(), base.clone(), lines.to_vec());
+         let taken = options.taken_ids.cloned();
+         blocking(move || append_to(&id, &base, &lines, taken.as_ref())).await
+@@ -93,7 +91,7 @@ impl SessionSync for Ccode {
+         options: &AppendOptions<'_>,
+         backups: &Path,
+     ) -> Result<ReplaceOutcome, SyncError> {
+-        require_idle(self.is_live(id, None).await)?;
++        require_idle(self.is_live(id, None, options.processes()).await)?;
+         let (id, base, branch) = (id.to_owned(), base.clone(), branch.to_vec());
+         let (taken, backups) = (options.taken_ids.cloned(), backups.to_path_buf());
+         blocking(move || replace_to(&id, &base, &branch, taken.as_ref(), &backups)).await
+diff --git a/crates/atuin-common/src/harnesstools/sync/codex.rs b/crates/atuin-common/src/harnesstools/sync/codex.rs
+index 676bff1..f42cec5 100644
+--- a/crates/atuin-common/src/harnesstools/sync/codex.rs
++++ b/crates/atuin-common/src/harnesstools/sync/codex.rs
+@@ -61,7 +61,7 @@ impl SessionSync for Codex {
+         local_tip_in(&crate::harnesstools::codex::home(), id).await
+     }
+ 
+-    async fn is_live(&self, id: &str, cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, id: &str, cwd: Option<&Path>, processes: Processes) -> Liveness {
+         let (home, id, cwd) =
+             (crate::harnesstools::codex::home(), id.to_owned(), cwd.map(Path::to_path_buf));
+         blocking_liveness(move || {
+@@ -74,7 +74,7 @@ impl SessionSync for Codex {
+                 names: vec![thread.to_owned()],
+                 changing: newest.is_some_and(|path| changed_lately(modified(&path))),
+             };
+-            liveness(&home, &id, &Processes::here(), &seen)
++            liveness(&home, &id, &processes, &seen)
+         })
+         .await
+     }
+@@ -86,12 +86,11 @@ impl SessionSync for Codex {
+         lines: &[RehydrateMessage],
+         options: &AppendOptions<'_>,
+     ) -> Result<AppendOutcome, SyncError> {
++        let processes = options.processes();
+         let (home, thread) = (crate::harnesstools::codex::home(), resume_id(id).to_owned());
+         let seen = appending(base, &thread, options.cwd);
+         let (at, of) = (home.clone(), id.to_owned());
+-        require_idle(
+-            blocking_liveness(move || liveness(&at, &of, &Processes::here(), &seen)).await,
+-        )?;
++        require_idle(blocking_liveness(move || liveness(&at, &of, &processes, &seen)).await)?;
+         let (base, lines, taken) = (base.clone(), lines.to_vec(), options.taken_ids.cloned());
+         blocking(move || append_in(&home, &thread, &base, &lines, taken.as_ref())).await
+     }
+@@ -104,12 +103,11 @@ impl SessionSync for Codex {
+         options: &AppendOptions<'_>,
+         backups: &Path,
+     ) -> Result<ReplaceOutcome, SyncError> {
++        let processes = options.processes();
+         let (home, thread) = (crate::harnesstools::codex::home(), resume_id(id).to_owned());
+         let seen = appending(base, &thread, options.cwd);
+         let (at, of) = (home.clone(), id.to_owned());
+-        require_idle(
+-            blocking_liveness(move || liveness(&at, &of, &Processes::here(), &seen)).await,
+-        )?;
++        require_idle(blocking_liveness(move || liveness(&at, &of, &processes, &seen)).await)?;
+         replace_in(&home, id, base, branch, options.taken_ids, backups).await
+     }
+ }
+diff --git a/crates/atuin-common/src/harnesstools/sync/copilot.rs b/crates/atuin-common/src/harnesstools/sync/copilot.rs
+index c8fe2b5..c291b8e 100644
+--- a/crates/atuin-common/src/harnesstools/sync/copilot.rs
++++ b/crates/atuin-common/src/harnesstools/sync/copilot.rs
+@@ -44,11 +44,11 @@ impl SessionSync for Copilot {
+         blocking(move || locate(&root, &id).map(|path| read_tip(&path)).transpose()).await
+     }
+ 
+-    async fn is_live(&self, id: &str, _cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, id: &str, _cwd: Option<&Path>, processes: Processes) -> Liveness {
+         let Some(dir) = session_dir(&default_root(), id) else {
+             return Liveness::NotLive;
+         };
+-        blocking_liveness(move || liveness(&dir, &Processes::here())).await
++        blocking_liveness(move || liveness(&dir, &processes)).await
+     }
+ 
+     async fn append(
+@@ -58,7 +58,7 @@ impl SessionSync for Copilot {
+         lines: &[RehydrateMessage],
+         options: &AppendOptions<'_>,
+     ) -> Result<AppendOutcome, SyncError> {
+-        require_idle(self.is_live(id, None).await)?;
++        require_idle(self.is_live(id, None, options.processes()).await)?;
+         let (id, base, lines) = (id.to_owned(), base.clone(), lines.to_vec());
+         let taken = options.taken_ids.cloned();
+         blocking(move || append_to(&id, &base, &lines, taken.as_ref())).await
+@@ -72,7 +72,7 @@ impl SessionSync for Copilot {
+         options: &AppendOptions<'_>,
+         backups: &Path,
+     ) -> Result<ReplaceOutcome, SyncError> {
+-        require_idle(self.is_live(id, None).await)?;
++        require_idle(self.is_live(id, None, options.processes()).await)?;
+         let (id, base, branch) = (id.to_owned(), base.clone(), branch.to_vec());
+         let (taken, backups) = (options.taken_ids.cloned(), backups.to_path_buf());
+         blocking(move || replace_to(&id, &base, &branch, taken.as_ref(), &backups)).await
+diff --git a/crates/atuin-common/src/harnesstools/sync/opencode.rs b/crates/atuin-common/src/harnesstools/sync/opencode.rs
+index a3d4f1a..3325e6d 100644
+--- a/crates/atuin-common/src/harnesstools/sync/opencode.rs
++++ b/crates/atuin-common/src/harnesstools/sync/opencode.rs
+@@ -54,9 +54,9 @@ impl SessionSync for Opencode {
+         local_tip_in(&db, id).await
+     }
+ 
+-    async fn is_live(&self, id: &str, cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, id: &str, cwd: Option<&Path>, processes: Processes) -> Liveness {
+         let db = default_db().filter(|db| db.is_file());
+-        liveness_in(db.as_deref(), id, Processes::here(), cwd).await
++        liveness_in(db.as_deref(), id, processes, cwd).await
+     }
+ 
+     async fn append(
+@@ -66,7 +66,7 @@ impl SessionSync for Opencode {
+         lines: &[RehydrateMessage],
+         options: &AppendOptions<'_>,
+     ) -> Result<AppendOutcome, SyncError> {
+-        require_idle(running(Processes::here(), appending(base, id, options.cwd)).await)?;
++        require_idle(running(options.processes(), appending(base, id, options.cwd)).await)?;
+         let into = base.native_path.clone();
+         append_in(id, base, lines, options, move |cwd: PathBuf, export: Value| async move {
+             run_import(Path::new("opencode"), &into, &cwd, &export)
+diff --git a/crates/atuin-common/src/harnesstools/sync/pi.rs b/crates/atuin-common/src/harnesstools/sync/pi.rs
+index 5d24cce..9eff0d1 100644
+--- a/crates/atuin-common/src/harnesstools/sync/pi.rs
++++ b/crates/atuin-common/src/harnesstools/sync/pi.rs
+@@ -45,7 +45,7 @@ impl SessionSync for Pi {
+         .await
+     }
+ 
+-    async fn is_live(&self, id: &str, cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, id: &str, cwd: Option<&Path>, processes: Processes) -> Liveness {
+         let flavour = self.flavour();
+         let (root, id, cwd) = (default_root(flavour), id.to_owned(), cwd.map(Path::to_path_buf));
+         blocking_liveness(move || {
+@@ -55,7 +55,7 @@ impl SessionSync for Pi {
+                 changing: file.as_deref().is_some_and(|f| changed_lately(modified(f))),
+                 names: names(&id, file.as_deref()),
+             };
+-            liveness(flavour, &Processes::here(), &seen)
++            liveness(flavour, &processes, &seen)
+         })
+         .await
+     }
+@@ -67,10 +67,9 @@ impl SessionSync for Pi {
+         lines: &[RehydrateMessage],
+         options: &AppendOptions<'_>,
+     ) -> Result<AppendOutcome, SyncError> {
++        let processes = options.processes();
+         let (seen, flavour) = (appending(base, id, options.cwd), self.flavour());
+-        require_idle(
+-            blocking_liveness(move || liveness(flavour, &Processes::here(), &seen)).await,
+-        )?;
++        require_idle(blocking_liveness(move || liveness(flavour, &processes, &seen)).await)?;
+         let (base, lines) = (base.clone(), lines.to_vec());
+         let taken = options.taken_ids.cloned();
+         blocking(move || append_to(&base, &lines, taken.as_ref())).await
+@@ -84,10 +83,9 @@ impl SessionSync for Pi {
+         options: &AppendOptions<'_>,
+         backups: &Path,
+     ) -> Result<ReplaceOutcome, SyncError> {
++        let processes = options.processes();
+         let (seen, flavour) = (appending(base, id, options.cwd), self.flavour());
+-        require_idle(
+-            blocking_liveness(move || liveness(flavour, &Processes::here(), &seen)).await,
+-        )?;
++        require_idle(blocking_liveness(move || liveness(flavour, &processes, &seen)).await)?;
+         let (base, branch, backups) = (base.clone(), branch.to_vec(), backups.to_path_buf());
+         let taken = options.taken_ids.cloned();
+         blocking(move || replace_to(&base, &branch, taken.as_ref(), &backups)).await
+diff --git a/crates/atuin/Cargo.toml b/crates/atuin/Cargo.toml
+index 42108cc..ee9fc97 100644
+--- a/crates/atuin/Cargo.toml
++++ b/crates/atuin/Cargo.toml
+@@ -45,6 +45,10 @@ path-guid = "93A1B211-BC0F-4942-81E4-6F6CAA9C25F1"
+ license = "LICENSE"
+ eula = false
+ 
++[[example]]
++name = "atuin-e2e"
++required-features = ["ai", "client"]
++
+ [features]
+ default = [
+     "client",
+diff --git a/crates/atuin/examples/atuin-e2e.rs b/crates/atuin/examples/atuin-e2e.rs
+new file mode 100644
+index 0000000..7b211ba
+--- /dev/null
++++ b/crates/atuin/examples/atuin-e2e.rs
+@@ -0,0 +1,43 @@
++//! E2E entry point: resume against fixture processes, and delegate other commands to atuin.
++use atuin_ai::commands::{Command as AiCommand, ResumeCmd, ThreadsCmd, resume_with_processes};
++use atuin_client::settings::Settings;
++use atuin_common::harnesstools::sync::Processes;
++use clap::Parser;
++
++#[derive(Parser)]
++enum FixtureCommand {
++    Resume(ResumeCmd),
++    #[command(subcommand)]
++    Threads(ThreadsCmd),
++    #[command(subcommand)]
++    Ai(AiCommand),
++}
++
++fn main() -> eyre::Result<()> {
++    let args: Vec<_> = std::env::args_os().collect();
++    let cmd = match FixtureCommand::try_parse_from(&args) {
++        Ok(
++            FixtureCommand::Resume(cmd)
++            | FixtureCommand::Threads(ThreadsCmd::Resume(cmd))
++            | FixtureCommand::Ai(AiCommand::Resume(cmd))
++            | FixtureCommand::Ai(AiCommand::Threads(ThreadsCmd::Resume(cmd))),
++        ) => cmd,
++        _ => {
++            let exe = std::env::current_exe()?.canonicalize()?;
++            let binary = exe.parent().unwrap().parent().unwrap().join("atuin");
++            let mut command = std::process::Command::new(binary);
++            command.args(args.into_iter().skip(1));
++            #[cfg(unix)]
++            {
++                use std::os::unix::process::CommandExt;
++                return Err(command.exec().into());
++            }
++            #[cfg(not(unix))]
++            std::process::exit(command.status()?.code().unwrap_or(1));
++        }
++    };
++    tokio::runtime::Builder::new_multi_thread()
++        .enable_all()
++        .build()?
++        .block_on(resume_with_processes(cmd, Settings::new()?, Processes::Table(vec![])))
++}
+diff --git a/crates/atuin/tests/common/mod.rs b/crates/atuin/tests/common/mod.rs
+index 8c24c84..0cc4490 100644
+--- a/crates/atuin/tests/common/mod.rs
++++ b/crates/atuin/tests/common/mod.rs
+@@ -13,6 +13,15 @@ pub const TIMEOUT: Duration = Duration::from_secs(30);
+ pub const LOCAL_TIMEOUT: Duration = Duration::from_secs(15);
+ pub const SESSION: &str = "b9c063b7b7204f81a50e3e0d51031f01";
+ 
++fn atuin_binary() -> PathBuf {
++    let binary = PathBuf::from(env!("CARGO_BIN_EXE_atuin"));
++    if cfg!(all(unix, feature = "ai", feature = "client")) {
++        binary.with_file_name("examples/atuin-e2e")
++    } else {
++        binary
++    }
++}
++
+ /// A temporary home with the built binary on PATH and isolated Atuin data.
+ pub struct FreshEnv {
+     home: TempDir,
+@@ -28,7 +37,7 @@ impl FreshEnv {
+         fs::create_dir_all(home.path().join(".cache")).unwrap();
+         fs::create_dir_all(home.path().join("tmp")).unwrap();
+         #[cfg(unix)]
+-        std::os::unix::fs::symlink(env!("CARGO_BIN_EXE_atuin"), bin.joined("atuin"))
++        std::os::unix::fs::symlink(atuin_binary(), bin.joined("atuin"))
+             .expect("failed to symlink atuin into fresh env");
+         Self { home }
+     }
+@@ -69,7 +78,7 @@ impl FreshEnv {
+     }
+ 
+     pub fn atuin(&self, args: &[&str]) -> Command {
+-        let mut cmd = Command::new(env!("CARGO_BIN_EXE_atuin"));
++        let mut cmd = Command::new(atuin_binary());
+         cmd.args(args);
+         cmd.env_clear();
+         cmd.envs(self.env_vars());

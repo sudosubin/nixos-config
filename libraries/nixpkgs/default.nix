@@ -10,6 +10,11 @@
     inputs.firefox-addons.overlays.default
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
+      atuin = prev.atuin.overrideAttrs (attrs: {
+        patches = (attrs.patches or [ ]) ++ [ ./patches/atuin-isolate-resume-tests.patch ];
+      });
+    })
+    (final: prev: {
       bash-language-server = prev.bash-language-server.overrideAttrs (attrs: {
         postInstall = (attrs.postInstall or "") + ''
           wrapProgram $out/bin/bash-language-server \
