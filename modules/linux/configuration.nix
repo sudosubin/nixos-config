@@ -37,7 +37,6 @@
     "rd.udev.log_level=3"
   ];
   boot.consoleLogLevel = 0;
-  boot.initrd.verbose = false;
   boot.plymouth.enable = true;
 
   # Enable opengl, vdpau
