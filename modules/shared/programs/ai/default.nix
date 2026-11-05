@@ -96,11 +96,11 @@
       (with pkgs.pi-extensions; [
         pi-goal
         pi-interactive-shell
-        pi-review
         pi-subagent
         (mkLocalExtension "pi-cline" "${piFrontierDir}/pi-cline")
         (mkLocalExtension "pi-cursor-agent" "${piFrontierDir}/pi-cursor-agent")
         (mkLocalExtension "pi-kilocode" "${piFrontierDir}/pi-kilocode")
+        (mkLocalExtension "pi-retry" "${piFrontierDir}/pi-retry")
       ]);
     mutableSettings = true;
     settings = {
