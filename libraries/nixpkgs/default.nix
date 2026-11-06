@@ -150,7 +150,6 @@
       "1password-cli"
       "apple_cursor"
       "claude-code"
-      "cursor"
       "cursor-cli"
       "firefox-bin"
       "firefox-bin-unwrapped"

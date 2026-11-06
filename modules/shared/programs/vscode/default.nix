@@ -1,68 +1,10 @@
+{ pkgs, ... }:
+
 {
-  lib,
-  pkgs,
-  ...
-}:
-
-let
-  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
-
-  monospace = "'Pravka Nerd Font Mono'";
-
-  stylesheet = {
-    ".mac, .windows, .linux" = "font-family: ${monospace}, monospace !important;";
-    ".quick-input-widget" = "font-family: ${monospace} !important;";
-    ".search-view .search-widgets-container" = "font-family: ${monospace} !important;";
-    ".monaco-workbench .debug-pane .monaco-list-row .expression" =
-      "font-family: ${monospace} !important;";
-    ".monaco-tree-sticky-container, .monaco-list-rows, .monaco-findInput, .monaco-inputbox" =
-      "font-family: ${monospace} !important;";
-  };
-
-  toCss =
-    stylesheet:
-    lib.strings.concatStrings (lib.attrsets.mapAttrsToList (key: value: "${key}{${value}}") stylesheet);
-
-  overlays = {
-    code-cursor = pkgs.code-cursor.overrideDerivation (attrs: {
-      nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ pkgs.nodejs ];
-
-      resources = if isDarwin then "Contents/Resources" else "resources";
-
-      preInstall = ''
-        ${attrs.preInstall or ""}
-
-        recalculateChecksum() {
-          filename="$1"
-          filename_escaped="$(echo "$filename" | sed "s/\//\\\\\//g" | sed "s/\./\\\\\./g")"
-
-          checksum=$(node -e """
-            const crypto = require('crypto');
-            const fs = require('fs');
-
-            const contents = fs.readFileSync('$resources/app/out/$filename');
-            console.log(crypto.createHash('sha256').update(contents).digest('base64').replace(/=+$/, '''));
-          """)
-
-          sed -r "s/\"($filename_escaped)\": \"(.*)\"/\"\1\": \"''${checksum//\//\\\/}\"/" \
-            -i "$resources/app/product.json"
-        }
-
-        echo "${toCss stylesheet}" >> $resources/app/out/vs/workbench/workbench.desktop.main.css
-        recalculateChecksum "vs/workbench/workbench.desktop.main.css"
-
-        # Cursor realpaths extension resources before its root check, so nix store icon fonts are refused
-        grep -q '".otf",".ttf"' $resources/app/out/main.js
-        sed -i 's/".otf",".ttf"/".otf",".ttf",".woff",".woff2"/' $resources/app/out/main.js
-      '';
-    });
-  };
-
-in
-{
-  programs.cursor = rec {
+  programs.vscodium = rec {
     enable = true;
-    package = overlays.code-cursor;
+    package = pkgs.vscodium;
+    argvSettings.enable-crash-reporter = false;
     profiles.default = {
       extensions =
         (with (pkgs.forVSCodeVersion package.vscodeVersion).open-vsx; [
@@ -109,7 +51,6 @@ in
         ])
         ++ (with (pkgs.forVSCodeVersion package.vscodeVersion).vscode-marketplace; [
           bierner.markdown-preview-github-styles
-          typescriptteam.native-preview
         ])
         ++ [
           (pkgs.open-vsx.pkief.material-icon-theme.override {
@@ -124,6 +65,6 @@ in
   };
 
   home.shellAliases = {
-    code = "cursor";
+    code = "codium";
   };
 }

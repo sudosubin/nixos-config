@@ -1,5 +1,6 @@
 {
   // fonts
+  "workbench.experimental.fontFamily": "'Pravka Nerd Font Mono', 'Source Han Mono K', monospace",
   "markdown.preview.fontFamily": "Noto Sans CJK KR",
   "editor.fontFamily": "'Pravka Nerd Font Mono', 'Source Han Mono K'",
   "debug.console.fontFamily": "'Pravka Nerd Font Mono', 'Source Han Mono K'",
@@ -67,6 +68,7 @@
   "gitlens.showWhatsNewAfterUpgrades": false,
 
   // files
+  "workbench.localHistory.maxFileEntries": 1000,
   "files.associations": {
     "*.yaml.gotmpl": "goyaml",
     ".dockerignore": "ignore",
@@ -102,6 +104,7 @@
 
   // language (javascript)
   "emmet.excludeLanguages": ["typescriptreact"],
+  "js/ts.experimental.useTsgo": false,
   "js/ts.tsserver.automaticTypeAcquisition.enabled": false,
   "js/ts.preferences.importModuleSpecifier": "non-relative",
   "[css]": {
@@ -178,16 +181,13 @@
   "errorLens.gutterIconSize": "65%",
   "errorLens.gutterIconSet": "defaultOutline",
 
-  // cursor
-  "cursor.composer.showEmptyStateTips": false,
-
   // telemetry, etc
   "http.proxyStrictSSL": false,
   "redhat.telemetry.enabled": false,
-  "crashReporting.enabled": "off",
+  "telemetry.telemetryLevel": "off",
   "extensions.ignoreRecommendations": true,
   "extensions.autoCheckUpdates": false,
-  "extensions.autoUpdate": false,
+  "extensions.autoUpdate": "off",
   "update.mode": "none",
   "workbench.welcomePage.walkthroughs.openOnInstall": false
 }
