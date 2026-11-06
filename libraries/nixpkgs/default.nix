@@ -11,7 +11,11 @@
     inputs.nix-vscode-extensions.overlays.default
     (final: prev: {
       atuin = prev.atuin.overrideAttrs (attrs: {
-        patches = (attrs.patches or [ ]) ++ [ ./patches/atuin-isolate-resume-tests.patch ];
+        patches = (attrs.patches or [ ]) ++ [
+          ./patches/atuin-isolate-resume-tests.patch
+          ./patches/atuin-redaction-initialization.patch
+        ];
+        dontUseCargoParallelTests = true;
       });
     })
     (final: prev: {

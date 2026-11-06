@@ -1,0 +1,11 @@
+Subject: [PATCH] Exclude regex initialization from the redaction budget
+
+diff --git a/crates/atuin-common/src/secrets.rs b/crates/atuin-common/src/secrets.rs
+--- a/crates/atuin-common/src/secrets.rs
++++ b/crates/atuin-common/src/secrets.rs
+@@ -771,2 +771,5 @@ impl Redactor {
+     pub fn redact_within<'a>(&self, s: &'a str, budget: Duration) -> Option<Cow<'a, str>> {
++        if self.builtin {
++            LazyLock::force(&REDACTION);
++        }
+         self.redact_by(s, Some(Instant::now() + budget)).ok()
