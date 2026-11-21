@@ -6,7 +6,7 @@ The example target uses a fixture table; the installed CLI still uses the OS.
 Local proposal; not yet submitted upstream.
 
 diff --git a/crates/atuin-ai/src/commands.rs b/crates/atuin-ai/src/commands.rs
-index 27db1a3..71812dc 100644
+index 2223c73..461c640 100644
 --- a/crates/atuin-ai/src/commands.rs
 +++ b/crates/atuin-ai/src/commands.rs
 @@ -10,7 +10,7 @@ pub(crate) mod inline;
@@ -15,11 +15,11 @@ index 27db1a3..71812dc 100644
  
 -pub use resume::Cmd as ResumeCmd;
 +pub use resume::{Cmd as ResumeCmd, run_with_processes as resume_with_processes};
- pub use session::{Cmd as ThreadsCmd, import_all};
+ pub use session::{Cmd as ThreadsCmd, Recent, import_all, one_line, recent};
  
  #[derive(Args, Debug)]
 diff --git a/crates/atuin-ai/src/commands/resume.rs b/crates/atuin-ai/src/commands/resume.rs
-index f72e6a8..a9c9012 100644
+index 6c46da8..8c76615 100644
 --- a/crates/atuin-ai/src/commands/resume.rs
 +++ b/crates/atuin-ai/src/commands/resume.rs
 @@ -52,6 +52,7 @@ use std::sync::Arc;
@@ -59,7 +59,7 @@ index f72e6a8..a9c9012 100644
      if cmd.fork || cmd.continue_in.is_some() {
          let (source, resumer, query) = (source.as_ref(), resumer.as_ref(), query.trim());
 diff --git a/crates/atuin-ai/src/resume_tui/resumer.rs b/crates/atuin-ai/src/resume_tui/resumer.rs
-index 2c57e9b..2e5c733 100644
+index bd2ce20..40175cb 100644
 --- a/crates/atuin-ai/src/resume_tui/resumer.rs
 +++ b/crates/atuin-ai/src/resume_tui/resumer.rs
 @@ -28,7 +28,8 @@ use atuin_common::harnesstools::rehydrate::{
@@ -72,7 +72,7 @@ index 2c57e9b..2e5c733 100644
  };
  use atuin_common::harnesstools::{AnyHarness, Harness as _, fork};
  use atuin_common::path::PathBufExt as _;
-@@ -388,7 +389,9 @@ fn wrote(started: Instant) {
+@@ -418,7 +419,9 @@ fn wrote(started: Instant) {
  }
  
  /// This machine, as the harnesses themselves see it.
@@ -83,7 +83,7 @@ index 2c57e9b..2e5c733 100644
  
  #[async_trait]
  impl Machine for ThisMachine {
-@@ -422,7 +425,7 @@ impl Machine for ThisMachine {
+@@ -452,7 +455,7 @@ impl Machine for ThisMachine {
      }
  
      async fn is_live(&self, harness: AnyHarness, id: &str, cwd: Option<&Path>) -> Liveness {
@@ -92,7 +92,7 @@ index 2c57e9b..2e5c733 100644
      }
  
      async fn append(
-@@ -434,7 +437,11 @@ impl Machine for ThisMachine {
+@@ -464,7 +467,11 @@ impl Machine for ThisMachine {
          options: &AppendOptions<'_>,
      ) -> Result<AppendOutcome, SyncError> {
          let started = Instant::now();
@@ -105,7 +105,7 @@ index 2c57e9b..2e5c733 100644
          if appended.as_ref().is_ok_and(|outcome| !outcome.appended.is_empty()) {
              wrote(started);
          }
-@@ -451,7 +458,11 @@ impl Machine for ThisMachine {
+@@ -481,7 +488,11 @@ impl Machine for ThisMachine {
          backups: &Path,
      ) -> Result<ReplaceOutcome, SyncError> {
          let started = Instant::now();
@@ -118,7 +118,7 @@ index 2c57e9b..2e5c733 100644
          if replaced.is_ok() {
              wrote(started);
          }
-@@ -477,9 +488,10 @@ pub fn switched_dir(settings: &Settings) -> PathBuf {
+@@ -507,9 +518,10 @@ pub fn switched_dir(settings: &Settings) -> PathBuf {
  }
  
  impl HarnessResumer {
@@ -131,7 +131,7 @@ index 2c57e9b..2e5c733 100644
      }
  
      /// A resumer looking at `machine` instead of this one.
-@@ -759,6 +771,7 @@ impl Resumer for HarnessResumer {
+@@ -826,6 +838,7 @@ impl Resumer for HarnessResumer {
          let options = AppendOptions {
              taken_ids: Some(&taken),
              cwd: dir.as_deref(),
@@ -139,7 +139,7 @@ index 2c57e9b..2e5c733 100644
          };
          let outcome = match self.machine.append(harness, id, &base, &rows, &options).await {
              Ok(outcome) => outcome,
-@@ -836,6 +849,7 @@ impl Resumer for HarnessResumer {
+@@ -903,6 +916,7 @@ impl Resumer for HarnessResumer {
          let options = AppendOptions {
              taken_ids: Some(&taken),
              cwd: dir.as_deref(),
@@ -148,15 +148,16 @@ index 2c57e9b..2e5c733 100644
          let backups = self.switched.join(harness.name());
          let replaced = self.machine.replace(harness, id, &tip, &branch, &options, &backups).await;
 diff --git a/crates/atuin-ai/src/resume_tui/resumer/tests.rs b/crates/atuin-ai/src/resume_tui/resumer/tests.rs
-index cfd7fdf..537f552 100644
+index f574094..b09bb19 100644
 --- a/crates/atuin-ai/src/resume_tui/resumer/tests.rs
 +++ b/crates/atuin-ai/src/resume_tui/resumer/tests.rs
-@@ -259,6 +259,53 @@ fn row(harness: HarnessKind, id: &str, cwd: &Path, remote: bool) -> SessionRow {
+@@ -264,6 +264,54 @@ fn row(harness: HarnessKind, id: &str, cwd: &Path, remote: bool) -> SessionRow {
      row
  }
  
 +#[tokio::test]
 +async fn native_machine_uses_injected_processes_for_every_guard() {
++    use atuin_common::env;
 +    use atuin_common::harnesstools::pi::Pi;
 +    use atuin_common::harnesstools::sync::TableEntry;
 +
@@ -205,11 +206,25 @@ index cfd7fdf..537f552 100644
  #[rstest]
  fn shell_line_quotes_the_directory() {
      let plan = ResumePlan {
+diff --git a/crates/atuin-common/src/harnesstools/mod.rs b/crates/atuin-common/src/harnesstools/mod.rs
+index 03d9621..2a872c9 100644
+--- a/crates/atuin-common/src/harnesstools/mod.rs
++++ b/crates/atuin-common/src/harnesstools/mod.rs
+@@ -38,7 +38,8 @@ use rehydrate::{RehydrateError, RehydrateMessage, RehydrateSession, Rehydrated};
+ use resume::{ResumeError, ResumePlan, ResumeTarget};
+ use session::any::{AnySessions, ObservableExt};
+ use sync::{
+-    AppendOptions, AppendOutcome, Liveness, LocalTip, ReplaceOutcome, SessionSync, SyncError,
++    AppendOptions, AppendOutcome, Liveness, LocalTip, Processes, ReplaceOutcome, SessionSync,
++    SyncError,
+ };
+ 
+ use crate::sync::BlockingPool;
 diff --git a/crates/atuin-common/src/harnesstools/sync.rs b/crates/atuin-common/src/harnesstools/sync.rs
-index 9d38492..5fa56b9 100644
+index 3d826b5..1bb1b7d 100644
 --- a/crates/atuin-common/src/harnesstools/sync.rs
 +++ b/crates/atuin-common/src/harnesstools/sync.rs
-@@ -147,6 +147,14 @@ pub struct AppendOptions<'a> {
+@@ -152,6 +152,14 @@ pub struct AppendOptions<'a> {
      /// in the directory the transcript records ([`LocalTip::cwd`]) counts too; with either not
      /// known, a process anywhere does.
      pub cwd: Option<&'a Path>,
@@ -224,16 +239,16 @@ index 9d38492..5fa56b9 100644
  }
  
  /// What [`SessionSync::append`] did.
-@@ -208,6 +216,8 @@ fn pid_note(pid: Option<u32>) -> String {
+@@ -213,6 +221,8 @@ fn pid_note(pid: Option<u32>) -> String {
  }
  
  /// The harness side of fast-forwarding a session (see the module docs).
 +/// Process sources are supplied by the caller, including for the final checks before writing.
 +/// OS-backed sources observe the current process table again on each check.
+ #[enum_dispatch]
  pub trait SessionSync {
      /// What this machine's native copy of session `id` holds; `None` when it has none.
-     #[allow(async_fn_in_trait)]
-@@ -216,7 +226,7 @@ pub trait SessionSync {
+@@ -222,7 +232,7 @@ pub trait SessionSync {
      /// Whether a harness process on this machine may be writing session `id`, last seen working
      /// in `cwd`. [`Liveness::Unknown`] is to be taken as live.
      #[allow(async_fn_in_trait)]
@@ -242,24 +257,27 @@ index 9d38492..5fa56b9 100644
  
      /// Append `lines` (root to head, the first hanging from the tip `base` read, each after it
      /// from the tip or a row before it) to session `id`'s transcript, so the harness resumes from
-@@ -281,13 +291,13 @@ impl SessionSync for AnyHarness {
-         }
+diff --git a/crates/atuin-common/src/harnesstools/sync/amp.rs b/crates/atuin-common/src/harnesstools/sync/amp.rs
+index 565a8e5..25d5f0b 100644
+--- a/crates/atuin-common/src/harnesstools/sync/amp.rs
++++ b/crates/atuin-common/src/harnesstools/sync/amp.rs
+@@ -3,7 +3,8 @@
+ use std::path::Path;
+ 
+ use super::{
+-    AppendOptions, AppendOutcome, Liveness, LocalTip, ReplaceOutcome, SessionSync, SyncError,
++    AppendOptions, AppendOutcome, Liveness, LocalTip, Processes, ReplaceOutcome, SessionSync,
++    SyncError,
+ };
+ use crate::harnesstools::amp::Amp;
+ use crate::harnesstools::rehydrate::RehydrateMessage;
+@@ -15,7 +16,7 @@ impl SessionSync for Amp {
+         Err(SyncError::Unsupported(REMOTE))
      }
  
--    async fn is_live(&self, id: &str, cwd: Option<&Path>) -> Liveness {
-+    async fn is_live(&self, id: &str, cwd: Option<&Path>, processes: Processes) -> Liveness {
-         match self {
--            Self::ClaudeCode(h) => h.is_live(id, cwd).await,
--            Self::Codex(h) => h.is_live(id, cwd).await,
--            Self::Copilot(h) => h.is_live(id, cwd).await,
--            Self::Opencode(h) => h.is_live(id, cwd).await,
--            Self::Pi(h) => h.is_live(id, cwd).await,
-+            Self::ClaudeCode(h) => h.is_live(id, cwd, processes).await,
-+            Self::Codex(h) => h.is_live(id, cwd, processes).await,
-+            Self::Copilot(h) => h.is_live(id, cwd, processes).await,
-+            Self::Opencode(h) => h.is_live(id, cwd, processes).await,
-+            Self::Pi(h) => h.is_live(id, cwd, processes).await,
-         }
+-    async fn is_live(&self, _id: &str, _cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, _id: &str, _cwd: Option<&Path>, _processes: Processes) -> Liveness {
+         Liveness::Unknown
      }
  
 diff --git a/crates/atuin-common/src/harnesstools/sync/ccode.rs b/crates/atuin-common/src/harnesstools/sync/ccode.rs
@@ -390,6 +408,107 @@ index c8fe2b5..c291b8e 100644
          let (id, base, branch) = (id.to_owned(), base.clone(), branch.to_vec());
          let (taken, backups) = (options.taken_ids.cloned(), backups.to_path_buf());
          blocking(move || replace_to(&id, &base, &branch, taken.as_ref(), &backups)).await
+diff --git a/crates/atuin-common/src/harnesstools/sync/grok.rs b/crates/atuin-common/src/harnesstools/sync/grok.rs
+index 31e6e15..6f4fd6f 100644
+--- a/crates/atuin-common/src/harnesstools/sync/grok.rs
++++ b/crates/atuin-common/src/harnesstools/sync/grok.rs
+@@ -33,7 +33,7 @@ impl SessionSync for Grok {
+         .await
+     }
+ 
+-    async fn is_live(&self, id: &str, cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, id: &str, cwd: Option<&Path>, processes: Processes) -> Liveness {
+         let (root, id, cwd) = (default_root(), id.to_owned(), cwd.map(Path::to_path_buf));
+         blocking_liveness(move || {
+             let file = locate(&root, &id);
+@@ -42,7 +42,7 @@ impl SessionSync for Grok {
+                 changing: file.as_deref().is_some_and(|f| changed_lately(modified(f))),
+                 names: vec![id],
+             };
+-            liveness(&Processes::here(), &seen)
++            liveness(&processes, &seen)
+         })
+         .await
+     }
+@@ -54,8 +54,9 @@ impl SessionSync for Grok {
+         lines: &[RehydrateMessage],
+         options: &AppendOptions<'_>,
+     ) -> Result<AppendOutcome, SyncError> {
++        let processes = options.processes();
+         let seen = base.seen(options.cwd, vec![id.to_owned()]);
+-        require_idle(blocking_liveness(move || liveness(&Processes::here(), &seen)).await)?;
++        require_idle(blocking_liveness(move || liveness(&processes, &seen)).await)?;
+         let (id, base, lines) = (id.to_owned(), base.clone(), lines.to_vec());
+         let taken = options.taken_ids.cloned();
+         blocking(move || append_to(&id, &base, &lines, taken.as_ref())).await
+@@ -69,8 +70,9 @@ impl SessionSync for Grok {
+         options: &AppendOptions<'_>,
+         backups: &Path,
+     ) -> Result<ReplaceOutcome, SyncError> {
++        let processes = options.processes();
+         let seen = base.seen(options.cwd, vec![id.to_owned()]);
+-        require_idle(blocking_liveness(move || liveness(&Processes::here(), &seen)).await)?;
++        require_idle(blocking_liveness(move || liveness(&processes, &seen)).await)?;
+         let (id, base, branch, backups) =
+             (id.to_owned(), base.clone(), branch.to_vec(), backups.to_path_buf());
+         let taken = options.taken_ids.cloned();
+diff --git a/crates/atuin-common/src/harnesstools/sync/hermes.rs b/crates/atuin-common/src/harnesstools/sync/hermes.rs
+index 6db1373..7fce8be 100644
+--- a/crates/atuin-common/src/harnesstools/sync/hermes.rs
++++ b/crates/atuin-common/src/harnesstools/sync/hermes.rs
+@@ -55,14 +55,14 @@ impl SessionSync for Hermes {
+         local_tip_in(&db, id).await
+     }
+ 
+-    async fn is_live(&self, id: &str, _cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, id: &str, _cwd: Option<&Path>, processes: Processes) -> Liveness {
+         let Some(db) = session::locate(&hermes_home(), id).await else {
+             return Liveness::NotLive;
+         };
+         let registry = db.with_file_name("runtime").joined(REGISTRY_FILE);
+         let of = id.to_owned();
+         let claimed =
+-            blocking_liveness(move || registry_holder(&registry, &of, &Processes::here())).await;
++            blocking_liveness(move || registry_holder(&registry, &of, &processes)).await;
+         match claimed {
+             Liveness::Live { .. } => claimed,
+             Liveness::NotLive => liveness_in(&db, id, SystemTime::now()).await,
+diff --git a/crates/atuin-common/src/harnesstools/sync/kiro.rs b/crates/atuin-common/src/harnesstools/sync/kiro.rs
+index 3735474..be87820 100644
+--- a/crates/atuin-common/src/harnesstools/sync/kiro.rs
++++ b/crates/atuin-common/src/harnesstools/sync/kiro.rs
+@@ -60,11 +60,11 @@ impl SessionSync for Kiro {
+         blocking(move || locate(&root, &id).map(|path| read_tip(&path)).transpose()).await
+     }
+ 
+-    async fn is_live(&self, id: &str, cwd: Option<&Path>) -> Liveness {
++    async fn is_live(&self, id: &str, cwd: Option<&Path>, processes: Processes) -> Liveness {
+         let root = default_root();
+         let (id, cwd) = (id.to_owned(), cwd.map(Path::to_path_buf));
+         blocking_liveness(move || match session_dir(&root, &id) {
+-            Some(dir) => liveness(&dir, &id, cwd.as_deref(), &Processes::here()),
++            Some(dir) => liveness(&dir, &id, cwd.as_deref(), &processes),
+             None => Liveness::NotLive,
+         })
+         .await
+@@ -77,7 +77,7 @@ impl SessionSync for Kiro {
+         lines: &[RehydrateMessage],
+         options: &AppendOptions<'_>,
+     ) -> Result<AppendOutcome, SyncError> {
+-        require_idle(self.is_live(id, options.cwd).await)?;
++        require_idle(self.is_live(id, options.cwd, options.processes()).await)?;
+         let (id, base, lines) = (id.to_owned(), base.clone(), lines.to_vec());
+         let taken = options.taken_ids.cloned();
+         blocking(move || append_to(&id, &base, &lines, taken.as_ref())).await
+@@ -91,7 +91,7 @@ impl SessionSync for Kiro {
+         options: &AppendOptions<'_>,
+         backups: &Path,
+     ) -> Result<ReplaceOutcome, SyncError> {
+-        require_idle(self.is_live(id, options.cwd).await)?;
++        require_idle(self.is_live(id, options.cwd, options.processes()).await)?;
+         let (id, base, branch) = (id.to_owned(), base.clone(), branch.to_vec());
+         let (taken, backups) = (options.taken_ids.cloned(), backups.to_path_buf());
+         blocking(move || replace_to(&id, &base, &branch, taken.as_ref(), &backups)).await
 diff --git a/crates/atuin-common/src/harnesstools/sync/opencode.rs b/crates/atuin-common/src/harnesstools/sync/opencode.rs
 index a3d4f1a..3325e6d 100644
 --- a/crates/atuin-common/src/harnesstools/sync/opencode.rs
@@ -464,7 +583,7 @@ index 5d24cce..9eff0d1 100644
          let taken = options.taken_ids.cloned();
          blocking(move || replace_to(&base, &branch, taken.as_ref(), &backups)).await
 diff --git a/crates/atuin/Cargo.toml b/crates/atuin/Cargo.toml
-index 42108cc..ee9fc97 100644
+index 66b1d43..32cdb74 100644
 --- a/crates/atuin/Cargo.toml
 +++ b/crates/atuin/Cargo.toml
 @@ -45,6 +45,10 @@ path-guid = "93A1B211-BC0F-4942-81E4-6F6CAA9C25F1"

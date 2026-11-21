@@ -8,16 +8,16 @@
 
 (buildGoModule.override { go = go_1_27; }) (finalAttrs: {
   pname = "gh-attach";
-  version = "0.5.0";
+  version = "0.5.1";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "gh-attach";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-O3hocWsMvPGLWZAJhdehQM36chM7bq90wKuZFTFn4K0=";
+    hash = "sha256-mXTFqv56y2pwITgVJKuCOuHDZK6F65UU18pN3iz62+I=";
   };
 
-  vendorHash = "sha256-1Jp5gkwt97Wy+7nOp55Io2Rrj5TzObNNo9J/hOzgQ3k=";
+  vendorHash = "sha256-CPlH6NNmBFpoav7vmPbS7P3LbQXNXpQVIP2BIW3XajI=";
 
   subPackages = [ "cmd/gh-attach" ];
 

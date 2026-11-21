@@ -1,6 +1,7 @@
 {
   fetchFromGitHub,
   lib,
+  libgit2,
   openssl,
   pkg-config,
   rustPlatform,
@@ -20,7 +21,10 @@ rustPlatform.buildRustPackage (finalAttrs: {
   cargoHash = "sha256-xO753cda/cUm/Z6tgC3BC3xRX2gHmTsvjOCITvbxWfU=";
 
   nativeBuildInputs = [ pkg-config ];
-  buildInputs = [ openssl ];
+  buildInputs = [
+    libgit2
+    openssl
+  ];
 
   meta = with lib; {
     description = "A simple script to enable nix flake direnv from current directory or external flake repository";

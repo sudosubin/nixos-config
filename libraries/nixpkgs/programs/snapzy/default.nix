@@ -1,6 +1,8 @@
 {
+  apple-sdk_26,
   buildSwiftPackage,
   fetchFromGitHub,
+  fetchSwiftpmDeps,
   lib,
   nix-update-script,
   sqlite,
@@ -9,22 +11,43 @@
 
 buildSwiftPackage (finalAttrs: {
   pname = "snapzy";
-  version = "2.1.0";
+  version = "2.2.0";
 
   src = fetchFromGitHub {
     owner = "duongductrong";
     repo = "Snapzy";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-ucDfLv8JIWuJRPsYLgldeigqpvn0lkf5uMAgu9KZ9Zo=";
+    hash = "sha256-8u7hYaQ4xM+SXJvqBE9Gpx8N/mGY1WFipcPxV2kaD7w=";
   };
 
   swiftpmManifest = ./Package.swift;
   swiftpmResolved = "Snapzy.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved";
-  swiftpmDepsHash = "sha256-yxxEU9nC5T7NbJf3HLFYN5DlxOBWVKUJXxxIMNQk+W4=";
+  swiftpmDeps = fetchSwiftpmDeps {
+    inherit (finalAttrs)
+      pname
+      version
+      src
+      swiftpmManifest
+      swiftpmResolved
+      ;
+    hash = "sha256-m63K6TLbqeAmLNGv+lRtTV8HxDZDaqHQ1r/6neW7clM=";
+    # SnapzyCLIKit is a local package with no checkout; swiftpmUnpackHook adds it back from the manifest
+    preInstall = ''
+      jq '.object.dependencies |= map(select(.packageRef.kind != "fileSystem"))' \
+        .build/workspace-state.json > workspace-state.json~
+      mv workspace-state.json~ .build/workspace-state.json
+    '';
+  };
 
   patches = [
     ./fix-magnifier-edge-fill.patch
     ./fix-magnifier-pixel-alignment.patch
+  ];
+
+  # swift-build, the default since Swift 6.4, rejects the unsigned Sparkle.xcframework
+  swiftpmFlags = [
+    "--build-system"
+    "native"
   ];
 
   nativeBuildInputs = [ swiftAppBundleHook ];
@@ -39,6 +62,10 @@ buildSwiftPackage (finalAttrs: {
   ];
 
   postPatch = ''
+    # Packages/ holds SnapzyCLIKit, so swiftpmUnpackHook linked the vendored deps at Packages/Packages
+    rm Packages/Packages
+    mv "$swiftpmDeps"/Packages/* Packages/
+
     # SwiftPM compiles every file in a C target
     find Packages/libwebp-Xcode/libwebp/{src,sharpyuv} -type f ! -name "*.[ch]" -delete
 
@@ -51,6 +78,11 @@ buildSwiftPackage (finalAttrs: {
       "class FirstMouseHostingView<Content: View>: NSHostingView<Content> { @inline(never) deinit {}"
   '';
 
+  # SwiftUI's @State is a macro from the Xcode-only SwiftUIMacros plugin in the macOS 27 SDK
+  preConfigure = ''
+    export DEVELOPER_DIR=${apple-sdk_26} SDKROOT=${apple-sdk_26.sdkroot}
+  '';
+
   xcodeProject = "Snapzy.xcodeproj";
   appResources = [
     "Snapzy/Resources/Assets.xcassets"
@@ -60,6 +92,10 @@ buildSwiftPackage (finalAttrs: {
     "Snapzy/Resources/whats_new.json"
     "Snapzy/Resources/Wallpapers/*.jpg"
   ];
+
+  postInstall = ''
+    install -Dm755 "$(swiftpmBinPath)/SnapzyCLIMain" "$out/Applications/Snapzy.app/Contents/Helpers/snapzy"
+  '';
 
   passthru.updateScript = nix-update-script {
     extraArgs = [

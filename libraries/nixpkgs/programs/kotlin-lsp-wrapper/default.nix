@@ -4,7 +4,9 @@
   lib,
   makeWrapper,
   nix-update-script,
+  pkg-config,
   rustPlatform,
+  zstd,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {
@@ -24,7 +26,12 @@ rustPlatform.buildRustPackage (finalAttrs: {
     cp ${./Cargo.lock} $sourceRoot/Cargo.lock
   '';
 
-  nativeBuildInputs = [ makeWrapper ];
+  nativeBuildInputs = [
+    makeWrapper
+    pkg-config
+  ];
+
+  buildInputs = [ zstd ];
 
   postInstall = ''
     wrapProgram $out/bin/kotlin-lsp-wrapper \

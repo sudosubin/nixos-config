@@ -20,6 +20,7 @@ let package = Package(
     .package(url: "https://github.com/cmsj/AXSwift", branch: "main"),
     .package(url: "https://github.com/cmsj/javascript-core-extras", branch: "main"),
     .package(url: "https://github.com/cmsj/swift-commandlinekit", branch: "master"),
+    .package(url: "https://github.com/cmsj/swift-mqtt", branch: "main"),
   ],
   targets: [
     .target(
@@ -35,6 +36,7 @@ let package = Package(
         .product(name: "Sparkle", package: "Sparkle"),
         .product(name: "AXSwift", package: "AXSwift"),
         .product(name: "JavaScriptCoreExtras", package: "javascript-core-extras"),
+        .product(name: "MQTT", package: "swift-mqtt"),
       ],
       path: "Hammerspoon 2",
       exclude: [

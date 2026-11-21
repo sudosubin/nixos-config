@@ -82,12 +82,12 @@
       final: prev:
       lib.optionalAttrs prev.stdenvNoCC.hostPlatform.isDarwin {
         yabai = prev.yabai.overrideAttrs (oldAttrs: {
-          version = "7.1.25-unstable-2026-06-14";
+          version = "7.1.25-unstable-2026-11-11";
           src = prev.fetchFromGitHub {
             owner = "asmvik";
             repo = "yabai";
-            rev = "dd845723416f5fe92af49fad5ebab00369e07edd";
-            hash = "sha256-RPiGAuJS+tGsexekIzwgKYf/v+kA3lVn0+qMVIMC2Vk=";
+            rev = "b2dc8b4c892d74738a6e865d73048ed2dc3c9ed1";
+            hash = "sha256-Nx/zAWis8ZRE/8gkzbE02//zCCGVtMxqhBrV3ikJ+xs=";
           };
           postPatch = builtins.replaceStrings [ " -Wl,-no_uuid" ] [ "" ] oldAttrs.postPatch;
           doInstallCheck = false;

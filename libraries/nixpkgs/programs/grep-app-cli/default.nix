@@ -3,23 +3,30 @@
   installShellFiles,
   lib,
   nix-update-script,
+  oniguruma,
+  pkg-config,
   rustPlatform,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "grep-app-cli";
-  version = "0.1.5";
+  version = "0.1.6";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "grep-app-cli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-3/FziNgX5Uw7oSwuA/Sj6rwFMszWlmr8sHtMcWNBXWw=";
+    hash = "sha256-r13/X4s4v7YRn9dHHYfevBz+k3RCGy4h3KLb/YyDMeo=";
   };
 
-  cargoHash = "sha256-CsMXFjaedFqO0T8yEDO4b7LEqzXmVLzd6aS66HeGxYE=";
+  cargoHash = "sha256-i8y4lTRaTu1bxFP1/JlCgZNFLmMVSK0+zuRZNs7HK6U=";
 
-  nativeBuildInputs = [ installShellFiles ];
+  nativeBuildInputs = [
+    installShellFiles
+    pkg-config
+  ];
+
+  buildInputs = [ oniguruma ];
 
   postInstall = ''
     installShellCompletion --cmd grep-app-cli \

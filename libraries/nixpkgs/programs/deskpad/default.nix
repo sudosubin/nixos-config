@@ -21,6 +21,12 @@ buildSwiftPackage (finalAttrs: {
   swiftpmResolved = "DeskPad.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved";
   swiftpmDepsHash = "sha256-FwLnfeWmiNQJBtAiWjuiZIQF3T1+j57QyRC2RZTp7NY=";
 
+  # swift-build, the default since Swift 6.4, resolves -import-objc-header against NIX_BUILD_TOP
+  swiftpmFlags = [
+    "--build-system"
+    "native"
+  ];
+
   nativeBuildInputs = [ swiftAppBundleHook ];
 
   xcodeProject = "DeskPad.xcodeproj";
