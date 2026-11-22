@@ -1,7 +1,6 @@
 {
   lib,
   actool,
-  jq,
   makeSetupHook,
   perl,
   python3Packages,
@@ -13,7 +12,6 @@
   swiftpmSetupHook = makeSetupHook {
     name = "swiftpm-setup-hook.sh";
     substitutions = {
-      jq = lib.getExe jq;
       perl = lib.getExe perl;
     };
   } ./swiftpm-setup-hook.sh;

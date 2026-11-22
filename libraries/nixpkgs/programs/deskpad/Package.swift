@@ -23,7 +23,7 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v5),
         // SWIFT_OBJC_BRIDGING_HEADER
-        .unsafeFlags(["-import-objc-header", "DeskPad/DeskPad-Bridging-Header.h"]),
+        .unsafeFlags(["-import-objc-header", Context.packageDirectory + "/DeskPad/DeskPad-Bridging-Header.h"]),
       ]
     ),
   ]

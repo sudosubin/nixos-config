@@ -1,8 +1,6 @@
 {
-  apple-sdk_26,
   buildSwiftPackage,
   fetchFromGitHub,
-  fetchSwiftpmDeps,
   lib,
   nix-update-script,
   sqlite,
@@ -22,32 +20,11 @@ buildSwiftPackage (finalAttrs: {
 
   swiftpmManifest = ./Package.swift;
   swiftpmResolved = "Snapzy.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved";
-  swiftpmDeps = fetchSwiftpmDeps {
-    inherit (finalAttrs)
-      pname
-      version
-      src
-      swiftpmManifest
-      swiftpmResolved
-      ;
-    hash = "sha256-m63K6TLbqeAmLNGv+lRtTV8HxDZDaqHQ1r/6neW7clM=";
-    # SnapzyCLIKit is a local package with no checkout; swiftpmUnpackHook adds it back from the manifest
-    preInstall = ''
-      jq '.object.dependencies |= map(select(.packageRef.kind != "fileSystem"))' \
-        .build/workspace-state.json > workspace-state.json~
-      mv workspace-state.json~ .build/workspace-state.json
-    '';
-  };
+  swiftpmDepsHash = "sha256-y/jODBgHT26UeSdYz+lTA41RYxZcjhh5LDdh/NgFWfM=";
 
   patches = [
     ./fix-magnifier-edge-fill.patch
     ./fix-magnifier-pixel-alignment.patch
-  ];
-
-  # swift-build, the default since Swift 6.4, rejects the unsigned Sparkle.xcframework
-  swiftpmFlags = [
-    "--build-system"
-    "native"
   ];
 
   nativeBuildInputs = [ swiftAppBundleHook ];
@@ -62,25 +39,8 @@ buildSwiftPackage (finalAttrs: {
   ];
 
   postPatch = ''
-    # Packages/ holds SnapzyCLIKit, so swiftpmUnpackHook linked the vendored deps at Packages/Packages
-    rm Packages/Packages
-    mv "$swiftpmDeps"/Packages/* Packages/
-
     # SwiftPM compiles every file in a C target
     find Packages/libwebp-Xcode/libwebp/{src,sharpyuv} -type f ! -name "*.[ch]" -delete
-
-    # Work around a swiftc 6.2.4 segfault in implicit deinits of generic classes
-    substituteInPlace Snapzy/Services/Cloud/S3MultipartUploader.swift --replace-fail \
-      "class ThreadSafeDictionary<Key: Hashable, Value>: @unchecked Sendable {" \
-      "class ThreadSafeDictionary<Key: Hashable, Value>: @unchecked Sendable { @inline(never) deinit {}"
-    substituteInPlace Snapzy/Features/Capture/CaptureDelayCountdownController.swift --replace-fail \
-      "class FirstMouseHostingView<Content: View>: NSHostingView<Content> {" \
-      "class FirstMouseHostingView<Content: View>: NSHostingView<Content> { @inline(never) deinit {}"
-  '';
-
-  # SwiftUI's @State is a macro from the Xcode-only SwiftUIMacros plugin in the macOS 27 SDK
-  preConfigure = ''
-    export DEVELOPER_DIR=${apple-sdk_26} SDKROOT=${apple-sdk_26.sdkroot}
   '';
 
   xcodeProject = "Snapzy.xcodeproj";
@@ -103,7 +63,7 @@ buildSwiftPackage (finalAttrs: {
       "--version-regex"
       "^v(\\d+\\.\\d+\\.\\d+)$"
       "--custom-dep"
-      "swiftpmDeps"
+      "swiftpmVendor"
     ];
   };
 

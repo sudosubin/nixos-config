@@ -1,5 +1,4 @@
 {
-  apple-sdk_26,
   buildSwiftPackage,
   fetchFromGitHub,
   fetchNpmDeps,
@@ -13,29 +12,25 @@
 
 buildSwiftPackage (finalAttrs: {
   pname = "hammerspoon2";
-  version = "0.0.17";
+  version = "0.0.18";
 
   src = fetchFromGitHub {
     owner = "cmsj";
     repo = "Hammerspoon2";
     tag = finalAttrs.version;
-    hash = "sha256-irXwlUhS6l6P36KlJICWUIod59IPTqC+V420D/WYqYc=";
+    hash = "sha256-iVskJBpuslIMY8WmwK4iUZYZzdZbEcXsZuykxRtj3XQ=";
   };
 
   swiftpmManifest = ./Package.swift;
   swiftpmResolved = "Hammerspoon 2.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved";
-  swiftpmDepsHash = "sha256-0EaiksS2Ulqqq4PACJBeLYersHwp1c1DFk7hsS78HEQ=";
+  swiftpmDepsHash = "sha256-dG7fgRzUWMHGhfOtdtlkUwXZ8JlyYJOBw02e8gcO6bU=";
+  # Xcode-only lint plugin, and its binary target is not an XCFramework
+  swiftpmExcludedPins = [ "swiftlintplugins" ];
 
   npmDeps = fetchNpmDeps {
     inherit (finalAttrs) src;
-    hash = "sha256-UxtJ4JtD0F/VrAuX01Emnzom8wPEacYx2bV05DzRMhI=";
+    hash = "sha256-/UpOlZMg3pu6HgnTLdN11Rz+Zo+Or8Pzu9XmrJdPDBM=";
   };
-
-  # swift-build, the default since Swift 6.4, rejects the unsigned Sparkle.xcframework
-  swiftpmFlags = [
-    "--build-system"
-    "native"
-  ];
 
   nativeBuildInputs = [
     nodejs
@@ -46,7 +41,7 @@ buildSwiftPackage (finalAttrs: {
   buildInputs = [ sqlite ];
 
   postPatch = ''
-    # SQLite is already exposed by Bridging-Header.h; avoid the SDK's broken module map.
+    # nixpkgs' SDK lacks the sqlite3.h its SQLite3 module map needs; Bridging-Header.h includes sqlite
     substituteInPlace "Hammerspoon 2/Modules/node/NodeModuleSQLite.swift" \
       --replace-fail "import SQLite3" ""
 
@@ -56,28 +51,12 @@ buildSwiftPackage (finalAttrs: {
     cp HammerspoonIPCBroker/HSIPCShared.swift "Hammerspoon 2/"
     cp HammerspoonIPCBroker/HSIPCShared.swift hs2/
 
-    # MapKit's geocoding requests are not Sendable in the macOS 26.5 SDK
-    substituteInPlace "Hammerspoon 2/Modules/hs.location/HSLocationGeocoder.swift" \
-      --replace-fail "import MapKit" "@preconcurrency import MapKit"
-
-    # @diagnose requires a newer Swift compiler than the pinned nixpkgs provides.
-    for file in "Hammerspoon 2/Modules/hs.sharing/HSSharingModule.swift" \
-      "Hammerspoon 2/Modules/hs.urlevent/HSURLEventModule.swift"; do
-      substituteInPlace "$file" \
-        --replace-fail '@diagnose(DeprecatedDeclaration, as: ignored, reason: "No suitable replacement exists")' ""
-    done
-
     # swift-mqtt only needs NWConnection, so it builds with the app's macOS 26 floor
     substituteInPlace Packages/swift-mqtt/Package.swift \
       --replace-fail 'platforms: [.macOS("27.0")]' 'platforms: [.macOS(.v26)]'
 
     substituteInPlace scripts/extract-docs.js \
       --replace-fail "new Date().toISOString()" "new Date(process.env.SOURCE_DATE_EPOCH * 1000).toISOString()"
-  '';
-
-  # SwiftUI's @State is a macro from the Xcode-only SwiftUIMacros plugin in the macOS 27 SDK
-  preConfigure = ''
-    export DEVELOPER_DIR=${apple-sdk_26} SDKROOT=${apple-sdk_26.sdkroot}
   '';
 
   preBuild = ''
@@ -87,6 +66,7 @@ buildSwiftPackage (finalAttrs: {
   xcodeProject = "Hammerspoon 2.xcodeproj";
   appResources = [
     "Hammerspoon 2/Assets.xcassets"
+    "Hammerspoon 2/AppIcon.icon"
     "Hammerspoon 2/Engine/*.js"
     "Hammerspoon 2/Modules/*/*.js"
     "DefaultConfig"
@@ -98,12 +78,6 @@ buildSwiftPackage (finalAttrs: {
 
   postInstall = ''
     app="$out/Applications/Hammerspoon 2.app"
-
-    # The app icon is only an Icon Composer .icon now, and actool compiles one document per run
-    mkdir "$NIX_BUILD_TOP/app-icon"
-    actool --compile "$NIX_BUILD_TOP/app-icon" --platform macosx --app-icon AppIcon \
-      --output-partial-info-plist "$NIX_BUILD_TOP/app-icon/partial.plist" "Hammerspoon 2/AppIcon.icon"
-    install -Dm644 "$NIX_BUILD_TOP/app-icon/AppIcon.icns" "$app/Contents/Resources/AppIcon.icns"
     bin="$(swiftpmBinPath)"
 
     install -Dm755 "$bin/hs2" "$app/Contents/MacOS/hs2"
@@ -141,7 +115,7 @@ buildSwiftPackage (finalAttrs: {
   passthru.updateScript = nix-update-script {
     extraArgs = [
       "--custom-dep"
-      "swiftpmDeps"
+      "swiftpmVendor"
     ];
   };
 

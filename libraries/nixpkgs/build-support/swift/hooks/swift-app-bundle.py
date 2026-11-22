@@ -103,15 +103,17 @@ def install(bin_path, patterns):
         for path in [d / n for d in [dest, *dest.glob("Versions/*")] for n in ["Headers", "PrivateHeaders", "Modules"]]:
             shutil.rmtree(path) if path.is_dir() and not path.is_symlink() else path.unlink(missing_ok=True)
 
-    # SwiftPM resource bundles
     for bundle in bin_path.glob("*.bundle"):
         shutil.copytree(bundle, resources / bundle.name, symlinks=True)
 
     asset_catalogs = []
+    icons = []
     for pattern in patterns:
         for path in map(Path, sorted(glob.glob(pattern)) or sys.exit(f"swift-app-bundle: no match for {pattern}")):
             if path.suffix == ".xcassets":
                 asset_catalogs.append(path)
+            elif path.suffix == ".icon":
+                icons.append(path)
             elif path.suffix == ".xcstrings":
                 compile_string_catalog(path, resources)
             elif path.is_dir():
@@ -146,6 +148,15 @@ def install(bin_path, patterns):
         if get("ASSETCATALOG_COMPILER_APPICON_NAME"):
             args += ["--app-icon", get("ASSETCATALOG_COMPILER_APPICON_NAME")]
         subprocess.run([*args, *asset_catalogs], check=True)
+        info |= plistlib.loads(partial.read_bytes())
+
+    # actool compiles one document per run, so each Icon Composer icon contributes only its .icns
+    for icon in icons:
+        out = build_top / "icon-composer" / icon.stem
+        out.mkdir(parents=True)
+        partial = out / "partial.plist"
+        subprocess.run(["actool", "--compile", out, "--platform", "macosx", "--app-icon", icon.stem, "--output-partial-info-plist", partial, icon], check=True)
+        shutil.copy2(out / f"{icon.stem}.icns", resources)
         info |= plistlib.loads(partial.read_bytes())
 
     (contents / "Info.plist").write_bytes(plistlib.dumps(expand(info, settings)))

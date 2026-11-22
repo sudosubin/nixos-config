@@ -97,7 +97,6 @@
     (final: prev: {
       inherit (final.callPackages ./build-support/swift { })
         buildSwiftPackage
-        fetchSwiftpmDeps
         swiftAppBundleHook
         swiftpmSetupHook
         ;

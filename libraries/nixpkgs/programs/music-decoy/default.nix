@@ -18,7 +18,6 @@ buildSwiftPackage (finalAttrs: {
     hash = "sha256-sga62W/aLda68RNjPZw+m7xiEeMTjRHbIt4yY+XO7Os=";
   };
 
-  # No SwiftPM dependencies
   swiftpmManifest = ./Package.swift;
   swiftpmDeps = null;
 

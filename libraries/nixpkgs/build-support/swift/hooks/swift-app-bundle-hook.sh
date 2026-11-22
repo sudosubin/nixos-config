@@ -13,8 +13,7 @@ swiftAppBundleInstallPhase() {
     runHook postInstall
 }
 
-# Like Xcode's swift-stdlib-tool, embed the libraries loaded through rpaths into
-# the Nix store (Swift back-deployment libraries), then drop those rpaths
+# Like Xcode's swift-stdlib-tool, embed the Swift back-deployment libraries found through store rpaths
 swiftAppBundleFixupRpaths() {
     local exe rpath lib
     for exe in "$out"/Applications/*.app/Contents/MacOS/*; do

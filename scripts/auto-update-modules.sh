@@ -31,7 +31,7 @@ let
       # the local firefox addons are built with its buildFirefoxXpiAddon
       inherit (import $firefoxAddons/../.. { pkgs = prev; }) firefox-addons;
       inherit (final.callPackages $ROOT_DIR/libraries/nixpkgs/build-support/swift { })
-        buildSwiftPackage fetchSwiftpmDeps swiftAppBundleHook swiftpmSetupHook;
+        buildSwiftPackage swiftAppBundleHook swiftpmSetupHook;
       __localUpdates = localPackages // { recurseForDerivations = true; };
     };
 in
