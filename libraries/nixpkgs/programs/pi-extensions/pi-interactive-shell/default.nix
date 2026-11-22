@@ -6,7 +6,7 @@
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
-  pname = "pi-interactive-shell.ts";
+  pname = "pi-interactive-shell";
   version = "1.6.0";
 
   src = fetchFromGitHub {
@@ -20,7 +20,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   installPhase = ''
     runHook preInstall
-    install -Dm644 packages/coding-agent/examples/extensions/interactive-shell.ts $out
+    install -Dm644 packages/coding-agent/examples/extensions/interactive-shell.ts $out/index.ts
     runHook postInstall
   '';
 

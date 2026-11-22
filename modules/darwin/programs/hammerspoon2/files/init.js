@@ -101,7 +101,7 @@ const bin = {
 };
 
 // Text replacement
-const textReplacement = hs.loadSpoon("TextReplacement");
+const textReplacement = hs.spoons.load("TextReplacement");
 textReplacement.rules = {
   "->": "→",
   "<-": "←",

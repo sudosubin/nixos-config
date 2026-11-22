@@ -6,7 +6,7 @@
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {
-  pname = "pi-goal.ts";
+  pname = "pi-goal";
   version = "1.6.0-unstable-2026-09-27";
 
   src = fetchFromGitHub {
@@ -20,7 +20,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   installPhase = ''
     runHook preInstall
-    install -Dm644 extensions/goal.ts $out
+    install -Dm644 extensions/goal.ts $out/index.ts
     runHook postInstall
   '';
 
